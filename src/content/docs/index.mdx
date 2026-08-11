@@ -5,7 +5,6 @@ template: splash
 ---
 
 import FeatureGrid from '../../components/FeatureGrid.astro';
-import InterfacePreview from '../../components/InterfacePreview.astro';
 import ProductShot from '../../components/ProductShot.astro';
 import { Image } from 'astro:assets';
 import screenshot from '../../assets/screenshots/openbox-screenshot.png';
@@ -32,8 +31,6 @@ The application ships as two interfaces over the same local data:
 | Native UI | `python3 openbox.py` or `openbox-native` | Lightweight desktop window |
 
 When you start the Web UI, a local server starts on `127.0.0.1` and your browser opens to it. The server never listens on the network, and every request must carry a per-launch token, so the tab you open is the only client.
-
-<InterfacePreview />
 
 :::note[Local-first by design]
 The page is a three-column workspace: platform filters on the left, a searchable cover grid or list in the center, and a detail pane on the right where metadata, launch controls, saves, and history stay together. Everything you see is rendered from a local `library.json` you own.

@@ -5,6 +5,10 @@ description: Find something to play with the curated Discovery views.
 
 The **Discovery** button (top bar) curates your library into ready-to-play views so you never stare at an empty grid. It works entirely from local library data — no account or network required.
 
+:::note[How discovery recomputes automatically]
+Discovery doesn't store pre-computed lists. Each click regenerates the six views by filtering and sorting against `play_count`, `playtime_seconds`, `last_played`, and rating — the same counters used for session tracking. That means a game moved from "Continue playing" to the bottom of "Highly rated" the moment it gets marked Completed, without any manual refresh. See [Sessions, saves, and backups](/guides/sessions-saves-and-backups/) for what feeds these counters.
+:::
+
 ## The views
 
 | View | What it shows |

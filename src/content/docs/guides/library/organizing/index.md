@@ -5,6 +5,10 @@ description: Use search, filters, collections, playlists, and safe library opera
 
 OpenBoxGL organizes a large catalog through favorites, collections, saved filters, ordered manual playlists, custom fields, ESRB filters, platform categories, and bulk edits.
 
+:::tip[Bulk edit never deletes anything]
+Bulk Edit changes only the fields you specify — missing keys are preserved unchanged. `favorite` and `hidden` must be booleans; `progress` must be a known status; `rating` is clamped to 0–5. Tags have their own replace/add/remove actions (see [Queue, tags, and notifications](/guides/library/queue-tags-notifications/)) because combining tag replacement with add or remove in one request would be ambiguous.
+:::
+
 ## Filters and views
 
 The sidebar **View** selector covers All games, Favorites, Recently played, Never played, In progress, Completed, Installed only, Owned / not installed, Has saves, Hidden, and Missing files. The **ESRB** filter narrows to E, E10+, T, M, AO, RP, or Unrated. **Categories** group platforms into Nintendo, Sony, Microsoft, Computer, Arcade, Adventure, and Other by default, overridable in Settings. **Explorer** facets count and filter by genre, developer, publisher, platform, progress, and ESRB with up to 40 values per field; clicking a facet applies it, and an "Unset"/"Unrated" label covers empty values.

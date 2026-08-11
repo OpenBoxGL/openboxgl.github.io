@@ -5,6 +5,10 @@ description: Set up IGDB, LaunchBox Games Database, EmuMovies, Bezel Project, St
 
 OpenBoxGL enriches games from several optional media and metadata providers. This page is the setup guide; the [Accounts and media](/integrations/accounts-and-media/) reference has the exact credentials and API details.
 
+:::note[Which providers need credentials]
+Five providers require **no credentials** and work out of the box: LaunchBox Games Database (public download), Steam (per App ID), GOG (embedded data), Bezel Project (GitHub public repo), and IGDB when you supply `IGDB_CLIENT_ID`/`IGDB_CLIENT_SECRET`. Only EmuMovies requires a paid licensed account. All other providers are optional — your library functions perfectly with zero media providers configured.
+:::
+
 ## Choose your providers
 
 | Provider | What it provides | Credentials needed |

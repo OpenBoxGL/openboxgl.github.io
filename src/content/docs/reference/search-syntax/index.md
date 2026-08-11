@@ -5,6 +5,10 @@ description: The full grammar of the library search box.
 
 The library search box supports field-targeted terms, quoted values, and negative terms. Terms are combined with implicit AND; a space-separated list narrows the results.
 
+:::tip[Search runs against stable data]
+Search filters operate on `library.json` at query time — not a pre-built index or database. Every filter you apply stays in place until you clear it or navigate away, so chaining multiple sidebar facets (e.g. genre → platform → installed) compounds filters without extra typing. The Explorer facets panel (sidebar) does the same thing visually by showing counts per value; clicking a facet injects the equivalent `field:value` term. See [Library overview](/guides/library/) for the full UI walk-through.
+:::
+
 ## Field terms
 
 Prefix a term with a field name and a colon to target one field:

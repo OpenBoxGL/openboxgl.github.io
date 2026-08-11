@@ -3,7 +3,13 @@ title: Getting started
 description: Import one local executable and launch it safely.
 ---
 
+import { Steps } from '@astrojs/starlight/components';
+
 This path is for a first run with a local executable folder. Use a disposable folder if you are testing, so the experiment cannot touch real games.
+
+:::note[What happens under the hood]
+When you start the Web UI for the first time, OpenBoxGL does several things silently: it creates your data directory (`~/.local/share/openbox-game-launcher` by default), generates a per-launch `server.token`, writes the port to `server.port`, and initializes an empty `library.json` with schema version 4. You won't see these files unless you look in the data directory, but they're the reason nothing gets corrupted when the server restarts unexpectedly. See [Interfaces and data](/interfaces-and-data/) for where every file lives.
+:::
 
 The goal is a full loop: install, import one game, see it in the library, launch it, and confirm the session was recorded. It also proves the data model works: the entry you import is the entry that launches, and the session you play is the session that appears in history.
 
@@ -25,19 +31,67 @@ The Web UI workspace looks like this once you have a library entry — filters o
 
 ## Steps
 
-1. **Install and start the Web UI.** From the AppImage, Flatpak, or source as described on the [Installation](/install/) page. When the library is empty, the welcome wizard appears; you can close it and use the topbar buttons, or start from its **Import a ROM or game folder** step.
+<Steps>
+  <ol>
+    <li><strong>Install and start the Web UI.</strong> From the AppImage, Flatpak, or source as described on the [Installation](/install/) page. When the library is empty, the welcome wizard appears; you can close it and use the topbar buttons, or start from its **Import a ROM or game folder** step.</li>
+  </ol>
+</Steps>
 
-2. **Choose Import Folder.** Click **Import Folder** in the topbar (or the wizard's folder step). The web UI asks for the absolute path of the folder to import. Because the browser cannot browse your filesystem, you type or paste the path, for example `/home/you/test-game`.
+:::callout
+**You should see:** An empty cover grid in the center, no cards in any view. The welcome wizard suggests importing a folder or scanning for emulators. If the browser did not open, look at the terminal — OpenBoxGL printed `http://127.0.0.1:PORT/?token=...`. Open that URL manually.
+:::
 
-3. **Select a folder containing one executable `.sh` file.** The import scans the folder for supported files (`.sh`, `.appimage`, `.exe`, `.iso`, `.rom`, common console extensions, and archives), checks each against existing library entries so nothing is duplicated, and adds what is new. If the import also finds a known emulator on your system, it may offer to install or configure a profile; with a plain `.sh` file, nothing extra is needed.
+<Steps>
+  <ol>
+    <li><strong>Choose Import Folder.</strong> Click **Import Folder** in the topbar (or the wizard's folder step). The web UI asks for the absolute path of the folder to import. Because the browser cannot browse your filesystem, you type or paste the path, for example `/home/you/test-game`.</li>
+  </ol>
+</Steps>
 
-4. **Confirm the imported title in the library.** A grid card appears with the game's name. The detail pane on the right shows the launch path, the platform, and empty metadata fields that you can later fill from the LaunchBox Games Database or edit by hand.
+:::callout
+**You should see:** A text input field labeled "Folder path". Type or paste the path and press Enter. There is no file picker — you must provide the full path.
+:::
 
-5. **Open the game card to view its details.** Selecting the card opens its detail pane: the launch command, the launch profile for its platform, per-game overrides, save locations, and history stay together here. This is also where you review or fix a launch failure.
+<Steps>
+  <ol>
+    <li><strong>Select a folder containing one executable `.sh` file.</strong> The import scans the folder for supported files (`.sh`, `.appimage`, `.exe`, `.iso`, `.rom`, common console extensions, and archives), checks each against existing library entries so nothing is duplicated, and adds what is new. If the import also finds a known emulator on your system, it may offer to install or configure a profile; with a plain `.sh` file, nothing extra is needed.</li>
+  </ol>
+</Steps>
+
+:::callout
+**You should see:** Either a brief notification ("X found, Y added") or the imported card appearing instantly in the grid. If zero files were added, re-check the path — the importer prints a specific error when no recognized files exist. Existing entries are never duplicated.
+:::
+
+<Steps>
+  <ol>
+    <li><strong>Confirm the imported title in the library.</strong> A grid card appears with the game's name. The detail pane on the right shows the launch path, the platform, and empty metadata fields that you can later fill from the LaunchBox Games Database or edit by hand.</li>
+  </ol>
+</Steps>
+
+:::callout
+**You should see:** One card in the grid whose label matches your file's name or folder name. Selecting it opens the detail pane showing a **PLAY** button (greyed out until a platform profile is set), the file path, and an empty Emulator row. No artwork exists yet — you'll add that later.
+:::
+
+<Steps>
+  <ol>
+    <li><strong>Open the game card to view its details.</strong> Selecting the card opens its detail pane: the launch command, the launch profile for its platform, per-game overrides, save locations, and history stay together here. This is also where you review or fix a launch failure.</li>
+  </ol>
+</Steps>
 
 ![The game detail pane with metadata, launch controls, save management, and history](/openbox-game-detail.png)
 
-6. **Select PLAY and watch the session result.** PLAY runs the game's launch command without a shell. For a `.sh` file, that means `bash <path>`. A lifecycle overlay appears ("Starting"), the process starts, and after it exits, the overlay reports the outcome: either "Session ended, play time and history were saved" for a clean exit, or the actual exit code for a failure. The session is recorded with start time, duration, and exit status.
+:::callout
+**You should see:** A hero area (empty, no background art), the game name, a **PLAY** button with a **Find metadata** / **Edit metadata** row below it. On the right side, an Information section showing "Source" (folder import), the file path, and no Play Time or History entries yet.
+:::
+
+<Steps>
+  <ol>
+    <li><strong>Select PLAY and watch the session result.</strong> PLAY runs the game's launch command without a shell. For a `.sh` file, that means `bash <path>`. A lifecycle overlay appears ("Starting"), the process starts, and after it exits, the overlay reports the outcome: either "Session ended, play time and history were saved" for a clean exit, or the actual exit code for a failure. The session is recorded with start time, duration, and exit status.</li>
+  </ol>
+</Steps>
+
+:::callout
+**You should see:** If the path or permissions are wrong, PLAY stays greyed-out with a message naming which part is missing. If correct, a small "Starting…" banner appears at the top, then "Session ended" with the play time and a link to the History view. The game card's "Play count" increments to 1 and "Play time" grows to match the script's duration.
+:::
 
 ## Expected result
 

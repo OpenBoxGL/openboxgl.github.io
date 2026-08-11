@@ -290,63 +290,6 @@ h3 {
   line-height: 1.4;
 }
 
-/* ---- Interface preview schematic ---- */
-.interface-preview {
-  margin: 1.5rem 0;
-  padding: 1rem;
-  border: 1px solid var(--ob-line);
-  border-radius: var(--ob-radius-shot);
-  background: var(--ob-panel);
-}
-.interface-preview figcaption {
-  margin-bottom: 0.75rem;
-  color: var(--ob-text);
-  font-weight: 700;
-}
-.interface-preview__body {
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  gap: 0.5rem;
-}
-.interface-preview__filters,
-.interface-preview__detail {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: 0.75rem;
-  color: var(--ob-muted);
-  background: var(--ob-ink);
-  border-radius: var(--ob-radius-util);
-}
-.interface-preview__detail {
-  align-items: flex-start;
-}
-.interface-preview__play {
-  margin-top: auto;
-  padding: 0.3rem 0.8rem;
-  border-radius: var(--ob-radius-pill);
-  background: var(--ob-launch);
-  color: var(--ob-launch-ink);
-  font-weight: 800;
-  font-size: 0.8rem;
-}
-.interface-preview__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-}
-.interface-preview__grid div {
-  min-height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  border-radius: var(--ob-radius-util);
-  background: var(--ob-card);
-  color: var(--ob-focus);
-  font-size: 0.8rem;
-}
-
 /* ---- Procedure rail ---- */
 .procedure {
   margin: 1.5rem 0;
@@ -481,7 +424,6 @@ h3 {
 .sl-markdown-content > .product-shot,
 .sl-markdown-content > figure,
 .sl-markdown-content > .feature-grid,
-.sl-markdown-content > .interface-preview,
 .sl-markdown-content > .install-options,
 .sl-markdown-content > .api-endpoint,
 .sl-markdown-content > .procedure {
@@ -518,12 +460,6 @@ h3 {
   .install-options {
     grid-template-columns: 1fr;
   }
-  .interface-preview__body {
-    grid-template-columns: 1fr;
-  }
-  .interface-preview__grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 @media (max-width: 30rem) {
   .hero .actions {
@@ -535,14 +471,6 @@ h3 {
   }
 }
 @media (max-width: 1100px) {
-  .interface-preview__body {
-    grid-template-columns: 1fr 2fr 1fr;
-  }
-}
-@media (max-width: 760px) {
-  .interface-preview__body {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

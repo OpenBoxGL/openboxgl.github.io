@@ -48,10 +48,14 @@ Values already in the environment are never overridden by `.env`. The template l
 | `EMUMOVIES_USERNAME` | EmuMovies media downloads | `OPENBOX_EMUMOVIES_USERNAME` |
 | `EMUMOVIES_PASSWORD` | EmuMovies media downloads | `OPENBOX_EMUMOVIES_PASSWORD` |
 | `GITHUB_TOKEN` | GitHub release API rate limit for update checks | `GH_TOKEN`, `OPENBOX_GITHUB_TOKEN` |
-| `IGDB_CLIENT_ID` | IGDB metadata provider (Twitch developer app) | none |
-| `IGDB_CLIENT_SECRET` | IGDB metadata provider | none |
+| `IGDB_CLIENT_ID` | IGDB metadata provider (Twitch developer app) | — |
+| `IGDB_CLIENT_SECRET` | IGDB metadata provider (Twitch developer app) | — |
 
-Each credential lookup checks the aliases in order and uses the first non-empty value. IGDB requires both `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET`; without them the IGDB routes return a `400` error naming the missing variables.
+Each credential lookup checks the aliases in order using `env_value()` from `env_config.py` — it iterates through the listed names for a variable and uses the first non-empty value found. If an empty string is returned for any required variable, the route returns a specific `400` error naming exactly which variable is missing. For example, IGDB requires both `IGDB_CLIENT_ID` **and** `IGDB_CLIENT_SECRET`; without either the IGDB routes return `400 {"error":"Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET in ~/.env to use IGDB."}`. Without RetroAchievements credentials, the `/api/ra/*` routes return `400 {"error":"Configure RetroAchievements first."}`.
+
+:::tip[Why aliases exist]
+The alias pattern lets users choose whichever name suits their setup. A RetroAchievements user might already have `RA_USERNAME` set as part of another tool's config; OpenBoxGL will pick it up automatically. The `OPENBOX_*` variants are useful when you're prefixing all your custom environment variables under one namespace.
+:::
 
 Credentials supplied through the Settings dialog are persisted in the data directory (`retroachievements.json`, `emumovies.json`, `settings.json` for Gameyfin) with owner-only permissions (`0o600` via `secure_text_write`). The API and diagnostic log redact the values, but the files themselves are plaintext.
 
@@ -59,30 +63,63 @@ Credentials supplied through the Settings dialog are persisted in the data direc
 
 The Settings dialog saves into `library.json` under `settings`. The save handler (`web_app._save_settings_locked`) validates each field before committing; an invalid value aborts the whole save with a `400` error. The full key list is exposed by `GET /api/settings`. Notable validated limits:
 
-| Setting | Validation |
-| --- | --- |
-| `watch_folders` | List of at most 50 absolute, existing directories; duplicates removed |
-| `screensaver_seconds` | `0` or between 30 and 3600 |
-| `controller_map` | Actions limited to `play`, `back`, `favorite`, `random`, `page_left`, `page_right`, `pause`, `menu`; button numbers 0 through 31 |
-| `progress_automation_play_minutes` | 0 to 100000 |
-| `progress_automation_idle_days` | 0 to 3650 |
-| `save_backup_limit` | 0 to 500 |
-| `media_download_limit` | 0 to 10000 |
-| `auto_import_media_types` | Subset of `cover`, `background`, `screenshots` |
-| `region_priority` | Non-empty list |
-| `video_priority` | Subset of `video_snap`, `video_theme`, `video_trailer`, `video_recording`, `video` |
-| `bigbox_mode` | `stage`, `hybrid`, or `coverflow` |
-| `startup_commands` / `shutdown_commands` / `bigbox_shutdown_commands` | List of at most 25 shell-free commands, each parsed with `shlex.split` |
-| `tracking_mode` | `default`, `process`, `original_process`, `folder`, `process_name` |
-| `tracking_delay` | 0 to 600 seconds |
-| `tracking_frequency` | 0.5 to 60 seconds |
-| `apply_perf` | `off`, `auto`, or `always` |
-| `locale` | Any string, truncated to 5 characters; UI strings fall back to English for unknown locales |
-| `hidden_sidebar_sections` | List capped at 20 entries |
-| `list_columns` | List capped at 12 entries |
-| `gameyfin_url` | Prepends `http://` when no scheme is present |
+| Setting | Default | Validation |
+| --- | --- | --- |
+| `watch_folders` | `[]` | List of at most 50 absolute, existing directories; duplicates removed |
+| `screensaver_seconds` | (none) | `0` (off) or between 30 and 3600 |
+| `controller_map` | `{}` | Actions limited to `play`, `back`, `favorite`, `random`, `page_left`, `page_right`, `pause`, `menu`; button numbers 0–31 |
+| `progress_automation_enabled` | `false` | Boolean; enables/disables automatic progress changes |
+| `progress_automation_play_minutes` | 30 | 0 to 100,000 — minutes before marking Playing |
+| `progress_automation_idle_days` | 30 | 0 to 3,650 — days before marking Paused |
+| `progress_on_first_play` | "Playing" | Must be a known progress status |
+| `welcome_completed` | `false` | Boolean — hides the welcome wizard |
+| `image_group` | "cover" | One of cover, background, screenshot, clear_logo, fanart, banner, icon, box_back, box_spine, box_3d, title_screen |
+| `badge_visibility` | Most badges shown | Subset of favorite, installed, missing_media, saves, documents, versions, storefront, achievements, highscores, progress, rating, broken, portable, controller |
+| `cloud_folder` | "" | Absolute, existing path for mounted-folder statistics sync |
+| `storefront_auto_import` | All off | Object with boolean keys: `steam`, `heroic`, `lutris`, `gameyfin` |
+| `auto_import_media_types` | All types | Subset of cover, background, screenshots — applied during import-time media jobs |
+| `media_download_limit` | 0 (unlimited) | 0 to 10,000 |
+| `region_priority` | (default list) | Non-empty ordered list — ranks which regional media to prefer |
+| `video_priority` | snap, theme, trailer, recording | Subset of video_snap, video_theme, video_trailer, video_recording, video |
+| `library_music` | "" | Path to existing audio file; empty disables Big Box library BGM |
+| `video_bgm_mix` | `false` | Boolean — lower music volume when mixing with video audio |
+| `bigbox_mode` | "stage" | One of stage, hybrid, coverflow |
+| `attract_mode_seconds` | 90 | Seconds of idle before screensaver/attract mode triggers |
+| `bigbox_startup_video` | "" | Empty string (disabled) or path to startup video file |
+| `bigbox_shutdown_commands` | `[]` | At most 25 commands; run on leaving Big Box |
+| `startup_commands` | `[]` | At most 25 commands; run after server binds |
+| `shutdown_commands` | `[]` | At most 25 commands; run on graceful exit |
+| `track_session_history` | `true` | Boolean — when false, sessions still track but history isn't recorded |
+| `backup_on_close` | `false` | Boolean — creates save backups when session ends |
+| `save_backup_limit` | 10 | 0 to 500 — oldest archives trimmed after each backup |
+| `tracking_mode` | "default" | One of default, process, original_process, folder, process_name |
+| `tracking_delay` | 0 | 0 to 600 seconds before tracking starts after spawn |
+| `tracking_frequency` | 2.0 | 0.5 to 60 seconds between poll checks |
+| `apply_perf` | "auto" | One of off, auto, always — whether TDP limits apply |
+| `obs_auto_attach` | `true` | Boolean — auto-attaches latest OBS recording to game |
+| `obs_recording_path` | "" | Absolute, existing path override; empty uses discovery |
+| `dynamic_play_button` | `true` | Boolean — shows animated PLAY state |
+| `custom_field_defs` | `[]` | Up to 20 fields; each 50 options max |
+| `platform_categories` | Built-in mapping | Platform-to-category overrides (Nintendo, Sony, Microsoft, Computer, Arcade, Adventure, Other) |
+| `list_columns` | Defaults | Capped at 12 columns per platform or global view |
+| `library_view` | "grid" | Current persistent view preference |
+| `locale` | "en" | Any string, truncated to 5 characters; unknown locales fall back to English |
+| `hidden_sidebar_sections` | `[]` | Capped at 20 entries |
+| `tray_enabled` | `false` | Boolean — shows system tray icon |
+| `minimize_to_tray` | `false` | Boolean — minimizes to tray instead of closing |
+| `show_playlist_actions` | `true` | Boolean — show add/remove playlist buttons |
+| `gameyfin_url` | "" | Prepends `http://` when no scheme present; must resolve |
+| `gameyfin_username` | "" | Stored as plain text alongside url and password |
+| `gameyfin_password` | "" | Empty value leaves stored password unchanged; otherwise persisted with `0o600` |
+| `gameyfin_install_dir` | "~/Games/Gameyfin" | Absolute path; created if missing, rejected if symlink or non-existent |
+| `gameyfin_provider` | "" | Provider label; falls back to first available |
+| `ludusavi_backup_path` | "" | Optional absolute path for Ludusavi JSON output |
 
 Partial saves merge with existing settings: keys you omit are preserved, and concurrent partial saves of different keys do not lose updates (covered by the API sweep tests). An empty `gameyfin_password` in a save leaves the stored password unchanged.
+
+:::tip[How validation prevents bad saves]
+The save handler validates **every** posted field before committing any change. If a single value fails validation (for example, `screensaver_seconds: -5`), the entire save request returns `400` and **nothing** is written. This means you can safely send partial saves — changing `bigbox_mode` won't accidentally corrupt `tracker_frequency` even if both arrive in the same request. The only exception is an empty `gameyfin_password`, which deliberately preserves the old value so you don't erase your password while updating other settings.
+:::
 
 ## Values consumed at startup
 
