@@ -25,4 +25,22 @@ Stock themes carry a `/* OpenBox Stock Theme:` marker. On startup, missing stock
 
 The public design tokens live in the [Design system](/project/design-system/) page. In short: the default look is blue-black surfaces, cool text, cyan focus and selection, green launch actions, and orange lifecycle accents. Themes may change palette, typography, and surface treatment while preserving the interaction structure. Keep readable contrast on both light and dark surfaces, visible focus states (the base stylesheet outlines focused controls), and legible controls; avoid permanent glow, deep shadows on every component, and low-contrast text. The base CSS defines variables such as `--bg`, `--panel`, `--text`, `--muted`, `--accent`, `--green`, `--danger`, and `--focus`; themes that override these variables inherit consistent behavior across dialogs and Big Box.
 
+:::tip[Author your first theme]
+A theme is a plain `.css` file that overrides the design tokens. The smallest useful theme just sets the palette:
+
+```css
+/* OpenBox Stock Theme: my-theme */
+:root {
+  --bg: #1a1020;
+  --panel: #241628;
+  --text: #f5eef7;
+  --accent: #c77dff;
+  --green: #6bd36b;
+  --focus: #c77dff;
+}
+```
+
+Drop the file somewhere on disk and use **Import CSS theme** with its absolute path. Stock themes carry a `/* OpenBox Stock Theme:` marker so the app knows they are managed; your own files are never touched on startup. To target one platform only, apply the theme from the Themes dialog with that platform selected.
+:::
+
 Themes are scoped to the Web UI; the native Tk interface has its own fixed palette.

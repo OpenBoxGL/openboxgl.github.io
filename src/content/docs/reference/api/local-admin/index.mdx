@@ -2,12 +2,15 @@
 title: API local administrator
 description: Local administrator operations that are not a stable remote contract.
 ---
+import ApiEndpoint from '../../../../../components/ApiEndpoint.astro';
+
 
 These routes manage the local installation and process. They are not a stable remote contract: treat them as local-administrator operations and verify behavior against the running version. All require `X-OpenBox-Token: TOKEN`; POST bodies are JSON objects.
 
 ## Updates
 
-### `GET /api/update`
+<ApiEndpoint method="GET" path="/api/update">
+
 
 Check for a new release. Queries the GitHub releases API for `vindeckyy/OpenBoxGL` (30-second timeout) and returns:
 
@@ -30,7 +33,10 @@ Rules:
 - The AppImage asset must come from the trusted `https://github.com/vindeckyy/OpenBoxGL/releases/download/` prefix and a SHA-256 checksum must be present (asset digest or `.sha256` file); otherwise `400` with a clear reason.
 - GitHub failures return `400` (`"GitHub releases request failed (...)"` / `"Could not reach GitHub releases: ..."`). Setting `GITHUB_TOKEN` (or `GH_TOKEN`) in `~/.env` authenticates the request for a higher rate limit.
 
-### `POST /api/update/install`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/update/install">
+
 
 Download and atomically install the verified update into the running AppImage. Prerequisites:
 
@@ -41,105 +47,167 @@ Download and atomically install the verified update into the running AppImage. P
 
 Returns `{"installed": "<version>", "backup": "<path>"}`. Restart to use the update.
 
+</ApiEndpoint>
+
 ## Shutdown
 
-### `POST /api/shutdown`
+<ApiEndpoint method="POST" path="/api/shutdown">
+
 
 `{"force": bool}` stops every running game (SIGTERM, or SIGKILL with `force: true`) and returns `{"stopped": <count>, "forced": bool}`. Games that already exited are skipped.
 
+</ApiEndpoint>
+
 ## State recovery
 
-### `POST /api/state/recover`
+<ApiEndpoint method="POST" path="/api/state/recover">
+
 
 Restore the library from `library.json.bak` (see [Data and recovery](/reference/data-and-recovery/)). Success returns `{"ok": true, "games": <count>}`; an unusable backup raises `503`-class errors (surfaced as `400` with the message).
 
+</ApiEndpoint>
+
 ## Desktop integration
 
-### `POST /api/desktop/install`
+<ApiEndpoint method="POST" path="/api/desktop/install">
+
 
 Write the desktop entry and icon for the running AppImage: `~/.local/share/applications/io.openbox.GameLauncher.desktop` and `~/.local/share/icons/hicolor/scalable/apps/io.openbox.GameLauncher.svg`. Requires `APPIMAGE` (else `400`). Returns `{"desktop": "<path>"}`.
 
+</ApiEndpoint>
+
 ## Themes
 
-### `GET /api/themes`
+<ApiEndpoint method="GET" path="/api/themes">
+
 
 `?platform=<name>` returns `{"themes": [...], "selected": "...", "global": "...", "mappings": {...}}`. Stock themes are installed on demand (Midnight Circuit, Phosphor Terminal, Harbor Light, Cinema Marquee, Nordic Mist). `selected` is the per-platform mapping when `platform` is given, else the global theme.
 
-### `POST /api/themes/select`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/themes/select">
+
 
 `{"name": "theme-name"|"", "platform": ""}` sets the global theme (or clears it with `""`); with `platform`, sets/clears a per-platform mapping. Unknown theme file: `400`. Returns `{"selected", "platform"}`.
 
-### `POST /api/themes/import`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/themes/import">
+
 
 `{"path": "/path/to/theme.css"}` copies a CSS file into `themes/` (`.css` suffix required). Returns `{"theme": "<stem>"}`.
 
-### `POST /api/themes/open-folder`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/themes/open-folder">
+
 
 Open the themes folder in the file manager via `xdg-open` (missing `xdg-open`: `400`). Returns `{"path"}`.
 
+</ApiEndpoint>
+
 ## Plugins
 
-### `GET /api/plugins`
+<ApiEndpoint method="GET" path="/api/plugins">
+
 
 `{"plugins": [{"id", "name", "version", "entry", "hooks", "enabled"}, ...]}` sorted by id. Invalid packages are skipped.
 
-### `POST /api/plugins/install`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/plugins/install">
+
 
 `{"path": "/path/to/plugin-dir-or.zip"}` installs or updates a plugin package (safe extraction, staging, rollback on failure). Returns `{"plugin": {...manifest..., "updated": bool}}`.
 
-### `POST /api/plugins/toggle`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/plugins/toggle">
+
 
 `{"id", "enabled": bool}` enables/disables a plugin (persisted in `plugins-state.json`). Returns `{"enabled": bool}`.
 
-### `POST /api/plugins/remove`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/plugins/remove">
+
 
 `{"id"}` moves the plugin directory to `plugins/.removed/<id>-<timestamp>` (reversible by moving it back) and clears its disabled state. Returns `{"removed": "<id>"}`.
 
-### `GET /api/plugins/catalog`
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/plugins/catalog">
+
 
 `{"catalog": [...]}` from the bundled local catalog, falling back to the remote catalog (`raw.githubusercontent.com/vindeckyy/OpenBoxGL/master/plugins/catalog.json`, 20-second timeout, 4 MiB cap).
 
-### `POST /api/plugins/catalog/install`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/plugins/catalog/install">
+
 
 `{"id"}` downloads the catalog entry's package (128 MiB cap, SHA-256 verified when the entry provides one, 120-second timeout) and installs it. Unknown id or `local_only` entries raise `400` (`"This catalog entry is documentation-only. Install local plugin packages manually."`). Returns `{"plugin": {...}}`.
 
 See [Plugins](/reference/plugins/) for the manifest and hook contract.
 
+</ApiEndpoint>
+
 ## Premium read models
 
-### `GET /api/premium/strings`
+<ApiEndpoint method="GET" path="/api/premium/strings">
+
 
 `?locale=en|es|de|fr|pt` returns `{"locale", "strings": {...}}`; unknown locales fall back to English.
 
-### `GET /api/premium/media-packs`
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/premium/media-packs">
+
 
 `{"packs": [{"id", "name", "description", "kinds", "active"}, ...]}`. Bundled packs: `clear-logos-default`, `controller-xbox`, `controller-playstation`, `badges-core`.
 
-### `GET /api/premium/platform-categories`
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/premium/platform-categories">
+
 
 `{"categories": {...}}` platform-to-category mapping (Nintendo, Sony, Microsoft, Computer, Arcade, Adventure, ...) with user overrides merged.
 
-### `POST /api/premium/media-packs/apply`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/premium/media-packs/apply">
+
 
 `{"id": "<pack id>"}` activates a pack (and sets the controller prompt pack/hint for controller packs). Unknown pack: `400`. Returns `{"pack": {...}, "settings": {...}}`.
 
+</ApiEndpoint>
+
 ## Local reads
 
-### `GET /api/log`
+<ApiEndpoint method="GET" path="/api/log">
+
 
 `{"log": "<last 250 KB of openbox.log>"}`. The log redacts tokens, passwords, API keys, and authorization headers, but can contain game names and local file paths.
 
-### `GET /api/theme.css`
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/theme.css">
+
 
 `?name=<theme>` serves the theme CSS with revalidation headers; unknown themes return an empty stylesheet.
+
+</ApiEndpoint>
 
 ### `GET /api/platform/documents` and `GET /api/platform/document`
 
 Per-platform document lists and file serving (`?platform=&index=`). Documents are validated to be regular files; symlinks are rejected. Missing documents return `404`.
 
-### `POST /api/platform/documents`
+<ApiEndpoint method="POST" path="/api/platform/documents">
+
 
 `{"platform", "documents": [{"name", "path"}, ...]}` replaces the platform's document list (capped at 100 entries). Returns `{"saved", "count"}`.
+
+</ApiEndpoint>
 
 ## Errors
 

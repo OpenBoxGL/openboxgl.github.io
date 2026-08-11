@@ -2,16 +2,22 @@
 title: API automation
 description: Queue, tags, notifications, and webhook request contracts.
 ---
+import ApiEndpoint from '../../../../../components/ApiEndpoint.astro';
+
 
 Queue, tags, notifications, and signed webhooks. All routes require `X-OpenBox-Token: TOKEN` and POST bodies are JSON objects.
 
 ## Play queue
 
-### `GET /api/queue`
+<ApiEndpoint method="GET" path="/api/queue">
+
 
 Returns `{"queue": [...]}`. Each entry: `game_id`, `added_at`, `note` (max 200 characters), `skip`, plus resolved fields `name`, `platform`, `cover`, `path_exists`, and `missing` (true when the game was deleted). The persisted queue is capped at 500 entries.
 
-### `POST /api/queue`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/queue">
+
 
 Actions:
 
@@ -25,23 +31,35 @@ Actions:
 
 Response: `{"queue": [...], "next": <entry or null>}`.
 
+</ApiEndpoint>
+
 ## Tags
 
-### `GET /api/tags`
+<ApiEndpoint method="GET" path="/api/tags">
+
 
 `{"tags": [{"tag": "...", "count": <n>}, ...]}` sorted by count descending then tag; hidden games are excluded.
 
-### `POST /api/tags`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/tags">
+
 
 `{"ids": [...], "tags"|"tags_add"|"tags_remove": [...]}`. At least one tag change key is required. Normalization: each tag is trimmed, whitespace-collapsed, deduplicated case-insensitively, limited to 64 characters, and at most 50 tags per game; overlong tags raise `400`. Returns `{"updated": <count>, "tags": [...]}`.
 
+</ApiEndpoint>
+
 ## Notifications
 
-### `GET /api/notifications`
+<ApiEndpoint method="GET" path="/api/notifications">
+
 
 `{"notifications": [...], "unread": <count>}`. Notifications are newest first, capped at 200. Each item: `id` (`nt-<hex>`), `kind`, `level`, `title` (max 200 chars), `body` (max 2000 chars), `created_at`, `read`, and optional `source`, `correlation_id`, `dedupe_key`. Same-kind+same-title items within 600 seconds, or items with the same `dedupe_key`, collapse into the existing entry.
 
-### `POST /api/notifications`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/notifications">
+
 
 - `{"action":"read", "ids": [...]}` mark read (no `ids` marks all).
 - `{"action":"clear", "ids": [...]}` remove (no `ids` clears all).
@@ -49,13 +67,19 @@ Response: `{"queue": [...], "next": <entry or null>}`.
 
 Response: `{"notifications": [...], "unread": <count>}`.
 
+</ApiEndpoint>
+
 ## Webhooks
 
-### `GET /api/webhooks`
+<ApiEndpoint method="GET" path="/api/webhooks">
+
 
 `{"webhooks": [...], "events": [...], "attempts": <default>, "timeout": <default>}`. Webhook configs are redacted: the `secret` value is replaced by `secret_set: true`, and delivery status fields (`last_status`, `last_error`, `last_sent_at`, `last_delivery_at`) are included. `events` lists the nine subscribable types: `session.started`, `session.stopped`, `queue.advanced`, `library.imported`, `library.changed`, `metadata.synced`, `backup.created`, `update.installed`, `plugin.changed`.
 
-### `POST /api/webhooks`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/webhooks">
+
 
 Save the full webhook list plus global defaults:
 
@@ -89,9 +113,14 @@ Validation (`validate_webhook`):
 
 Returns `{"webhooks": [...redacted...], "events": [...]}`.
 
-### `POST /api/webhooks/test`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/webhooks/test">
+
 
 `{"webhook": {...}}` or the config fields directly. Performs one bounded synchronous delivery of a `test.ping` envelope and returns `{"ok": bool, "status": int|null, "error": str}` without exposing the response body, resolved addresses, or credentials. The outbound request respects the config's timeout (1..15 s).
+
+</ApiEndpoint>
 
 ### Delivery contract
 
@@ -106,25 +135,37 @@ Retries: attempts (1..5, default 3) with exponential backoff 1, 2, 4, 8 seconds;
 
 ## Launcher menu
 
-### `GET /api/launcher/menu`
+<ApiEndpoint method="GET" path="/api/launcher/menu">
+
 
 `{"items": [{"id", "label"}, ...]}`: Big Box, Settings, Search, then up to 40 games with ids `launch:<index>`. Used by the rofi/wofi/dmenu keyboard launcher.
 
+</ApiEndpoint>
+
 ## Import exclusions
 
-### `GET /api/import/exclusions`
+<ApiEndpoint method="GET" path="/api/import/exclusions">
+
 
 `{"exclusions": [...]}`. Entries: `{"source": "steam"|"heroic"|"lutris"|"gameyfin", "external_id": "..."}`, optionally `{"heroic": ["heroic", "<source>", "<id>"]}` for store-specific Heroic exclusions.
 
-### `POST /api/import/exclusions`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/import/exclusions">
+
 
 `{"source", "external_id", "heroic_source": ""}` adds an exclusion (deduplicated). Returns `{"exclusion": {...}}`.
 
-### `POST /api/import/exclusions/delete`
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/import/exclusions/delete">
+
 
 `{"source", "external_id"}` removes it. Returns `{"removed": true}`.
 
 Excluded storefront entries are filtered out of future imports and storefront rescans.
+
+</ApiEndpoint>
 
 ## Errors
 

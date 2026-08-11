@@ -7,6 +7,10 @@ Performance profiles apply a TDP limit through `ryzenadj` before a game launches
 
 ## Setup
 
+:::tip[Quick setup for a Steam Deck]
+Open **Emulators**, create or pick a profile (for example `GameCube = dolphin-emu -b -e {path}`), then in the **Handheld performance** section check **Enable TDP**, set **Limit (W)** to your desired cap (e.g. `12`), and optionally set **Restore (W)**. Leave **Apply handheld performance limits** on `auto` (the default) so the limit applies only in Game Mode or on battery. Install `ryzenadj` on the host if it is not already present.
+:::
+
 In **Emulators**, after a profile exists (for example `GameCube = dolphin-emu -b -e {path}`), the Handheld performance section lists each profile with:
 
 - **Enable TDP** checkbox
