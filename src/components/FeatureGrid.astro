@@ -1,0 +1,5 @@
+---
+type Feature = { href: string; title: string; description: string };
+const { items = [] } = Astro.props as { items?: Feature[] };
+---
+<div class="component-grid">{items.map((item: Feature) => <a href={item.href}><strong>{item.title}</strong><span>{item.description}</span></a>)}</div>

@@ -19,3 +19,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible {
 .steps strong { color:var(--sl-color-accent); font-family:var(--sl-font-system-mono); } .feature-grid a { display:block; text-decoration:none; } .feature-grid strong,.feature-grid span { display:block; } .feature-grid span { color:var(--sl-color-gray-2); margin-top:.35rem; }
 @media (max-width:700px) { .steps,.feature-grid { grid-template-columns:1fr; } .hero-shell { padding:.5rem 0; } }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; scroll-behavior:auto!important; } }
+
+.component-hero { padding:1rem; border:1px solid color-mix(in srgb,var(--sl-color-accent) 35%,transparent); border-radius:12px; background:var(--sl-color-gray-6); }
+.component-hero p { color:var(--sl-color-accent); font-weight:800; }
+.component-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+.component-grid a,.install-tabs>div,.api-endpoint { display:block; padding:1rem; border:1px solid color-mix(in srgb,var(--sl-color-accent) 25%,transparent); border-radius:10px; background:var(--sl-color-gray-6); text-decoration:none; }
+.component-grid strong,.component-grid span { display:block; } .component-grid span { color:var(--sl-color-gray-2); margin-top:.3rem; }
+.interface-preview { display:grid; grid-template-columns:1fr 2fr 1fr; gap:.5rem; padding:1rem; border:1px solid var(--sl-color-accent); border-radius:12px; background:var(--sl-color-gray-7); }
+.interface-preview aside,.interface-preview section { padding:.75rem; color:var(--sl-color-gray-2); } .interface-preview main { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; } .interface-preview main div { min-height:70px; padding:.5rem; border-radius:8px; background:var(--sl-color-gray-6); color:var(--sl-color-accent); }
+.install-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; } .status-badge { padding:.2rem .5rem; border-radius:999px; font-size:.8rem; font-weight:800; } .status-stable { background:#2dff9a; color:#07140f; } .status-experimental { background:#ffbf30; color:#18100a; } .status-local-only { background:#3de0ff; color:#07131a; }
+@media (max-width:700px) { .component-grid,.install-tabs,.interface-preview { grid-template-columns:1fr; } .interface-preview main { grid-template-columns:repeat(2,1fr); } }

@@ -1,0 +1,4 @@
+---
+const { method = 'GET', path = '/', auth = 'X-OpenBox-Token: TOKEN' } = Astro.props;
+---
+<section class="api-endpoint"><p><strong>{method}</strong> <code>{path}</code></p><p>Auth: <code>{auth}</code></p><slot /></section>
