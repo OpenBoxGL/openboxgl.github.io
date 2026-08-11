@@ -106,6 +106,7 @@ export default defineConfig({
           label: 'Reference',
           collapsed: true,
           items: [
+            { slug: 'reference/how-it-works' },
             { slug: 'reference/configuration' },
             { slug: 'reference/command-tokens' },
             { slug: 'reference/search-syntax' },

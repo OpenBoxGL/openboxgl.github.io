@@ -31,6 +31,10 @@ EmuMovies downloads require a licensed account: credentials come from Settings o
 
 ## Limits and recovery
 
+:::note[Why downloads are bounded and jobs are observable]
+Metadata and media work never blocks the UI and never runs unbounded. Every bulk operation is a named background job (metadata sync, media-bulk) on a 4-thread pool, surfaced through its own status route so you can poll until `done` and inspect the per-game error list before retrying. Downloads cap per image (32 MiB), per trailer (512 MiB), and per database (2 GiB), and require an `image/` content type. See [Background jobs](/reference/background-jobs/) for the job lifecycle and [How OpenBoxGL works](/reference/how-it-works/#the-job-manager) for why a crash mid-job leaves partial-but-valid state.
+:::
+
 - Metadata database download: 2 GiB cap, 120-second timeout.
 - Image downloads: 32 MiB cap, 30-second timeout (15 seconds for Steam covers), must return an `image/` content type.
 - Steam trailer/GOG media: responses read up to 4 MiB for JSON, downloads capped at 512 MiB.

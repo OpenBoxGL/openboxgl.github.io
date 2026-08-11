@@ -3,7 +3,39 @@ title: REST API
 description: Use the local authenticated HTTP API for automation.
 ---
 
-The Web UI exposes a local REST API for automation and third-party tooling. The server binds to loopback only and requires a per-launch token on every request. This page is the index; each operation group has its own reference page.
+import FeatureGrid from '../../../components/FeatureGrid.astro';
+
+The Web UI exposes a local REST API for automation and third-party tooling. The server binds to loopback only and requires a per-launch token on every request. This page is the index; each operation group has its own reference page, and [How OpenBoxGL works](/reference/how-it-works/) explains the server, the error contract, and the lifecycle.
+
+## Quickstart
+
+Find your token and port, then call any route with the `X-OpenBox-Token` header:
+
+```bash
+TOKEN=$(cat ~/.local/share/openbox-game-launcher/server.token)
+PORT=$(cat ~/.local/share/openbox-game-launcher/server.port)
+
+# List the whole library
+curl -s -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:$PORT/api/library | jq '.games | length'
+
+# Launch a game by stable id
+curl -s -X POST -H "X-OpenBox-Token: $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"game_id": "GAME_ID"}' \
+  http://127.0.0.1:$PORT/api/launch
+
+# Toggle a favorite
+curl -s -X POST -H "X-OpenBox-Token: $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"game_id": "GAME_ID"}' \
+  http://127.0.0.1:$PORT/api/favorite
+```
+
+Replace `GAME_ID` with a real `game-<hex>` id from `/api/library`. The token and port live only while the Web UI is running — both files are deleted when the server stops.
+
+:::caution[Prefer the header over the query string]
+`?token=TOKEN` works but leaks into browser history, referrer logs, and proxy logs. Use `X-OpenBox-Token` in anything you write.
+:::
 
 ## Server and transport
 
@@ -41,22 +73,27 @@ All JSON responses use the shape `{"key": value, ...}`. Errors are always `{"err
 
 The `400` path catches `ValueError`, `OSError`, `TypeError`, `AttributeError`, `KeyError`, `IndexError`, `json.JSONDecodeError`, `GameyfinError`, `FileNotFoundError`, `RuntimeError`, and `subprocess.SubprocessError` from handlers, so most operation failures surface as `400` with a readable message. A corrupt state file raises `503` before the handler runs. Anything else is a `500` with a logged exception.
 
+## Route groups
+
+Each group has its own reference page with per-endpoint cards.
+
+<FeatureGrid
+  label="REST API route groups"
+  items={[
+    { href: '/reference/api/overview/', title: 'Overview and contract', eyebrow: 'shared', description: 'Loopback boundary, authentication, body limits, and the common error envelope every route follows.' },
+    { href: '/reference/api/library-and-settings/', title: 'Library and settings', eyebrow: 'crud', description: 'Library, settings, profiles, running sessions, history, launch, playlists, filter presets.' },
+    { href: '/reference/api/automation/', title: 'Automation', eyebrow: 'events', description: 'Queue, tags, notifications, webhooks, the launcher menu, and import exclusions.' },
+    { href: '/reference/api/content-and-imports/', title: 'Content and imports', eyebrow: 'media', description: 'Imports, metadata, media, emulators, storefronts, Gameyfin, discovery, and the health audit.' },
+    { href: '/reference/api/saves-and-operations/', title: 'Saves and operations', eyebrow: 'protect', description: 'Save discovery/backup/restore, library backups, cloud sync, save tools, high scores, OBS.' },
+    { href: '/reference/api/local-admin/', title: 'Local administrator', eyebrow: 'admin', description: 'Updates, shutdown, state recovery, desktop integration, themes, plugins, premium read models.' },
+  ]}
+/>
+
 ## Security notes
 
 - Keep exported library data and local paths sensitive. The API can read game paths, media files, documents, and the diagnostic log.
 - Secrets (webhook secrets, Gameyfin password, RetroAchievements and EmuMovies credentials) are never returned: credential-bearing settings expose `*_set` boolean flags instead, and the diagnostic log redacts tokens, passwords, and API keys.
 - Restore, deletion, and cleanup operations are destructive by design. They validate archive paths, reject symlinks, and refuse to run while games are running where the operation says so.
-
-## Route groups
-
-| Group | Page | Example routes |
-| --- | --- | --- |
-| Overview and contract | [REST API overview](/reference/api/overview/) | auth, errors, body limits |
-| Library and settings | [API library and settings](/reference/api/library-and-settings/) | `/api/library`, `/api/settings`, `/api/game`, `/api/launch`, `/api/profiles`, `/api/related`, `/api/playlists`, `/api/filter-presets` |
-| Automation | [API automation](/reference/api/automation/) | `/api/queue`, `/api/tags`, `/api/notifications`, `/api/webhooks`, `/api/launcher/menu` |
-| Content and imports | [API content and imports](/reference/api/content-and-imports/) | `/api/import`, `/api/metadata/*`, `/api/media/*`, `/api/emulators/*`, `/api/storefront/*`, `/api/gameyfin/*`, `/api/health` |
-| Saves and operations | [API saves and operations](/reference/api/saves-and-operations/) | `/api/saves/*`, `/api/backup/*`, `/api/cloud/sync`, `/api/save-tools/*`, `/api/highscores/*`, `/api/obs/*` |
-| Local administrator | [API local administrator](/reference/api/local-admin/) | `/api/update`, `/api/shutdown`, `/api/state/recover`, `/api/desktop/install`, `/api/themes/*` |
 
 ## Examples
 
