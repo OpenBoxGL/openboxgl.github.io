@@ -3,8 +3,74 @@ title: Updating
 description: Update AppImage installations and understand package boundaries.
 ---
 
-The built-in updater handles AppImage releases from GitHub. It verifies the SHA-256 checksum, downloads trusted release assets, replaces the active AppImage, and keeps a `.previous.AppImage` rollback file.
+OpenBoxGL has one built-in updater and it is for the AppImage only. This page explains what it verifies, what happens during an update, what can go wrong, and how the other installation types update instead.
 
-Flatpak, source, and system installations follow their own package or source workflow. They are not updated by the AppImage updater.
+## Which installs get the built-in updater
 
-Keep a library backup before major changes. See [Library backups](/reference/library-backups/) and [Data and recovery](/reference/data-and-recovery/).
+| Installation | Updater | How to update |
+| --- | --- | --- |
+| AppImage | Built-in verified updater | Settings > Check for updates, then Install verified update |
+| Flatpak | None | Rebuild the manifest (`flatpak-builder --user --install --force-clean build-dir io.openbox.GameLauncher.yml`) or use your local Flatpak workflow |
+| Source | None | `git pull` in the checkout, then restart |
+| System install (`sudo make install`) | None | `git pull`, then `sudo make install` again |
+
+The updater only recognizes an AppImage: it refuses to run when `APPIMAGE` is not set (source and Flatpak launches never set it). If you are on Flatpak or source, the update button reports the release channel but the install step will not replace anything, by design.
+
+## How the AppImage update works
+
+When you click **Check for updates** in Settings, OpenBoxGL queries the GitHub releases API for the latest release of `vindeckyy/OpenBoxGL` and compares versions:
+
+1. **Version comparison.** The tag must be newer than the running version. Pre-release and build-suffixed tags (`-beta`, `+build`) are never offered as updates, even when their version number is higher.
+2. **Asset verification.** The update is only offered when the release ships the `OpenBox-x86_64.AppImage` asset from the trusted `https://github.com/vindeckyy/OpenBoxGL/releases/download/` prefix, and when a SHA-256 checksum is available either as an asset digest or a `.sha256` file. A release missing either is rejected with a clear error instead of an unsafe download.
+3. **Checksummed download.** The new AppImage downloads to a staging file beside the current one, streaming with a 2 GiB cap. The download fails if the computed SHA-256 does not match the release's checksum.
+4. **Atomic swap with rollback.** The current AppImage is renamed to `OpenBox-x86_64.previous.AppImage` (any older rollback file is removed first), then the new file is moved into place. If the move fails, the previous file is restored and the update reports the error.
+
+That is why the Settings dialog says "The current AppImage will be retained as a backup" before you confirm: the `.previous.AppImage` file is the rollback copy, not a leftover.
+
+### What you see
+
+- **Update status line** in Settings shows the running version and whether it is an AppImage ("AppImage") or a source checkout.
+- After a successful install, the status line reports the installed version and the backup path. **You must restart OpenBoxGL to use the update**; the running process still executes the old file.
+- The desktop entry does not change because it points at the same path; only the file contents at that path were replaced.
+
+## Common failures and recovery
+
+### "Automatic updates require the OpenBox AppImage"
+
+The app is not running from an AppImage. This is expected for Flatpak, source, and system installs; update those through their own workflow above.
+
+### "GitHub releases request failed (4xx) or Could not reach GitHub releases"
+
+No network, GitHub unreachable, or the API rate limit was hit. The update check is read-only and never modifies anything, so retry later. If you run many installs from one IP, set `GITHUB_TOKEN` in a `.env` file (or `GH_TOKEN`) so the request authenticates against the higher API limit; the token is used only for this request.
+
+### "The release checksum is unavailable" / "The release is missing a SHA-256 checksum"
+
+The latest release lacks a verified asset or checksum. Nothing is downloaded; report the release to the maintainers rather than bypassing the check.
+
+### Update installed but the app still shows the old version
+
+Restart OpenBoxGL. The new file only takes effect on the next launch. If it still shows old behavior after a restart, you are likely running a different file than the one that was updated (for example, a copy elsewhere on disk); update that copy, or move the updated AppImage and re-run **Install desktop shortcut** so the menu entry follows it.
+
+### The new AppImage will not start
+
+The previous version is intact at `OpenBox-x86_64.previous.AppImage` in the same directory. Replace the new file with it:
+
+```bash
+mv OpenBox-x86_64.previous.AppImage OpenBox-x86_64.AppImage
+chmod +x OpenBox-x86_64.AppImage
+```
+
+then report the failure with the diagnostic log (Settings > Copy diagnostic log), which redacts tokens and passwords but can include game names and file paths.
+
+## Data safety during updates
+
+The updater touches only the AppImage file next to the running executable. Your library, media, backups, themes, and settings live in the data directory (`~/.local/share/openbox-game-launcher` or `OPENBOX_DATA_DIR`) and are never part of the update. Moving, replacing, or deleting the AppImage does not touch them.
+
+Still, keep a library backup before major changes, and definitely before any rollback dance: [Library backups](/reference/library-backups/) and [Data and recovery](/reference/data-and-recovery/) cover both.
+
+## Related pages
+
+- [Installation](/install/)
+- [Getting started](/getting-started/)
+- [Interfaces and data](/interfaces-and-data/)
+- [Troubleshooting](/guides/troubleshooting/)

@@ -1,16 +1,35 @@
 ---
-title: Troubleshooting Backups And Restores
-description: Safe checks for backups and restores problems.
+title: Troubleshooting backups and restores
+description: Diagnose refused backups, stale restores, and failed restores.
 ---
 
-Start with the safest check for backups and restores problems. Confirm the current data directory and inspect the diagnostic log before changing state.
+Both whole-library backups and per-game save backups validate hard before writing. Most problems are a specific refusal message; start with that message and the diagnostic log.
 
-## Procedure
+## Backup refused
 
-1. Reproduce the issue with the smallest local example.
-2. Check the exact visible error and the relevant configuration.
-3. Back up before any destructive recovery.
+| Message | Cause / fix |
+| --- | --- |
+| `"Close running games before creating a backup."` | A game session is active; close games first (Running dialog). Applies to create and restore. |
+| `"Backup source is a symlink: ..."` | Backup refuses symlinks anywhere in the source tree. Point the item at real files. |
 
-## Recovery
+## Restore refused
 
-Correct the input or dependency, retry once, and stop if the same failure returns. Use the linked source and focused test as the maintenance contract.
+| Message | Cause / fix |
+| --- | --- |
+| `"This backup is older than the current library. Pass force=True to restore it anyway."` | The archive predates the current library. Only force when you intentionally want the older state; the current library is saved to `library.before-restore.json` first. |
+| `"Backup archive is invalid."` / `"Backup manifest is invalid."` | Not a ZIP or missing manifest. Only `OpenBoxBackup-*.zip` archives inside the data directory or `backups/` are accepted. |
+| `"Save backup roots do not match this game."` | The game's `save_paths` changed after the backup. Restore the archived paths (or back up again). |
+| `"Save backup not found."` | The archive name is not inside the game's backup directory; use a name from the backup list. |
+| Restore fails on a symlink | Restore rejects symlinks anywhere in the archive or destination tree (checked before and after each `mkdir`). |
+
+## What restore always does first
+
+- Whole-library restore copies the current `library.json` to `library.before-restore.json` before replacing it.
+- Save restore creates an automatic `before-restore` save backup of the current state first.
+- Backups and restores are refused while games are running.
+
+## See also
+
+- [Library backups](/guides/sessions-saves-and-backups/library-backups/) — create/rotate/restore workflow
+- [Save discovery and restore](/guides/sessions-saves-and-backups/saves/) — per-game save backups
+- [Save archives](/reference/save-archives/) and [Library backups API reference](/reference/library-backups/) — the archive contracts

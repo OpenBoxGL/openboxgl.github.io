@@ -3,20 +3,206 @@ title: API content and imports
 description: Import, metadata, media, storefront, emulator, and audit routes.
 ---
 
-Import, metadata, media, storefront, emulator, and audit routes.
+Import sources, metadata and media management, emulators, storefronts, Gameyfin, and the library health audit. All routes require `X-OpenBox-Token: TOKEN`; POST bodies are JSON objects.
 
-## Stability
+## Folder and file imports
 
-This reference follows the current `master` implementation and focused tests. Exact route names, JSON keys, limits, and error envelopes are maintained from the application source.
+### `POST /api/import`
 
-## Contract
+Scan a folder and add supported files: `{"folder": "/absolute/path", "chosen_emulators": {"Platform": "app_id"}}`. Supported extensions include `.sh`, `.appimage`, `.exe`, `.iso`, `.rom`, console ROMs (`.nes`, `.sfc`, `.smc`, `.gba`, `.gb`, `.gbc`), and archives (`.zip`, `.7z`, `.rar`) plus `.m3u`, `.cue`, `.chd`, `.wbfs`, `.rvz`, `.n64`, `.z64`, `.v64`, `.nds`, `.3ds`, `.cia`, `.pbp`, `.vpk`, `.xci`, `.nsp`, `.wad`, `.ciso`, `.gcm`, `.gcz`, `.wia`, `.dol`, `.elf`, `.xex`. Multi-disc groups (Disc/disk/CD/DVD/side markers) are merged into an `.m3u`; duplicate ROMs are ranked and the best kept with `version_candidates`. Existing paths are never duplicated. When emulator choices are supplied, chosen emulators are installed from Flathub. Returns `{"added", "found", "recommendations"}`; media downloads for entries with a `launchbox_db_id` are queued respecting `media_download_limit`.
 
-Use placeholders such as `TOKEN`, `GAME_ID`, and `/path/to/...`. Authenticate local API examples with `X-OpenBox-Token: TOKEN`. Treat exported library data, credentials, and local paths as sensitive.
+### `POST /api/import/wizard`
 
-## Errors and limits
+Like `/api/import` but also installs each chosen emulator and returns `{"added", "found", "recommendations", "installed": [app_ids]}`.
 
-Invalid input returns a validation error. Missing local prerequisites are reported before destructive work. Check the operation-specific response and diagnostic log before retrying.
+### `POST /api/import/watch`
 
-## Source
+Rescan all configured watch folders once. Returns `{"added", "found", "errors": [...]}`. The background auto-import worker rescans every 10 seconds (backing off to at most 300 on state errors) when the server runs.
 
-See the corresponding module and test named by the [application repository](https://github.com/vindeckyy/OpenBoxGL).
+### `POST /api/import/xbox360`
+
+`{"folder", "command": ""}` scans for `default.xex`, `.xex`, and `.xbe`; titles come from the folder name for `default.xex`. Returns `{"added", "found"}`.
+
+### `POST /api/import/loose-arcade`
+
+`{"folder", "command": ""}` scans `.zip`, `.7z`, `.singe`, `.rom` files; defaults to `hypseus`/`singe` on `PATH`. Returns `{"added", "found"}`.
+
+## Storefront imports
+
+### `POST /api/import/steam` | `POST /api/import/heroic` | `POST /api/import/lutris`
+
+Import installed games from local manifests. Steam reads `steamapps/appmanifest_*.acf` across all library folders; Heroic reads `legendary`/`gog`/`nile` installed manifests; Lutris shells out to `lutris --list-games --installed --json` (or Flatpak) with a 30-second timeout. Missing launchers raise `400` (for example, `"Steam, Flatpak, or xdg-open is required to launch imported Steam games."`, `"xdg-open is required to launch imported Heroic games."`, `"Lutris or Flatpak is required to import Lutris games."`). Returns `{"added", "found"}`. The health route `POST /api/health/dedupe` removes library duplicates by identity.
+
+### `POST /api/import/arcade`
+
+`{"folder", "dat": "", "command": "", "source": "MAME"}` imports a MAME or FinalBurn Neo full set. With a DAT/XML file, entries are classified as `parent`, `merged`, `split`, or `non-merged` by comparing set ROMs with the ZIP contents. Without a DAT, MAME's own `mame -listxml` output is used (300-second timeout, 256 MiB cap) and `mame` must be installed. Missing folder or catalog raises `400`. Returns `{"added", "found", "sets": {"parent": n, "merged": n, "split": n, "non-merged": n}}`.
+
+### `POST /api/import/scummvm` | `POST /api/import/rpcs3` | `POST /api/import/vita3k`
+
+Scan ScummVM (`scummvm.ini` sections), RPCS3 (`dev_hdd0/game/*/PARAM.SFO` titles), and Vita3K (`ux0/app/*/sce_sys/param.sfo` titles) libraries. Returns `{"added", "found"}`.
+
+## Metadata
+
+### `GET /api/metadata/status`
+
+`{"ready": <database file exists>, "job": {...}}` where `job` is the in-memory metadata sync job (state `downloading`/`done`/`error`, plus `error` on failure).
+
+### `POST /api/metadata/sync`
+
+Start a background sync of the LaunchBox Games Database (`https://gamesdb.launchbox-app.com/Metadata.zip`, 2 GiB cap). Returns `202 {"state":"downloading"}`; re-POSTing while downloading returns the current job with `200`.
+
+### `GET /api/metadata/search`
+
+`?id=<index>&q=<title>&platform=<platform>` searches the local database (20 results max). Before the database exists: `409 {"error":"Download the LaunchBox metadata database first."}`. Results include `database_id`, `name`, `platform`, `release_date`, `developer`, `publisher`, `genre`, `overview`, `series`, `esrb`, `max_players`, `cooperative`.
+
+### `POST /api/metadata/apply`
+
+`{"id"|"game_id", "database_id": <int>, "media": ["cover"|"background"|"screenshots"], "overwrite": bool}`. Applies text metadata (name, platform, year, developer, publisher, genre, description, series, ESRB, max_players, `launchbox_db_id`) and downloads the selected media into `media/launchbox/<database_id>/` (cover/background 32 MiB cap; screenshots at most 12). Missing database raises `400`. Returns `{"updated": [changed_fields]}` and bumps the media epoch.
+
+### `POST /api/metadata/steam`
+
+Fetch Steam store metadata (`appdetails`) for a game with a numeric `steam_app_id`: name, developer, publisher, genre, year, description, cover, background. Missing App ID raises `400`.
+
+### `POST /api/metadata/trailer`
+
+Download the first Steam store trailer: requires `steam_app_id`. Returns `{"video_trailer": "<path>"}`.
+
+### `POST /api/metadata/gog`
+
+Download GOG cover/background for a Heroic/GOG id. Returns `{"cover", "background"}`.
+
+### `GET /api/metadata/igdb/search`
+
+`?q=<title>&platform=<platform>` searches IGDB (requires `IGDB_CLIENT_ID`/`IGDB_CLIENT_SECRET` in `~/.env`; missing credentials raise `400`). Results include `id`, `name`, `summary`, `year`, `genres`, `platforms`, `rating`, `critic_score`.
+
+### `POST /api/metadata/igdb/apply`
+
+`{"id"|"game_id", "igdb_id": <int>}` applies name, description, year, genre, developer, publisher, rating, `igdb_id`, and `time_to_beat_hours`. Returns `{"applied": true, "game": "<name>"}`.
+
+## Media
+
+### `GET /api/media`
+
+Serve one media file: `?id=<index>&kind=cover|background|clear_logo|fanart|banner|icon|box_back|box_spine|box_3d|title_screen|video|music|video_snap|video_theme|video_trailer|video_recording|screenshot&index=<n>` (screenshot index for `kind=screenshot`). `kind=video` resolves the active video by priority. Missing file or bad kind: `404 {"error":"Media not found"}`. Media responses carry immutable cache headers, ETag, and byte-range support.
+
+### `POST /api/media/bulk`
+
+Start a background media download for every game with a `launchbox_db_id` (optionally `?platform=` scoped): `{"media": ["cover"|"background"|"screenshots"], "overwrite": bool}`. Returns `202 {"state":"running"}`. Missing database raises `400`.
+
+### `GET /api/media/bulk/status`
+
+`{"job": {"state": "running"|"done", "current", "total", "updated", "errors": [...]}}` (last 20 errors).
+
+### `GET /api/media/audit`
+
+`?platform=<name or "all">` reports `games`, `matched` (has `launchbox_db_id`), `missing_cover`, `missing_background`, `missing_screenshots`.
+
+### `GET /api/media/duplicates`
+
+`{"groups": [{"keep": "<path>", "duplicates": [...]}]}` by SHA-256 + size fingerprint of covers, backgrounds, and screenshots.
+
+### `POST /api/media/cleanup`
+
+`{"apply": bool}` removes duplicate media. With `apply: false` it is a dry run returning candidate paths; with `apply: true` files are deleted (only inside the data directory) and the media epoch bumps. Returns `{"groups", "paths": [...], "applied"}`.
+
+### `GET /api/media/queue`
+
+`{"queue": [...]}` from `media-queue.json` (pending media jobs).
+
+### `POST /api/screenshot`
+
+Capture the screen with the first available tool among gnome-screenshot, spectacle, scrot, and ImageMagick `import`; appends to the game's `screenshots` and bumps the media epoch. Returns `{"path"}`.
+
+## Emulators
+
+### `GET /api/emulators`
+
+`{"emulators": [...], "install_all": {...}}`. Each emulator: `app_id`, `name`, `platforms`, `installed`, `mode` (`native`|`flatpak`|`""`), `profiles` (platform to command), `can_install` (flatpak present), `recommendations`. The known set is Dolphin, PPSSPP, PCSX2, RPCS3, Cemu, MAME, xemu, ScummVM, RetroArch, DuckStation, melonDS.
+
+### `GET /api/emulators/recommend`
+
+`?platform=<name>` returns `{"recommendations": [...]}` from the platform-to-emulator map.
+
+### `GET /api/emulators/dependencies`
+
+`?name=<emulator>` returns `{"required": [...], "missing": [...]}` BIOS/system file checks (DuckStation, PCSX2, RPCS3, RetroArch hints).
+
+### `POST /api/emulators/install`
+
+`{"app_id": "org.mamedev.MAME"}` installs from Flathub (adding the flathub remote if needed; 120 s remote, 1800 s install timeouts) and merges the platform profiles. Returns `202 {"state":"installing"}`; duplicates return `200` with the current job. Errors surface as `400`/`500` with flatpak's stderr detail.
+
+### `POST /api/emulators/install-all`
+
+Install every not-installed emulator. Returns `202 {"state":"installing"}`; completion job has `{"state":"done", "installed": [...], "errors": [...]}`.
+
+### `POST /api/emulators/update` | `POST /api/emulators/update-all`
+
+`{"app_id"}` updates one (Flatpak required; `400` `"Flatpak is required for emulator updates."`); update-all updates installed flatpak-mode emulators. Returns `202 {"state":"updating"}`.
+
+### `POST /api/emulators/open`
+
+`{"app_id"}` launches the emulator standalone (native binary or `flatpak run`). Not installed: `400` `"<name> is not installed."`.
+
+### `GET /api/emulators/definitions`
+
+`{"definitions": [...]}` YAML emulator definition packs (id, name, extensions, platforms, startup, executable_patterns, flatpak, native).
+
+### `POST /api/emulators/scan`
+
+`{"folder"}` scans a folder using the definitions. Returns `{"added", "found"}`.
+
+### `GET /api/emulators/scan-configs` | `POST /api/emulators/scan-configs`
+
+Saved scan configurations (`folder`, `emulator_id`, `auto_update`). The auto-import worker executes configs with `auto_update: true`.
+
+## Storefront catalog
+
+### `GET /api/storefront/catalog`
+
+`?source=steam|heroic|lutris|gameyfin` returns `{"catalog": [...]}`. Steam reads installed manifests plus owned app ids from `localconfig.vdf`; Heroic reads library caches; Lutris uses `--list-games --json`; Gameyfin queries the configured server (requires `gameyfin_url` in settings, else `400`). Entries carry `id`, `name`, `source`, `installed`, `install_uri`, `path`, `launch`, and store-specific ids. Provider errors return `400`.
+
+### `POST /api/storefront/import`
+
+`{"source", "uninstalled_only": bool, "installed_only": bool}` imports catalog entries as games (deduplicated by identity), marking `store_catalog`, `store_installed`, `owned`. Returns `{"added", "found", "imported"}`. Unknown source raises `400`.
+
+## Gameyfin
+
+### `GET /api/gameyfin/providers`
+
+`{"providers": [...]}` from the configured server. Connection failures return `400`.
+
+### `POST /api/gameyfin/test`
+
+Test connection using posted settings (merged over stored). Returns `{"ok": true, "games": <n>, "providers": [...]}`.
+
+### `POST /api/gameyfin/install`
+
+`{"gameyfin_id"|"id", "library_id": <optional>}` downloads the game from Gameyfin into the install directory (staging with rollback; symlinks rejected; 4 GiB per file cap) and updates or appends the library entry. Returns `202 {"state":"installing", "gameyfin_id"}`; without a `gameyfin_id` raises `400`.
+
+### `GET /api/gameyfin/install/status`
+
+`?gameyfin_id=<id>` returns the job: `{"state": "idle"|"installing"|"done"|"error", "gameyfin_id", "error"?}`. Missing id raises `400`.
+
+### `POST /api/gameyfin/uninstall`
+
+Removes the game's install directory and files (refusing symlinks and paths outside the install directory) and marks the entry uninstalled. Non-Gameyfin entries raise `400`. Returns `{"removed": [...], "game": {...}}`.
+
+## Health
+
+### `POST /api/health`
+
+Library audit: `{"games", "missing", "duplicates", "unconfigured", "missing_media", "issues": [...]}`. Issues are typed `Duplicate`, `Missing game`, `Missing box front`, `Missing extra`, `Missing save path`, and `No emulator` (ROM extensions without a launch command or platform profile).
+
+### `POST /api/health/dedupe`
+
+Remove duplicate games by identity (steam app id, heroic, lutris, arcade rom_name, or normalized path). Returns `{"removed": [names]}`.
+
+## Discovery
+
+### `GET /api/discovery`
+
+`{"recently_added": [...], "never_played": [...], "short_sessions": [...], "highly_rated": [...], "continue_playing": [...], "random_picks": [...], "generated_at": ...}` index lists (12 each).
+
+## Errors
+
+Missing database prerequisites return `409` on metadata routes; missing local tools (`mame`, `xdg-open`, `7z`, `flatpak`, `lutris`) return `400` with the exact requirement; provider failures return `400` with the provider's message. See [REST API overview](/reference/api/overview/) for the shared envelope.

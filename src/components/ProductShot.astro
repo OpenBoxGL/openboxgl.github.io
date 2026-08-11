@@ -1,0 +1,19 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption: string;
+  eager?: boolean;
+}
+
+const { src, alt, caption, eager = false } = Astro.props;
+---
+
+<figure class="product-shot">
+  <a href={src.src} class="product-shot__link" target="_blank" rel="noopener">
+    <Image src={src} alt={alt} loading={eager ? 'eager' : 'lazy'} decoding="async" widths={[480, 960, 1440, 1920]} sizes="(min-width: 1024px) 960px, 100vw" />
+  </a>
+  <figcaption>{caption}</figcaption>
+</figure>

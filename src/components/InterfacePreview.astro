@@ -1,1 +1,20 @@
-<div class="interface-preview" role="img" aria-label="Illustration of a generic OpenBoxGL library with six placeholder game cards and a detail pane"><aside>Library<br />Filters<br />Platforms</aside><main>{Array.from({ length: 6 }, (_, index) => <div>Game {String(index + 1).padStart(2, '0')}</div>)}</main><section>Game detail<br />PLAY</section></div>
+---
+const caption = Astro.props.caption ?? 'The OpenBox Web UI: a filter rail on the left, a cover grid in the center, and the selected game detail pane on the right.';
+---
+<figure class="interface-preview">
+  <figcaption>{caption}</figcaption>
+  <div class="interface-preview__body" aria-hidden="true">
+    <aside class="interface-preview__filters">
+      <span>Filters</span>
+      <span>Platforms</span>
+      <span>Views</span>
+    </aside>
+    <main class="interface-preview__grid">
+      {Array.from({ length: 6 }, (_, index) => <div>Game {String(index + 1).padStart(2, '0')}</div>)}
+    </main>
+    <section class="interface-preview__detail">
+      <span>Game detail</span>
+      <span class="interface-preview__play">PLAY</span>
+    </section>
+  </div>
+</figure>

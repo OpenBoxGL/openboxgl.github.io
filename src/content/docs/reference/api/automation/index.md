@@ -3,20 +3,129 @@ title: API automation
 description: Queue, tags, notifications, and webhook request contracts.
 ---
 
-Queue, tags, notifications, and webhook request contracts.
+Queue, tags, notifications, and signed webhooks. All routes require `X-OpenBox-Token: TOKEN` and POST bodies are JSON objects.
 
-## Stability
+## Play queue
 
-This reference follows the current `master` implementation and focused tests. Exact route names, JSON keys, limits, and error envelopes are maintained from the application source.
+### `GET /api/queue`
 
-## Contract
+Returns `{"queue": [...]}`. Each entry: `game_id`, `added_at`, `note` (max 200 characters), `skip`, plus resolved fields `name`, `platform`, `cover`, `path_exists`, and `missing` (true when the game was deleted). The persisted queue is capped at 500 entries.
 
-Use placeholders such as `TOKEN`, `GAME_ID`, and `/path/to/...`. Authenticate local API examples with `X-OpenBox-Token: TOKEN`. Treat exported library data, credentials, and local paths as sensitive.
+### `POST /api/queue`
 
-## Errors and limits
+Actions:
 
-Invalid input returns a validation error. Missing local prerequisites are reported before destructive work. Check the operation-specific response and diagnostic log before retrying.
+| Action | Body | Behavior |
+| --- | --- | --- |
+| `list` (default) | `{}` | Return the current queue |
+| `enqueue` | `{"action":"enqueue", "game_ids": [...], "position": <int>, "note": "..."}` | Append (or insert at `position`, clamped 0..len) entries; unknown game ids raise `400` with `"Game not found: <id>"` |
+| `remove` | `{"action":"remove", "game_ids": [...]}` | Remove entries |
+| `reorder` | `{"action":"reorder", "ordered_game_ids": [...]}` | Replace ordering; a partial list raises `400` |
+| `advance` | `{"action":"advance", "current_game_id": "<id>"}` | Move past the current entry; returns the next entry in `next` |
 
-## Source
+Response: `{"queue": [...], "next": <entry or null>}`.
 
-See the corresponding module and test named by the [application repository](https://github.com/vindeckyy/OpenBoxGL).
+## Tags
+
+### `GET /api/tags`
+
+`{"tags": [{"tag": "...", "count": <n>}, ...]}` sorted by count descending then tag; hidden games are excluded.
+
+### `POST /api/tags`
+
+`{"ids": [...], "tags"|"tags_add"|"tags_remove": [...]}`. At least one tag change key is required. Normalization: each tag is trimmed, whitespace-collapsed, deduplicated case-insensitively, limited to 64 characters, and at most 50 tags per game; overlong tags raise `400`. Returns `{"updated": <count>, "tags": [...]}`.
+
+## Notifications
+
+### `GET /api/notifications`
+
+`{"notifications": [...], "unread": <count>}`. Notifications are newest first, capped at 200. Each item: `id` (`nt-<hex>`), `kind`, `level`, `title` (max 200 chars), `body` (max 2000 chars), `created_at`, `read`, and optional `source`, `correlation_id`, `dedupe_key`. Same-kind+same-title items within 600 seconds, or items with the same `dedupe_key`, collapse into the existing entry.
+
+### `POST /api/notifications`
+
+- `{"action":"read", "ids": [...]}` mark read (no `ids` marks all).
+- `{"action":"clear", "ids": [...]}` remove (no `ids` clears all).
+- `{"action":"list"}` returns the current feed.
+
+Response: `{"notifications": [...], "unread": <count>}`.
+
+## Webhooks
+
+### `GET /api/webhooks`
+
+`{"webhooks": [...], "events": [...], "attempts": <default>, "timeout": <default>}`. Webhook configs are redacted: the `secret` value is replaced by `secret_set: true`, and delivery status fields (`last_status`, `last_error`, `last_sent_at`, `last_delivery_at`) are included. `events` lists the nine subscribable types: `session.started`, `session.stopped`, `queue.advanced`, `library.imported`, `library.changed`, `metadata.synced`, `backup.created`, `update.installed`, `plugin.changed`.
+
+### `POST /api/webhooks`
+
+Save the full webhook list plus global defaults:
+
+```json
+{
+  "webhooks": [
+    {
+      "id": "wh-...",
+      "url": "https://example.com/hook",
+      "events": ["session.started", "session.stopped"],
+      "enabled": true,
+      "attempts": 3,
+      "timeout": 5,
+      "secret": "replace-me-with-8-plus-chars"
+    }
+  ],
+  "attempts": 3,
+  "timeout": 5
+}
+```
+
+Validation (`validate_webhook`):
+
+- At most 32 configs (`MAX_WEBHOOKS`); a longer list raises `400`.
+- `events` must be a non-empty list of known types.
+- URL must be http/https, at most 2048 characters, no embedded credentials, no fragment, valid port (1..65535).
+- HTTPS is required unless `OPENBOX_ALLOW_HTTP_WEBHOOKS=1` is set.
+- Host must resolve to a non-reserved address: unspecified, multicast, link-local, and reserved addresses are rejected. Loopback targets must not be the running OpenBox server port (checked both by port match and by a live TCP probe).
+- `attempts` and `timeout` must be numeric; effective values clamp to 1..5 and 1..15 on delivery.
+- Secrets must be at least 8 characters when supplied (delivery signs only when a secret exists). A config with `secret_set: true` and no `secret` preserves the stored value.
+
+Returns `{"webhooks": [...redacted...], "events": [...]}`.
+
+### `POST /api/webhooks/test`
+
+`{"webhook": {...}}` or the config fields directly. Performs one bounded synchronous delivery of a `test.ping` envelope and returns `{"ok": bool, "status": int|null, "error": str}` without exposing the response body, resolved addresses, or credentials. The outbound request respects the config's timeout (1..15 s).
+
+### Delivery contract
+
+Delivery is asynchronous and best-effort. Envelopes are compact JSON with `id` (`evt-<hex>`), `type`, `version: 1`, `created_at`, `source: "openbox"`, and an allowlisted `data` object (only documented keys are copied; caller data is never passed through). Request headers:
+
+- `Content-Type: application/json`
+- `User-Agent: OpenBox/1`
+- `X-OpenBox-Event-Id`, `X-OpenBox-Event`, `X-OpenBox-Timestamp`
+- `X-OpenBox-Signature: sha256=<hmac>` where the HMAC-SHA256 is computed over `timestamp + "." + body` with the config secret (omitted when no secret is set)
+
+Retries: attempts (1..5, default 3) with exponential backoff 1, 2, 4, 8 seconds; `Retry-After` clamps the delay to at most 30 seconds. Retryable statuses are 408, 425, 429, and 5xx; 3xx is a terminal failure (a redirect is never followed unvalidated). Timeout per attempt is 1..15 seconds (default 5). The delivery queue is bounded at 128 pending items with 4 workers; overflow drops the event and records a failure notification. Delivery failures surface as error notifications and update the config's `last_status`/`last_error`.
+
+## Launcher menu
+
+### `GET /api/launcher/menu`
+
+`{"items": [{"id", "label"}, ...]}`: Big Box, Settings, Search, then up to 40 games with ids `launch:<index>`. Used by the rofi/wofi/dmenu keyboard launcher.
+
+## Import exclusions
+
+### `GET /api/import/exclusions`
+
+`{"exclusions": [...]}`. Entries: `{"source": "steam"|"heroic"|"lutris"|"gameyfin", "external_id": "..."}`, optionally `{"heroic": ["heroic", "<source>", "<id>"]}` for store-specific Heroic exclusions.
+
+### `POST /api/import/exclusions`
+
+`{"source", "external_id", "heroic_source": ""}` adds an exclusion (deduplicated). Returns `{"exclusion": {...}}`.
+
+### `POST /api/import/exclusions/delete`
+
+`{"source", "external_id"}` removes it. Returns `{"removed": true}`.
+
+Excluded storefront entries are filtered out of future imports and storefront rescans.
+
+## Errors
+
+Unknown actions raise `400` (`"Unknown queue action."`, `"Unknown notification action."`); missing games in queue operations raise `400` with the game id; webhook validation failures raise `400` with the specific reason. See [REST API overview](/reference/api/overview/) for the shared envelope and [Webhooks](/integrations/webhooks/) for the end-user view.
