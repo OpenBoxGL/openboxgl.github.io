@@ -8,6 +8,7 @@ const links = [
   { label: "Sources", href: "#sources" },
   { label: "Big Box", href: "#bigbox" },
   { label: "Local-first", href: "#local" },
+  { label: "Docs", href: "/getting-started/" },
 ]
 
 export function SiteNav() {

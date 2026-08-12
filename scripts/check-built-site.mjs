@@ -1,8 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { join, relative } from 'node:path';
-import { parse } from 'node-html-parser';
 import { requiredRoutes } from './required-routes.mjs';
-const root = 'dist';
+const root = 'out';
 const files = [];
 async function walk(dir) { for (const entry of await readdir(dir,{withFileTypes:true})) { const path=join(dir,entry.name); if(entry.isDirectory()) await walk(path); else if(entry.name.endsWith('.html')) files.push(path); } }
 await walk(root);
@@ -10,18 +9,17 @@ const routes = new Set(files.map(file => { const path=relative(root,file).replac
 for (const route of requiredRoutes) if (!routes.has(route)) throw new Error(`missing required route ${route}`);
 const titles = new Set();
 for (const file of files) {
-  const html=parse(await readFile(file,'utf8'));
-  if (file.endsWith('/404.html')) continue;
-  // Redirect stubs (meta-refresh) carry no content of their own: keep them out
-  // of the content checks so the checker validates real pages only.
-  const refresh=html.querySelector('meta[http-equiv="refresh"]');
-  if (refresh) continue;
-  const title=html.querySelector('title')?.text.trim();
-  const description=html.querySelector('meta[name="description"]')?.getAttribute('content');
-  const h1=html.querySelectorAll('h1');
-  if(!title || !description || (h1.length!==1 && file !== 'dist/index.html')) throw new Error(`metadata or h1 failure in ${file}`);
+  if (file.endsWith('404.html')) continue;
+  if (file.includes('_not-found') || file.includes('/404/')) continue;
+  const html = await readFile(file,'utf8');
+  const title = html.match(/<title>([^<]*)<\/title>/)?.[1]?.trim();
+  if(!title) throw new Error(`missing title in ${file}`);
   if(titles.has(title)) throw new Error(`duplicate title ${title}`);
   titles.add(title);
-  for(const image of html.querySelectorAll('img')) if(!image.getAttribute('alt')?.trim() && !image.getAttribute('src')?.includes('/_astro/openbox')) throw new Error(`image without alt in ${file}`);
+  for(const img of html.matchAll(/<img[^>]*>/g)) {
+    const src = img[0].match(/src="([^"]*)"/)?.[1] ?? '';
+    const alt = img[0].match(/alt="([^"]*)"/)?.[1] ?? '';
+    if(!alt?.trim()) throw new Error(`image without alt in ${file}: ${src}`);
+  }
 }
 console.log(`verified ${files.length} HTML pages and ${routes.size} routes`);

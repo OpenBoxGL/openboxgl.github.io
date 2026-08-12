@@ -1,0 +1,152 @@
+---
+title: How OpenBoxGL works
+description: The launch pipeline, state store, plugin runner, job manager, and webhook dispatcher from the inside.
+---
+
+import FeatureGrid from '../../../components/FeatureGrid.astro';
+
+This page explains how OpenBoxGL is wired together internally. It is not a setup guide; it is the mental model that makes every other page make sense. Read it once and the importers, launch profiles, saves, plugins, and webhooks all fit into one picture.
+
+OpenBoxGL is a single Python process (standard library only) that owns one schema-versioned JSON file. Everything else — the Web UI, the REST API, Big Box, the native Tk window, plugins, jobs, webhooks — is a surface over that file and a small set of in-memory workers.
+
+## The pieces
+
+<FeatureGrid
+  label="OpenBoxGL internals"
+  items={[
+    { href: '#the-state-store', title: 'State store', eyebrow: 'core', description: 'One JSON file, atomic writes, a .bak sidecar, and a cross-process lock. The source of truth.' },
+    { href: '#the-launch-pipeline', title: 'Launch pipeline', eyebrow: 'play', description: 'Path → archive → tokens → perf → before_launch plugin → spawn → track → after_session.' },
+    { href: '#the-plugin-runner', title: 'Plugin runner', eyebrow: 'extend', description: 'Child processes, JSON over stdin/stdout, 5-second timeout, chained in sorted order.' },
+    { href: '#the-job-manager', title: 'Job manager', eyebrow: 'async', description: 'A 4-thread pool for metadata sync, media bulk, emulator installs, and Gameyfin downloads.' },
+    { href: '#the-webhook-dispatcher', title: 'Webhook dispatcher', eyebrow: 'notify', description: 'A bounded queue, 4 workers, HMAC signing, exponential retries, no redirect following.' },
+    { href: '#the-http-server', title: 'HTTP server', eyebrow: 'serve', description: 'A loopback ThreadingHTTPServer with a per-launch token and a 400/503/500 error contract.' },
+  ]}
+/>
+
+## The state store
+
+The library is one file: `library.json` inside the data directory (`~/.local/share/openbox-game-launcher` unless `OPENBOX_DATA_DIR` is set). The `JsonStateStore` in `state_store.py` is the only thing that writes it, and it writes defensively:
+
+1. **Serialize.** Payloads over 1 MiB use compact JSON; smaller ones are pretty-printed. A trailing newline is always written.
+2. **Temp + fsync.** The bytes go to a temp file in the same directory, `fsync`'d, and chmod `0o600` (owner-only).
+3. **Backup first.** The temp is copied to `library.json.bak` *before* the primary is swapped. This ordering matters: if the process dies between steps, you can never end up with a fresh primary paired with a stale backup.
+4. **Atomic swap.** `os.replace` moves the temp over `library.json`, chmod `0o600`, then the directory is `fsync`'d.
+
+Every read and write happens under a `flock` on `.library.json.lock`, so the Web UI and the native Tk UI can share one library safely. The last writer wins per transaction, not per file. Loaded state is deep-copied per request, so a caller cannot mutate the in-memory cache by accident.
+
+### Schema and identity
+
+The file is schema version 4. Older files migrate in place on load: v1 (bare game list) is wrapped into a state object; v2's index-suffixed IDs become stable IDs (the old form is kept as a `legacy_game_ids` alias); v3 gains `queue` and `notifications`. A version above 4, below 1, or with no migration raises `StateCorruptError` rather than guessing.
+
+**Stable game IDs** are the linchpin of the whole model. A `game_id` is `game-` + the first 24 hex chars of a SHA-256 over a sorted JSON payload of the game's *identity* — `path` (normalized), `platform`, `steam_app_id`, `heroic_app_id`, `lutris_id`, `gameyfin_id`, `launchbox_db_id`, or `name` when no store id exists. Because the ID is derived from identity, never list position, reordering, deleting other games, and re-importing do not change which entry a queue item, save backup, or history record points at. Collisions append `-2`, `-3`, …
+
+This is why the UI can say "re-importing never duplicates": the importer computes the same identity hash and the store treats it as the same game.
+
+:::tip[Why this matters to you]
+If a game's identity changes (you move its file and edit the path, or you change its Steam App ID), its `game_id` changes and it becomes a *new* entry. Save backups and queue entries keyed to the old ID stay where they are. That is why editing save paths after a backup makes that backup un-restorable until the paths match again.
+:::
+
+## The launch pipeline
+
+Launching a game is a fixed sequence in `build_launch` (`openbox.py`) and the launch handler (`web_app.py`). Understanding the order tells you exactly where each failure comes from.
+
+```text
+resolve path
+  └─ (extract archive if enabled)   → launch_path becomes a cached member
+resolve command
+  ├─ per-game `launch` override?    → use it
+  ├─ else platform profile?         → use profiles[platform]
+  └─ else .sh? → bash; else         → the path itself (must be executable)
+substitute tokens                    → {path}{name}{rom_name}{app_id}{heroic_app_id}{lutris_id}
+  └─ shlex.split AFTER substitution  → paths with spaces stay one argument
+  └─ profile with no {path}?         → path appended as final arg
+apply perf profile (ryzenadj)        → gated by apply_perf: off/auto/always
+before_launch plugins                → may rewrite args/cwd, or cancel
+spawn (start_new_session=True)       → own process group, tracked separately
+update state: last_played, play_count→ committed before tracking starts
+track session (mode-dependent)       → process | original_process | folder | process_name
+session ends
+  ├─ record history (last 500)       → play_count, playtime_seconds, exit_code
+  ├─ restore perf profile            → never raises (bookkeeping is sacred)
+  ├─ progress automation             → Playing after N min, Paused after N days
+  ├─ backup saves on close           → if backup_on_close + save_paths
+  ├─ auto-attach OBS recording       → if enabled
+  ├─ statistics sync                  → if cloud_folder configured
+  └─ after_session plugins           → result discarded; cannot break bookkeeping
+```
+
+### Why each validation error exists
+
+The pipeline fails *before* any process starts whenever the command would be meaningless. Each message names the exact problem:
+
+| Message | Where it fires | Fix |
+| --- | --- | --- |
+| `"<name> has no launch path."` | `build_launch`, path empty | Set the game's file path |
+| `"The configured path no longer exists: <path>"` | `build_launch`, `Path(path).exists()` false | Re-point or re-import |
+| `"<name> has no launch command and its file is not executable."` | no command, not `.sh`, not executable | `chmod +x`, or set a profile/per-game command |
+| `"7z or 7zz is required to extract this archive."` | archive path, non-ZIP | Install `7z`/`7zz` |
+| `"A plugin returned an invalid launch command."` | `before_launch` output structurally wrong | Fix the plugin, or safe mode |
+| `"Launch canceled by a plugin."` | `before_launch` returned `{"cancel": true}` | Remove/fix the plugin |
+
+A session that *starts* but exits under 5 seconds with a nonzero code shows "Session failed" with the exit code — that is not a validation error, it is the process itself failing. Check the tokens, the emulator binary, and BIOS files.
+
+:::note[Tokenization, not shell interpolation]
+Commands are never passed through a shell. `shlex.split` runs *after* token substitution, so `{path}` with spaces stays a single argv element. This is both safer (no injection) and the reason you must add your own quotes when the target emulator expects a single quoted argument: `retroarch -L … "{path}"`.
+:::
+
+## The plugin runner
+
+Plugins are local Python packages. The runner (`plugin_runner.py`, called by `run_plugins` in `plugins.py`) does not import plugin code into the OpenBox process. It spawns each plugin as a separate child process: `python3 plugin_runner.py <entry> <hook>`.
+
+- **Protocol:** one JSON object on stdin, one JSON object on stdout. Input and output are capped at 2 MiB each.
+- **Timeout:** 5 seconds per plugin (`subprocess.run(..., timeout=5)`). A timeout, crash, or invalid JSON logs a warning and the plugin's result is skipped — the previous payload passes through. A plugin therefore cannot break a launch or a library read by crashing.
+- **Chaining:** plugins run in sorted (alphabetical by id) order. For `library` and `before_launch`, each plugin's output feeds the next plugin's input. The `library` result is cached for 3 seconds and invalidated on state changes.
+- **Environment:** the child environment is cleaned — `PYTHONPATH`, `PYTHONHOME`, `LD_PRELOAD`, `LD_LIBRARY_PATH` are removed and `PYTHONNOUSERSITE=1` is set — so a plugin cannot ride in on the user's site-packages or preload.
+- **Safe mode:** `OPENBOX_SAFE_MODE=1` skips `run_plugins` for `library`, `before_launch`, and `after_session`, and disables the webhook dispatcher. It is the first diagnostic for plugin-caused failures.
+
+The one exception to "plugins cannot break things" is `before_launch` output that is *valid JSON but structurally wrong* (missing `args`/`cwd`, empty argv, nonexistent working directory). That aborts the launch with a validation error, because launching with a broken command would be worse than not launching.
+
+:::caution[Trust boundary]
+The child-process isolation is robustness, not a security sandbox. The plugin shares your user and your filesystem and can read and modify files under your account. Install only plugins you wrote or audited.
+:::
+
+## The job manager
+
+Background work goes through `job_manager.py`: a `ThreadPoolExecutor` with 4 worker threads (`openbox-job-*`) and a small job dict per submission (`job_id`, `name`, `state`, `attempt`, `max_attempts`, `error` truncated to 800 chars, …).
+
+- **States:** `queued → running → done | error | cancelled`.
+- **Replacement:** submitting the same `name` while a job is queued/running returns the existing job, unless `replace=True` (used when a new operation must supersede an old one).
+- **Cancellation:** a worker may accept a `cancel_event`; `cancel(name)` sets it. A queued job flips to `cancelled` immediately; a running job flips when the worker observes the event.
+- **Retries:** on exception, the job retries up to `max_attempts` with exponential backoff `backoff_seconds * 2^(attempt-1)`.
+- **Volatility:** job state is in-memory only. It does not survive a restart and jobs do not resume. The *results* that matter (library writes, downloaded files, settings changes) are committed transactionally by the worker before the job reports `done`, so a crash mid-job leaves partial-but-valid state.
+
+Named jobs: `auto-import` (the watch-folder/storefront loop), `metadata` (LaunchBox DB sync), `media-bulk`, `emulator-install:<app_id>`, `emulator-install-all`, `update:<app_id>`, `emulator-update-all`, and `gameyfin:<game_id>`. Each is exposed through its own status route.
+
+## The webhook dispatcher
+
+When a subscribed event fires, the dispatcher (`automation.py`) builds a compact JSON envelope and hands it to 4 background workers over a bounded queue of 128 pending items.
+
+- **Envelope:** `id`, `type`, `version: 1`, `created_at`, `source: "openbox"`, and an allowlisted `data` object. Only documented keys are copied from the caller; you cannot smuggle extra fields through.
+- **Headers:** `Content-Type: application/json`, `User-Agent: OpenBox/1`, `X-OpenBox-Event-Id`, `X-OpenBox-Event`, `X-OpenBox-Timestamp`, and `X-OpenBox-Signature: sha256=<hmac>` when a secret is set. The HMAC-SHA256 is over `timestamp + "." + body` (the exact transmitted bytes).
+- **URL validation** runs before save and before every test: HTTPS required (unless `OPENBOX_ALLOW_HTTP_WEBHOOKS=1`), no embedded credentials, no fragments, port 1..65535, host must resolve to a non-reserved address, and loopback targets must not be the running server (checked by port and by a live TCP probe).
+- **Retries:** retryable statuses are 408, 425, 429, and 5xx; backoff is 1, 2, 4, 8 seconds, clamped by `Retry-After` to 30. A redirect (3xx) is a **terminal** failure — the signed payload is never followed to an unvalidated destination.
+- **Backpressure:** a full queue drops the event with a failure notification (`"Webhook delivery queue is full; the event was dropped."`). Delivery failures update the config's `last_status`/`last_error` and emit an error notification with a `webhook:<event_id>` dedupe key.
+
+## The HTTP server
+
+The Web UI is a `ThreadingHTTPServer` bound to `("127.0.0.1", 0)` — loopback only, random port. The port and a per-launch token are written to `server.port` and `server.token` in the data directory and deleted on exit. Every route except the static UI page requires the token (header `X-OpenBox-Token` or `?token=`), checked with `secrets.compare_digest`. Unauthenticated requests to *any* route, known or unknown, return `403 {"error":"Unauthorized"}`, so the route surface is not discoverable without the token.
+
+### The error contract
+
+The handler catches a fixed set of exceptions from POST handlers and returns them as `400` with the message in `error`: `ValueError`, `OSError`, `TypeError`, `AttributeError`, `KeyError`, `IndexError`, `json.JSONDecodeError`, `GameyfinError`, `FileNotFoundError`, `RuntimeError`, and `subprocess.SubprocessError`. State-corruption errors become `503` *before* handler dispatch. Everything else is logged and returned as `500` with a message pointing at the diagnostic log.
+
+This is why almost every operation failure you hit through the API is a `400` with a readable, specific message — and why a `500` is genuinely "something the developers need to see," not a normal error path.
+
+## Where to go next
+
+- For the data file layout and recovery: [Data and recovery](/reference/data-and-recovery/)
+- For the launch command contract: [Command tokens](/reference/command-tokens/)
+- For the plugin contract: [Plugin API overview](/reference/plugins/overview/)
+- For the job status routes: [Background jobs](/reference/background-jobs/)
+- For the webhook contract: [Webhooks](/integrations/webhooks/)
+- For the REST API surface: [REST API](/reference/api/)
