@@ -138,6 +138,7 @@ export function buildSidebar(): DocNode[] {
     section("Reference", [
       "reference/how-it-works",
       "reference/configuration",
+      "reference/cli",
       "reference/command-tokens",
       "reference/search-syntax",
       "reference/data-and-recovery",

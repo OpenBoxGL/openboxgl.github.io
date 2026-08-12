@@ -20,7 +20,7 @@ Starting the Web UI does three things in order:
 2. Loads and normalizes the library state (running migrations if the schema is older), starts a `ThreadingHTTPServer` bound to `127.0.0.1` on a random port, and writes `server.port` and `server.token` into the data directory.
 3. Prints `http://127.0.0.1:PORT/?token=...` and opens it in your browser, unless `--no-browser` is passed.
 
-The server is loopback-only, so nothing is reachable from the network. The URL carries the per-launch token in the query string; the API also accepts the same value as an `X-OpenBox-Token` header. When the server stops, both files are deleted. A second instance therefore gets a fresh token and port, and the files are shared between interfaces: the keyboard launcher (`scripts/openbox-launcher.sh`) and `openbox://` deep links read these two files to find and authenticate against the running server.
+The server is loopback-only, so nothing is reachable from the network. The URL carries the per-launch token in the query string; the API also accepts the same value as an `X-OpenBox-Token` header. When the server stops, both files are deleted. A second instance therefore gets a fresh token and port, and the files are shared between interfaces: the keyboard launcher (`scripts/openbox-launcher.sh`) and `openbox://` deep links read these two files to find and authenticate against the running server. See [Command line and deep links](/reference/cli/) for the full flag and URI reference.
 
 ### Native UI
 

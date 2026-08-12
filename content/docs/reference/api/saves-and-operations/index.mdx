@@ -95,6 +95,13 @@ Returns `{"archive": "<path>", "name": "<filename>"}`.
 
 </ApiEndpoint>
 
+<ApiEndpoint method="GET" path="/api/backup">
+
+
+Downloads the current library state as a JSON attachment (`openbox-library.json`). This is a raw snapshot of `library.json`, not a backup archive; it is useful for inspection and external tooling. The response is streamed with `Content-Disposition: attachment; filename=openbox-library.json`.
+
+</ApiEndpoint>
+
 <ApiEndpoint method="GET" path="/api/backup/manifest">
 
 
