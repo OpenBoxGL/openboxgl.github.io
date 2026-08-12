@@ -2,20 +2,25 @@
 
 import Image from "next/image"
 import { Star, Terminal } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 const links = [
-  { label: "Library", href: "#library" },
-  { label: "Sources", href: "#sources" },
-  { label: "Big Box", href: "#bigbox" },
-  { label: "Local-first", href: "#local" },
+  { label: "Library", href: "/#library" },
+  { label: "Sources", href: "/#sources" },
+  { label: "Big Box", href: "/#bigbox" },
+  { label: "Local-first", href: "/#local" },
   { label: "Docs", href: "/getting-started/" },
 ]
 
 export function SiteNav() {
+  const pathname = usePathname()
+  const onDocs = pathname !== "/"
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
       <nav className="flex w-full max-w-6xl items-center justify-between gap-4 rounded-2xl border border-border bg-background/70 px-3 py-2.5 pl-4 backdrop-blur-xl">
-        <a href="#top" className="flex items-center gap-2.5">
+        <a href={onDocs ? "/" : "#top"} className="flex items-center gap-2.5" aria-label="OpenBox home">
           <span className="relative block h-8 w-8 overflow-hidden rounded-md drop-shadow-[0_0_12px_oklch(0.7_0.19_46_/_50%)]">
             <Image
               src="/openbox-logo.png"
@@ -33,7 +38,10 @@ export function SiteNav() {
             <a
               key={l.href}
               href={l.href}
-              className="rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+                l.href.startsWith("/") && !l.href.startsWith("/#") && onDocs && "text-primary",
+              )}
             >
               {l.label}
             </a>
@@ -42,14 +50,16 @@ export function SiteNav() {
 
         <div className="flex items-center gap-2">
           <a
-            href="#"
+            href="https://github.com/vindeckyy/OpenBoxGL"
+            target="_blank"
+            rel="noopener noreferrer"
             className="hidden items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
           >
             <Star className="h-4 w-4" />
-            <span className="font-mono text-xs">14.2k</span>
+            <span className="font-mono text-xs">GitHub</span>
           </a>
           <a
-            href="#install"
+            href="/install/"
             className="flex items-center gap-2 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
           >
             <Terminal className="h-4 w-4" />

@@ -34,14 +34,16 @@ export function CtaFooter() {
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
-            href="#install"
+            href="/install/"
             className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
           >
             <Terminal className="h-4 w-4" />
             Install OpenBox
           </a>
           <a
-            href="#"
+            href="https://github.com/vindeckyy/OpenBoxGL"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 rounded-xl border border-border bg-background/50 px-6 py-3 font-medium transition-colors hover:bg-secondary"
           >
             <Star className="h-4 w-4" />

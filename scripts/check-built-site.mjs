@@ -12,6 +12,9 @@ for (const file of files) {
   if (file.endsWith('404.html')) continue;
   if (file.includes('_not-found') || file.includes('/404/')) continue;
   const html = await readFile(file,'utf8');
+  // Redirect stubs (meta-refresh) carry no content of their own: keep them out
+  // of the content checks so the checker validates real pages only.
+  if (html.includes('http-equiv="refresh"')) continue;
   const title = html.match(/<title>([^<]*)<\/title>/)?.[1]?.trim();
   if(!title) throw new Error(`missing title in ${file}`);
   if(titles.has(title)) throw new Error(`duplicate title ${title}`);
