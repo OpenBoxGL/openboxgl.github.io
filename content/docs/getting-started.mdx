@@ -35,19 +35,13 @@ The Web UI workspace looks like this once you have a library entry — filters o
 
 <li><strong>Install and start the Web UI.</strong> From the AppImage, Flatpak, or source as described on the [Installation](/install/) page. When the library is empty, the welcome wizard appears; you can close it and use the topbar buttons, or start from its **Import a ROM or game folder** step.</li>
 
-</Steps>
-
 <Callout type="note">
 
 **You should see:** An empty cover grid in the center, no cards in any view. The welcome wizard suggests importing a folder or scanning for emulators. If the browser did not open, look at the terminal — OpenBoxGL printed `http://127.0.0.1:PORT/?token=...`. Open that URL manually.
 
 </Callout>
 
-<Steps>
-
 <li><strong>Choose Import Folder.</strong> Click **Import Folder** in the topbar (or the wizard's folder step). The web UI asks for the absolute path of the folder to import. Because the browser cannot browse your filesystem, you type or paste the path, for example `/home/you/test-game`.</li>
-
-</Steps>
 
 <Callout type="note">
 
@@ -55,11 +49,7 @@ The Web UI workspace looks like this once you have a library entry — filters o
 
 </Callout>
 
-<Steps>
-
 <li><strong>Select a folder containing one executable `.sh` file.</strong> The import scans the folder for supported files (`.sh`, `.appimage`, `.exe`, `.iso`, `.rom`, common console extensions, and archives), checks each against existing library entries so nothing is duplicated, and adds what is new. If the import also finds a known emulator on your system, it may offer to install or configure a profile; with a plain `.sh` file, nothing extra is needed.</li>
-
-</Steps>
 
 <Callout type="note">
 
@@ -67,11 +57,7 @@ The Web UI workspace looks like this once you have a library entry — filters o
 
 </Callout>
 
-<Steps>
-
 <li><strong>Confirm the imported title in the library.</strong> A grid card appears with the game's name. The detail pane on the right shows the launch path, the platform, and empty metadata fields that you can later fill from the LaunchBox Games Database or edit by hand.</li>
-
-</Steps>
 
 <Callout type="note">
 
@@ -79,13 +65,7 @@ The Web UI workspace looks like this once you have a library entry — filters o
 
 </Callout>
 
-<Steps>
-
 <li><strong>Open the game card to view its details.</strong> Selecting the card opens its detail pane: the launch command, the launch profile for its platform, per-game overrides, save locations, and history stay together here. This is also where you review or fix a launch failure.</li>
-
-</Steps>
-
-![The game detail pane with metadata, launch controls, save management, and history](/openbox-game-detail.png)
 
 <Callout type="note">
 
@@ -93,17 +73,17 @@ The Web UI workspace looks like this once you have a library entry — filters o
 
 </Callout>
 
-<Steps>
+![The game detail pane with metadata, launch controls, save management, and history](/openbox-game-detail.png)
 
 <li><strong>Select PLAY and watch the session result.</strong> PLAY runs the game's launch command without a shell. For a `.sh` file, that means `bash <path>`. A lifecycle overlay appears ("Starting"), the process starts, and after it exits, the overlay reports the outcome: either "Session ended, play time and history were saved" for a clean exit, or the actual exit code for a failure. The session is recorded with start time, duration, and exit status.</li>
-
-</Steps>
 
 <Callout type="note">
 
 **You should see:** If the path or permissions are wrong, PLAY stays greyed-out with a message naming which part is missing. If correct, a small "Starting…" banner appears at the top, then "Session ended" with the play time and a link to the History view. The game card's "Play count" increments to 1 and "Play time" grows to match the script's duration.
 
 </Callout>
+
+</Steps>
 
 ## Expected result
 

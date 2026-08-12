@@ -93,19 +93,28 @@ export function Callout({
 
 export function Steps({ children }: { children?: ReactNode }) {
   const items = Children.toArray(children).filter(isValidElement)
+  let stepNumber = 0
   return (
     <ol className="my-4 space-y-3">
       {items.map((child, i) => {
-        // If the child is already an <li> (from MDX), unwrap it to avoid nesting.
         const el = child as React.ReactElement<{ children?: ReactNode }>
         const isLi = el.type === "li" || (typeof el.type === "string" && el.type === "li")
-        const content = isLi ? el.props.children : el
+        if (!isLi) {
+          // Non-li children (e.g. Callouts) render as-is inside the list.
+          return (
+            <li key={i} className="list-none [&>ol]:my-0">
+              {el}
+            </li>
+          )
+        }
+        stepNumber += 1
+        const content = el.props.children
         return (
           <li key={i} className="flex gap-3">
-            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 font-mono text-xs font-bold text-primary">
-              {i + 1}
+            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 font-mono text-xs font-bold text-primary">
+              {stepNumber}
             </span>
-            <div className="min-w-0 flex-1 [&_p]:my-1 [&_code]:rounded [&_code]:bg-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2">
+            <div className="min-w-0 flex-1 [&_p]:my-1 [&_code]:rounded [&_code]:bg-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_a]:text-primary [&_a]:underline">
               {content}
             </div>
           </li>
