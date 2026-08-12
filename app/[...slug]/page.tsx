@@ -43,9 +43,9 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
   return (
     <article>
       <DocsBreadcrumbs slug={slugStr} />
-      <div className="mb-8 border-b border-border pb-6">
-        <p className="font-mono text-xs uppercase tracking-[0.25em] text-primary">// OPENBOX DOCS</p>
-        <h1 className="mt-2 text-balance text-3xl font-bold tracking-tight md:text-4xl">
+      <div className="mb-10 border-b border-border pb-8">
+        <p className="mb-3 font-mono text-xs uppercase tracking-[0.25em] text-primary">// OPENBOX DOCS</p>
+        <h1 className="max-w-3xl text-balance text-3xl font-bold leading-tight tracking-tight md:text-4xl">
           {doc.frontmatter.title || "OpenBox Docs"}
         </h1>
         {doc.frontmatter.description && (
@@ -57,14 +57,14 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
 
       <div className={proseClasses()}>{renderMdx(doc.source)}</div>
 
-      <nav className="mt-12 flex items-center justify-between border-t border-border pt-6">
+      <nav className="mt-12 flex items-center justify-between gap-3 border-t border-border pt-6">
         {prev ? (
           <Link
             href={`/${prev.slug}/`}
-            className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+            className="group flex min-w-0 items-center gap-2 rounded-xl border border-border bg-card/60 px-3.5 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" />
-            {prev.title}
+            <ArrowLeft className="h-4 w-4 shrink-0 transition-transform group-hover:-translate-x-0.5" />
+            <span className="truncate">{prev.title}</span>
           </Link>
         ) : (
           <span />
@@ -72,10 +72,10 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
         {next ? (
           <Link
             href={`/${next.slug}/`}
-            className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+            className="group flex min-w-0 items-center gap-2 rounded-xl border border-border bg-card/60 px-3.5 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
           >
-            {next.title}
-            <ArrowRight className="h-4 w-4" />
+            <span className="truncate">{next.title}</span>
+            <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
           </Link>
         ) : (
           <span />

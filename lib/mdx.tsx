@@ -1,4 +1,5 @@
 import { MDXRemote } from "next-mdx-remote-client/rsc"
+import remarkGfm from "remark-gfm"
 import { ApiEndpoint, Callout, FeatureGrid, InstallOptionCard, InstallOptions, Procedure, ProductShot, StatusBadge, Steps } from "@/components/docs"
 
 const components = {
@@ -58,5 +59,16 @@ export function preprocess(source: string): string {
 }
 
 export function renderMdx(source: string) {
-  return <MDXRemote source={preprocess(source)} components={components} options={{ mdxOptions: { format: "mdx" } }} />
+  return (
+    <MDXRemote
+      source={preprocess(source)}
+      components={components}
+      options={{
+        mdxOptions: {
+          format: "mdx",
+          remarkPlugins: [remarkGfm],
+        },
+      }}
+    />
+  )
 }

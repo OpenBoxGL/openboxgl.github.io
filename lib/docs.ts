@@ -101,40 +101,24 @@ export function buildSidebar(): DocNode[] {
   }
 
   sections.push(
-    section("Start here", ["index", "install", "getting-started", "interfaces-and-data", "updating"]),
+    section("Start here", ["install", "getting-started", "interfaces-and-data", "updating"]),
     section("Use OpenBox", [
       "guides/library",
-      "guides/library/importing",
-      "guides/library/organizing",
-      "guides/library/queue-tags-notifications",
       "guides/metadata-and-media",
       "guides/media-providers",
       "guides/storefront-manager",
       "guides/discovery",
       "guides/emulators-and-launching",
       "guides/big-box-and-handhelds",
-      "guides/big-box-and-handhelds/performance",
       "guides/retroachievements",
       "themes",
     ]),
     section("Saves and recovery", [
       "guides/sessions-saves-and-backups",
-      "guides/sessions-saves-and-backups/saves",
-      "guides/sessions-saves-and-backups/library-backups",
-      "guides/sessions-saves-and-backups/statistics-sync",
     ]),
     section("Extend and automate", [
       "guides/plugins",
       "guides/troubleshooting",
-      "guides/troubleshooting/startup-and-browser",
-      "guides/troubleshooting/imports",
-      "guides/troubleshooting/metadata-and-media",
-      "guides/troubleshooting/launching",
-      "guides/troubleshooting/state-recovery",
-      "guides/troubleshooting/backups-and-restores",
-      "guides/troubleshooting/integration-credentials",
-      "guides/troubleshooting/plugins",
-      "guides/troubleshooting/diagnostic-logs",
     ]),
     section("Integrations", [
       "integrations/import-sources",
@@ -152,18 +136,7 @@ export function buildSidebar(): DocNode[] {
       "reference/library-backups",
       "reference/background-jobs",
       "reference/api",
-      "reference/api/overview",
-      "reference/api/library-and-settings",
-      "reference/api/automation",
-      "reference/api/content-and-imports",
-      "reference/api/saves-and-operations",
-      "reference/api/local-admin",
       "reference/plugins",
-      "reference/plugins/overview",
-      "reference/plugins/manifest",
-      "reference/plugins/hooks",
-      "reference/plugins/process-and-errors",
-      "reference/plugins/catalog",
       "reference/parity",
     ]),
     section("Project and policies", [
@@ -174,9 +147,14 @@ export function buildSidebar(): DocNode[] {
     ]),
   )
 
-  // Any slugs not in a section (404 page) are appended to Start here.
-  const covered = new Set(sections.flatMap((s) => s.children.map((c) => c.slug)))
-  const orphan = slugs.filter((s) => !covered.has(s))
+  // Any slugs not covered by a section (or a descendant of a covered item)
+  // are appended to Start here. Only the 404 page is a true orphan.
+  const covered = new Set(
+    sections.flatMap((s) =>
+      s.children.flatMap((c) => [c.slug, ...slugs.filter((slug) => slug.startsWith(`${c.slug}/`))]),
+    ),
+  )
+  const orphan = slugs.filter((s) => !covered.has(s) && s !== "index" && s !== "404")
   if (orphan.length) {
     sections[0].children.push(
       ...orphan.map((slug) => {
