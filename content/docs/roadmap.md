@@ -14,7 +14,7 @@ The [changelog](/changelog/) is the accurate record. The headline pieces in 0.8.
 
 ## In progress
 
-The Unreleased section of the app changelog tracks the next batch. Right now no new items are committed there; the queue, tags, notifications, and webhook surfaces from the previous Unreleased list shipped in 0.8.2. New ideas come from the sources below.
+The Unreleased section of the app changelog tracks the next batch: full LaunchBox Games Database media downloads (box backs, spines, 3D boxes, clear logos, fanart, banners, title screens, carts, discs, ads, and archive-side manuals) and a chrome-less app window that opens the UI without the default browser. New ideas come from the sources below.
 
 ## Where ideas come from
 
