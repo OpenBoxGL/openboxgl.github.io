@@ -11,7 +11,7 @@ export function FeatureBento() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:grid-rows-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-4 md:grid-rows-2">
           {/* signature command palette tile */}
           <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 md:col-span-2 md:row-span-2">
             <div className="flex items-center gap-2 text-primary">
@@ -52,10 +52,12 @@ export function FeatureBento() {
             </div>
           </div>
 
-          <BentoCard icon={Award} title="RetroAchievements" body="Match ROMs to achievement sets and track hardcore, beaten, and mastered progress." />
-          <BentoCard icon={Clock} title="Play history" body="Session times, launch counts and last-played, per game." />
-          <BentoCard icon={Palette} title="Themes" body="Reskin the whole app. Community themes in one click." />
-          <BentoCard icon={Blocks} title="Plugins" body="Extend imports, scrapers and views with an open API." />
+          <div className="grid grid-cols-1 gap-3 md:col-span-2 md:row-span-2 sm:grid-cols-2">
+            <BentoCard icon={Award} title="RetroAchievements" body="Match ROMs to achievement sets and track hardcore, beaten, and mastered progress." />
+            <BentoCard icon={Clock} title="Play history" body="Session times, launch counts and last-played, per game." />
+            <BentoCard icon={Palette} title="Themes" body="Reskin the whole app. Community themes in one click." />
+            <BentoCard icon={Blocks} title="Plugins" body="Extend imports, scrapers and views with an open API." />
+          </div>
         </div>
 
         <div className="mt-3 grid grid-cols-1 gap-3">

@@ -24,6 +24,25 @@ export function LocalFirst() {
               OpenBox is built on a simple promise: everything runs locally. No sync servers, no analytics beacons, no
               hidden network calls. It works perfectly offline because that&apos;s the whole point.
             </p>
+            <p className="mt-4 max-w-md text-pretty text-sm leading-relaxed text-muted-foreground">
+              Two interfaces share the same local library: the full-featured Web UI with Big Box and the REST API, and a
+              lightweight native desktop window. Both write to the same <code className="rounded border border-border bg-secondary px-1.5 py-0.5 font-mono text-xs">library.json</code>,
+              process-safe, so you can switch between them freely.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a
+                href="/interfaces-and-data/"
+                className="rounded-xl border border-border bg-background/50 px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary"
+              >
+                Interfaces and data
+              </a>
+              <a
+                href="/policies/privacy/"
+                className="rounded-xl border border-border bg-background/50 px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary"
+              >
+                Privacy policy
+              </a>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

@@ -70,9 +70,9 @@ export function Hero() {
         </p>
 
         {/* install command */}
-        <div id="install" className="mx-auto mt-9 flex max-w-2xl items-center gap-2 rounded-xl border border-border bg-card p-1.5 pl-4 font-mono text-xs sm:text-sm">
+        <div id="install" className="mx-auto mt-9 flex max-w-3xl items-center gap-2 rounded-xl border border-border bg-card p-1.5 pl-4 font-mono text-xs sm:text-sm">
           <span className="text-primary">$</span>
-          <span className="flex-1 truncate text-left text-foreground/90">{cmd}</span>
+          <span className="flex-1 overflow-hidden text-left text-foreground/90">{cmd}</span>
           <button
             onClick={copy}
             className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground transition-colors hover:bg-muted"
