@@ -3,8 +3,6 @@ title: REST API
 description: Use the local authenticated HTTP API for automation.
 ---
 
-import FeatureGrid from '../../../components/FeatureGrid.astro';
-
 The Web UI exposes a local REST API for automation and third-party tooling. The server binds to loopback only and requires a per-launch token on every request. This page is the index; each operation group has its own reference page, and [How OpenBoxGL works](/reference/how-it-works/) explains the server, the error contract, and the lifecycle.
 
 ## Quickstart
@@ -33,10 +31,11 @@ curl -s -X POST -H "X-OpenBox-Token: $TOKEN" \
 
 Replace `GAME_ID` with a real `game-<hex>` id from `/api/library`. The token and port live only while the Web UI is running — both files are deleted when the server stops.
 
-:::caution[Prefer the header over the query string]
-`?token=TOKEN` works but leaks into browser history, referrer logs, and proxy logs. Use `X-OpenBox-Token` in anything you write.
-:::
+<Callout type="caution" title="Prefer the header over the query string">
 
+`?token=TOKEN` works but leaks into browser history, referrer logs, and proxy logs. Use `X-OpenBox-Token` in anything you write.
+
+</Callout>
 ## Server and transport
 
 - The API listens at `http://127.0.0.1:SERVER_PORT` on a random port chosen at startup. The port and token are written to `server.port` and `server.token` inside the data directory and deleted when the server stops.

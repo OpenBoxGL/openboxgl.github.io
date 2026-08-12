@@ -5,9 +5,9 @@ description: Connect RetroAchievements, match ROMs to achievement sets, and trac
 
 OpenBoxGL integrates with [RetroAchievements](https://retroachievements.org/) to match your ROMs to achievement sets, show earned and hardcore progress, serve badges, and inject your credentials into emulator configs so emulators enable achievements themselves.
 
-:::note[Why hash-based matching matters]
+<Callout type="note" title="Why hash-based matching matters">
 RetroAchievements matches games by SHA-256 content hash of the ROM file, not by filename or size. That's why two different dumps of "Super Mario Bros" (NES) can have different hashes — they're treated as separate games with separate achievement sets. If a ROM doesn't match any set, try a different dump from No-Intro, Redump, or a well-known source; header-stripping is applied automatically for NES, SNES, N64, Game Boy, Genesis, SMS, GG, Atari 2600/7800, Lynx, and PC Engine.
-:::
+</Callout>
 
 ## What it does
 

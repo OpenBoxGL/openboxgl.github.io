@@ -23,9 +23,11 @@ All colors are dark by default. Saturated hues appear only on focus, launch stat
 | `--ob-text` | `#f3f5fb` | Primary titles, high-priority content |
 | `--ob-muted` | `#8e96aa` | Metadata, labels, helper copy, inactive navigation |
 
-:::note[Contrast ratios]
+<Callout type="note" title="Contrast ratios">
+
 The muted/text pair (`#8e96aa` / `#f3f5fb`) achieves a ratio of approximately 5.5:1 — passes WCAG AA for normal text. If your theme changes either value independently, verify the pair still reaches at least 4.5:1. Low contrast is explicitly called out in the "Do not" section.
-:::
+
+</Callout>
 
 ### Accent colors
 
@@ -54,9 +56,11 @@ The muted/text pair (`#8e96aa` / `#f3f5fb`) achieves a ratio of approximately 5.
 | `--ob-empty-action` | `#2aaddb` | Empty-state action buttons |
 | `--ob-danger` | *(theme-dependent)* | Error/destructive state — typically a muted red derived from the theme palette |
 
-:::tip[State-color rule]
+<Callout type="tip" title="State-color rule">
+
 Cyan identifies **where the user is focused**; green identifies **where the user can launch or is actively playing**. Never swap those roles. Green for selection or cyan for launch-success are both explicitly forbidden.
-:::
+
+</Callout>
 
 ## Typography
 

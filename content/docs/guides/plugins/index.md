@@ -5,9 +5,11 @@ description: Install and use local Python plugins to extend OpenBoxGL.
 
 Plugins are optional local Python packages that observe or extend OpenBoxGL through three hooks. They run as separate processes with a JSON stdin/stdout protocol, so a plugin that crashes or misbehaves cannot take down the library.
 
-:::caution[What "separate process" actually means]
+<Callout type="caution" title="What 'separate process' actually means">
+
 Isolation is robustness, not a security sandbox. The child process shares your user privileges and your filesystem — it can read and write any file your OpenBoxGL process can reach. The 5-second timeout, 2 MiB payload cap, and `PYTHONNOUSERSITE=1` environment cleaning prevent runaway behavior, but they don't restrict what the plugin can see on disk. Review every installed `plugin.py` before enabling it, and use `OPENBOX_SAFE_MODE=1` if you're unsure about a package. See [How OpenBoxGL works](/reference/how-it-works/#the-plugin-runner) for the execution pipeline.
-:::
+
+</Callout>
 
 ## What a plugin can do
 

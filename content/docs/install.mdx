@@ -3,9 +3,6 @@ title: Installation
 description: Install OpenBoxGL on Linux with AppImage, Flatpak, or source.
 ---
 
-import InstallOptions from '../../components/InstallOptions.astro';
-import { Steps } from '@astrojs/starlight/components';
-
 OpenBoxGL runs on Linux with Python 3.10+ for source installs. AppImage is the recommended path: it bundles its own Python runtime, so you never depend on system Python versions or library packages.
 
 There is no OpenBox account, installer wizard, or license key. Downloading a release or cloning the repository is the entire installation.
@@ -36,12 +33,14 @@ Before you install, confirm your system meets the baseline:
 | `git` | Not needed | Not needed | Required |
 | FUSE (to mount AppImages) | Required | Not needed | Not needed |
 
-:::tip[No Python packages to install]
+<Callout type="tip" title="No Python packages to install">
+
 The source install uses only the Python standard library — there is no `pip install`, no `requirements.txt`, and no virtualenv step. Clone and run.
-:::
+
+</Callout>
 
 <InstallOptions>
-  <div slot="appimage" >
+<InstallOptionCard slot="appimage">
 
   ### AppImage
 
@@ -88,9 +87,8 @@ The source install uses only the Python standard library — there is no `pip in
 
   The Tk interface shares the same library data as the Web UI, so you can switch between them freely.
 
-  </div>
-
-  <div slot="flatpak" >
+</InstallOptionCard>
+<InstallOptionCard slot="flatpak">
 
   ### Flatpak
 
@@ -105,9 +103,8 @@ The source install uses only the Python standard library — there is no `pip in
   - Flatpak builds install the same `openbox` and `openbox-native` launchers; `flatpak run io.openbox.GameLauncher --native` starts the Tk interface.
   - The Flatpak is not updated by OpenBoxGL's built-in updater (it only understands the AppImage). Update by rebuilding the manifest or using the Flatpak workflow you already have for local builds.
 
-  </div>
-
-  <div slot="source" >
+</InstallOptionCard>
+<InstallOptionCard slot="source">
 
   ### Source / system
 
@@ -132,12 +129,14 @@ The source install uses only the Python standard library — there is no `pip in
   sudo make uninstall   # removes everything the target placed
   ```
 
-  </div>
+</InstallOptionCard>
 </InstallOptions>
 
-:::caution[Known issue: system install wrapper]
+<Callout type="caution" title="Known issue: system install wrapper">
+
 The current `sudo make install` wrapper path is not the recommended installation route. Use the AppImage, Flatpak, or source commands above. The wrapper exists for distro-style packaging; the AppImage covers desktop, handheld, and immutable-system use more completely.
-:::
+
+</Callout>
 
 ## Making an app menu entry
 
@@ -148,12 +147,12 @@ If an older build opened then never showed a window after integration, install *
 ## Verify your install
 
 <Steps>
-  <ol>
-    <li>Run the entry point from a terminal. It should print a line like `http://127.0.0.1:PORT/?token=...` and open your browser.</li>
+
+<li>Run the entry point from a terminal. It should print a line like `http://127.0.0.1:PORT/?token=...` and open your browser.</li>
     <li>The browser shows the three-column workspace with an empty cover grid. On first launch with an empty library, the welcome wizard appears.</li>
     <li>Settings → About (or `GET /api/settings` with the token) reports the running version and whether it is an AppImage.</li>
     <li>Your data directory (`~/.local/share/openbox-game-launcher` unless `OPENBOX_DATA_DIR` is set) now contains `library.json`, `server.token`, and `server.port`.</li>
-  </ol>
+
 </Steps>
 
 ## Optional local configuration
@@ -162,10 +161,12 @@ OpenBoxGL loads optional credentials and settings from `.env` files it discovers
 
 Secrets and tokens (RetroAchievements, EmuMovies, IGDB, GitHub) are read from these files or from the process environment. Put real secrets in `~/.env` or `~/.config/openbox-game-launcher/.env` only, never in the repository or in a tracked file.
 
-:::caution[Two variables that must be set before launch]
+<Callout type="caution" title="Two variables that must be set before launch">
+
 - `OPENBOX_DATA_DIR` chooses the data directory. It is read before `.env` bootstrap, so putting it inside a discovered `.env` file is too late.
 - `OPENBOX_SAFE_MODE=1` disables plugin execution for the whole process. Useful for diagnosing plugin-caused launch failures.
-:::
+
+</Callout>
 
 See [Configuration](/reference/configuration/) for the full environment contract.
 

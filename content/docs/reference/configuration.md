@@ -53,9 +53,11 @@ Values already in the environment are never overridden by `.env`. The template l
 
 Each credential lookup checks the aliases in order using `env_value()` from `env_config.py` — it iterates through the listed names for a variable and uses the first non-empty value found. If an empty string is returned for any required variable, the route returns a specific `400` error naming exactly which variable is missing. For example, IGDB requires both `IGDB_CLIENT_ID` **and** `IGDB_CLIENT_SECRET`; without either the IGDB routes return `400 {"error":"Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET in ~/.env to use IGDB."}`. Without RetroAchievements credentials, the `/api/ra/*` routes return `400 {"error":"Configure RetroAchievements first."}`.
 
-:::tip[Why aliases exist]
+<Callout type="tip" title="Why aliases exist">
+
 The alias pattern lets users choose whichever name suits their setup. A RetroAchievements user might already have `RA_USERNAME` set as part of another tool's config; OpenBoxGL will pick it up automatically. The `OPENBOX_*` variants are useful when you're prefixing all your custom environment variables under one namespace.
-:::
+
+</Callout>
 
 Credentials supplied through the Settings dialog are persisted in the data directory (`retroachievements.json`, `emumovies.json`, `settings.json` for Gameyfin) with owner-only permissions (`0o600` via `secure_text_write`). The API and diagnostic log redact the values, but the files themselves are plaintext.
 
@@ -117,9 +119,11 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 
 Partial saves merge with existing settings: keys you omit are preserved, and concurrent partial saves of different keys do not lose updates (covered by the API sweep tests). An empty `gameyfin_password` in a save leaves the stored password unchanged.
 
-:::tip[How validation prevents bad saves]
+<Callout type="tip" title="How validation prevents bad saves">
+
 The save handler validates **every** posted field before committing any change. If a single value fails validation (for example, `screensaver_seconds: -5`), the entire save request returns `400` and **nothing** is written. This means you can safely send partial saves — changing `bigbox_mode` won't accidentally corrupt `tracker_frequency` even if both arrive in the same request. The only exception is an empty `gameyfin_password`, which deliberately preserves the old value so you don't erase your password while updating other settings.
-:::
+
+</Callout>
 
 ## Values consumed at startup
 

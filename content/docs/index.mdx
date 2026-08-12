@@ -1,13 +1,8 @@
 ---
 title: OpenBoxGL
 description: A local-first game library and launcher for Linux.
-template: splash
 ---
 
-import FeatureGrid from '../../components/FeatureGrid.astro';
-import ProductShot from '../../components/ProductShot.astro';
-import { Image } from 'astro:assets';
-import screenshot from '../../assets/screenshots/openbox-screenshot.png';
 
 # OpenBox Game Launcher for Linux
 
@@ -15,7 +10,7 @@ import screenshot from '../../assets/screenshots/openbox-screenshot.png';
 
 OpenBoxGL brings mixed game collections into one searchable catalog. Keep library data on your machine, enrich it with artwork and metadata, then launch and track play from the same interface. No account, no cloud lock-in, no telemetry.
 
-<ProductShot src={screenshot} alt="The OpenBox Web UI: filter rail on the left, cover grid in the center, and the selected game's detail pane on the right." caption="The Web UI: filter rail, cover grid, and game detail pane in one workspace." eager />
+<ProductShot src="/openbox-screenshot.png" alt="The OpenBox Web UI: filter rail on the left, cover grid in the center, and the selected game's detail pane on the right." caption="The Web UI: filter rail, cover grid, and game detail pane in one workspace." />
 
 [**Install OpenBoxGL**](/install/) [**Read the quick start**](/getting-started/)
 
@@ -32,9 +27,11 @@ The application ships as two interfaces over the same local data:
 
 When you start the Web UI, a local server starts on `127.0.0.1` and your browser opens to it. The server never listens on the network, and every request must carry a per-launch token, so the tab you open is the only client.
 
-:::note[Local-first by design]
+<Callout type="note" title="Local-first by design">
+
 The page is a three-column workspace: platform filters on the left, a searchable cover grid or list in the center, and a detail pane on the right where metadata, launch controls, saves, and history stay together. Everything you see is rendered from a local `library.json` you own.
-:::
+
+</Callout>
 
 OpenBoxGL is independent from the Openbox window manager and from LaunchBox and Unbroken Software, LLC. Those names appear only to describe compatibility and comparison boundaries.
 

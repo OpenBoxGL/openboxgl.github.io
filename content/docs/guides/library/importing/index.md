@@ -5,9 +5,11 @@ description: Bring storefronts, executables, ROMs, and arcade sets into one cata
 
 OpenBoxGL imports from installed storefront manifests, local ROM folders, standalone executables, and arcade DAT catalogs. Every importer reports how many games were found and added; entries that already exist are skipped, so re-running an import never creates duplicates. Imported games keep a stable identity (Steam App ID, Heroic App ID, Lutris ID, Gameyfin ID, or path) so later imports merge into the existing entry instead of adding a second copy.
 
-:::tip[Why re-importing never duplicates]
+<Callout type="tip" title="Why re-importing never duplicates">
+
 Each imported game gets a `game_id` derived from a SHA-256 over its *identity* (normalized path, platform, and store ids). The importer computes the same hash on every run, so a game that already exists is recognized and updated, not duplicated. This is also why a game keeps its sessions, saves, queue entries, and history when you reorder or re-import. See [How OpenBoxGL works](/reference/how-it-works/#the-state-store) for the identity model.
-:::
+
+</Callout>
 
 ## Import a folder of ROMs or executables
 
@@ -54,8 +56,10 @@ The **Storefronts** dialog also browses owned versus installed catalogs for Stea
 
 Missing tools and malformed manifests are reported as import errors rather than silently creating unusable entries. A missing Steam binary, missing `xdg-open` for Heroic, or a Lutris list that is not valid JSON all raise a visible error and import nothing. Configure an emulator profile before launching ROMs; see [Emulators and launching](/guides/emulators-and-launching/).
 
-:::caution[Storefront entries without local files]
+<Callout type="caution" title="Storefront entries without local files">
+
 Storefront imports that mark a title owned-but-uninstalled (`store_installed: false`) create a placeholder entry — its Play button stays disabled (or becomes **INSTALL** for Gameyfin) until the client actually has the game installed. These placeholders are intentional: they let your catalog include your whole owned library ahead of time.
-:::
+
+</Callout>
 
 See [Import sources](/integrations/import-sources/) for source-specific paths and [Emulators and launching](/guides/emulators-and-launching/) for profiles.

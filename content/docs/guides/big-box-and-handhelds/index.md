@@ -42,9 +42,11 @@ Under gamescope, OpenBoxGL detects the guest via environment (`GAMESCOPE_WAYLAND
 
 Do not wrap OpenBox in another `gamescope` while already in Game Mode. On a normal desktop, behavior is unchanged unless you pass `--game-mode`. The Flatpak build relies on host tools for window tagging and kiosk mode, so prefer the AppImage for Game Mode.
 
-:::note[How window tagging keeps Steam Input working]
+<Callout type="note" title="How window tagging keeps Steam Input working">
+
 OpenBoxGL marks its own browser window with a dedicated `STEAM_GAME` id (`413091001`) so gamescope treats it as a real app window. Games you launch from inside OpenBox still go through Steam (`steam -applaunch` / `steam://`), so their Input profiles and overlays stay scoped to those titles. Non-Steam games get a stable synthetic `STEAM_GAME` id derived from their identity (range 700,000,000–899,999,999). The tagging is a window property only — it does not change how the game runs.
-:::
+
+</Callout>
 
 Steam Input profiles stay scoped to your shortcut; the STEAM_GAME tagging is only a window property. OpenBoxGL does not control TDP; use Steam's QAM or your image's handheld tools. Developers can approximate Deck/Bazzite Game Mode on a desktop with `./scripts/emulate_deck_gamemode.sh` (requires gamescope; runs a nested session with `SteamDeck=1` advertising).
 

@@ -5,9 +5,11 @@ description: Browse owned and installed catalogs, import either set, and automat
 
 The **Storefronts** dialog (top bar) browses your storefront catalogs — owned versus installed — and imports either set into the library. It covers Steam, Heroic, Lutris, and Gameyfin.
 
-:::note[Why owned vs. installed matters]
+<Callout type="note" title="Why owned vs. installed matters">
+
 OpenBoxGL distinguishes between what you *own* on a storefront and what you actually *have installed* on disk. Importing "installed" gives you games ready to play; importing "owned / uninstalled" gives you placeholders so your catalog reflects your entire library ahead of time. The Play button on an uninstalled entry stays greyed-out (or becomes **INSTALL** for Gameyfin) until the game's local files appear. This separation lets you see your full collection without needing every title downloaded simultaneously.
-:::
+
+</Callout>
 
 ## What each source shows
 

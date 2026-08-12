@@ -5,9 +5,11 @@ description: Browse, search, and safely maintain a mixed Linux game library.
 
 OpenBoxGL presents imported games in a searchable grid or list. Select a card to open its detail pane, where metadata, artwork, launch, saves, and history stay together. The Web UI keeps one top bar of actions: **Library**, **Add Game**, **Import Folder**, **Import Steam**, **Import Heroic**, **Import Lutris**, **Import Arcade**, **Emulators**, **Settings**, **Big Box**, **Running**, **History**, **Themes**, **Save Filter**, **Save Preset**, **Playlists**, **Achievements**, **Plugins**, **Discovery**, **Storefronts**, **Media**, **Health**, **Bulk Edit**, **Backup**, **Fullscreen**, **Queue**, **Tags**, **Notifications**, and **Webhooks**.
 
-:::tip[Why the library never gets "broken" by reordering]
+<Callout type="tip" title="Why the library never gets broken by reordering">
+
 Every entry carries a `game_id` derived from its identity (path, platform, store ids), not its position in the list. Reorder cards, delete others, re-import — your sessions, queue entries, save links, and tags all point at the same id. This is also why a second import of the same folder does not duplicate: OpenBoxGL computes the same hash and recognizes the existing game before creating anything new. See [How OpenBoxGL works](/reference/how-it-works/#the-state-store).
-:::
+
+</Callout>
 
 ## Browse and search
 

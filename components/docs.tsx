@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react"
+import { Children, isValidElement } from "react"
 import { AlertTriangle, CheckCircle2, Info, Lightbulb } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -80,20 +81,25 @@ export function Callout({
 }
 
 export function Steps({ children }: { children?: ReactNode }) {
+  const items = Children.toArray(children).filter(isValidElement)
   return (
     <ol className="my-4 space-y-3">
-      {Array.isArray(children)
-        ? children.map((child, i) => (
-            <li key={i} className="flex gap-3">
-              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 font-mono text-xs font-bold text-primary">
-                {i + 1}
-              </span>
-              <div className="min-w-0 flex-1 [&_p]:my-1 [&_code]:rounded [&_code]:bg-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_a]:text-primary [&_a]:underline">
-                {child}
-              </div>
-            </li>
-          ))
-        : children}
+      {items.map((child, i) => {
+        // If the child is already an <li> (from MDX), unwrap it to avoid nesting.
+        const el = child as React.ReactElement<{ children?: ReactNode }>
+        const isLi = el.type === "li" || (typeof el.type === "string" && el.type === "li")
+        const content = isLi ? el.props.children : el
+        return (
+          <li key={i} className="flex gap-3">
+            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 font-mono text-xs font-bold text-primary">
+              {i + 1}
+            </span>
+            <div className="min-w-0 flex-1 [&_p]:my-1 [&_code]:rounded [&_code]:bg-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_a]:text-primary [&_a]:underline">
+              {content}
+            </div>
+          </li>
+        )
+      })}
     </ol>
   )
 }

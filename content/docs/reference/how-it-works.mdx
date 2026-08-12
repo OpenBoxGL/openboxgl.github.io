@@ -3,7 +3,6 @@ title: How OpenBoxGL works
 description: The launch pipeline, state store, plugin runner, job manager, and webhook dispatcher from the inside.
 ---
 
-import FeatureGrid from '../../../components/FeatureGrid.astro';
 
 This page explains how OpenBoxGL is wired together internally. It is not a setup guide; it is the mental model that makes every other page make sense. Read it once and the importers, launch profiles, saves, plugins, and webhooks all fit into one picture.
 
@@ -42,9 +41,11 @@ The file is schema version 4. Older files migrate in place on load: v1 (bare gam
 
 This is why the UI can say "re-importing never duplicates": the importer computes the same identity hash and the store treats it as the same game.
 
-:::tip[Why this matters to you]
+<Callout type="tip" title="Why this matters to you">
+
 If a game's identity changes (you move its file and edit the path, or you change its Steam App ID), its `game_id` changes and it becomes a *new* entry. Save backups and queue entries keyed to the old ID stay where they are. That is why editing save paths after a backup makes that backup un-restorable until the paths match again.
-:::
+
+</Callout>
 
 ## The launch pipeline
 
@@ -90,9 +91,11 @@ The pipeline fails *before* any process starts whenever the command would be mea
 
 A session that *starts* but exits under 5 seconds with a nonzero code shows "Session failed" with the exit code — that is not a validation error, it is the process itself failing. Check the tokens, the emulator binary, and BIOS files.
 
-:::note[Tokenization, not shell interpolation]
+<Callout type="note" title="Tokenization, not shell interpolation">
+
 Commands are never passed through a shell. `shlex.split` runs *after* token substitution, so `{path}` with spaces stays a single argv element. This is both safer (no injection) and the reason you must add your own quotes when the target emulator expects a single quoted argument: `retroarch -L … "{path}"`.
-:::
+
+</Callout>
 
 ## The plugin runner
 
@@ -106,9 +109,11 @@ Plugins are local Python packages. The runner (`plugin_runner.py`, called by `ru
 
 The one exception to "plugins cannot break things" is `before_launch` output that is *valid JSON but structurally wrong* (missing `args`/`cwd`, empty argv, nonexistent working directory). That aborts the launch with a validation error, because launching with a broken command would be worse than not launching.
 
-:::caution[Trust boundary]
+<Callout type="caution" title="Trust boundary">
+
 The child-process isolation is robustness, not a security sandbox. The plugin shares your user and your filesystem and can read and modify files under your account. Install only plugins you wrote or audited.
-:::
+
+</Callout>
 
 ## The job manager
 

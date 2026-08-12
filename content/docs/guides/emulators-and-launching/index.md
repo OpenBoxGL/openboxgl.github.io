@@ -5,9 +5,11 @@ description: Configure profiles, tokens, archives, dependencies, and session con
 
 OpenBoxGL launches games through tokenized commands, never shell interpolation. A launch command is split with shell rules into an argument list, and tokens are replaced per argument; a path with spaces stays one argument.
 
-:::tip[Read the launch pipeline first]
+<Callout type="tip" title="Read the launch pipeline first">
+
 Launching is a fixed sequence — resolve path → extract archive → resolve command → substitute tokens → apply perf → run `before_launch` plugins → spawn → track → `after_session`. The full order and where each validation error fires is documented in [How OpenBoxGL works](/reference/how-it-works/#the-launch-pipeline). Knowing the order tells you exactly which step a failure came from.
-:::
+
+</Callout>
 
 ## Profiles
 
@@ -52,9 +54,11 @@ YAML definition packs in `emulator_defs/` (dolphin, duckstation, retroarch) map 
 
 A game with **Extract archive before launch** enabled is extracted at launch time into `<data-dir>/cache/archives`. ZIP extraction is native and strictly validated: at most 25,000 members, 2 GiB per member, 8 GiB total, no absolute or `..` paths, no duplicate entries, no symlinks or device nodes, and no symlinked destination. 7z and RAR need `7z` or `7zz` on PATH, which first validates the listing with the same limits. The largest non-artwork file becomes the launch target unless **Archive member** names one; extraction is cached per archive (content-addressed) with a `.complete` marker, so re-launches reuse the cache. A failed extraction raises before any process starts.
 
-:::caution[Why the safe extractor refuses things]
+<Callout type="caution" title="Why the safe extractor refuses things">
+
 The extraction limits exist because a malicious or malformed archive is the one place untrusted bytes enter the filesystem. The extractor refuses symlinks, `..` paths, device nodes, and oversized members *by design*; a "cannot extract" error here means the archive violated a safety rule, not that the extractor is broken. Do not bypass it — repackage the archive.
-:::
+
+</Callout>
 
 ## Dependency checks
 

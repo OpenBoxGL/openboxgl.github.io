@@ -5,9 +5,11 @@ description: Track play and protect library and save data.
 
 OpenBoxGL records session history, play counts, play time, last-played state, and exit outcomes when tracking is enabled, and protects both save data and the whole library with versioned backups.
 
-:::tip[Why sessions and saves are keyed by stable game id]
+<Callout type="tip" title="Why sessions and saves are keyed by stable game id">
+
 Every session, queue entry, save backup, and history record points at a `game_id` derived from the game's *identity* (path, platform, store ids), never its position in the list. That is why reordering your library, re-importing, or deleting other games never breaks the link between a session and its game — and why editing a game's save paths after a backup makes that backup un-restorable until the paths match again. See [How OpenBoxGL works](/reference/how-it-works/#the-state-store) for the identity model.
-:::
+
+</Callout>
 
 ## Sessions and history
 
