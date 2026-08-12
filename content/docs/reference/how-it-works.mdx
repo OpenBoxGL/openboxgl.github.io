@@ -1,157 +1,539 @@
 ---
 title: How OpenBoxGL works
-description: The launch pipeline, state store, plugin runner, job manager, and webhook dispatcher from the inside.
+description: A code-level guide to startup, state, imports, launching, sessions, jobs, plugins, webhooks, and the local API.
 ---
 
+This page is for developers and maintainers who want to follow a real OpenBoxGL operation through the code. It starts at process startup, follows a library entry through import and launch, then covers the workers and extension points that sit around that path.
 
-This page explains how OpenBoxGL is wired together internally. It is not a setup guide; it is the mental model that makes every other page make sense. Read it once and the importers, launch profiles, saves, plugins, and webhooks all fit into one picture.
+OpenBoxGL has a local application core with two presentation shells. The Web UI is a browser client of a loopback HTTP server. The native UI is a separate Tk presentation layer. Both use the same data directory and state-store rules for durable library data, but only the running Web UI process owns its live browser session maps and game process maps.
 
-OpenBoxGL is a single Python process (standard library only) that owns one schema-versioned JSON file. Everything else — the Web UI, the REST API, Big Box, the native Tk window, plugins, jobs, webhooks — is a surface over that file and a small set of in-memory workers.
-
-## The pieces
+That distinction explains most of the architecture. Durable facts such as games, settings, playlists, queue entries, notifications, and completed history belong in `library.json`. Temporary facts such as an open dialog, an active browser selection, a running `Popen` object, or a queued worker live in memory and disappear when their process stops.
 
 <FeatureGrid
   label="OpenBoxGL internals"
   items={[
-    { href: '#the-state-store', title: 'State store', eyebrow: 'core', description: 'One JSON file, atomic writes, a .bak sidecar, and a cross-process lock. The source of truth.' },
-    { href: '#the-launch-pipeline', title: 'Launch pipeline', eyebrow: 'play', description: 'Path → archive → tokens → perf → before_launch plugin → spawn → track → after_session.' },
-    { href: '#the-plugin-runner', title: 'Plugin runner', eyebrow: 'extend', description: 'Child processes, JSON over stdin/stdout, 5-second timeout, chained in sorted order.' },
-    { href: '#the-job-manager', title: 'Job manager', eyebrow: 'async', description: 'A 4-thread pool for metadata sync, media bulk, emulator installs, and Gameyfin downloads.' },
-    { href: '#the-webhook-dispatcher', title: 'Webhook dispatcher', eyebrow: 'notify', description: 'A bounded queue, 4 workers, HMAC signing, exponential retries, no redirect following.' },
-    { href: '#the-http-server', title: 'HTTP server', eyebrow: 'serve', description: 'A loopback ThreadingHTTPServer with a per-launch token and a 400/503/500 error contract.' },
+    { href: '#startup-and-process-ownership', title: 'Startup', eyebrow: 'boot', description: 'Environment selection, state bootstrap, themes, workers, loopback server, token files, and browser handoff.' },
+    { href: '#the-state-store', title: 'State store', eyebrow: 'persist', description: 'Schema migration, identity, locks, atomic writes, cache behavior, backups, and recovery.' },
+    { href: '#the-request-lifecycle', title: 'HTTP boundary', eyebrow: 'serve', description: 'Authentication, body limits, route dispatch, error mapping, headers, and browser API behavior.' },
+    { href: '#the-import-pipeline', title: 'Imports', eyebrow: 'catalog', description: 'Folder scans, storefront adapters, ROM normalization, deduplication, state mutation, and media work.' },
+    { href: '#the-launch-pipeline', title: 'Launch', eyebrow: 'play', description: 'Path resolution, archive extraction, command tokens, plugins, process groups, tracking, and teardown.' },
+    { href: '#background-jobs', title: 'Workers', eyebrow: 'async', description: 'Generic jobs, feature-specific status maps, retries, cancellation, polling, and restart behavior.' },
+    { href: '#extension-boundaries', title: 'Extensions', eyebrow: 'extend', description: 'Plugin subprocesses, CSS themes, webhook delivery, validation, and trust boundaries.' },
+    { href: '#maintenance-map', title: 'Maintenance map', eyebrow: 'change', description: 'Where to make a change, which contracts it touches, and which tests prove the result.' },
   ]}
 />
 
+## The architecture in one view
+
+The application is easiest to understand as a set of boundaries around one local library:
+
+```text
+AppImage or source entry point
+  -> web_app.main() or openbox.py
+  -> environment and data-directory selection
+  -> JsonStateStore and library bootstrap
+  -> browser shell or native Tk shell
+
+Web shell
+  -> ThreadingHTTPServer on 127.0.0.1 and an ephemeral port
+  -> token-authenticated Handler routes
+  -> focused domain modules
+  -> state-store transaction or bounded filesystem operation
+  -> JSON response
+  -> index.html refresh, render, toast, dialog, or job polling
+
+Launch path
+  -> stable game identity resolution
+  -> build_launch()
+  -> optional archive extraction and performance setup
+  -> before_launch plugin subprocesses
+  -> Popen(start_new_session=True)
+  -> process-local RUNNING and PROCESSES maps
+  -> finish_session()
+  -> durable playtime and optional history
+  -> save backup, integrations, stop event, and after_session plugins
+```
+
+The composition root for the Web UI is `web_app.py`. The shared launch and data-directory entry points are in `openbox.py`. Persistence rules are in `state_store.py`. The browser implementation is the single `index.html` file. Other modules own narrower rules, such as archive safety, import adapters, metadata, saves, integrations, plugins, themes, and jobs.
+
+## Startup and process ownership
+
+The normal Web UI startup path is in `web_app.main()`. The native path is in `openbox.py`. The shell scripts and AppImage wrapper select which Python entry point runs, but they do not become a second application layer.
+
+### Web UI startup order
+
+The current startup sequence is approximately:
+
+```text
+web_app.main()
+  -> bootstrap_env(DATA.parent)
+  -> configure diagnostic logging
+  -> initialize or recover environment configuration
+  -> load the state store and purge demo data where applicable
+  -> ensure bundled stock themes exist
+  -> create the auto-import worker
+  -> create ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+  -> generate the per-launch token
+  -> write server.port and server.token
+  -> build the token-bearing localhost URL
+  -> run configured startup commands
+  -> open the browser unless browser opening is disabled
+  -> serve requests
+  -> stop workers, remove token and port files, run shutdown commands
+```
+
+The exact startup code lives near `main()` in `web_app.py`. The important ordering is that the server must have a bound port and token before the browser URL can be built. The token and port files are owner-readable files under the selected data directory. They are discovery helpers for local tools such as the launcher script and deep-link handling, not a remote service registry.
+
+The server asks the operating system for port `0`, which means the final port is selected at bind time. A second OpenBoxGL process therefore gets a different port and token. Stopping a process removes its own `server.port` and `server.token` files.
+
+Configured startup and shutdown commands are parsed with `shlex.split()`. Their first executable path is expanded, and the command runs in a new process session. Startup command failures are logged or ignored by the current implementation rather than becoming a different application startup mode.
+
+### Two shells, one durable data boundary
+
+| Shell | Entry point | Owns | Does not own |
+| --- | --- | --- | --- |
+| Web UI | `web_app.py` and `index.html` | HTTP routes, browser state, Big Box, integrations, plugin hooks, live process maps, session polling | A durable browser database or a separate library format |
+| Native UI | `openbox.py` | Lightweight Tk presentation and direct launch controls | Web routes, browser rendering, web plugin flow, and Web UI live-session maps |
+
+Both shells use the same `library.json` and the same sidecar lock. The lock serializes normal state-store transactions across processes. It does not make every in-memory view instantly consistent, and it cannot protect a process that edits `library.json` directly without using the store's lock.
+
+The native shell can launch games with its own presentation path. The Web UI launch path adds stable-ID resolution, Web UI process tracking, performance handling, and Web UI plugin hooks. A feature implemented in only one shell is therefore not automatically available in the other shell.
+
+### Durable state and process-local state
+
+| Kind of state | Examples | Lifetime | Storage |
+| --- | --- | --- | --- |
+| Durable library state | Games, profiles, settings, playlists, queue, notifications | Survives restart | `library.json` |
+| Durable completed-session state | Game name, start time, seconds, exit code when history tracking is enabled | Survives restart | `library.json` history |
+| Durable files | Media, save archives, library backups, themes, plugins, metadata database | Survives restart | Data-directory subdirectories |
+| Web runtime state | `RUNNING`, `PROCESSES`, `SESSION_EVENTS`, browser caches | One Web UI process | Python memory |
+| Worker state | Job records, cancellation events, feature-specific progress maps | One process | Python memory, with some result files persisted by workers |
+| Browser state | Selected game, filters, open menus, dialog contents, polling timers | One browser page | JavaScript memory and the URL where applicable |
+
+Completed history is worth calling out. Normal session history records store the game name, start time, duration, and exit code. They do not store the stable game ID in the session record. Stable IDs protect active references such as current launch resolution, queue entries, playlists, and API requests. They do not turn an old name-based history row into a durable foreign-key record.
+
+## The data directory boundary
+
+`openbox.py` selects the data directory from `OPENBOX_DATA_DIR`, or from the default path:
+
+```text
+~/.local/share/openbox-game-launcher/
+```
+
+When the custom variable is not set and the new library file does not exist, the startup code can copy the legacy LaunchBox Linux library from its old location. That migration happens before normal state-store use. It is a one-time compatibility copy, not a general synchronization mechanism.
+
+A typical data directory contains:
+
+```text
+APP_DIR/
+├── library.json
+├── library.json.bak
+├── .library.json.lock
+├── server.port
+├── server.token
+├── openbox.log
+├── backups/
+├── save-backups/
+├── media/
+├── metadata/
+├── cache/
+├── themes/
+├── plugins/
+├── media-queue.json
+├── highscores/
+└── bezels/
+```
+
+`library.json` is the durable state document. The other files are part of the local application boundary too. Moving only `library.json` leaves media, save archives, installed plugins, themes, metadata, and recovery material behind.
+
+The environment variable must be available before startup selects `DATA`. An `.env` file discovered later in bootstrap cannot retroactively change that already-selected data directory. Export it from the shell, desktop entry, or service that starts OpenBoxGL.
+
 ## The state store
 
-The library is one file: `library.json` inside the data directory (`~/.local/share/openbox-game-launcher` unless `OPENBOX_DATA_DIR` is set). The `JsonStateStore` in `state_store.py` is the only thing that writes it, and it writes defensively:
+`state_store.py` owns the normal read-modify-write path. `JsonStateStore.update()` and `update_with_result()` perform mutations while holding the in-process lock and the sidecar filesystem lock. Some specialized restore paths use their own atomic file helpers, so a restore operation should be read together with the backup implementation rather than assumed to be identical to a normal state transaction.
 
-1. **Serialize.** Payloads over 1 MiB use compact JSON; smaller ones are pretty-printed. A trailing newline is always written.
-2. **Temp + fsync.** The bytes go to a temp file in the same directory, `fsync`'d, and chmod `0o600` (owner-only).
-3. **Backup first.** The temp is copied to `library.json.bak` *before* the primary is swapped. This ordering matters: if the process dies between steps, you can never end up with a fresh primary paired with a stale backup.
-4. **Atomic swap.** `os.replace` moves the temp over `library.json`, chmod `0o600`, then the directory is `fsync`'d.
+### State shape and migration
 
-Every read and write happens under a `flock` on `.library.json.lock`, so the Web UI and the native Tk UI can share one library safely. The last writer wins per transaction, not per file. Loaded state is deep-copied per request, so a caller cannot mutate the in-memory cache by accident.
+`default_state()` creates schema version 4 with these top-level collections:
 
-### Schema and identity
+```json
+{
+  "schema_version": 4,
+  "games": [],
+  "profiles": {},
+  "history": [],
+  "settings": {},
+  "playlists": [],
+  "queue": [],
+  "notifications": []
+}
+```
 
-The file is schema version 4. Older files migrate in place on load: v1 (bare game list) is wrapped into a state object; v2's index-suffixed IDs become stable IDs (the old form is kept as a `legacy_game_ids` alias); v3 gains `queue` and `notifications`. A version above 4, below 1, or with no migration raises `StateCorruptError` rather than guessing.
+The migration path is ordered. Version 1 was a bare game list. Version 2 wrapped that list in a state object and added the main collections. Version 3 replaced index-suffixed game IDs with identity-derived IDs and retained the old IDs as `legacy_game_ids` aliases. Version 4 added queue and notification collections and repaired their caps and basic types.
 
-**Stable game IDs** are the linchpin of the whole model. A `game_id` is `game-` + the first 24 hex chars of a SHA-256 over a sorted JSON payload of the game's *identity* — `path` (normalized), `platform`, `steam_app_id`, `heroic_app_id`, `lutris_id`, `gameyfin_id`, `launchbox_db_id`, or `name` when no store id exists. Because the ID is derived from identity, never list position, reordering, deleting other games, and re-importing do not change which entry a queue item, save backup, or history record points at. Collisions append `-2`, `-3`, …
+The loader rejects versions below 1, versions above the current schema, and a version for which no migration exists. Corrupt JSON, a state value of the wrong top-level type, a non-list `games` collection, a non-dictionary game, or a game without a usable ID raises `StateCorruptError`. The API turns that condition into a recovery response instead of silently discarding the library.
 
-This is why the UI can say "re-importing never duplicates": the importer computes the same identity hash and the store treats it as the same game.
+Normalization is deliberately selective. Unknown top-level and per-game fields are retained. Known fields such as IDs, queue, notifications, and tags are repaired or capped. A schema-4 file can use a fast path when its required keys and basic collection shapes already look valid. That fast path does not prove that every nested settings, playlist, queue, or notification value has valid application semantics. Feature code still validates its own input at the boundary where it uses it.
 
-<Callout type="tip" title="Why this matters to you">
+### Stable identity
 
-If a game's identity changes (you move its file and edit the path, or you change its Steam App ID), its `game_id` changes and it becomes a *new* entry. Save backups and queue entries keyed to the old ID stay where they are. That is why editing save paths after a backup makes that backup un-restorable until the paths match again.
+A stable `game_id` is derived from normalized identity data, not from the current array index. The identity payload can use the normalized path, platform, storefront identifiers, emulator-facing identifiers, LaunchBox metadata IDs, or the name when no stronger identifier is available. The payload is serialized deterministically, hashed with SHA-256, truncated to 24 hex characters, and prefixed with `game-`. Duplicate generated IDs receive `-2`, `-3`, and later suffixes during normalization.
 
-</Callout>
+This identity is used when the Web UI resolves a game for launch, queue operations, playlists, save links, and API requests. Reordering the list or deleting a neighboring game therefore does not redirect those active references to a different record. A meaningful identity change, such as editing the path or changing a store ID, can produce a new ID. Existing references to the old identity do not magically become references to the new game.
+
+Normal session history has a separate limitation. Its stored record contains the game name, start timestamp, seconds, and exit code. It does not carry the stable `game_id`. That is why stable IDs protect current operations more strongly than old history rows.
+
+### Locking, caching, and commit order
+
+The store has two locks:
+
+- an in-process `threading.RLock` for callers sharing one Python process;
+- a sidecar file lock on `.<state filename>.lock` for cooperating OpenBoxGL processes.
+
+`update()` acquires the locks, reloads the current file, passes that state to the mutator, normalizes the result, and writes while the exclusive lock remains held. The transaction is therefore serialized across the Web UI and native UI when both use the store. Direct edits to `library.json` bypass that guarantee.
+
+Loads use a file signature containing metadata such as modification time, size, and inode. A matching signature can reuse the in-memory cache. This avoids repeated normalization and JSON decoding for unchanged files. It is metadata-based rather than a content hash, so an external writer that preserves all signature fields could evade cache invalidation. Normal application writes change the signature and invalidate the cache.
+
+The normal write path is:
+
+```text
+mutator
+  -> current state loaded under the exclusive lock
+  -> known collections normalized
+  -> JSON serialized
+  -> temporary file created beside library.json
+  -> temporary file flushed, fsynced, and chmod 0600
+  -> temporary bytes copied to library.json.bak
+  -> os.replace(temp, library.json)
+  -> primary chmod 0600
+  -> containing directory fsynced
+  -> in-memory cache refreshed
+```
+
+Files below the compact serialization threshold are pretty-printed. A payload whose compact form exceeds 1 MiB is written compactly. The file ends with a newline in either case. The backup is written before the primary replacement, which keeps the backup aligned with the state being committed if the primary swap completes.
+
+The backup copy itself is not an independent atomic transaction. A failure during the copy can damage the backup, and a primary replacement failure after a successful copy can leave the old primary beside a newer backup. Those are real failure windows to keep in mind when changing durability code.
+
+### Recovery
+
+A corrupt primary is preserved and causes `StateCorruptError`; normal reads do not silently fall back to the backup. An authenticated recovery operation validates `library.json.bak`, normalizes it, and writes it through the state-store write path. If the backup is absent or also invalid, recovery returns a concrete error.
+
+A successful recovery writes the recovered state through the same backup-before-primary sequence. The original backup used for the recovery is therefore not retained as a separate immutable recovery point after the recovery write. Manual intervention should copy the whole data directory before experimenting with recovery.
+
+## The request lifecycle
+
+The Web UI is a local JSON client. `index.html` calls its `api()` helper, which adds the current token and sends requests to the loopback server. `web_app.Handler` authenticates, parses the request, dispatches to the relevant branch, and returns JSON.
+
+```text
+browser action
+  -> index.html api(path, options)
+  -> X-OpenBox-Token header or token query parameter
+  -> Handler authorization
+  -> method and route dispatch
+  -> JSON body and boundary validation
+  -> focused domain function
+  -> state transaction or bounded file/process operation
+  -> JSON response
+  -> browser refresh, render, notification, dialog, or polling
+```
+
+### Authentication and static resources
+
+The server binds to `127.0.0.1` and an ephemeral port. The root HTML and favicon are served without the API token so the initial browser page can load. API and protected resource routes require the token in `X-OpenBox-Token` or in a `token` query parameter. The comparison uses `secrets.compare_digest()`.
+
+The header is preferable for scripts because query-string tokens can appear in browser history, copied URLs, and other URL-bearing tooling. The query form exists because the initial browser URL needs to carry the token before JavaScript has started making requests.
+
+Unauthenticated requests are rejected before useful route details are exposed. The server writes `server.token` with owner-only permissions and removes it during normal shutdown. A token grants the local instance's read, write, launch, and administrative capabilities, so it should be treated like a password.
+
+### Body and connection limits
+
+The request handler uses a 30-second socket timeout and caps JSON request bodies at 65,536 bytes. It rejects invalid or negative `Content-Length`, oversized bodies, truncated reads, malformed JSON, and JSON values that are not objects. GET parameters come from the query string and follow `parse_qs` behavior for repeated values.
+
+Responses use JSON for API errors and set no-store, nosniff, no-referrer, and restrictive content-security headers. Media responses have their own cache, ETag, last-modified, range, and partial-content behavior because cover art and video are materially different from small state responses.
+
+### Error mapping
+
+The API has a deliberately broad expected-error class. Handler failures such as `ValueError`, `OSError`, `TypeError`, missing files, integration errors, and subprocess errors usually become HTTP 400 with the concrete exception text. Authentication failures are 403. Unknown routes are 404. State corruption is 503. An exception outside the expected set is logged and becomes 500 with diagnostic-log guidance.
+
+The browser `api()` helper converts network failures, invalid JSON, and non-2xx responses into JavaScript `Error` objects. It does not automatically decide how every error should look to a person. Individual feature handlers choose between a toast, inline error, dialog message, or a retry path. A documentation statement that every API failure automatically produces a toast would therefore be inaccurate.
+
+## The import pipeline
+
+Imports turn an external source into normalized game dictionaries. Import adapters do not own the durable library file. The Web UI handler validates the request, calls an adapter or common import helper, removes duplicates, and commits the resulting records through the state path.
+
+### Folder import
+
+A browser folder import starts with an absolute path because the browser cannot browse the host filesystem itself:
+
+```text
+index.html import action
+  -> POST /api/import
+  -> import_folder_path()
+  -> parity_import.import_multi_platform()
+  -> candidate discovery and normalization
+  -> duplicate-path checks against current games
+  -> state transaction
+  -> library response and optional media work
+```
+
+The multi-platform path recognizes executable files, archives, disc images, ROM extensions, and source-specific layouts. Emulator recommendations are separate from persistence. A recommendation can tell the UI which platform profile or dependency may be needed, but it does not grant a ROM a launch command by itself.
+
+Multi-disc imports group files by disc, disk, CD, DVD, or side suffixes and can create an M3U with relative paths. Source-specific handlers cover layouts such as ScummVM, RPCS3 HDD, and Vita3K. The adapter returns normalized records, and the shared path decides how those records enter the library.
+
+### Storefront import
+
+Storefront adapters inspect installed manifests and convert them into the same broad game dictionary shape:
+
+| Source | Adapter behavior |
+| --- | --- |
+| Steam | Reads VDF/manifests from known Steam roots and library folders. Launch selection falls back through native Steam, Flatpak Steam, and `xdg-open`. |
+| Heroic | Reads Epic, GOG, and Amazon JSON manifests. |
+| Lutris | Invokes the native or Flatpak Lutris command with a bounded subprocess timeout and classifies sources such as Xbox, EA, Ubisoft, and generic Lutris. |
+| Gameyfin | Uses the Gameyfin integration and distinguishes catalog entries from installed entries. |
+| ROM and emulator layouts | Uses extension, directory, multi-disc, and platform rules in `parity_import.py`. |
+
+The catalog model can represent an owned or available storefront entry before its files are installed. Fields such as `store_catalog`, `store_installed`, and `owned` let the UI distinguish a catalog record from a launchable local path.
+
+### Deduplication and media follow-up
+
+The import path checks duplicate paths and the state store computes stable IDs from normalized identity. These checks cover different problems. A duplicate path check prevents the same file from being appended during one import operation. Stable identity prevents re-importing the same identity from creating a different record merely because list position changed.
+
+After a successful import, selected records can queue metadata or media work. That follow-up is asynchronous and has its own status path. Import success means the normalized library record was committed; it does not mean artwork, screenshots, trailers, or external metadata have already arrived.
 
 ## The launch pipeline
 
-Launching a game is a fixed sequence in `build_launch` (`openbox.py`) and the launch handler (`web_app.py`). Understanding the order tells you exactly where each failure comes from.
+The Web UI launch path starts from a stable game reference and passes through `web_app.start_game()` and `openbox.build_launch()`. The ordering matters because each stage owns a different class of failure.
 
 ```text
-resolve path
-  └─ (extract archive if enabled)   → launch_path becomes a cached member
-resolve command
-  ├─ per-game `launch` override?    → use it
-  ├─ else platform profile?         → use profiles[platform]
-  └─ else .sh? → bash; else         → the path itself (must be executable)
-substitute tokens                    → {path}{name}{rom_name}{app_id}{heroic_app_id}{lutris_id}
-  └─ shlex.split AFTER substitution  → paths with spaces stay one argument
-  └─ profile with no {path}?         → path appended as final arg
-apply perf profile (ryzenadj)        → gated by apply_perf: off/auto/always
-before_launch plugins                → may rewrite args/cwd, or cancel
-spawn (start_new_session=True)       → own process group, tracked separately
-update state: last_played, play_count→ committed before tracking starts
-track session (mode-dependent)       → process | original_process | folder | process_name
-session ends
-  ├─ record history (last 500)       → play_count, playtime_seconds, exit_code
-  ├─ restore perf profile            → never raises (bookkeeping is sacred)
-  ├─ progress automation             → Playing after N min, Paused after N days
-  ├─ backup saves on close           → if backup_on_close + save_paths
-  ├─ auto-attach OBS recording       → if enabled
-  ├─ statistics sync                  → if cloud_folder configured
-  └─ after_session plugins           → result discarded; cannot break bookkeeping
+POST /api/launch
+  -> resolve stable ID or supported legacy reference
+  -> copy and re-resolve current game state
+  -> validate path
+  -> optionally extract archive into a staged cache
+  -> select per-game command or platform profile
+  -> tokenize and substitute launch markers
+  -> choose fallback for .sh or executable paths
+  -> apply optional performance profile
+  -> run before_launch plugin chain
+  -> validate plugin output
+  -> Popen(..., start_new_session=True)
+  -> update play metadata and live process maps
+  -> publish session.started
+  -> daemon completion thread waits for exit
 ```
 
-### Why each validation error exists
+### Path and archive resolution
 
-The pipeline fails *before* any process starts whenever the command would be meaningless. Each message names the exact problem:
+`build_launch()` rejects an empty path and a path that no longer exists. If archive extraction is enabled, `archives.py` extracts into a cache derived from the archive path, size, and modification time. ZIP extraction checks member count, per-member size, total expanded size, traversal, absolute names, duplicate normalized names, symlinks, and special files. Other supported archives are preflighted with `7z` or `7zz` before extraction.
 
-| Message | Where it fires | Fix |
+Extraction uses staging and a completion marker. The final cache directory is replaced only after extraction completes. A configured `archive_member` must resolve to a regular file inside the extraction directory. Without one, the selector chooses a suitable extracted file while ignoring common documentation and media extensions.
+
+### Command selection and tokenization
+
+The command source is selected in this order:
+
+1. a per-game `launch` override;
+2. the profile command for the game's platform;
+3. the `.sh` fallback, which invokes `bash <path>`;
+4. a direct executable path when no command is configured.
+
+Configured command text is tokenized with `shlex.split()`. Literal replacements then fill `{path}`, `{name}`, `{app_id}`, `{heroic_app_id}`, `{lutris_id}`, and `{rom_name}`. Because replacement occurs after splitting, a path containing spaces stays inside its existing argument. Shell operators in the configured command are not interpreted by a shell. A profile that does not contain `{path}` receives the selected launch path as a final argument.
+
+The direct fallback requires an executable file in the Web UI launch path. This early validation is intentional. It avoids starting a process that cannot perform useful work and gives the browser a message naming the missing command, permission, path, or dependency.
+
+### Plugin and performance stages
+
+The Web UI can apply a configured performance profile before spawning. The `apply_perf` setting gates that behavior as `off`, `auto`, or `always`; restoration is attempted after the session and is treated as bookkeeping that should not replace the session result.
+
+The `before_launch` plugin chain receives a JSON payload and may rewrite `args` and `cwd`, or return a cancellation. Valid JSON with structurally invalid launch data is different from a plugin crash. A crash, timeout, invalid JSON, or non-dictionary result passes the previous payload through. An invalid `args` or `cwd` result aborts the launch before `Popen`, because running a malformed command is less useful than reporting the validation error.
+
+### Process ownership
+
+The Web launcher passes `start_new_session=True` to `subprocess.Popen`. The launched game becomes the leader of a new process session and process group. Pause, resume, stop, restart, and force-close then operate on the group with `SIGSTOP`, `SIGCONT`, `SIGTERM`, or `SIGKILL` rather than targeting only the direct child.
+
+Live process data is held in `RUNNING` and `PROCESSES` under `PROCESS_LOCK`. It includes the launch ID, stable identity information, PID, start time, selected profile, and pause state. The browser polls the running endpoint and event sequence to update lifecycle UI. A server restart loses those live maps even though completed history already persisted remains in the library.
+
+## Session completion and teardown
+
+The daemon completion thread calls `finish_session()` after the process exits. It resolves the current game again because the library may have changed while the game was running. Stable identity, external IDs, path, and guarded fallback information are used to avoid attributing the session to the wrong current entry.
+
+The completion path is ordered roughly as follows:
+
+```text
+process exits
+  -> calculate elapsed time, with a minimum recorded duration of 1 second
+  -> resolve current game
+  -> optional save backup on close
+  -> optional OBS and store cleanup
+  -> update playtime and progress
+  -> append optional name-based history record
+  -> cap history at the newest 500 entries
+  -> remove RUNNING and PROCESSES entries
+  -> restore performance settings
+  -> publish session.stopped
+  -> run after_session plugins
+  -> attempt cloud statistics sync
+  -> restart when the session requested it
+```
+
+A normal history record contains the game name, ISO start time, duration, and exit code. History is only appended when session-history tracking is enabled. Playtime and progress can still update when history recording is disabled.
+
+Save backup on close requires the setting and configured save paths. The save engine rejects unsafe roots and symlinks, writes archives through temporary files, and enforces retention. Backup failures for missing files are handled as expected file conditions. Security validation failures deserve attention because they indicate an unsafe path rather than an absent save.
+
+The session publishes `session.started` and `session.stopped`. Webhooks and automation consumers should use the allowlisted event names in `automation.py` and the Webhook reference page.
+
+There are two practical limits to remember. First, live session state is process-local and cannot be reconstructed completely after a server crash. Second, a game deleted while it is running can leave a name-based history record without a current game record to receive the playtime update.
+
+## Background jobs
+
+OpenBoxGL has a generic `JobManager` plus feature-specific progress maps. Treating them as one universal job API would misdescribe the current implementation.
+
+### Generic job manager
+
+`job_manager.py` uses a four-worker `ThreadPoolExecutor`. A logical job is keyed by name, while each submission has its own job ID. Submitting the same name while a job is queued or running returns the current job unless `replace=True`. Replacement sets the previous cancellation event and installs a fresh logical record.
+
+The normal states are:
+
+```text
+queued -> running -> done
+                 -> error
+                 -> cancelled
+```
+
+Retries are capped at five attempts and use exponential backoff from the configured base delay. Cancellation is cooperative. Setting the event does not terminate arbitrary code; the worker must observe the event or reach a cancellation-aware boundary. A stale worker cannot overwrite a newer replacement job because updates check the submission ID before changing the logical record.
+
+Job records and cancellation events are in memory. They disappear on restart, and queued work does not resume automatically. Workers may commit durable files or state before reporting `done`, so a restart can leave valid partial results even though the transient job record is gone.
+
+### Feature-specific status
+
+Current status routes expose feature-specific shapes in several areas:
+
+| Work | Internal status | Browser status path |
 | --- | --- | --- |
-| `"<name> has no launch path."` | `build_launch`, path empty | Set the game's file path |
-| `"The configured path no longer exists: <path>"` | `build_launch`, `Path(path).exists()` false | Re-point or re-import |
-| `"<name> has no launch command and its file is not executable."` | no command, not `.sh`, not executable | `chmod +x`, or set a profile/per-game command |
-| `"7z or 7zz is required to extract this archive."` | archive path, non-ZIP | Install `7z`/`7zz` |
-| `"A plugin returned an invalid launch command."` | `before_launch` output structurally wrong | Fix the plugin, or safe mode |
-| `"Launch canceled by a plugin."` | `before_launch` returned `{"cancel": true}` | Remove/fix the plugin |
+| Auto-import | Named manager job with an in-process watch loop | No general job endpoint; configuration and library state expose results |
+| Metadata sync | `METADATA_JOB` and manager work | `GET /api/metadata/status` |
+| Bulk media | `MEDIA_JOB` with current, total, updated, and recent errors | `GET /api/media/bulk/status` |
+| Emulator install/update | `INSTALLS` entries with install/update states | `GET /api/emulators` |
+| Gameyfin install | `INSTALLS` entries for the game operation | `GET /api/gameyfin/install/status` |
 
-A session that *starts* but exits under 5 seconds with a nonzero code shows "Session failed" with the exit code — that is not a validation error, it is the process itself failing. Check the tokens, the emulator binary, and BIOS files.
+The automatic import worker starts with a short delay and backs off up to 300 seconds when state loading fails. Per-source errors are handled so a failing source does not necessarily stop the other source scans. Long work therefore needs two checks when being changed: the generic manager's lifecycle and the feature route's browser-visible state.
 
-<Callout type="note" title="Tokenization, not shell interpolation">
+The browser pattern is to return an initial accepted response, keep the triggering action stable, poll the documented feature route, then refresh durable state after `done`. A failed job reports its concrete error and leaves retry or correction to the feature handler.
 
-Commands are never passed through a shell. `shlex.split` runs *after* token substitution, so `{path}` with spaces stays a single argv element. This is both safer (no injection) and the reason you must add your own quotes when the target emulator expects a single quoted argument: `retroarch -L … "{path}"`.
+## Extension boundaries
 
-</Callout>
+OpenBoxGL has three distinct extension styles. Python plugins can change selected data or launch input. CSS themes can change presentation. Webhooks can observe allowlisted events outside the process. They have different trust and failure models.
 
-## The plugin runner
+### Plugins
 
-Plugins are local Python packages. The runner (`plugin_runner.py`, called by `run_plugins` in `plugins.py`) does not import plugin code into the OpenBox process. It spawns each plugin as a separate child process: `python3 plugin_runner.py <entry> <hook>`.
+Plugins are packages under `APP_DIR/plugins/`. `plugins.py` validates the manifest, plugin ID, supported hook names, entry-file containment, Python extension, package links, and package archive safety. Installation stages the package, moves an existing version into a backup area, swaps the new version into place, and restores the previous version if the swap fails. Removing a plugin moves it to a recoverable `.removed` directory.
 
-- **Protocol:** one JSON object on stdin, one JSON object on stdout. Input and output are capped at 2 MiB each.
-- **Timeout:** 5 seconds per plugin (`subprocess.run(..., timeout=5)`). A timeout, crash, or invalid JSON logs a warning and the plugin's result is skipped — the previous payload passes through. A plugin therefore cannot break a launch or a library read by crashing.
-- **Chaining:** plugins run in sorted (alphabetical by id) order. For `library` and `before_launch`, each plugin's output feeds the next plugin's input. The `library` result is cached for 3 seconds and invalidated on state changes.
-- **Environment:** the child environment is cleaned — `PYTHONPATH`, `PYTHONHOME`, `LD_PRELOAD`, `LD_LIBRARY_PATH` are removed and `PYTHONNOUSERSITE=1` is set — so a plugin cannot ride in on the user's site-packages or preload.
-- **Safe mode:** `OPENBOX_SAFE_MODE=1` skips `run_plugins` for `library`, `before_launch`, and `after_session`, and disables the webhook dispatcher. It is the first diagnostic for plugin-caused failures.
+Supported hooks are:
 
-The one exception to "plugins cannot break things" is `before_launch` output that is *valid JSON but structurally wrong* (missing `args`/`cwd`, empty argv, nonexistent working directory). That aborts the launch with a validation error, because launching with a broken command would be worse than not launching.
+| Hook | Called from | Contract |
+| --- | --- | --- |
+| `library` | Public library projection | May rewrite the games list. Cached briefly and skipped in safe mode. |
+| `before_launch` | After command and profile resolution | May rewrite `args` and `cwd`, or cancel. Invalid structure aborts launch. |
+| `after_session` | After session bookkeeping and stop event | Observes the completed session. Its return value is discarded. |
 
-<Callout type="caution" title="Trust boundary">
+Each invocation starts `plugin_runner.py` as a separate Python process. JSON travels over stdin and stdout. Input and output are capped at 2 MiB, execution is limited to five seconds, and the child environment removes `PYTHONPATH`, `PYTHONHOME`, `LD_PRELOAD`, and `LD_LIBRARY_PATH` while setting `PYTHONNOUSERSITE=1`.
 
-The child-process isolation is robustness, not a security sandbox. The plugin shares your user and your filesystem and can read and modify files under your account. Install only plugins you wrote or audited.
+This boundary isolates crashes, timeouts, malformed output, and nonzero exits from the main process. It does not sandbox a trusted local plugin. The child still has the user's privileges and can read or modify files available to that account. `OPENBOX_SAFE_MODE=1` skips plugin hooks and disables the webhook dispatcher, making it the first diagnostic setting for plugin-caused failures.
 
-</Callout>
+### Themes
 
-## The job manager
+Stock themes are bundled under `themes/` and installed into the data directory by `stock_themes.ensure_stock_themes()`. Stock files have a marker identifying them. Missing stock files are restored, while user-imported themes and edited stock files are preserved rather than overwritten.
 
-Background work goes through `job_manager.py`: a `ThreadPoolExecutor` with 4 worker threads (`openbox-job-*`) and a small job dict per submission (`job_id`, `name`, `state`, `attempt`, `max_attempts`, `error` truncated to 800 chars, …).
+The Web UI loads an active CSS file through the authenticated theme route. Theme CSS can override visual roles while preserving the HTML and behavior contract. It cannot add a new server operation or execute Python. That is the useful boundary: presentation changes remain cheap, and behavior remains in the application code.
 
-- **States:** `queued → running → done | error | cancelled`.
-- **Replacement:** submitting the same `name` while a job is queued/running returns the existing job, unless `replace=True` (used when a new operation must supersede an old one).
-- **Cancellation:** a worker may accept a `cancel_event`; `cancel(name)` sets it. A queued job flips to `cancelled` immediately; a running job flips when the worker observes the event.
-- **Retries:** on exception, the job retries up to `max_attempts` with exponential backoff `backoff_seconds * 2^(attempt-1)`.
-- **Volatility:** job state is in-memory only. It does not survive a restart and jobs do not resume. The *results* that matter (library writes, downloaded files, settings changes) are committed transactionally by the worker before the job reports `done`, so a crash mid-job leaves partial-but-valid state.
+### Webhooks
 
-Named jobs: `auto-import` (the watch-folder/storefront loop), `metadata` (LaunchBox DB sync), `media-bulk`, `emulator-install:<app_id>`, `emulator-install-all`, `update:<app_id>`, `emulator-update-all`, and `gameyfin:<game_id>`. Each is exposed through its own status route.
+`automation.py` builds an event envelope from an allowlisted event type and allowlisted data keys. Unknown fields are dropped. The envelope is compact JSON with an event ID, type, version, timestamp, source, and sanitized data. Normal event types include session start and stop, queue advancement, library import and change, metadata sync, backup creation, update installation, and plugin changes.
 
-## The webhook dispatcher
+Delivery is asynchronous. Four daemon workers consume a bounded queue with 128 pending items. A full queue drops the event, records a notification, and does not change the originating operation's result. Delivery attempts and timeout are bounded, with configurable values clamped to 1 through 5 attempts and 1 through 15 seconds. Retryable statuses include 408, 425, 429, and 5xx responses. Backoff uses 1, 2, 4, and 8 second delays, with `Retry-After` capped at 30 seconds.
 
-When a subscribed event fires, the dispatcher (`automation.py`) builds a compact JSON envelope and hands it to 4 background workers over a bounded queue of 128 pending items.
+When a secret is configured, HMAC-SHA256 signs the exact transmitted body together with its timestamp. Redirects are terminal failures and are not followed, because a redirected destination was not the URL that passed validation. URL checks reject credentials, fragments, invalid ports, unsafe resolved addresses, and loopback self-callbacks. HTTP targets require `OPENBOX_ALLOW_HTTP_WEBHOOKS=1`.
 
-- **Envelope:** `id`, `type`, `version: 1`, `created_at`, `source: "openbox"`, and an allowlisted `data` object. Only documented keys are copied from the caller; you cannot smuggle extra fields through.
-- **Headers:** `Content-Type: application/json`, `User-Agent: OpenBox/1`, `X-OpenBox-Event-Id`, `X-OpenBox-Event`, `X-OpenBox-Timestamp`, and `X-OpenBox-Signature: sha256=<hmac>` when a secret is set. The HMAC-SHA256 is over `timestamp + "." + body` (the exact transmitted bytes).
-- **URL validation** runs before save and before every test: HTTPS required (unless `OPENBOX_ALLOW_HTTP_WEBHOOKS=1`), no embedded credentials, no fragments, port 1..65535, host must resolve to a non-reserved address, and loopback targets must not be the running server (checked by port and by a live TCP probe).
-- **Retries:** retryable statuses are 408, 425, 429, and 5xx; backoff is 1, 2, 4, 8 seconds, clamped by `Retry-After` to 30. A redirect (3xx) is a **terminal** failure — the signed payload is never followed to an unvalidated destination.
-- **Backpressure:** a full queue drops the event with a failure notification (`"Webhook delivery queue is full; the event was dropped."`). Delivery failures update the config's `last_status`/`last_error` and emit an error notification with a `webhook:<event_id>` dedupe key.
+There can be at most 32 webhook configurations. The synchronous `test.ping` path uses the same URL validation and returns a bounded result. Normal delivery updates status fields and emits a deduplicated failure notification when an event reaches a terminal error.
 
-## The HTTP server
+## Import, launch, and API failure boundaries
 
-The Web UI is a `ThreadingHTTPServer` bound to `("127.0.0.1", 0)` — loopback only, random port. The port and a per-launch token are written to `server.port` and `server.token` in the data directory and deleted on exit. Every route except the static UI page requires the token (header `X-OpenBox-Token` or `?token=`), checked with `secrets.compare_digest`. Unauthenticated requests to *any* route, known or unknown, return `403 {"error":"Unauthorized"}`, so the route surface is not discoverable without the token.
+The same local-first design creates a consistent failure pattern across features:
 
-### The error contract
+| Boundary | Validation happens | Durable effect when validation fails |
+| --- | --- | --- |
+| Path or URL input | Handler or focused helper before filesystem/network work | No new library mutation |
+| Archive member | Archive preflight and staged extraction | Existing extraction cache remains intact |
+| Game command | `build_launch()` and plugin output validation before `Popen` | No half-started session |
+| State document | State-store load and normalization | Primary is preserved; API reports recovery state |
+| Plugin output | Parent process after child returns | Previous payload remains, except malformed launch structure aborts launch |
+| Webhook destination | Save and test paths, then delivery workers | Originating operation continues; delivery status records failure |
+| Background job | Worker and feature status map | Committed partial results remain possible; job status becomes error |
 
-The handler catches a fixed set of exceptions from POST handlers and returns them as `400` with the message in `error`: `ValueError`, `OSError`, `TypeError`, `AttributeError`, `KeyError`, `IndexError`, `json.JSONDecodeError`, `GameyfinError`, `FileNotFoundError`, `RuntimeError`, and `subprocess.SubprocessError`. State-corruption errors become `503` *before* handler dispatch. Everything else is logged and returned as `500` with a message pointing at the diagnostic log.
+This is why error text is part of the contract. The browser can only offer a useful recovery action when the backend names the failed boundary, such as missing executable permission, absent emulator profile, corrupt state, unsafe archive member, invalid plugin command, or rejected webhook destination.
 
-This is why almost every operation failure you hit through the API is a `400` with a readable, specific message — and why a `500` is genuinely "something the developers need to see," not a normal error path.
+## Security model and non-goals
+
+The local threat model assumes the desktop account is trusted to run the application and install its extensions. The implemented boundaries are aimed at preventing accidental exposure, path traversal, unsafe extraction, and one failed worker taking down the main process.
+
+The server binds to loopback and uses a per-launch token. State, token, backup, media, save, and extension paths use ownership and containment checks in their respective modules. Archive and save extraction reject traversal and links. Webhook validation rejects many unsafe network destinations. Plugins run in separate processes with limits.
+
+Those controls do not create multi-user authentication, remote tenancy, or a security sandbox for local Python plugins. Sharing the token grants control of the local instance. Installing a plugin grants that package the account's normal filesystem and process privileges. Exposing the server beyond the host changes the trust assumptions and is outside the default design.
+
+## Tests as architecture contracts
+
+The repository's tests are standalone `test_*.py` scripts collected by `run_all_tests.sh`. They use temporary directories, real subprocesses, threaded HTTP handlers, migrations, locks, archives, and integration fixtures. That makes the tests useful for tracing boundaries, not only for checking individual functions.
+
+| Contract | Representative tests |
+| --- | --- |
+| State schema, IDs, cache, writes, recovery | `test_state_v4.py`, `test_backend_hardening.py`, `test_perf_state.py`, `test_perf_writes.py` |
+| HTTP auth, body limits, error conversion, lifecycle | `test_bug_sweep_api.py`, `test_backend_followup.py`, `test_parity_api.py` |
+| Launch sessions and process control | `test_sessions.py`, `test_gamescope_deck_emu.py` |
+| Imports and storefront adapters | `test_importers.py`, `test_auto_import.py`, `test_parity_features.py`, `test_parity_api.py` |
+| Plugins and rollback | `test_plugins.py`, `test_parity_api.py` |
+| Webhooks, queue, tags, notifications | `test_four_features.py`, `test_four_features_api.py` |
+| Metadata, media, saves, external integrations | `test_metadata.py`, `test_parity_integrations.py`, `test_saves.py`, `test_parity_gameyfin.py` |
+| Themes and packaging | `test_stock_themes.py`, `test_packaging.py` |
+
+The test suite does not prove every external service contract. Coverage is thinner around live third-party API drift, webhook retry timing and saturation, complete plugin security behavior, and some job-manager replacement cases. New behavior should add a focused standalone test and an integration test when it crosses HTTP, filesystem, process, or state boundaries.
+
+## Maintenance map
+
+Use the nearest owner for a change, then follow the path across boundaries:
+
+| Change | First files to inspect | Follow-up contracts |
+| --- | --- | --- |
+| New durable field | `state_store.py`, `openbox.py`, relevant handler | Defaults, migration, normalization, unknown-field preservation, API projection, tests |
+| New browser workflow | `index.html`, relevant `web_app.py` route | Loading, success, error, empty, disabled, focus, Escape, touch, reduced motion |
+| New import source | `importers.py`, `parity_import.py`, focused adapter | Normalized record shape, duplicate behavior, source failure, import API tests |
+| New launch behavior | `openbox.py`, `web_app.py`, `archives.py` | Tokens, executable validation, process group, plugin ordering, exit cleanup |
+| New long-running work | `job_manager.py`, feature status maps, route | Accepted response, polling, cancellation, retry, restart behavior |
+| New plugin hook | `plugins.py`, `plugin_runner.py`, `automation.py` if observable | Payload size, timeout, failure pass-through, safe mode, hook tests |
+| New theme capability | `stock_themes.py`, `themes/`, theme route | Preservation semantics, authenticated serving, browser rendering |
+| New webhook event | `automation.py`, publishing call site, docs | Event allowlist, payload size, signature, queue overflow, delivery status |
+| New restore or backup behavior | `parity_backup.py`, `state_store.py`, `backend_io.py` | Symlink and containment checks, atomicity, running-session guard, recovery tests |
+
+A cross-cutting feature should be implemented from the durable boundary outward:
+
+1. decide whether the value is durable or process-local;
+2. add defaults and migration behavior if the state schema changes;
+3. keep domain rules in the focused module that owns them;
+4. validate input at the HTTP or filesystem boundary;
+5. add the route and JSON shape;
+6. add browser loading, success, error, empty, disabled, focus, and cancellation behavior where applicable;
+7. add tests at every crossed boundary;
+8. run `./run_all_tests.sh` and the packaging checks when the distribution path changes.
+
+Keep `web_app.py` as orchestration when a feature already has a focused owner. Keep `index.html` responsible for browser state, rendering, and feedback rather than filesystem, process, or persistence rules. That separation is the main way to keep a large single-file browser surface from becoming a second backend.
 
 ## Where to go next
 
-- For the data file layout and recovery: [Data and recovery](/reference/data-and-recovery/)
-- For the launch command contract: [Command tokens](/reference/command-tokens/)
-- For the plugin contract: [Plugin API overview](/reference/plugins/overview/)
-- For the job status routes: [Background jobs](/reference/background-jobs/)
-- For the webhook contract: [Webhooks](/integrations/webhooks/)
-- For the REST API surface: [REST API](/reference/api/)
+- [Interfaces and data](/interfaces-and-data/) for the two shells and the data-directory layout.
+- [Data and recovery](/reference/data-and-recovery/) for schema caps, recovery routes, and write details.
+- [Command tokens](/reference/command-tokens/) for launch command construction.
+- [Emulators and launching](/guides/emulators-and-launching/) for profiles and dependencies.
+- [Background jobs](/reference/background-jobs/) for status routes and worker states.
+- [Plugin API overview](/reference/plugins/overview/) for package and hook contracts.
+- [Webhooks](/integrations/webhooks/) for event payloads, signatures, and delivery behavior.
+- [REST API](/reference/api/) for route-level request and response shapes.
+- [Contributing](/project/contributing/) for the documentation and application development workflow.
