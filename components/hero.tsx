@@ -43,6 +43,13 @@ export function Hero() {
       <div className="relative mx-auto max-w-5xl text-center">
         {/* HUD strip */}
         <div className="mx-auto mb-8 flex w-fit flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full border border-border bg-background/60 px-4 py-1.5 font-mono text-[10px] tracking-[0.2em] text-muted-foreground backdrop-blur">
+          <a
+            href="/changelog/"
+            className="rounded border border-border bg-secondary px-1.5 py-0.5 text-cyan transition-colors hover:text-primary"
+            aria-label="Open the changelog for v0.8.1"
+          >
+            v0.8.1
+          </a>
           {hudItems.map((h, i) => (
             <span key={h} className="flex items-center gap-3">
               {i === 0 ? <span className="text-cyan">{h}</span> : h}
@@ -59,7 +66,7 @@ export function Hero() {
 
         <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">
           OpenBox unifies Steam, GOG, Heroic, Lutris, ROMs and arcade sets into a single art-rich, searchable,
-          controller-ready catalog. No account. No cloud. No telemetry — it all lives on your machine.
+          controller-ready catalog. No account. No cloud. No telemetry. It all lives on your machine.
         </p>
 
         {/* install command */}

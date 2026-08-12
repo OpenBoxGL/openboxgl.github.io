@@ -1,10 +1,10 @@
 import Image from "next/image"
 
 const stats = [
-  { value: "40+", label: "Platforms" },
+  { value: "30+", label: "Platforms" },
   { value: "1-click", label: "Import" },
-  { value: "∞", label: "Playlists" },
-  { value: "0ms", label: "Cloud calls" },
+  { value: "134", label: "API routes" },
+  { value: "5", label: "Themes" },
 ]
 
 export function LibraryShowcase() {
@@ -19,7 +19,7 @@ export function LibraryShowcase() {
             </h2>
           </div>
           <p className="max-w-sm text-pretty text-sm leading-relaxed text-muted-foreground">
-            Faceted filters, rich box art, per-game metadata, achievements and play history — every detail, one keystroke away.
+            Faceted filters, rich box art, per-game metadata, achievements and play history. Every detail, one keystroke away.
           </p>
         </div>
 

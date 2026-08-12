@@ -4,15 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/generate-redirects.mjs",
+    "build": "next build && node scripts/generate-redirects.mjs && node scripts/generate-sitemap.mjs",
     "start": "next start",
     "lint": "eslint .",
     "docs:index": "node scripts/build-docs-index.mjs",
-    "test": "node scripts/build-docs-index.mjs && next build && node scripts/generate-redirects.mjs && node scripts/check-built-site.mjs"
+    "test": "node scripts/build-docs-index.mjs && next build && node scripts/generate-redirects.mjs && node scripts/generate-sitemap.mjs && node scripts/check-built-site.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
-    "@vercel/analytics": "1.6.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.16.0",

@@ -10,9 +10,12 @@ import { notFound } from "next/navigation"
 export const dynamicParams = false
 
 export function generateStaticParams() {
-  return allDocSlugs()
-    .filter((s) => s !== "index")
-    .map((slug) => ({ slug: slug.split("/") }))
+  return [
+    ...allDocSlugs()
+      .filter((s) => s !== "index")
+      .map((slug) => ({ slug: slug.split("/") })),
+    { slug: ["docs"] },
+  ]
 }
 
 export async function generateMetadata({
@@ -21,7 +24,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string[] }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const doc = readDoc(slug.join("/"))
+  const doc = readDoc(slug.join("/") === "docs" ? "index" : slug.join("/"))
   return {
     title: doc ? `${doc.frontmatter.title} — OpenBox Docs` : "OpenBox Docs",
     description: doc?.frontmatter.description,
@@ -31,7 +34,7 @@ export async function generateMetadata({
 export default async function DocPage({ params }: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await params
   const slugStr = slug.join("/")
-  const doc = readDoc(slugStr)
+  const doc = readDoc(slugStr === "docs" ? "index" : slugStr)
   if (!doc) notFound()
 
   const tree = buildSidebar()

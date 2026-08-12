@@ -23,7 +23,7 @@ export function FeatureBento() {
             </h3>
             <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
               Press <kbd className="rounded border border-border bg-secondary px-1.5 py-0.5 font-mono text-xs">Ctrl K</kbd> to
-              fuzzy-search across every platform, jump to a game, apply a filter, or fire a command — no mouse required.
+              fuzzy-search across every platform, jump to a game, apply a filter, or fire a command. No mouse required.
             </p>
 
             <div className="mt-6 overflow-hidden rounded-xl border border-border bg-background/70">
@@ -52,7 +52,7 @@ export function FeatureBento() {
             </div>
           </div>
 
-          <BentoCard icon={Award} title="Achievements" body="Track unlocks across Steam, RetroAchievements and more." />
+          <BentoCard icon={Award} title="RetroAchievements" body="Match ROMs to achievement sets and track hardcore, beaten, and mastered progress." />
           <BentoCard icon={Clock} title="Play history" body="Session times, launch counts and last-played, per game." />
           <BentoCard icon={Palette} title="Themes" body="Reskin the whole app. Community themes in one click." />
           <BentoCard icon={Blocks} title="Plugins" body="Extend imports, scrapers and views with an open API." />

@@ -22,7 +22,7 @@ export function BigBoxShowcase() {
             From desktop to the couch, instantly.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground">
-            One shortcut flips OpenBox into a fullscreen, controller-first launcher — perfect for the Steam Deck, a
+            One shortcut flips OpenBox into a fullscreen, controller-first launcher. Perfect for the Steam Deck, a
             handheld, or a TV-connected battlestation.
           </p>
         </div>

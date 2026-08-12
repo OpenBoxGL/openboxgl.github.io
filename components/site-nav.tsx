@@ -7,10 +7,12 @@ import { cn } from "@/lib/utils"
 
 const links = [
   { label: "Library", href: "/#library" },
-  { label: "Sources", href: "/#sources" },
+  { label: "Saves", href: "/#saves" },
+  { label: "Emulators", href: "/#emulators" },
   { label: "Big Box", href: "/#bigbox" },
+  { label: "Automate", href: "/#automation" },
   { label: "Local-first", href: "/#local" },
-  { label: "Docs", href: "/getting-started/" },
+  { label: "Docs", href: "/docs/" },
 ]
 
 export function SiteNav() {

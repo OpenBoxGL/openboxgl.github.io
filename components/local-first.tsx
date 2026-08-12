@@ -4,7 +4,7 @@ const pillars = [
   { icon: CloudOff, title: "No cloud", body: "Your library, saves and metadata never leave the device." },
   { icon: Lock, title: "No account", body: "Nothing to sign up for. Open the app and start playing." },
   { icon: ShieldCheck, title: "Zero telemetry", body: "We don't track you. There is nothing to track." },
-  { icon: GitBranch, title: "Open source", body: "GPL-licensed and auditable, top to bottom." },
+  { icon: GitBranch, title: "Open source", body: "AGPL-3.0-licensed and auditable, top to bottom." },
 ]
 
 export function LocalFirst() {

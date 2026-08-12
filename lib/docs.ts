@@ -80,7 +80,15 @@ export function buildSidebar(): DocNode[] {
       const doc = bySlug.get(item)!
       const children = slugs
         .filter((s) => s.startsWith(`${item}/`))
-        .sort()
+        .sort((a, b) => {
+          // Keep save-related children in user-flow order: saves, backups, sync.
+          const order: Record<string, number> = {
+            [`${item}/saves`]: 1,
+            [`${item}/library-backups`]: 2,
+            [`${item}/statistics-sync`]: 3,
+          }
+          return (order[a] ?? 100) - (order[b] ?? 100) || a.localeCompare(b)
+        })
         .map((childSlug) => {
           const child = bySlug.get(childSlug)!
           return {
@@ -101,7 +109,7 @@ export function buildSidebar(): DocNode[] {
   }
 
   sections.push(
-    section("Start here", ["install", "getting-started", "interfaces-and-data", "updating"]),
+    section("Start here", ["install", "getting-started", "interfaces-and-data", "updating", "faq"]),
     section("Use OpenBox", [
       "guides/library",
       "guides/metadata-and-media",
@@ -110,6 +118,7 @@ export function buildSidebar(): DocNode[] {
       "guides/discovery",
       "guides/emulators-and-launching",
       "guides/big-box-and-handhelds",
+      "steam-deck",
       "guides/retroachievements",
       "themes",
     ]),
@@ -142,7 +151,11 @@ export function buildSidebar(): DocNode[] {
     section("Project and policies", [
       "project/contributing",
       "project/design-system",
+      "localization",
+      "changelog",
+      "roadmap",
       "policies/security",
+      "policies/privacy",
       "policies/legal-and-trademarks",
     ]),
   )

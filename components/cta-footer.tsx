@@ -60,7 +60,32 @@ export function CtaFooter() {
 
         <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row">
           <span className="flex items-center gap-2 font-bold tracking-[0.16em] text-foreground">OPENBOX</span>
-          <span className="font-mono text-xs">GPL-3.0 · Local-first · No telemetry</span>
+          <span className="font-mono text-xs">AGPL-3.0 · Local-first · No telemetry</span>
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          <a href="/docs/" className="transition-colors hover:text-foreground">Docs home</a>
+          <a href="/faq/" className="transition-colors hover:text-foreground">FAQ</a>
+          <a href="/changelog/" className="transition-colors hover:text-foreground">Changelog</a>
+          <a href="/roadmap/" className="transition-colors hover:text-foreground">Roadmap</a>
+          <a href="/policies/privacy/" className="transition-colors hover:text-foreground">Privacy</a>
+          <a href="/policies/security/" className="transition-colors hover:text-foreground">Security</a>
+          <a
+            href="https://github.com/vindeckyy/OpenBoxGL"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-foreground"
+          >
+            GitHub
+          </a>
+          <a
+            href="https://www.buymeacoffee.com/haydenopenbox"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-foreground"
+          >
+            Buy me a coffee
+          </a>
         </div>
       </div>
     </footer>

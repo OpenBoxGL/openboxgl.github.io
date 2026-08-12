@@ -37,7 +37,7 @@ export function SearchPage({ entries }: { entries: SearchEntry[] }) {
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Try “import”, “backup”, “webhook”, “retroachievements”…"
+          placeholder="Try &quot;import&quot;, &quot;backup&quot;, &quot;webhook&quot;, &quot;retroachievements&quot;..."
           autoFocus
           className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           aria-label="Search docs"
@@ -51,7 +51,7 @@ export function SearchPage({ entries }: { entries: SearchEntry[] }) {
 
       {query && (
         <p className="mt-6 font-mono text-xs text-muted-foreground">
-          {results.length} result{results.length === 1 ? "" : "s"} for “{query}”
+          {results.length} result{results.length === 1 ? "" : "s"} for &quot;{query}&quot;
         </p>
       )}
 
@@ -69,7 +69,7 @@ export function SearchPage({ entries }: { entries: SearchEntry[] }) {
         ))}
         {query && results.length === 0 && (
           <p className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
-            No results for “{query}”. Try a broader term like “import”, “save”, or “theme”.
+            No results for &quot;{query}&quot;. Try a broader term like &quot;import&quot;, &quot;save&quot;, or &quot;theme&quot;.
           </p>
         )}
       </div>

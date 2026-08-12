@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChevronDown, Menu, Search, X } from "lucide-react"
+import { BookOpen, ChevronDown, Menu, Search, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { DocNode } from "@/lib/docs"
 
@@ -62,6 +62,18 @@ export function DocsSidebar({ tree }: { tree: DocNode[] }) {
     setOpen(false)
   }, [pathname])
 
+  // `/` focuses search from anywhere on a docs page, matching the sidebar hint.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "/" && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault()
+        window.location.href = "/search"
+      }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [])
+
   return (
     <>
       {/* Mobile toggle */}
@@ -90,6 +102,15 @@ export function DocsSidebar({ tree }: { tree: DocNode[] }) {
           open && "fixed inset-y-0 left-0 z-50 block w-72 bg-background md:hidden",
         )}
       >
+        <div className="mb-4 flex items-center justify-between px-2">
+          <Link
+            href="/docs"
+            className="flex w-full items-center gap-2 rounded-lg border border-border bg-secondary/40 px-3 py-2 font-mono text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            Docs home
+          </Link>
+        </div>
         <div className="mb-4 flex items-center justify-between px-2">
           <Link
             href="/search"

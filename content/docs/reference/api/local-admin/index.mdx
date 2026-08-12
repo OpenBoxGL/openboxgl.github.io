@@ -208,6 +208,18 @@ Per-platform document lists and file serving (`?platform=&index=`). Documents ar
 
 </ApiEndpoint>
 
+### `GET /api/document`
+
+Serves a game's document file for inline viewing (`?game_id=&index=`). The file is validated to be a regular file (symlinks rejected), served with its guessed MIME type and a sanitized `Content-Disposition` name. Missing game, index, or file returns `404` `{"error": "Document not found"}`.
+
+### `GET /api/explorer/facets`
+
+Facet counts for the Explorer rail (`?field=genre|developer|publisher|platform|progress|esrb`). Hidden games are skipped; missing values fall back to `Unspecified` / `Unset` / `Unrated`; results are sorted by count descending then name, capped at 40. Returns `{"field", "facets": [{"value", "count"}, ...]}`. Unknown fields return an empty list.
+
+### `POST /api/bigbox/mode`
+
+Signals a Big Box entry so the configured `bigbox_shutdown_commands` run on the host. Body `{"entering": true}` runs the commands in new session groups (failures are logged, never block); any other body is a no-op. Returns `{"ok": true}`.
+
 ## Errors
 
 These routes fail loudly on missing prerequisites (`400` with the exact requirement) and never silently skip destructive steps. See [REST API overview](/reference/api/overview/) for the shared envelope.

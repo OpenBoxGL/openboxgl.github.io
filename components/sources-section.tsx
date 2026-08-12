@@ -7,7 +7,7 @@ const sources = [
   { name: "Lutris", icon: Wine, note: "Wine & runners" },
   { name: "ROMs", icon: HardDrive, note: "Drop-folder scan" },
   { name: "Arcade", icon: Joystick, note: "MAME / FBNeo sets" },
-  { name: "Emulators", icon: Gamepad, note: "40+ cores" },
+  { name: "Emulators", icon: Gamepad, note: "11 bundled" },
   { name: "Local", icon: Boxes, note: "Any executable" },
 ]
 
