@@ -10,11 +10,11 @@ OpenBox is maintained by one person in the open, so the roadmap is short and hon
 
 ## In the current release
 
-The [changelog](/changelog/) is the accurate record. The headline pieces in 0.8.x are the failed-launch clarity (a game with no command or a missing executable fails before anything runs, and the UI reports the real session outcome), emulator installs that no longer abort on an existing Flathub remote, and handheld performance profiles that apply TDP via `ryzenadj` on Deck and battery-powered handhelds.
+The [changelog](/changelog/) is the accurate record. The headline pieces in 0.8.x are box art that keeps its natural aspect ratio (covers are no longer cropped into a single frame, so games with non-standard artwork like SNES titles display uncropped), the persistent play queue with normalized tags, the Notification Center, signed webhook automation, and handheld performance profiles that apply TDP via `ryzenadj` on Deck and battery-powered handhelds.
 
 ## In progress
 
-The Unreleased section of the app changelog tracks the next batch. The persistent play queue, normalized game tags, Notification Center, and signed webhook settings (plus their `/api/queue`, `/api/tags`, `/api/notifications`, and `/api/webhooks` contracts) are implemented in the working tree and documented across the guides and the API reference; they await a release tag rather than further design work.
+The Unreleased section of the app changelog tracks the next batch. Right now no new items are committed there; the queue, tags, notifications, and webhook surfaces from the previous Unreleased list shipped in 0.8.2. New ideas come from the sources below.
 
 ## Where ideas come from
 

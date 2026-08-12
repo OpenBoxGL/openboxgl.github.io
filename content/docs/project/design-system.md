@@ -126,7 +126,7 @@ The shell is a three-column workspace with responsive breakpoints:
 
 ### Cover grid
 
-Auto-filled columns with a minimum cover width of `132px` (`105px` at ≤ 1100px, `100px` at ≤ 760px). Covers use a `0.72` aspect ratio. The default grid gap is `20px 16px` (row then column); the sticky header keeps collection title, sort, image group, and view actions visible while the grid scrolls.
+Auto-filled columns with a minimum cover width of `132px` (`105px` at ≤ 1100px, `100px` at ≤ 760px). Covers keep the aspect ratio of each image: portrait, square, and landscape box art all render uncropped. Games without artwork fall back to a portrait `0.72` box with the title centered. The default grid gap is `20px 16px` (row then column); the sticky header keeps collection title, sort, image group, and view actions visible while the grid scrolls.
 
 ### Big Box compositions
 

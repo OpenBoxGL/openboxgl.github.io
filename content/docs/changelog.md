@@ -8,14 +8,16 @@ sidebar: false
 
 OpenBox follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The full file lives in the repository at [`CHANGELOG.md`](https://github.com/vindeckyy/OpenBoxGL/blob/master/CHANGELOG.md). These are the highlights.
 
-## Unreleased
+## 0.8.2 (2026-08-12)
+
+**Fixed**
+
+- Box art now keeps its natural aspect ratio in the library grid, Big Box Stage, and CoverFlow views instead of being force-cropped into a single ratio, so games with non-standard artwork (for example SNES titles) display uncropped. Title-only covers keep the standard portrait box.
 
 **Added**
 
 - Web UI surfaces for the persistent play queue, normalized game tags, Notification Center, and signed webhook settings.
 - `/api/queue`, `/api/tags`, `/api/notifications`, and `/api/webhooks` contracts with bounded state, secret redaction, and destination validation.
-
-These are implemented in `master` and documented across the guides and the [REST API](/reference/api/); they await a release tag.
 
 ## 0.8.1 (2026-08-09)
 
