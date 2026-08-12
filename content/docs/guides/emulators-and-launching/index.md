@@ -86,7 +86,7 @@ The **Running** dialog lists active sessions with PID, start time, paused state,
 - **Default** / **Process**: wait for the direct child process.
 - **Original process**: wait for the originally spawned PID.
 - **Install folder**: track processes whose cwd is inside the game's install folder or path parent.
-- **Process name**: track processes matching a name (defaults to the game file stem).
+- **Process name**: track processes matching a name. The name comes from the per-game `tracking_process_name` field (set in Edit metadata); when unset, it defaults to the game file stem.
 
 Tracking start delay (0-600 s) and poll frequency (0.5-60 s) are configurable. When a session ends, play time and history record (if tracking is enabled, history keeps the last 500 sessions), progress automation runs, save backups on close and OBS auto-attach fire if enabled, and the TDP restore applies. A session that exits immediately (under 5 seconds) with a nonzero code shows "Session failed" with the exit code and a hint to check the Launch command and emulator install. Restart relaunches the same game with the same stable ID.
 

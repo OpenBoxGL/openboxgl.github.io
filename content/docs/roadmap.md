@@ -14,7 +14,7 @@ The [changelog](/changelog/) is the accurate record. The headline pieces in 0.8.
 
 ## In progress
 
-The Unreleased section of the app changelog tracks the next batch. Right now that is the web UI surfaces for the persistent play queue, normalized game tags, the Notification Center, and signed webhook settings, plus the `/api/queue`, `/api/tags`, `/api/notifications`, and `/api/webhooks` contracts with bounded state, secret redaction, and destination validation.
+The Unreleased section of the app changelog tracks the next batch. The persistent play queue, normalized game tags, Notification Center, and signed webhook settings (plus their `/api/queue`, `/api/tags`, `/api/notifications`, and `/api/webhooks` contracts) are implemented in the working tree and documented across the guides and the API reference; they await a release tag rather than further design work.
 
 ## Where ideas come from
 

@@ -68,7 +68,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | Setting | Default | Validation |
 | --- | --- | --- |
 | `watch_folders` | `[]` | List of at most 50 absolute, existing directories; duplicates removed |
-| `screensaver_seconds` | (none) | `0` (off) or between 30 and 3600 |
+| `screensaver_seconds` | 90 | `0` (off) or between 30 and 3600; values 1-29 are rejected |
 | `controller_map` | `{}` | Actions limited to `play`, `back`, `favorite`, `random`, `page_left`, `page_right`, `pause`, `menu`; button numbers 0–31 |
 | `progress_automation_enabled` | `false` | Boolean; enables/disables automatic progress changes |
 | `progress_automation_play_minutes` | 30 | 0 to 100,000 — minutes before marking Playing |
@@ -88,7 +88,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `bigbox_mode` | "stage" | One of stage, hybrid, coverflow |
 | `attract_mode_seconds` | 90 | Seconds of idle before screensaver/attract mode triggers |
 | `bigbox_startup_video` | "" | Empty string (disabled) or path to startup video file |
-| `bigbox_shutdown_commands` | `[]` | At most 25 commands; run on leaving Big Box |
+| `bigbox_shutdown_commands` | `[]` | At most 25 commands; run on entering Big Box (see note below) |
 | `startup_commands` | `[]` | At most 25 commands; run after server binds |
 | `shutdown_commands` | `[]` | At most 25 commands; run on graceful exit |
 | `track_session_history` | `true` | Boolean — when false, sessions still track but history isn't recorded |
@@ -98,6 +98,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `tracking_delay` | 0 | 0 to 600 seconds before tracking starts after spawn |
 | `tracking_frequency` | 2.0 | 0.5 to 60 seconds between poll checks |
 | `apply_perf` | "auto" | One of off, auto, always — whether TDP limits apply |
+| `auto_close_store_clients` | `false` | Boolean — close Steam/Heroic/Lutris clients after a session ends |
 | `obs_auto_attach` | `true` | Boolean — auto-attaches latest OBS recording to game |
 | `obs_recording_path` | "" | Absolute, existing path override; empty uses discovery |
 | `dynamic_play_button` | `true` | Boolean — shows animated PLAY state |
@@ -113,15 +114,20 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `gameyfin_url` | "" | Prepends `http://` when no scheme present; must resolve |
 | `gameyfin_username` | "" | Stored as plain text alongside url and password |
 | `gameyfin_password` | "" | Empty value leaves stored password unchanged; otherwise persisted with `0o600` |
-| `gameyfin_install_dir` | "~/Games/Gameyfin" | Absolute path; created if missing, rejected if symlink or non-existent |
+| `gameyfin_install_dir` | "" | Absolute path; created if missing, rejected if symlink or non-existent. Empty by default; the UI shows a `~/Games/Gameyfin` placeholder |
 | `gameyfin_provider` | "" | Provider label; falls back to first available |
 | `ludusavi_backup_path` | "" | Optional absolute path for Ludusavi JSON output |
+
+Two naming details worth knowing:
+
+- `bigbox_shutdown_commands` is misnamed: the commands run when Big Box is **entered**, not when it is left. The `entering: false` signal from the UI is ignored by the handler.
+- `attract_mode_seconds` is the screensaver delay the Big Box screensaver actually reads; it falls back to `screensaver_seconds` when unset, and the Settings dialog keeps both fields with the same fallback.
 
 Partial saves merge with existing settings: keys you omit are preserved, and concurrent partial saves of different keys do not lose updates (covered by the API sweep tests). An empty `gameyfin_password` in a save leaves the stored password unchanged.
 
 <Callout type="tip" title="How validation prevents bad saves">
 
-The save handler validates **every** posted field before committing any change. If a single value fails validation (for example, `screensaver_seconds: -5`), the entire save request returns `400` and **nothing** is written. This means you can safely send partial saves — changing `bigbox_mode` won't accidentally corrupt `tracker_frequency` even if both arrive in the same request. The only exception is an empty `gameyfin_password`, which deliberately preserves the old value so you don't erase your password while updating other settings.
+The save handler validates **every** posted field before committing any change. If a single value fails validation (for example, `screensaver_seconds: -5`), the entire save request returns `400` and **nothing** is written. This means you can safely send partial saves — changing `bigbox_mode` won't accidentally corrupt `tracking_frequency` even if both arrive in the same request. The only exception is an empty `gameyfin_password`, which deliberately preserves the old value so you don't erase your password while updating other settings.
 
 </Callout>
 

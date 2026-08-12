@@ -1,163 +1,154 @@
 ---
 title: Design system
-description: Complete public theme-author tokens, typography, layout, and component specs.
+description: The real CSS variables, typography, layout, and component specs for theme authoring.
 ---
 
-OpenBoxGL uses blue-black surfaces, cool text, cyan focus and selection, green launch actions, and orange lifecycle accents. The authoritative source is `DESIGN.md` in the application repository; this page provides every hex token, typography spec, and component detail you need for theme authoring or custom CSS.
+OpenBoxGL's base stylesheet uses a dark, warm game-room palette: near-black surfaces, warm off-white text, and amber (`#e1b866`) as the focus/selection/launch signal. This page documents the actual variables shipped in the application's `index.html`, not a separate token layer. Theme authors override these variables in a CSS file imported through **Themes**.
+
+<Callout type="warning" title="These are the shipped tokens">
+
+This page reflects the current `index.html` `:root` block. The application repository also contains a `DESIGN.md` that describes an earlier blue-black palette with cyan focus (`#35a9d5`) and green launch (`#08bf20`). That document is out of date relative to the shipped stylesheet: the running app uses the amber palette below, and the blue/cyan values in `DESIGN.md` are not what a theme overrides today. If you rely on this page's values, always confirm against `index.html` in the repository you are actually running.
+
+</Callout>
 
 ## Base palette
 
-All colors are dark by default. Saturated hues appear only on focus, launch state, or progress indicators. Theme authors override these tokens but should preserve the dark stage rule: neutral surfaces carry most of the screen; saturated colors identify state and action.
+All colors are dark by default. Neutral surfaces carry most of the screen; the amber family identifies focus, selection, and launch action.
 
 ### Neutral surfaces
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--ob-ink` | `#0d1018` | Page canvas, deepest fullscreen surfaces |
-| `--ob-topbar` | `#11141d` | Command rail background |
-| `--ob-panel` | `#171b29` | Sidebar, detail pane, dialogs, lifecycle surfaces |
-| `--ob-raised` | `#202536` | Inputs, controls, related items, compact cards |
-| `--ob-card` | `#1c2131` | Detail cards, emulator items, result rows, history items |
-| `--ob-field` | `#24293a` | Form controls, secondary buttons, inline code backgrounds |
-| `--ob-line` | `#30364a` | Borders, dividers, separator rules |
-| `--ob-text` | `#f3f5fb` | Primary titles, high-priority content |
-| `--ob-muted` | `#8e96aa` | Metadata, labels, helper copy, inactive navigation |
-
-<Callout type="note" title="Contrast ratios">
-
-The muted/text pair (`#8e96aa` / `#f3f5fb`) achieves a ratio of approximately 5.5:1 — passes WCAG AA for normal text. If your theme changes either value independently, verify the pair still reaches at least 4.5:1. Low contrast is explicitly called out in the "Do not" section.
-
-</Callout>
+| `--bg` | `#11100e` | Page canvas, deepest fullscreen surfaces |
+| `--topbar` | `#171513` | Command rail background |
+| `--panel` | `#1b1916` | Sidebar, detail pane, dialogs, lifecycle surfaces |
+| `--panel2` | `#24211d` | Secondary panel tone |
+| `--surface-deep` | `#141311` | Sticky library header background |
+| `--surface-header` | `#1c1916` | Header surface |
+| `--surface-card` | `#211e1a` | Detail cards, emulator items, result rows, history items |
+| `--surface-field` | `#27231e` | Form controls, secondary buttons |
+| `--surface-hover` | `#342d23` | Hovered raised panels |
+| `--border-control` | `#4b4338` | Control borders |
+| `--border-card` | `#534a3d` | Card and dialog borders |
+| `--line` | `#3d3932` | Borders, dividers, separator rules |
+| `--text` | `#f4efe6` | Primary titles, high-priority content |
+| `--muted` | `#aaa094` | Metadata, labels, helper copy, inactive navigation |
 
 ### Accent colors
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--ob-focus` | `#35a9d5` | Focus ring, selected controls, active platform markers |
-| `--ob-active` | `#45c4ef` | Active navigation, hover states on raised panels |
-| `--ob-cyan` | `#25b7e8` | Cyan signal — focus outlines, selection borders, platform row dots |
-| `--ob-green` | `#08bf20` | Launch action (Play button), successful session end |
-| `--ob-action` | `#21aeda` | Dialog save buttons, explicit confirmation actions |
-| `--ob-action-ink` | `#07131a` | Dark text inside green/action buttons |
-| `--ob-white` | `#ffffff` | Occasional pure white highlights, cover-title overlays |
-| `--ob-mark-start` | `#ffbf30` | Progress/milestone accent start (orange-yellow) |
-| `--ob-mark-end` | `#f27022` | Progress/milestone accent end (deep orange) |
-| `--ob-mark-ink` | `#18100a` | Text inside milestone gradient fills |
+| `--focus` | `#e1b866` | Focus ring, selected controls, active platform markers |
+| `--active` | `#e1b866` | Active navigation, selected cover borders, Big Box cover borders |
+| `--action` | `#d7a34a` | Launch action (Play button), primary dialog confirmations |
+| `--action-ink` | `#1c160d` | Dark text inside the amber action surface |
+| `--white` | `#ffffff` | Occasional pure white highlights |
+| `--cyan` | `#72c9d4` | Teal accent (defined in `:root` but not consumed by the base stylesheet) |
+| `--green` | `#8fbd8d` | Muted sage (defined in `:root` but not consumed by the base stylesheet) |
+| `--gold` | `#e5b65c` | Achievement/gold signal |
+| `--rating` | `#f0bd63` | Rating star signal |
+| `--launch-shadow` | `#d7a34a44` | Shadow tint under the Play button |
+| `--danger` | `#743f3f` | Error/destructive state |
+| `--empty-action` | `#d7a34a` | Empty-state action buttons |
+| `--mark-start` | `#f0c36a` | Progress/milestone accent start |
+| `--mark-end` | `#ba593d` | Progress/milestone accent end |
+| `--mark-ink` | `#1c160d` | Text inside milestone fills |
+| `--cover-title-start` | `#51412d` | Cover gradient start tone |
+| `--achievement` | `#e8ba55` | RetroAchievements badge, achievement points |
+| `--lifecycle-bg` | `#45351d` | Session lifecycle overlay background |
+| `--lifecycle-kicker` | `#f0c36a` | Lifecycle kicker accent |
+| `--bigbox-bg` | `#30261a` | Big Box cover backdrop |
+| `--bigbox-copy` | `#d0c0a5` | Big Box secondary text |
 
-### Semantic states
+<Callout type="note" title="Defined vs consumed">
 
-| Token | Value | Use |
-| --- | --- | --- |
-| `--ob-achievement` | `#e8ba41` | RetroAchievements badge, achievement points display |
-| `--ob-lifecycle-bg` | `#283651` | Session lifecycle overlay background |
-| `--ob-lifecycle-kicker` | `#55c7ee` | Lifecycle kicker accent (cyan highlight) |
-| `--ob-bigbox-bg` | `#26334f` | Big Box cover backdrop |
-| `--ob-bigbox-copy` | `#aeb8ca` | Big Box secondary text |
-| `--ob-empty-action` | `#2aaddb` | Empty-state action buttons |
-| `--ob-danger` | *(theme-dependent)* | Error/destructive state — typically a muted red derived from the theme palette |
-
-<Callout type="tip" title="State-color rule">
-
-Cyan identifies **where the user is focused**; green identifies **where the user can launch or is actively playing**. Never swap those roles. Green for selection or cyan for launch-success are both explicitly forbidden.
+`--cyan` and `--green` are declared in `:root` but the base stylesheet never reads them with `var()`. The launch action uses `--action` (amber), not `--green`. A theme that sets `--green` alone will not change the Play button; set `--action` and `--action-ink` for that. `--focus`, `--active`, `--action`, and `--launch-shadow` are the amber tokens the base stylesheet actually consumes.
 
 </Callout>
 
+### State-color rule
+
+Amber (`#e1b866` / `#d7a34a`) identifies both **where the user is focused** and **where the user can launch or is actively playing**. The base stylesheet does not split these roles across two hue families the way earlier `DESIGN.md` text described. If you author a theme that does split focus from launch, keep the two roles visually distinct and never make launch read as a destructive or muted state.
+
 ## Typography
 
-All typefaces use Inter with fallbacks. Stock themes may replace the stack entirely — Midnight Circuit uses Syne + Manrope, Phosphor Terminal uses IBM Plex Mono + Share Tech Mono, Harbor Light uses Sora + Literata, Cinema Marquee uses Bebas Neue + Source Sans 3, and Nordic Mist uses Outfit + Fraunces. When you author a custom theme, consider replacing the entire Inter stack with a matching pair.
+The base stack is `ui-sans-serif, system-ui, sans-serif` (no bundled webfont in the base stylesheet). Font sizes come from `--font-*` variables.
 
-### Display hierarchy
+| Token | Value | Use |
+| --- | --- | --- |
+| `--font-micro` | `9px` | Tiny counters, badge numbers |
+| `--font-label` | `11px` | Section labels, field labels, nav categories |
+| `--font-meta` | `12px` | Release year, region tags, auxiliary metadata |
+| `--font-body-small` | `13px` | Inline hints, status chips |
+| `--font-body` | `14px` | Default application copy, form content |
+| `--font-action` | `15px` | Button labels, chip text |
+| `--font-dialog` | `16px` | Dialog body |
+| `--font-title-large` | `18px` | Game card titles |
+| `--font-heading` | `24px` | Section headings |
+| `--font-brand` | `0.9375rem` | App title strip, breadcrumbs |
+| `--font-nav` | `0.8125rem` | Topbar menu items, sidebar row labels |
+| `--font-subtitle` | `19px` | Dialog section headers |
+| `--font-bigbox` | `21px` | Big Box body |
+| `--font-panel-title` | `28px` | Big Box panel headers |
+| `--font-bigbox-display` | `clamp(38px,5vw,72px)` | Big Box headings |
+| `--font-screensaver` | `clamp(44px,8vw,110px)` | Screensaver statements |
 
-Every size below targets Inter at `font-weight: 400` unless noted. All font families include `ui-sans-serif, system-ui, sans-serif` fallbacks.
+The lifecycle overlay uses a hardcoded `clamp(34px,6vw,78px)` rather than a `--font-*` variable.
 
-| Level | Weight | Size | Line-height | Case | Purpose |
-| --- | --- | --- | --- | --- | --- |
-| Display | 900 | `clamp(34px, 6vw, 78px)` | 1.0 | Normal | Fullscreen lifecycle messages, screensaver statements |
-| Headline | 900 | `22px` | 1.05 | Normal | Selected-game hero titles, uppercase labels |
-| Title | 800 | `1.0625rem` (17px) | 1.2 | Normal | Library heading, primary pane titles |
-| Subtitle | 400 | `18px` | 1.2 | Normal | Dialog section headers, game card titles |
-| Dialog | 400 | `15px` | 1.2 | Normal | Form labels inside dialogs, metadata labels |
-| Action | 800 | `14px` | 1.25 | Uppercase | Button labels, chip text, ESRB badges |
-| Body | 400 | `0.75rem` (12px) | 1.4 | Normal | Default application copy, form content |
-| Panel Title | 400 | `28px` | 1.1 | Normal | Big Box panel headers |
-| Brand | 800 | `0.8125rem` (13px) | 1.2 | Normal | Section breadcrumbs, app title strip |
-| Label | 800 | `9px` | 1.25 | Uppercase, `letter-spacing: 0.1em` | Field labels, section identifiers, nav categories |
-| Nav | 400 | `0.6875rem` (11px) | 1.25 | Normal | Topbar menu items, sidebar row labels |
-| Meta | 400 | `10px` | 1.4 | Normal | Release year, region tags, auxiliary metadata |
-| Micro | 400 | `8px` | 1.25 | Normal | Tiny counters, badge numbers |
-| Body Small | 400 | `11px` | 1.4 | Normal | Inline hints, tool-tip text, status chips |
-
-### Scan-first rule
-
-Use weight, case, and letter-spacing to make labels and state readable **before** adding decoration. A label at `9px` must still be legible because its bold weight (`800`) and uppercase format create visual prominence. Don't rely solely on color difference.
+Stock themes may replace the entire stack: Midnight Circuit uses Syne + Manrope, Phosphor Terminal uses IBM Plex Mono + Share Tech Mono, Harbor Light uses Sora + Literata, Cinema Marquee uses Bebas Neue + Source Sans 3, and Nordic Mist uses Outfit + Fraunces.
 
 ## Spacing
 
-The spacing scale is compact to support dense information density without overwhelming. All padding/margin values come from these units or multiples thereof.
-
-| Token | Value | Typical use |
-| --- | --- | --- |
-| `--sp-xs` | `2px` | Icon-button padding, tight list gaps |
-| `--sp-sm` | `6px` | Checkbox margins, mini-divider padding |
-| `--sp-md` | `8px` | Input padding, small card padding, row gaps |
-| `--sp-lg` | `12px` | Detail card padding, section gutters |
-| `--sp-xl` | `16px` | Standard column gap, field margin-bottom |
-| `--sp-2xl` | `25px` | Wide form grids, large section spacing |
-
-When creating new components, derive spacing from the nearest scale step up or down — don't invent arbitrary values.
+The base stylesheet does not expose `--sp-*` variables; spacing is hardcoded in each rule. Common values: `2px` for hairline gaps, `6px` for checkbox margins, `8px` for input padding, `12px` for card padding, `16px` for column gaps, and `25px` for wide form grids. When you add custom CSS, derive spacing from the nearest value already used in `index.html` rather than inventing new units.
 
 ## Rounded corners
 
-Form language moves from nearly-square inputs to pill-shaped action buttons. Cards use intermediate radii. Always round images/clipped areas to match their container context.
+Only four radius variables exist. Other radii are hardcoded in the rules that use them.
 
 | Token | Value | Applies to |
 | --- | --- | --- |
-| `--rnd-hairline` | `2px` | Thin decorative lines, narrow separators |
-| `--rnd-xs` | `3px` | Input fields, tiny chip corners |
-| `--rnd-sm` | `4px` | Primary/secondary buttons, small control elements |
-| `--rnd-md` | `6px` | Compact utility cards, detail cards |
-| `--rnd-cover` | `5px` | Game cover art containers |
-| `--rnd-lg` | `8px` | Big Box panels, larger info cards |
-| `--rnd-xl` | `10px` | Dialog inner surfaces |
-| `--rnd-pill` | `18px` | Primary Play/launch buttons, pill badges |
-| `--rnd-pill-large` | `28px` | Large status pills, extended badge containers |
-| `--rnd-panel` | `12px` | CoverFlow jewel-case perspective edges |
+| `--radius-hairline` | `2px` | Thin decorative lines, narrow separators |
+| `--radius-cover` | `5px` | Game cover art containers |
+| `--radius-panel` | `12px` | Big Box panels, large panels |
+| `--radius-pill-large` | `28px` | Big Box play/pill buttons |
+
+Hardcoded values in the base: inputs use `4px` (some `3px`), cards and detail panels use `6px` to `8px`, dialogs use `8px`, the Play button uses `18px` (pill).
 
 ## Layout
 
-The application shell uses three-column composition with responsive breakpoints:
+The shell is a three-column workspace with responsive breakpoints:
 
 | Breakpoint | Sidebar | Library | Detail Pane |
 | --- | --- | --- | --- |
-| Default (> 1100px) | `170px` min | `minmax(520px, 1fr)` | `410px` |
-| Tablet (≤ 1100px) | `150px` min | `1fr` | `340px` |
-| Mobile (≤ 760px) | Stacked above library | Stacked | Stacked below grid |
+| Default | `190px` | `minmax(520px, 1fr)` | `410px` |
+| ≤ 1100px | `150px` | `1fr` | `340px` |
+| ≤ 760px | Stacked above library | Stacked | Stacked below grid |
 
 ### Cover grid
 
-Auto-filled columns with minimum cover width of `118px`, `14px` horizontal gaps, and `17px` row gaps. Covers maintain a `0.72` aspect ratio (height ÷ width). The sticky header keeps collection title, sort, image group, and view actions visible while the grid scrolls.
+Auto-filled columns with a minimum cover width of `132px` (`105px` at ≤ 1100px, `100px` at ≤ 760px). Covers use a `0.72` aspect ratio. The default grid gap is `20px 16px` (row then column); the sticky header keeps collection title, sort, image group, and view actions visible while the grid scrolls.
 
 ### Big Box compositions
-
-Big Box enlarges the same state colors and material language but composes differently per layout:
 
 | Layout | Composition |
 | --- | --- |
 | Stage | One large cover + description + big Play button; controller footer hints |
-| Hybrid | Platform rail on left + games + scoped search field; similar to desktop but larger |
+| Hybrid | Platform rail on left + games + scoped search field |
 | CoverFlow | Horizontal jewel-case cover strip; active cover straightens and scales |
 
 ## Shadows
 
-Depth comes from tonal layering first, shadows second. Use the lightest shadow that separates the surface from its neighbor. Stronger lifts are reserved for focus and selection states.
+Depth comes from tonal layering first, shadows second. The real values in the base stylesheet:
 
-| Shadow | Values | Context |
-| --- | --- | --- |
-| Topbar ambient | `0 2px 12px rgba(0,0,0,0.03)` | Separates command rail from workspace |
-| Cover lift | `0 8px 18px rgba(0,0,0,0.05)` | Resting cover cards |
-| Selected cover | `0 0 0 2px rgba(40,185,229,0.27), 0 10px 23px rgba(0,0,0,0.06)` | Active/selected cover — combines cyan halo with separation |
-| Detail pane | `-12px 0 30px rgba(0,0,0,0.03)` | Right pane distinction from grid |
-| Dialog depth | `0 30px 80px rgba(0,0,0,0.05)` | Modal work above dimmed workspace |
+| Context | Value |
+| --- | --- |
+| Cover lift | `0 8px 18px #0007` |
+| Cover (Cinema Marquee theme) | `0 14px 32px #000a` |
+| Dialog depth | `0 30px 80px #000c` |
+| Big Box cover | `0 0 0 6px #e1b86622, 0 40px 90px #000c` |
+| Play button | `0 5px 14px var(--launch-shadow)` |
+
+Hover and selection add an amber separation border plus stronger lift. The selected cover uses a cyan-family halo only in the historical `DESIGN.md`; the shipped base uses amber (`--active`).
 
 ## Component specs
 
@@ -165,74 +156,47 @@ Depth comes from tonal layering first, shadows second. Use the lightest shadow t
 
 | Variant | Background | Text color | Radius | Padding |
 | --- | --- | --- | --- | --- |
-| Launch (Play) | `{colors.green}` → `#08bf20` | `{colors.action-ink}` → `#07131a` | Pill (`18px`) | `9px` vertical |
-| Primary | `{colors.action}` → `#21aeda` | `{colors.action-ink}` | `sm` (`4px`) | `8px` 16px |
-| Secondary | `{colors.field}` → `#24293a` | `{colors.text}` → `#f3f5fb` | `sm` (`4px`) | `7px` 10px |
+| Launch (Play) | `var(--action)` → `#d7a34a` | `var(--action-ink)` → `#1c160d` | Pill (`18px`) | `10px` |
+| Primary | `var(--action)` → `#d7a34a` | `var(--action-ink)` | `4px` | `9px 16px` |
+| Secondary | `var(--surface-field)` → `#27231e` | `var(--text)` | `4px` | (rule-specific) |
 
-Hover shifts secondary toward a lighter raised panel. Focused controls gain a `2px` focus border plus a one-pixel ring.
+Hover shifts secondary toward a lighter raised surface. Focused controls gain a `2px` focus border (`var(--focus)`) plus a one-pixel ring.
 
-### Chips
+### Chips and badges
 
-Rating, status, and ESRB chips use small muted surfaces (`{colors.muted}` text on `{colors.card}` background) with compact body-small size (`11px`). Achievement signals use their semantic color (`#e8ba41` gold). Chips always stay subordinate to cover art and the launch action.
+Rating, status, and ESRB chips use muted text on card surfaces. Achievement signals use `--achievement` (`#e8ba55`). Badges stay subordinate to cover art and the launch action.
 
 ### Cards
 
 | Element | Radius | Padding | Background |
 | --- | --- | --- | --- |
-| Cover card | `md` (`6px`) | `12px` | Gradient or raised panel |
-| Detail card | `md`–`lg` (`6px`–`8px`) | `12px` | Card surface |
-| Big Box panel | `lg` (`8px`) | `24px`–`26px` | Big Box bg (`#26334f`) |
-| Related items | `md` (`6px`) | `12px` | Raised panel |
-
-Resting covers use cover lift shadow. Hover and selection add cyan separation border (`2px solid #28b9e544`) and stronger lift.
+| Cover card | `var(--radius-cover)` (`5px`) | `12px` | Gradient (`#51412d` → `#1b1814`) or raised surface |
+| Detail card | `6px` to `8px` | `12px` | `var(--surface-card)` |
+| Big Box panel | `var(--radius-panel)` (`12px`) | `24px` to `26px` | `var(--bigbox-bg)` / `var(--panel)` |
 
 ### Inputs / Fields
 
-Fields use `{colors.field}` → `#24293a` background, `{colors.white}` → `#ffffff` text, `xs` (`3px`) radius, `7px 8px` padding. On focus, the border shifts to `{colors.focus}` → `#35a9d5` and gains a one-pixel focus ring. Disabled actions reduce opacity and show `not-allowed` cursor. No separate error palette exists in the base system — errors reuse the standard flow with a textual message rather than a colored field.
+Fields use `--surface-field` background, `--border-control` border, `4px` radius, and `7px 8px` padding. On focus, the border shifts to `--focus` (`#e1b866`) and gains a one-pixel ring. Disabled actions reduce opacity and show `not-allowed` cursor. No separate error palette exists in the base system; errors reuse the standard flow with a textual message rather than a colored field.
 
 ### Navigation
 
-Topbar items are borderless and transparent at rest, gaining a raised panel background on hover. Active platform rows use a darker panel tone (`{colors.panel}`) with a small cyan marker dot. Inactive navigation is muted (`{colors.muted}`) and transparent. The rail scrolls horizontally; the workspace columns tighten at `1100px` and stack below `760px`.
+Topbar items are borderless and transparent at rest, gaining a raised background on hover. Active platform rows use a darker panel tone with a small amber marker dot. Inactive navigation is muted and transparent. The rail scrolls horizontally; the workspace columns tighten at `1100px` and stack below `760px`.
 
 ## Big Box specifics
 
-Big Box reuses all palette tokens, typography sizes, and component styles from the desktop UI. Key differences:
+Big Box reuses the palette and typography tokens, then scales them:
 
-- Titles scale up using `fullscreen-heading` (clamp 38–72px) and `screensaver` (clamp 44–110px) levels.
-- Controller footer hints use `label` weight (800, 9px, uppercase, tracked) mapped to the currently pressed button.
+- Titles use `--font-bigbox-display` (clamp 38-72px) and the screensaver uses `--font-screensaver` (clamp 44-110px).
+- Controller footer hints use the `--font-label` weight mapped to the currently pressed button.
 - Jewel-case perspective on CoverFlow uses CSS transforms, not asset files.
 - Background music (`library_music` setting path) plays under covers; `video_bgm_mix` lowers volume when video audio is present.
 
-## Color theory notes
+## Light theme note
 
-The palette is intentionally low-chroma on neutrals so cover art dominates visually. Chromatic saturation concentrates into two roles:
-
-1. **Cyan** (`#25b7e8` family): Identifies presence — where the user's attention *is*. Focus rings, active platform dots, selected cover borders, active topbar items.
-2. **Green** (`#08bf20`): Identifies agency — where the user can *act*. The Play button, session-end success banner, online-status indicator.
-
-Orange (`#ffbf30` → `#f27022`) appears only as a progressive marker — play-time progress bars, milestone achievements — never as a primary action or state signal. Gold (`#e8ba41`) is reserved for achievements specifically.
-
-## Light theme adjustments
-
-When a theme enters light mode (most prominent in Harbor Light), the mapping shifts from dark ink to paper:
-
-| Dark token | Light equivalent |
-| --- | --- |
-| `--ob-ink` → `#0d1018` | `--sl-color-black` → `#eef2f6` |
-| `--ob-topbar` → `#11141d` | `--sl-color-bg-nav` → `#f7f8fa` |
-| `--ob-panel` → `#171b29` | `--sl-color-bg-sidebar` → `#f7f8fa` |
-| `--ob-raised` → `#202536` | `--sl-color-gray-6` → `#f7f8fa` |
-| `--ob-card` → `#1c2131` | `--sl-color-bg` → `#eef2f6` |
-| `--ob-field` → `#24293a` | `--sl-color-bg-inline-code` → `#e7ecf2` |
-| `--ob-text` → `#f3f5fb` | `--sl-color-white` → `#152033` |
-| `--ob-muted` → `#8e96aa` | `--sl-color-gray-1` → `#52637c` |
-| `--ob-focus` → `#35a9d5` | `--sl-color-accent` → `#0b7ea8` |
-| `--ob-green` → `#08bf20` | `--sl-color-launch` → `#0a9e23` |
-
-Light themes invert the chroma direction: accents move from bright (cyan/green) to deep (navy/dark green) against light paper surfaces. Contrast ratios must remain ≥ 4.5:1.
+Harbor Light is the only bundled light theme. It overrides `--bg`, `--panel`, `--panel2`, `--line`, `--text`, `--muted`, `--cyan`, `--green`, `--accent`, and `--danger` with paper tones, but the base stylesheet does not define a `--accent` variable or a `--sl-color-*` token set. Those names are theme-local, not part of the base contract. If you author a light theme, ensure `--focus`, `--active`, `--action`, and `--action-ink` remain legible against your light surfaces and that text contrast stays at least 4.5:1.
 
 ## Related
 
-- [How OpenBoxGL works](/reference/how-it-works/) for how these tokens render at runtime
-- [Themes](/themes/) for the five stock CSS themes and import workflow
-- [Design tokens in the application](https://github.com/vindeckyy/OpenBoxGL/blob/master/DESIGN.md) for the full YAML specification
+- [Themes](/themes/) for the five stock CSS themes and the import workflow
+- [How OpenBoxGL works](/reference/how-it-works/) for how tokens render at runtime
+- `index.html` in the application repository for the authoritative `:root` block

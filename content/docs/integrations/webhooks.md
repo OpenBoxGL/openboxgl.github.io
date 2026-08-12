@@ -86,6 +86,35 @@ assert mac.hexdigest() == provided_signature
 
 `POST /api/webhooks/test` with a webhook config performs one bounded synchronous `test.ping` delivery and returns `{"ok": bool, "status": int|null, "error": str}`. The test respects the same URL validation, so a bad target fails immediately. Receivers can distinguish tests by the `test.ping` event type.
 
+## Worked receiver example
+
+A minimal HTTPS receiver that verifies the signature and logs `session.stopped` events:
+
+```python
+import hashlib, hmac, json
+
+SECRET = "your-webhook-secret"
+
+def handle(request_body: bytes, headers):
+    timestamp = headers["X-OpenBox-Timestamp"]
+    provided = headers.get("X-OpenBox-Signature", "").removeprefix("sha256=")
+
+    expected = hmac.new(SECRET.encode(), digestmod=hashlib.sha256)
+    expected.update(timestamp.encode())
+    expected.update(b".")
+    expected.update(request_body)
+    if not hmac.compare_digest(expected.hexdigest(), provided):
+        raise ValueError("bad signature")
+
+    event = json.loads(request_body)
+    if event["type"] == "session.stopped":
+        game = event["data"]["name"]
+        seconds = event["data"]["seconds"]
+        print(f"{game} played for {seconds}s")
+```
+
+The signature covers the exact transmitted body bytes, so read the raw request body before any framework decodes or reformats it. Configure the webhook with the same `SECRET` in the **Webhooks** dialog; delivery only signs when a secret is set, and `X-OpenBox-Signature` is omitted when the config has none.
+
 ## Security notes
 
 - Keep webhook endpoints private: anyone with read access to your endpoint can see game names and play times.

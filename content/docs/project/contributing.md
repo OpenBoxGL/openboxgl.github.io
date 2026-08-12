@@ -42,7 +42,7 @@ Plugins require a manifest (`plugin.json` with `id`, `name`, `version`, optional
 
 ## Documentation site
 
-Documentation changes live in the [OpenBoxGL Pages repository](https://github.com/OpenBoxGL/openboxgl.github.io) and are checked with `npm test` (`npm ci` first). Keep technical literals exact, use placeholders for secrets, and cite the source module or test for every claim.
+Documentation changes live in the [OpenBoxGL Pages repository](https://github.com/OpenBoxGL/openboxgl.github.io) and are checked with `bun run test` (`bun install --frozen-lockfile` first). Keep technical literals exact, use placeholders for secrets, and cite the source module or test for every claim.
 
 ## Licensing and security
 

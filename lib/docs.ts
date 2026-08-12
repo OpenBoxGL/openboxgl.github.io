@@ -151,6 +151,7 @@ export function buildSidebar(): DocNode[] {
     ]),
     section("Project and policies", [
       "project/contributing",
+      "project/releasing",
       "project/design-system",
       "localization",
       "changelog",

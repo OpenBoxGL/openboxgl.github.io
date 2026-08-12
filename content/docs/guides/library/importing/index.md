@@ -46,7 +46,7 @@ From the **Storefronts** dialog: **Import ScummVM** reads `scummvm.ini` and impo
 
 ## Gameyfin
 
-The **Storefronts** dialog configures a Gameyfin server URL, optional username and password, and a local install folder (default `~/Games/Gameyfin`). **Test Gameyfin connection** lists the server's games and download providers. The catalog marks each title owned or installed; **Import owned / uninstalled** adds owned entries as placeholders with a note, and the Play button on such an entry becomes **INSTALL**, downloading through the configured provider into the install folder. Install staging protects existing files: a failed download keeps the previous copy, and uninstall refuses paths outside the install directory.
+The **Storefronts** dialog configures a Gameyfin server URL, optional username and password, and a local install folder (empty by default; the field shows a `~/Games/Gameyfin` placeholder). **Test Gameyfin connection** lists the server's games and download providers. The catalog marks each title owned or installed; **Import owned / uninstalled** adds owned entries as placeholders with a note, and the Play button on such an entry becomes **INSTALL**, downloading through the configured provider into the install folder. Install staging protects existing files: a failed download keeps the previous copy, and uninstall refuses paths outside the install directory.
 
 ## Storefront Manager
 

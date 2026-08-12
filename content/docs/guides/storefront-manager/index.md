@@ -22,7 +22,7 @@ OpenBoxGL distinguishes between what you *own* on a storefront and what you actu
 
 ## Import owned / uninstalled
 
-Storefront entries without local files are imported as owned-but-uninstalled (`store_installed: false`). For Gameyfin, the Play button on such an entry becomes **INSTALL**, downloading through the configured provider into the install folder (default `~/Games/Gameyfin`). For Steam/Heroic/Lutris, an owned-but-uninstalled entry launches once the client has the game installed — the import simply keeps the title in your catalog ahead of time.
+Storefront entries without local files are imported as owned-but-uninstalled (`store_installed: false`). For Gameyfin, the Play button on such an entry becomes **INSTALL**, downloading through the configured provider into the install folder (the Settings field is empty by default and shows a `~/Games/Gameyfin` placeholder). For Steam/Heroic/Lutris, an owned-but-uninstalled entry launches once the client has the game installed — the import simply keeps the title in your catalog ahead of time.
 
 ## Auto-import on startup
 

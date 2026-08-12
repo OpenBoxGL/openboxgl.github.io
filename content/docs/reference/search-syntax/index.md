@@ -18,24 +18,25 @@ Prefix a term with a field name and a colon to target one field:
 | Field | Matches |
 | --- | --- |
 | `title:` | Name, sort title, and alternate names |
-| `platform:` | Platform value (quote multi-word values: `platform:"PlayStation 2"`) |
-| `dev:` | Developer |
-| `pub:` | Publisher |
+| `platform:` (alias `plat:`) | Platform value (quote multi-word values: `platform:"PlayStation 2"`) |
+| `dev:` (alias `developer:`) | Developer |
+| `pub:` (alias `publisher:`) | Publisher |
 | `series:` | Series |
 | `genre:` | Genre |
 | `region:` | Region |
 | `notes:` | Notes |
-| `source:` | Import source (Steam, Heroic, Lutris, ...) |
-| `store:` | Storefront |
+| `source:` (aliases `store:`, `storefront:`) | Import source (Steam, Heroic, Lutris, ...) |
 | `progress:` | Progress status |
+| `status:` | Status |
+| `play:` (alias `playmode:`) | Play mode |
 | `rating:` | Rating |
-| `favorite:` | `favorite:yes` / `favorite:no` |
+| `favorite:` (alias `fav:`) | `favorite:yes` / `favorite:no` |
 | `installed:` | `installed:yes` / `installed:no` |
-| `hidden:` | `hidden:yes` / `hidden:no` |
+| `hidden:` (alias `hide:`) | `hidden:yes` / `hidden:no` |
 | `broken:` | `broken:yes` / `broken:no` |
 | `portable:` | `portable:yes` / `portable:no` |
 | `controller:` | Controller support |
-| `tag:` | Tag (see below) |
+| `tag:` (alias `tags:`) | Tag (see below) |
 
 ## Negative terms
 

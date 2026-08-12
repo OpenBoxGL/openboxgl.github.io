@@ -43,7 +43,7 @@ The web UI is the full-featured interface. Flags below apply to it unless noted.
 | `openbox://showgame/<id>` (alias `game`) | Open the detail pane for a game by stable id. |
 | `openbox://launch/<id>` | Launch a game by stable id. |
 | `openbox://bigbox` (alias `fullscreen`) | Switch the running UI to Big Box mode. |
-| `openbox://settings[/<panel>]` | Open Settings, optionally at a specific panel (defaults to `general`). |
+| `openbox://settings[/<panel>]` | Open Settings. A panel segment is parsed but not currently routed to a specific settings tab. |
 
 Usage:
 
@@ -56,7 +56,7 @@ openbox --uri "openbox://launch/1234"
 
 ## Keyboard launcher
 
-`openbox --launcher` (or `scripts/openbox-launcher.sh`) opens a rofi, wofi, or dmenu picker against the running instance. It queries `/api/launcher/menu`, which lists Big Box, Settings, Search, Refresh, and up to 40 games. Selecting an entry dispatches it.
+`openbox --launcher` (or `scripts/openbox-launcher.sh`) opens a rofi, wofi, or dmenu picker against the running instance. It queries `/api/launcher/menu`, which lists Big Box, Settings, Search, and up to 40 games. Selecting an entry dispatches it.
 
 ```bash
 # picker auto-detected (rofi > wofi > dmenu)

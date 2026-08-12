@@ -30,7 +30,7 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 
 - **Source**: a self-hosted Gameyfin server configured in Settings (`gameyfin_url`, optional `gameyfin_username`/`gameyfin_password`, `gameyfin_install_dir`, `gameyfin_provider`).
 - **Behavior**: catalog import lists owned games with installed status; install downloads the game from the server into the install directory (staging, rollback, symlink rejection, 4 GiB per file cap) and marks the entry installed; uninstall removes only files under the install directory.
-- The default install directory is `~/Games/Gameyfin`. Provider resolution falls back to the first provider the server offers, or the bundled Direct Download provider.
+- The install directory is empty by default; the Settings field shows a `~/Games/Gameyfin` placeholder. Provider resolution falls back to the first provider the server offers, or the bundled Direct Download provider.
 - Connection and request failures surface as `400` with the server's message.
 
 ## ROM folders and executables
