@@ -1,32 +1,29 @@
 ---
 title: Localization
-description: OpenBox ships in five languages. How to switch, and how to contribute translations.
+description: OpenBox ships in English today. How localization will arrive, and how to help.
 sidebar: false
 ---
 
 # Localization
 
-OpenBox ships with five interface languages. The setting lives in **Settings > Interface language**, and the choice persists in your library settings.
+OpenBox 0.9.0 ships in English. Earlier releases showed five interface languages, but only a handful of strings were ever translated, so the selector was honest about that and removed until real localization lands. The setting stays in **Settings > Interface language** with English as the only option, and the choice still persists in your library settings.
 
-| Code | Language |
-| --- | --- |
-| `en` | English |
-| `es` | Español |
-| `de` | Deutsch |
-| `fr` | Français |
-| `pt` | Português |
+The UI string table in `parity_premium.strings_for(locale)` and `GET /api/premium/strings?locale=<code>` remain in the app source, so the seam for translation work is unchanged.
 
-The UI strings come from `parity_premium.strings_for(locale)` in the app source, and the REST API exposes the same strings through `GET /api/premium/strings?locale=<code>`. Locale values are capped at five characters, so a malformed or unknown code falls back to English.
+## When localization lands
 
-## How to contribute a translation
+Localization is planned for a post-1.0 release. The blocker is not the runtime seam; it is that the Web UI is one large script with roughly 2,000 lines of JavaScript and every label embedded in template literals. A real localization release means:
 
-Translations are source strings in the app repository, not separate files on the website. To add or fix one:
+1. Extracting every user-facing string from `static/app.js` and the dialog markup into per-locale string files.
+2. A check that fails CI when a new string ships without a key in every locale.
+3. Shipping only languages that are complete, instead of partial dropdowns that mix languages.
 
-1. Open `parity_premium.py` in the OpenBox repository and find `strings_for`.
-2. Add or correct the entries for your locale, keeping the key names identical across locales.
-3. Run the test suite (`./run_all_tests.sh`) and open a pull request.
+## How to help
 
-The keys are the same for every locale; only the values differ. A missing key falls back to the English string, so a partial translation degrades gracefully instead of showing a blank label.
+If you want a translation to exist:
+
+1. Open an issue with the feature request template, naming the language.
+2. When localization work starts, translations will live in the app repository as per-locale string files; open a pull request there.
 
 ## Related pages
 

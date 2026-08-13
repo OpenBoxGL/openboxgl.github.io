@@ -13,6 +13,7 @@ Inside the data directory (default `~/.local/share/openbox-game-launcher`, or `O
 | --- | --- |
 | `library.json` | The primary state: `schema_version`, `games`, `profiles`, `history`, `settings`, `playlists`, `queue`, `notifications` |
 | `library.json.bak` | Last-known-good copy, rewritten before every commit |
+| `library.json.snapshots/` | Rolling snapshots of the last 5 committed states, kept as timestamped JSON copies for point-in-time recovery |
 | `.library.json.lock` | Cross-process `flock` lock coordinating concurrent writers |
 | `server.token`, `server.port` | Per-launch credentials for the running Web UI; deleted on exit |
 
@@ -61,6 +62,15 @@ Recovery (`/api/state/recover` or `recover_state()`) requires authentication and
 - Otherwise the backup is normalized, written through the same atomic path, and the API returns `{"ok": true, "games": <count>}`.
 
 The `.bak` is always at least as fresh as the primary commit that preceded the last write, because it is written before the swap.
+
+### Dry-run and snapshots
+
+`/api/state/recover` accepts two extensions beyond the bare restore:
+
+- `{"dry_run": true}` previews recovery without touching the file: it reports whether `.bak` exists, lists the available snapshots, and returns the current game count.
+- `{"snapshot": "<name>"}` restores a named snapshot from `library.json.snapshots/` instead of the backup. Snapshot names are strictly the file names inside that directory; anything else is rejected.
+
+Snapshots rotate on every commit: the last 5 committed states are kept as timestamped JSON copies, so a bad edit can be rolled back to a point in time even when `.bak` already reflects it.
 
 ## Security notes
 

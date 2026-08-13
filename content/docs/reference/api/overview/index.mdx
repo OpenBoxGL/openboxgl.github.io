@@ -27,22 +27,24 @@ A request flows through a fixed set of stages. Knowing the order tells you which
 
 ```text
 parse + route
-  ├─ unknown route, no token? → 403 Unauthorized (route surface hidden)
-  └─ known route, wrong/missing token? → 403 Unauthorized
+  ├─ unknown route? → 404 ROUTE_NOT_FOUND
+  └─ known route, wrong/missing token? → 403 UNAUTHORIZED
 authenticate (secrets.compare_digest)
 read body (Content-Length, ≤ 65536 bytes, valid JSON object)
   ├─ too large → 400 "Request is too large."
   ├─ truncated → 400 "Request body was truncated."
   └─ not a JSON object → 400
-dispatch to handler
-  ├─ state corrupt? → 503 "OpenBox library data needs recovery…" (before handler)
-  ├─ handler raises ValueError/OSError/TypeError/… → 400 {error: message}
-  ├─ handler raises StateCorruptError → 503
-  └─ any other exception → 500 "Unexpected server error. Copy the diagnostic log…"
-send JSON response (Cache-Control: no-store, nosniff, CSP, Referrer-Policy: no-referrer)
+dispatch to handler (routes.py → Handler.<method>)
+  ├─ state corrupt? → 503 STATE_UNAVAILABLE "OpenBox library data needs recovery…"
+  ├─ handler raises ApiError → its status + code (GAME_NOT_FOUND, MEDIA_NOT_FOUND, …)
+  ├─ POST handler raises ValueError/OSError/… → 400 BAD_REQUEST {error: message}
+  └─ any other exception → 500 INTERNAL_ERROR "Unexpected server error. Copy the diagnostic log…"
+send JSON response (nosniff, CSP, Referrer-Policy: no-referrer)
 ```
 
-The handler catches `ValueError`, `OSError`, `TypeError`, `AttributeError`, `KeyError`, `IndexError`, `json.JSONDecodeError`, `GameyfinError`, `FileNotFoundError`, `RuntimeError`, and `subprocess.SubprocessError` from POST handlers and returns them as `400` with the message in `error`. State-corruption errors become `503` before handler dispatch. Everything else is logged and returned as `500`.
+Every error response carries a stable `code` and a `request_id`. The request id is a short per-request token that also appears in the diagnostic log, so a screenshot of an error banner can be correlated with the log line.
+
+POST handlers re-raise `ApiError` unchanged and convert `ValueError`, `OSError`, `TypeError`, `AttributeError`, `KeyError`, `IndexError`, `json.JSONDecodeError`, `GameyfinError`, `FileNotFoundError`, `RuntimeError`, and `subprocess.SubprocessError` into `400 BAD_REQUEST` with the message in `error`. State-corruption errors become `503` before handler dispatch. Everything else is logged and returned as `500`.
 
 This is why almost every operation failure you hit through the API is a `400` with a readable, specific message — and why a `500` is genuinely "something the developers need to see," not a normal error path.
 
@@ -60,13 +62,17 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 
 | Status | Envelope | When |
 | --- | --- | --- |
-| 403 | `{"error":"Unauthorized"}` | Missing or wrong token |
-| 400 | `{"error": "<message>"}` | Validation failures, missing prerequisites surfaced by handlers, provider errors, unknown queue/notification actions, malformed payloads |
-| 404 | `{"error":"Not found"}` | Unknown route |
-| 404 | `{"error":"Game not found"}` / `"Media not found"` / `"Document not found"` / `"Platform document not found"` / `"Badge not found"` | Lookups that miss |
+| 403 | `{"error":"Unauthorized","code":"UNAUTHORIZED","request_id":"…"}` | Missing or wrong token |
+| 400 | `{"error": "<message>", "code": "BAD_REQUEST", "request_id": "…"}` | Validation failures, missing prerequisites surfaced by handlers, provider errors, unknown queue/notification actions, malformed payloads |
+| 404 | `{"code": "ROUTE_NOT_FOUND"}` | Unknown route |
+| 404 | `GAME_NOT_FOUND` / `MEDIA_NOT_FOUND` / `DOCUMENT_NOT_FOUND` / `PLATFORM_DOCUMENT_NOT_FOUND` / `BADGE_NOT_FOUND` | Lookups that miss |
 | 409 | `{"error":"Download the LaunchBox metadata database first."}` | Metadata routes before the database exists |
-| 503 | `{"error":"OpenBox library data needs recovery before this operation can continue."}` | Corrupt state file |
-| 500 | `{"error":"Unexpected server error. Copy the diagnostic log from Settings and include it in your report."}` | Unhandled exception |
+| 503 | `{"error":"OpenBox library data needs recovery before this operation can continue.","code":"STATE_UNAVAILABLE"}` | Corrupt state file |
+| 500 | `{"error":"Unexpected server error. Copy the diagnostic log from Settings and include it in your report.","code":"INTERNAL_ERROR"}` | Unhandled exception |
+
+## Versioned surface
+
+The stable contract lives at `/api/v1/*`. Legacy `/api/*` paths keep serving the same handlers for older clients. The v1 prefix currently covers the library, settings, launch, games, queue, tags, notifications, webhooks, playlists, sessions, saves, media, metadata, imports, emulators, profiles, themes, updates, backups, jobs, diagnostics, plugins, recovery, and filter presets. New work targets v1.
 
 ## Limits that apply across routes
 

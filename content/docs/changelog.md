@@ -8,6 +8,27 @@ sidebar: false
 
 OpenBox follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The full file lives in the repository at [`CHANGELOG.md`](https://github.com/vindeckyy/OpenBoxGL/blob/master/CHANGELOG.md). These are the highlights.
 
+## 0.9.0 (2026-08-14)
+
+**Added**
+
+- Engineering foundation: a `make check` gate (lint, compile, tests, coverage floors), a version-sync check, and CI that runs both on push, pull requests, and weekly.
+- Structured API errors with stable machine codes and per-request ids; a versioned `/api/v1` surface; a route registry in `routes.py`.
+- Gzip and conditional GET on the library payload: 5,000 games serve in about 2 ms at 638 KB instead of 13.8 MB.
+- Rolling state snapshots with dry-run recovery, a background jobs listing, and a settings key whitelist that drops unknown keys.
+- Full LaunchBox media catalog downloads: box backs, spines, 3D boxes, clear logos, fanart, banners, title screens, cart fronts, cart backs, discs, and advertisement flyers. Manuals pull a PDF or text manual out of the game's own archive.
+- Platform name mapping ranks exact LaunchBox matches first for names like Game Boy, PlayStation, and GameCube.
+- The UI opens in a chrome-less app window by default, with `--app-window` / `--no-app-window` overrides and a Settings option.
+- The browser UI split into static assets with centralized state, a persistent error banner with request-id copy, dialog accessibility, and a 12px label floor.
+- Release tooling: CycloneDX SBOM generation, Ed25519 release signing with a standard-library verifier, and a release pipeline script.
+- A 23-scenario reliability catalog (`docs/reliability.md`), a support matrix (`SUPPORT.md`), and a triage policy (`TRIAGE.md`).
+
+**Fixed**
+
+- Duplicate media cleanup now scans every media field, not just covers and backgrounds.
+- Latent undefined names in `web_app.py` (`automation.DEFAULT_*`, `contained_path`, `read_limited`) that would have crashed their code paths on first use.
+- Lint debt across the gate rule set: default-argument calls, loop-variable closures, unused variables, lambda assignments, missing `check=` on `subprocess.run`, shebangs, and import placement.
+
 ## 0.8.2 (2026-08-12)
 
 **Fixed**

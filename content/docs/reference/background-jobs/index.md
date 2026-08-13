@@ -60,6 +60,7 @@ Job state is in-memory only: it does not survive a restart, and jobs do not resu
 - POST routes that start a job return `202` with the initial job state; re-POSTing while in flight returns the current state with `200`.
 - Poll the documented status route until `state` is `done` or `error`, inspect `error` (or the job's `errors` list for `media-bulk`, capped at the last 20), then retry only after correcting the input.
 - The diagnostic log records worker failures with the job name and attempt.
+- `GET /api/jobs` returns every live job plus the last 50 finished jobs (`history`), newest first. The Library Audit dialog renders the same data, so a finished metadata sync or failed emulator install stays inspectable after the fact.
 
 ## Related
 

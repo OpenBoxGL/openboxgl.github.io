@@ -10,11 +10,11 @@ OpenBox is maintained by one person in the open, so the roadmap is short and hon
 
 ## In the current release
 
-The [changelog](/changelog/) is the accurate record. The headline pieces in 0.8.x are box art that keeps its natural aspect ratio (covers are no longer cropped into a single frame, so games with non-standard artwork like SNES titles display uncropped), the persistent play queue with normalized tags, the Notification Center, signed webhook automation, and handheld performance profiles that apply TDP via `ryzenadj` on Deck and battery-powered handhelds.
+The [changelog](/changelog/) is the accurate record. The headline pieces in 0.9.0 are the engineering foundation: a verification gate that runs lint, compile, tests, and coverage on every push, a route registry with structured API errors and request ids, gzip-served libraries that load 96% smaller, rolling state snapshots, and the full LaunchBox media catalog (box backs, spines, 3D boxes, logos, fanart, banners, screens, carts, discs, and ads). The desktop UI opens chrome-less by default, and releases ship with SBOM and signing tooling.
 
 ## In progress
 
-The Unreleased section of the app changelog tracks the next batch: full LaunchBox Games Database media downloads (box backs, spines, 3D boxes, clear logos, fanart, banners, title screens, carts, discs, ads, and archive-side manuals) and a chrome-less app window that opens the UI without the default browser. New ideas come from the sources below.
+The Unreleased section of the app changelog tracks the next batch. New ideas come from the sources below.
 
 ## Where ideas come from
 

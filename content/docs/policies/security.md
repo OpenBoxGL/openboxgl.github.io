@@ -13,6 +13,7 @@ Maintainers aim to acknowledge valid reports within 5 business days and provide 
 
 | Version | Support |
 | --- | --- |
+| 0.9.x | Yes |
 | 0.8.x | Yes |
 | 0.7.x | Best effort |
 | 0.6.x | Best effort |

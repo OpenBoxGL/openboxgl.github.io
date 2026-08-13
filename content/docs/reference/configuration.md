@@ -63,7 +63,7 @@ Credentials supplied through the Settings dialog are persisted in the data direc
 
 ## Persisted settings
 
-The Settings dialog saves into `library.json` under `settings`. The save handler (`web_app._save_settings_locked`) validates each field before committing; an invalid value aborts the whole save with a `400` error. The full key list is exposed by `GET /api/settings`. Notable validated limits:
+The Settings dialog saves into `library.json` under `settings`. The save handler (`web_app._save_settings_locked`) validates each field before committing; an invalid value aborts the whole save with a `400` error. Keys must exist in the `settings_schema.py` registry: unknown keys are dropped with a diagnostic log warning rather than persisted. The full key list is exposed by `GET /api/settings`. Notable validated limits:
 
 | Setting | Default | Validation |
 | --- | --- | --- |
@@ -106,7 +106,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `platform_categories` | Built-in mapping | Platform-to-category overrides (Nintendo, Sony, Microsoft, Computer, Arcade, Adventure, Other) |
 | `list_columns` | Defaults | Capped at 12 columns per platform or global view |
 | `library_view` | "grid" | Current persistent view preference |
-| `locale` | "en" | Any string, truncated to 5 characters; unknown locales fall back to English |
+| `locale` | "en" | "en" only in 0.9.0; localization returns in a future release. Unknown locales fall back to English |
 | `hidden_sidebar_sections` | `[]` | Capped at 20 entries |
 | `tray_enabled` | `false` | Boolean — shows system tray icon |
 | `minimize_to_tray` | `false` | Boolean — minimizes to tray instead of closing |
@@ -117,6 +117,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `gameyfin_install_dir` | "" | Absolute path; created if missing, rejected if symlink or non-existent. Empty by default; the UI shows a `~/Games/Gameyfin` placeholder |
 | `gameyfin_provider` | "" | Provider label; falls back to first available |
 | `ludusavi_backup_path` | "" | Optional absolute path for Ludusavi JSON output |
+| `ui_window` | "app" | One of app, browser — whether the UI opens chrome-less or in a browser tab; overridden by `--app-window` / `--no-app-window` |
 
 Two naming details worth knowing:
 
