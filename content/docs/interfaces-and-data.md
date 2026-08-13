@@ -9,7 +9,7 @@ OpenBoxGL ships two interfaces that share one local library. This page explains 
 
 | Interface | Entry point | What you see | Best for |
 | --- | --- | --- | --- |
-| Web UI | `python3 web_app.py` or `openbox` | A browser tab with a three-column workspace: filter sidebar, cover grid or list, detail pane | Full feature set, REST API, Big Box mode |
+| Web UI | `python3 web_app.py` or `openbox` | A chrome-less app window by default (falls back to your browser) with a three-column workspace: filter sidebar, cover grid or list, detail pane | Full feature set, REST API, Big Box mode |
 | Native UI | `python3 openbox.py` or `openbox-native` | A regular Tk desktop window with the same library | Lightweight desktop use |
 
 ### Web UI

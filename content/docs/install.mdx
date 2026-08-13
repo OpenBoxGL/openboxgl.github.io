@@ -77,7 +77,7 @@ The source install uses only the Python standard library — there is no `pip in
   ./OpenBox-x86_64.AppImage
   ```
 
-  The first launch starts the local server, writes the per-launch token files into the data directory, and opens your default browser on `http://127.0.0.1:PORT/?token=...`. If the browser does not open, run from a terminal and copy the printed URL into a browser.
+  The first launch starts the local server, writes the per-launch token files into the data directory, and opens the UI in a chrome-less app window by default (falling back to your default browser) on `http://127.0.0.1:PORT/?token=...`. If the browser does not open, run from a terminal and copy the printed URL into a browser.
 
   Use `--native` for the lightweight Tk interface instead of the Web UI:
 

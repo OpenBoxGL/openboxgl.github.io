@@ -8,7 +8,7 @@ sidebar: false
 
 OpenBox follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The full file lives in the repository at [`CHANGELOG.md`](https://github.com/vindeckyy/OpenBoxGL/blob/master/CHANGELOG.md). These are the highlights.
 
-## 0.9.0 (2026-08-14)
+## 0.9.0 (2026-08-12)
 
 **LaunchBox media catalog and archive manuals**
 
