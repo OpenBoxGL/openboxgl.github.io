@@ -10,24 +10,54 @@ OpenBox follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Se
 
 ## 0.9.0 (2026-08-14)
 
-**Added**
+**LaunchBox media catalog and archive manuals**
 
-- Engineering foundation: a `make check` gate (lint, compile, tests, coverage floors), a version-sync check, and CI that runs both on push, pull requests, and weekly.
-- Structured API errors with stable machine codes and per-request ids; a versioned `/api/v1` surface; a route registry in `routes.py`.
-- Gzip and conditional GET on the library payload: 5,000 games serve in about 2 ms at 638 KB instead of 13.8 MB.
-- Rolling state snapshots with dry-run recovery, a background jobs listing, and a settings key whitelist that drops unknown keys.
-- Full LaunchBox media catalog downloads: box backs, spines, 3D boxes, clear logos, fanart, banners, title screens, cart fronts, cart backs, discs, and advertisement flyers. Manuals pull a PDF or text manual out of the game's own archive.
-- Platform name mapping ranks exact LaunchBox matches first for names like Game Boy, PlayStation, and GameCube.
-- The UI opens in a chrome-less app window by default, with `--app-window` / `--no-app-window` overrides and a Settings option.
-- The browser UI split into static assets with centralized state, a persistent error banner with request-id copy, dialog accessibility, and a 12px label floor.
-- Release tooling: CycloneDX SBOM generation, Ed25519 release signing with a standard-library verifier, and a release pipeline script.
+- Media downloads now cover box backs, box spines, 3D boxes, clear logos, fanart, banners, title screens, cart fronts, cart backs, discs, and advertisement flyers, beyond covers, backgrounds, and screenshots. Every media surface (metadata dialog, bulk download, media audit, artwork gallery, image groups, auto-import) accepts the expanded set.
+- Manuals are not in the LaunchBox feed, so the manual option pulls a PDF or text manual out of the game's own archive, ranking `manual.pdf` first and reporting a "no manual in this archive" note when nothing is found.
+- Platform name mapping ranks exact LaunchBox matches first: `Game Boy` to `Nintendo Game Boy`, `PlayStation` to `Sony Playstation`, `GameCube` to `Nintendo GameCube`, `Xbox` to `Microsoft Xbox`, across 26 aliases.
+
+**Engineering foundation**
+
+- `make check` runs lint, compile checks, the full test suite under coverage, and coverage floors in one command. CI enforces it on push, pull requests, and weekly, and a version-sync check fails when `updates.py` disagrees with any published version spot.
+- The 613-line GET and 195-line POST dispatch chains became a route registry (`routes.py`) with 88 GET and 118 POST entries (including v1 aliases), each a named handler.
+- Structured errors carry stable machine codes (`GAME_NOT_FOUND`, `MEDIA_JOB_RUNNING`, ...) plus a per-request id that appears in the UI and the diagnostic log; POST validation errors become `400 BAD_REQUEST` instead of leaking to the generic 500 path.
+- A versioned `/api/v1` surface aliases the stable routes; legacy paths keep working.
+- The library payload is gzip-compressed once per state change and served with conditional GET: 5,000 games serve in about 2 ms at 638 KB instead of 13.8 MB.
+- Settings saves drop unknown keys against a 72-key whitelist instead of persisting junk.
+
+**Reliability**
+
+- Rolling state snapshots keep the last 5 committed states for point-in-time recovery; `/api/state/recover` gained dry-run preview and snapshot restore modes.
+- Background jobs keep a 50-entry finished history at `/api/jobs`, rendered in the Library Audit dialog.
+- Ctrl-C / SIGTERM stops running sessions and drains webhooks gracefully; the session poll drops to every 10 s when idle.
+- Log redaction now covers RetroAchievements keys and `client_secret` shapes, and `/api/diagnostic` packages a redacted report for bug reports.
+
+**Frontend**
+
+- `index.html` shrank from 3,117 lines to a 485-line shell; JS and CSS serve from `/static/*` with cache headers.
+- All 30 browser state globals moved into one `AppState` object; UI preferences persist through `localStorage`.
+- Server errors surface in a dismissible banner with a "Copy details" action that includes the request id.
+- Dialogs are `aria-modal`, toasts and lifecycle messages are live regions, and the label floor rose to 12px.
+- The interface language selector is honestly English-only until real localization lands.
+- A UI smoke test drives a real server with puppeteer and fails on page errors.
+
+**Release and supply chain**
+
+- CycloneDX 1.4 SBOM generation, Ed25519 release signing with a pure-stdlib verifier, and a release pipeline script that runs everything up to the human publish step.
 - A 23-scenario reliability catalog (`docs/reliability.md`), a support matrix (`SUPPORT.md`), and a triage policy (`TRIAGE.md`).
 
 **Fixed**
 
 - Duplicate media cleanup now scans every media field, not just covers and backgrounds.
-- Latent undefined names in `web_app.py` (`automation.DEFAULT_*`, `contained_path`, `read_limited`) that would have crashed their code paths on first use.
+- Latent undefined names in `web_app.py` that would have crashed their code paths on first use.
 - Lint debt across the gate rule set: default-argument calls, loop-variable closures, unused variables, lambda assignments, missing `check=` on `subprocess.run`, shebangs, and import placement.
+
+**Verification**
+
+- Ran `./run_all_tests.sh`: 45 test files, 0 failures.
+- Ran `make check`: lint, compile, tests, and coverage gates pass (56% total, 44% `web_app.py`).
+- UI smoke test boots a real server and drives the grid with no page errors.
+- Perf bench at 5,000 games: gzip library 1.9ms / 638KB vs 13.7ms / 13.8MB plain.
 
 ## 0.8.2 (2026-08-12)
 
