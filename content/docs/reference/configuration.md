@@ -117,6 +117,28 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `gameyfin_install_dir` | "" | Absolute path; created if missing, rejected if symlink or non-existent. Empty by default; the UI shows a `~/Games/Gameyfin` placeholder |
 | `gameyfin_provider` | "" | Provider label; falls back to first available |
 | `ludusavi_backup_path` | "" | Optional absolute path for Ludusavi JSON output |
+| `cover_grouping` | `"shape"` | String; shape used to group covers in the library |
+| `image_group_by_platform` | `{}` | Object; per-platform image group overrides |
+| `image_group_by_playlist` | `{}` | Object; per-playlist image group overrides |
+| `sidebar_sections` | `["search", "view", "platforms", "playlists", "filters"]` | List of strings; ordered sidebar section names |
+| `platform_documents` | `{}` | Object; per-platform manual/document lists |
+| `filter_presets` | `[]` | List of objects; named filter rules, each needs at least one rule |
+| `import_exclusions` | `[]` | List of strings; paths excluded from import |
+| `emulator_scan_configs` | `[]` | List of objects; per-emulator scan configuration |
+| `tracking_process_name` | `""` | String; process name used when `tracking_mode` is `process_name` |
+| `webhook_attempts` | 3 | 1 to 5 delivery retries per webhook |
+| `webhook_timeout` | 5 | 1 to 15 seconds before delivery times out |
+| `webhooks` | `[]` | At most 32 configs; each needs a URL and at least one event |
+| `theme` | `""` | String; global theme name, empty uses the stock theme |
+| `theme_by_platform` | `{}` | Object; platform to theme name mappings |
+| `bigbox_quick` | `— (auto-managed)` | Derived; presets flagged as Big Box quick actions, capped at 8 |
+| `controller_prompt_pack` | `— (auto-managed)` | String; media pack id driving controller prompts |
+| `controller_prompt_hint` | `""` | String; mapping hint text for the active prompt pack |
+| `active_media_packs` | `[]` | List of strings; media pack ids, appended when a pack is applied |
+| `last_cloud_sync` | `—` | Internal — auto-managed by OpenBox; do not edit |
+| `last_update_check` | `—` | Internal — auto-managed by OpenBox; do not edit |
+| `gameyfin_password_set` | `—` | Internal — auto-managed by OpenBox; do not edit |
+| `gamescope_guest` | `—` | Internal — auto-managed by OpenBox; do not edit |
 
 Two naming details worth knowing:
 
