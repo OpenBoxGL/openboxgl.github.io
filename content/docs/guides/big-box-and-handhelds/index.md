@@ -38,13 +38,13 @@ On Steam Deck, Bazzite, and other gamescope sessions, OpenBoxGL runs as a guest 
 3. Enable Steam Input for that shortcut if you want controller profiles in Big Box.
 4. Return to Game Mode and launch OpenBox. It opens Big Box fullscreen.
 
-Under gamescope, OpenBoxGL detects the guest via environment (`GAMESCOPE_WAYLAND_DISPLAY`, `STEAM_GAMESCOPE_RESTRICTED`, or a `gamescope` desktop name), opens the UI in a kiosk browser (Chromium, Chrome, Brave, or Edge, native or Flatpak), and marks its own window with a dedicated `STEAM_GAME` id (`413091001`) so it is visible under gamescope. Steam titles launched from OpenBox still go through Steam (`steam -applaunch` / `steam://`), so Steam Input and overlays keep working. Non-Steam games get a stable synthetic `STEAM_GAME` id derived from their identity, in the range 700,000,000 to 899,999,999.
+Under gamescope, OpenBoxGL detects the guest via environment (`GAMESCOPE_WAYLAND_DISPLAY`, `STEAM_GAMESCOPE_RESTRICTED`, or a `gamescope` desktop name) and opens Big Box fullscreen in the native window. In the web fallback (`--web`, or when the native host is missing), the UI opens in a kiosk browser (Chromium, Chrome, Brave, or Edge, native or Flatpak), and OpenBoxGL marks that window with a dedicated `STEAM_GAME` id (`413091001`) so it is visible under gamescope. Steam titles launched from OpenBox still go through Steam (`steam -applaunch` / `steam://`), so Steam Input and overlays keep working. Non-Steam games get a stable synthetic `STEAM_GAME` id derived from their identity, in the range 700,000,000 to 899,999,999.
 
-Do not wrap OpenBox in another `gamescope` while already in Game Mode. On a normal desktop, behavior is unchanged unless you pass `--game-mode`. The Flatpak build relies on host tools for window tagging and kiosk mode, so prefer the AppImage for Game Mode.
+Do not wrap OpenBox in another `gamescope` while already in Game Mode. On a normal desktop, behavior is unchanged unless you pass `--game-mode`. The Flatpak build relies on host tools for the kiosk-browser window tagging, so prefer the AppImage for Game Mode.
 
-<Callout type="note" title="How window tagging keeps Steam Input working">
+<Callout type="note" title="How the guest session keeps Steam Input working">
 
-OpenBoxGL marks its own browser window with a dedicated `STEAM_GAME` id (`413091001`) so gamescope treats it as a real app window. Games you launch from inside OpenBox still go through Steam (`steam -applaunch` / `steam://`), so their Input profiles and overlays stay scoped to those titles. Non-Steam games get a stable synthetic `STEAM_GAME` id derived from their identity (range 700,000,000–899,999,999). The tagging is a window property only — it does not change how the game runs.
+OpenBoxGL detects the gamescope guest from the environment and opens Big Box fullscreen in the native window, so gamescope treats it as a real app window. In the web fallback (`--web`), it opens a kiosk browser and marks that window with a dedicated `STEAM_GAME` id (`413091001`) so gamescope treats it as a real app window too. Games you launch from inside OpenBox still go through Steam (`steam -applaunch` / `steam://`), so their Input profiles and overlays stay scoped to those titles. Non-Steam games get a stable synthetic `STEAM_GAME` id derived from their identity (range 700,000,000–899,999,999). The tagging is a window property only — it does not change how the game runs.
 
 </Callout>
 

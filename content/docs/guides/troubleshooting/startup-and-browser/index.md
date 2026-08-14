@@ -20,7 +20,7 @@ The native window renders the same UI as the web UI; both are served by the loop
 | `Permission denied` on an AppImage | The file is not executable; `chmod +x OpenBox-x86_64.AppImage`. |
 | App exits immediately | Run from a terminal and read the printed error. Check `OPENBOX_DATA_DIR` is set before launch (it is read before `.env` bootstrap). |
 | Flatpak fails to find files | The Flatpak uses the FreeDesktop runtime and grants `--filesystem=home`; keep Steam/Heroic/Lutris/ROM folders under home. |
-| Kiosk browser not opening in Game Mode | The UI opens in a kiosk browser (Chromium, Chrome, Brave, Edge; native or Flatpak). If none is installed the fallback may fail; install one. Prefer the AppImage in Game Mode since the Flatpak relies on host tools for window tagging. |
+| Kiosk browser not opening in Game Mode | The web fallback (`--web`) opens the UI in a kiosk browser (Chromium, Chrome, Brave, Edge; native or Flatpak). If none is installed the fallback may fail; install one. The native window (default) needs no browser in Game Mode. Prefer the AppImage in Game Mode since the Flatpak relies on host tools for window tagging. |
 
 ## Window opens but the library looks empty
 

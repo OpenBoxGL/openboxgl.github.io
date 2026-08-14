@@ -10,11 +10,11 @@ OpenBox is maintained by one person in the open, so the roadmap is short and hon
 
 ## In the current release
 
-The [changelog](/changelog/) is the accurate record. The headline pieces in 1.0.0 are the native-first release: a native WebKitGTK window that renders the same UI as the web app (no browser tab, no separate Tk interface), batch LaunchBox metadata auto-match, and Server-Sent Events for session and job updates. The desktop UI opens in the native window by default, and releases ship with SBOM and signing tooling.
+The [changelog](/changelog/) is the accurate record. The headline pieces in 1.0.0 are the native-first release: a native WebKitGTK window that renders the same UI as the web app (no browser tab, no separate Tk interface), batch LaunchBox metadata auto-match, Server-Sent Events for session and job updates, a frozen v1 API contract, and cover grouping in the library grid. The desktop UI opens in the native window by default, and releases ship with SBOM and signing tooling.
 
 ## In progress
 
-The Unreleased section of the app changelog tracks the next batch. New ideas come from the sources below.
+Work in progress is tracked in the app repository: the [CHANGELOG](https://github.com/vindeckyy/OpenBoxGL/blob/master/CHANGELOG.md) for shipped releases and [GitHub issues](https://github.com/vindeckyy/OpenBoxGL/issues) for planned work. New ideas come from the sources below.
 
 ## Where ideas come from
 

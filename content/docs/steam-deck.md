@@ -25,11 +25,11 @@ See [Installation](/install/) for AppImage, Flatpak, and source options.
 3. Enable Steam Input for that shortcut if you want controller profiles in Big Box.
 4. Return to Game Mode and launch OpenBox. It opens Big Box fullscreen.
 
-Do not wrap OpenBox in another `gamescope` while already in Game Mode. On a normal desktop, behavior is unchanged unless you pass `--game-mode`. The Flatpak build relies on host tools for window tagging and kiosk mode, so prefer the AppImage for Game Mode.
+Do not wrap OpenBox in another `gamescope` while already in Game Mode. On a normal desktop, behavior is unchanged unless you pass `--game-mode`. The Flatpak build relies on host tools for the kiosk-browser window tagging, so prefer the AppImage for Game Mode.
 
 ## How Game Mode works
 
-OpenBox detects the gamescope guest via environment (`GAMESCOPE_WAYLAND_DISPLAY`, `STEAM_GAMESCOPE_RESTRICTED`, or a `gamescope` desktop name), opens the UI in a kiosk browser (Chromium, Chrome, Brave, or Edge, native or Flatpak), and marks its own window with a dedicated `STEAM_GAME` id (`413091001`) so it is visible under gamescope.
+OpenBox detects the gamescope guest via environment (`GAMESCOPE_WAYLAND_DISPLAY`, `STEAM_GAMESCOPE_RESTRICTED`, or a `gamescope` desktop name) and opens Big Box fullscreen in the native window. In the web fallback (`--web`, or when the native host is missing), the UI opens in a kiosk browser (Chromium, Chrome, Brave, or Edge, native or Flatpak), and OpenBox marks that window with a dedicated `STEAM_GAME` id (`413091001`) so it is visible under gamescope.
 
 Steam titles launched from OpenBox still go through Steam (`steam -applaunch` / `steam://`), so Steam Input and overlays keep working. Non-Steam games get a stable synthetic `STEAM_GAME` id derived from their identity, in the range 700,000,000 to 899,999,999. The tagging is a window property only; it does not change how the game runs.
 

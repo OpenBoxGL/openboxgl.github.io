@@ -22,15 +22,15 @@ The native window renders the same UI as the web fallback; both serve `index.htm
 
 | Flag | Behavior |
 | --- | --- |
-| `--no-browser` | Start the server without opening a browser. Useful for remote or scripted starts; the printed URL still works. |
-| `--game-mode` | Force gamescope guest behavior (Steam Deck / Bazzite Game Mode). Opens Big Box fullscreen in a kiosk browser. |
+| `--no-browser` | Start the server without opening a window. Useful for remote or scripted starts; the printed URL still works. |
+| `--game-mode` | Force gamescope guest behavior (Steam Deck / Bazzite Game Mode). On the web entry point this opens Big Box fullscreen in a kiosk browser; the native window detects gamescope guests from the environment and needs no flag. |
 | `--uri <openbox://...>` | Dispatch a deep link against a running instance (or start one) and exit. |
 | `--launcher` | Open the rofi/wofi/dmenu keyboard launcher against the running instance and exit. |
 | `--backup [--items a,b] [--keep N]` | Create a library backup from the command line. Default items are `library,settings`. Prints the archive path. |
 | `--restore-backup <archive>` | Restore a backup archive. The archive must be a real `.zip` inside the data directory or `backups/`. Prints the restored item names. |
 | `--web` | Start the loopback web UI in a browser instead of the native window (development). |
-| `--app-window` | Open the UI in a chrome-less app window (browser `--app=` mode) instead of a normal tab. |
-| `--no-app-window` | Open the UI in a normal browser window; overrides the chrome-less default. |
+| `--app-window` | Web entry point only: open the UI in a chrome-less app window (browser `--app=` mode) instead of a normal tab. The native window is unaffected. |
+| `--no-app-window` | Web entry point only: open the UI in a normal browser window; overrides the chrome-less app window default there. The native window is unaffected. |
 
 `--backup` and `--restore-backup` act on the library before the server starts, so they work even when no instance is running. They read `OPENBOX_DATA_DIR` from the environment, like every startup path.
 

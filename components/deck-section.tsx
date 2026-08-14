@@ -9,7 +9,7 @@ const perks = [
   {
     icon: MonitorSmartphone,
     title: "Kiosk fullscreen",
-    body: "Under gamescope, OpenBox opens Big Box in a kiosk browser and tags its window with a dedicated STEAM_GAME id so it is treated as a real app window.",
+    body: "Under gamescope, OpenBox detects the guest session and opens Big Box fullscreen in the native window, so it is treated as a real app window while Steam keeps Input, QAM, and TDP.",
   },
   {
     icon: Zap,

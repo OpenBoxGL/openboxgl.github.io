@@ -6,14 +6,34 @@ sidebar: false
 
 # Changelog
 
-## 1.0.0 (2026-08-13)
+## 1.0.0 (2026-08-14)
 
 **Native-first**
 
-- OpenBox now opens in a native WebKitGTK window by default, rendering the same library UI as the web app instead of a browser tab or the removed Tk interface. The native host owns server lifecycle, single instance, window geometry, minimize-to-tray, and a fallback to the system-browser app window when WebKitGTK is missing.
+- OpenBox now opens in a native WebKitGTK window by default, rendering the same library UI as the web app instead of a browser tab or the removed Tk interface. The C host (`native_host.c`) owns server lifecycle, single instance, window geometry, minimize-to-tray, and a fallback ladder to the system-browser app window (then your default browser) when WebKitGTK is missing; `openbox --web` remains the development opt-out.
+- The `ui_window` app/browser split is removed; the Tk interface no longer ships, and AppImage dependencies drop python3-tk/tcl/tk for WebKitGTK 4.1. CI compiles the native host on every pull request.
+- Native IPC: `/api/native/*` routes report host capabilities dynamically, and a JS↔C bridge drives native dialogs, external opens, reveal-in-file-manager, and Big Box fullscreen.
 - Batch metadata auto-match binds every unmatched game whose title exactly matches the LaunchBox Games Database in one action, instead of matching one game at a time. Only exact normalized-title hits qualify; ambiguous titles are left unmatched.
+
+**State and API contract**
+
+- Schema v5 adds a host-owned `ui_state` block; existing games, settings, playlists, and history migrate untouched.
+- The v1 API contract freezes (`contracts.py` + `v1_contracts.json`, 46 routes) with a CI check that fails when the contract drifts.
+
+**Frontend**
+
 - The topbar regroups into Library, Actions, and Tools zones; session and job events stream over Server-Sent Events with polling kept as a fallback.
-- The `ui_window` app/browser split is removed; native is the default and `--web`/`--app-window` remain for contributors.
+- Grid covers group by aspect ratio by default (persisted as `cover_grouping`), and the dialog manager traps focus and closes on Escape.
+- Scroll-lag fixes: rAF-coalesced grid rendering, backdrop blur removed from the base scroll path, hover-gated cover transitions, and a constrained workspace row.
+
+**Under the hood**
+
+- The 260-method `Handler` class splits into capability mixins under `handlers/` (library, media, imports, sessions, settings, extensions, health, emulators, native, data); `web_app.py` drops from 3,755 to 1,628 lines while response bytes and route wiring stay identical.
+- `docs/adr/0001-native-host.md` and `docs/native-host-contract.md` document the host/server split and IPC contract.
+
+**Verification**
+
+- 47 test files, 0 failures; `make check` gates (lint, compile, tests, coverage floors of 59% total and 65% `web_app.py`, v1 contract check) pass; the UI smoke test drives a real server and asserts the Tools menu opens under every stock theme.
 
 ## 0.9.0 (2026-08-12)
 
