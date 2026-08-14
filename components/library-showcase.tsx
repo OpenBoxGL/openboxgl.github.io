@@ -3,7 +3,7 @@ import Image from "next/image"
 const stats = [
   { value: "30+", label: "Platforms" },
   { value: "1-click", label: "Import" },
-  { value: "134", label: "API routes" },
+  { value: "215", label: "API routes" },
   { value: "5", label: "Themes" },
 ]
 
