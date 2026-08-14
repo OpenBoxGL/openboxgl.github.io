@@ -23,7 +23,7 @@ export function SiteNav() {
     <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
       <nav className="flex w-full max-w-6xl items-center justify-between gap-4 rounded-2xl border border-border bg-background/70 px-3 py-2.5 pl-4 backdrop-blur-xl">
         <a href={onDocs ? "/" : "#top"} className="flex items-center gap-2.5" aria-label="OpenBox home">
-          <span className="relative block h-8 w-8 overflow-hidden rounded-md drop-shadow-[0_0_12px_oklch(0.7_0.19_46_/_50%)]">
+          <span className="relative block h-8 w-8 overflow-hidden rounded-md drop-shadow-[0_0_12px_oklch(0.802_0.111_83_/_50%)]">
             <Image
               src="/openbox-logo.png"
               alt="OpenBox logo"

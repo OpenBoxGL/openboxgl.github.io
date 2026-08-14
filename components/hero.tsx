@@ -31,7 +31,7 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-0 grid-backdrop opacity-60" aria-hidden="true" />
       <div
         className="pointer-events-none absolute left-1/2 top-0 h-[520px] w-[820px] -translate-x-1/2 rounded-full opacity-50 blur-[120px]"
-        style={{ background: "radial-gradient(closest-side, oklch(0.7 0.19 46 / 40%), transparent)" }}
+        style={{ background: "radial-gradient(closest-side, oklch(0.802 0.111 83 / 35%), transparent)" }}
         aria-hidden="true"
       />
       <div
@@ -46,9 +46,9 @@ export function Hero() {
           <a
             href="/changelog/"
             className="rounded border border-border bg-secondary px-1.5 py-0.5 text-cyan transition-colors hover:text-primary"
-            aria-label="Open the changelog for v0.9.0"
+            aria-label="Open the changelog for v1.0.0"
           >
-            v0.9.0
+            v1.0.0
           </a>
           {hudItems.map((h, i) => (
             <span key={h} className="flex items-center gap-3">

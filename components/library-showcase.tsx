@@ -27,7 +27,7 @@ export function LibraryShowcase() {
         <div className="group relative rounded-2xl border border-border bg-card p-2 shadow-2xl">
           <div
             className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-100"
-            style={{ background: "linear-gradient(120deg, oklch(0.7 0.19 46 / 30%), oklch(0.8 0.13 210 / 25%))" }}
+            style={{ background: "linear-gradient(120deg, oklch(0.802 0.111 83 / 30%), oklch(0.785 0.085 206 / 25%))" }}
             aria-hidden="true"
           />
           <div className="relative overflow-hidden rounded-xl border border-border">

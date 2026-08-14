@@ -12,7 +12,7 @@ export function BigBoxShowcase() {
     <section id="bigbox" className="relative overflow-hidden px-4 py-24">
       <div
         className="pointer-events-none absolute right-0 top-1/4 h-[500px] w-[600px] rounded-full opacity-40 blur-[130px]"
-        style={{ background: "radial-gradient(closest-side, oklch(0.8 0.13 210 / 35%), transparent)" }}
+        style={{ background: "radial-gradient(closest-side, oklch(0.785 0.085 206 / 30%), transparent)" }}
         aria-hidden="true"
       />
       <div className="relative mx-auto max-w-6xl">
