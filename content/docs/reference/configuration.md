@@ -106,7 +106,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `platform_categories` | Built-in mapping | Platform-to-category overrides (Nintendo, Sony, Microsoft, Computer, Arcade, Adventure, Other) |
 | `list_columns` | Defaults | Capped at 12 columns per platform or global view |
 | `library_view` | "grid" | Current persistent view preference |
-| `locale` | "en" | "en" only in 0.9.0; localization returns in a future release. Unknown locales fall back to English |
+| `locale` | "en" | English only; localization returns in a future release. Unknown locales fall back to English |
 | `hidden_sidebar_sections` | `[]` | Capped at 20 entries |
 | `tray_enabled` | `false` | Boolean — shows system tray icon |
 | `minimize_to_tray` | `false` | Boolean — minimizes to tray instead of closing |
