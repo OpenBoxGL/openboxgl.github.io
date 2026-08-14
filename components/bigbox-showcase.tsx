@@ -31,7 +31,7 @@ export function BigBoxShowcase() {
           <div className="overflow-hidden rounded-xl border border-border">
             <Image
               src="/bigbox-mode.png"
-              alt="OpenBox Big Box fullscreen mode showing Chrono Trigger box art, description and a large green Play button with controller hints"
+              alt="OpenBox Big Box fullscreen mode showing Chrono Trigger box art, description and a large Play button with controller hints"
               width={1920}
               height={1080}
               className="w-full"
