@@ -46,4 +46,4 @@ Drop the file somewhere on disk and use **Import CSS theme** with its absolute p
 
 </Callout>
 
-Themes are scoped to the Web UI; the native Tk interface has its own fixed palette.
+Themes apply to the single UI rendered in both the native window and the web fallback.

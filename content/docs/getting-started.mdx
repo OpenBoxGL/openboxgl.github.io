@@ -7,7 +7,7 @@ This path is for a first run with a local executable folder. Use a disposable fo
 
 <Callout type="note" title="What happens under the hood">
 
-When you start the Web UI for the first time, OpenBoxGL does several things silently: it creates your data directory (`~/.local/share/openbox-game-launcher` by default), generates a per-launch `server.token`, writes the port to `server.port`, and initializes an empty `library.json` with schema version 4. You won't see these files unless you look in the data directory, but they're the reason nothing gets corrupted when the server restarts unexpectedly. See [Interfaces and data](/interfaces-and-data/) for where every file lives.
+When you start OpenBox for the first time, OpenBoxGL does several things silently: it creates your data directory (`~/.local/share/openbox-game-launcher` by default), generates a per-launch `server.token`, writes the port to `server.port`, and initializes an empty `library.json` with schema version 5. You won't see these files unless you look in the data directory, but they're the reason nothing gets corrupted when the server restarts unexpectedly. See [Interfaces and data](/interfaces-and-data/) for where every file lives.
 
 </Callout>
 
@@ -15,7 +15,7 @@ The goal is a full loop: install, import one game, see it in the library, launch
 
 ## Before you start
 
-- Follow [Installation](/install/) and start the Web UI. You should see the three-column workspace: filters on the left, an empty cover grid in the center, and the detail pane on the right.
+- Follow [Installation](/install/) and start OpenBox. You should see the three-column workspace: filters on the left, an empty cover grid in the center, and the detail pane on the right.
 - Make one folder containing a single executable `.sh` file. For a realistic first test, use a short script like this:
 
 ```bash
@@ -25,27 +25,27 @@ echo "OpenBox launch works" && sleep 3
 
 Make it executable (`chmod +x`). A non-executable file with no launch command is the most common first-launch failure, and the app now reports it explicitly instead of silently failing.
 
-The Web UI workspace looks like this once you have a library entry — filters on the left, the cover grid in the center, and the selected game's detail pane on the right:
+The workspace looks like this once you have a library entry: filters on the left, the grouped cover grid in the center, and the selected game's detail pane on the right.
 
-![The OpenBox Web UI showing the library grid, filter rail, and game detail pane](/openbox-screenshot.png)
+![The OpenBox native window showing the library grid, filter rail, and game detail pane](/openbox-screenshot.png)
 
 ## Steps
 
 <Steps>
 
-<li><strong>Install and start the Web UI.</strong> From the AppImage, Flatpak, or source as described on the [Installation](/install/) page. When the library is empty, the welcome wizard appears; you can close it and use the topbar buttons, or start from its **Import a ROM or game folder** step.</li>
+<li><strong>Install and start OpenBox.</strong> From the AppImage, Flatpak, or source as described on the [Installation](/install/) page. When the library is empty, the welcome wizard appears; you can close it and use the topbar buttons, or start from its **Import a ROM or game folder** step.</li>
 
 <Callout type="note">
 
-**You should see:** An empty cover grid in the center, no cards in any view. The welcome wizard suggests importing a folder or scanning for emulators. If the browser did not open, look at the terminal — OpenBoxGL printed `http://127.0.0.1:PORT/?token=...`. Open that URL manually.
+**You should see:** An empty cover grid in the center, no cards in any view. The welcome wizard suggests importing a folder or scanning for emulators. If the window did not open, run OpenBox from a terminal and read the printed error. In `--web` mode OpenBoxGL prints `http://127.0.0.1:PORT/?token=...`; open that URL yourself.
 
 </Callout>
 
-<li><strong>Choose Import Folder.</strong> Click **Import Folder** in the topbar (or the wizard's folder step). The web UI asks for the absolute path of the folder to import. Because the browser cannot browse your filesystem, you type or paste the path, for example `/home/you/test-game`.</li>
+<li><strong>Choose Import Folder.</strong> Click **Import Folder** in the topbar (or the wizard's folder step). In the native window a folder picker dialog opens, so you choose the folder directly. In the browser fallback (`--web`) the app asks for the absolute path of the folder to import, and you type or paste it, for example `/home/you/test-game`.</li>
 
 <Callout type="note">
 
-**You should see:** A text input field labeled "Folder path". Type or paste the path and press Enter. There is no file picker — you must provide the full path.
+**You should see:** In the native window, a GTK folder picker. Choose the folder and confirm. In the browser fallback, a text input field labeled "Folder path"; type or paste the path and press Enter. The browser cannot browse your filesystem, so the fallback always asks for the full path.
 
 </Callout>
 
@@ -109,11 +109,11 @@ Open the game detail view. The message tells you which part is missing:
 
 ### The session reports a failure
 
-An immediate exit with a non-zero code reports "Session failed" with the exit code and a hint to check the launch command and emulator install. If your test script exits 0, the session is recorded as a normal end. If you never see the lifecycle overlay at all, check that the browser tab still holds the current token (closing and reopening the tab on the same server is fine; starting a second server instance opens a new token, and the old tab keeps working because the token lives in the URL).
+An immediate exit with a non-zero code reports "Session failed" with the exit code and a hint to check the launch command and emulator install. If your test script exits 0, the session is recorded as a normal end. If you never see the lifecycle overlay at all, check that the window still holds the current token: closing and reopening the window on the same server is fine. Starting a second server instance opens a new token, and the original window keeps working because the token lives in its URL.
 
-### The browser did not open
+### The window did not open
 
-Run the entry point from a terminal. OpenBoxGL prints `http://127.0.0.1:PORT/?token=...` and you can open that URL yourself. The server binds to loopback only; nothing is exposed to the network.
+Run the entry point from a terminal. In `--web` mode, OpenBoxGL prints `http://127.0.0.1:PORT/?token=...` and you can open that URL yourself. If the native window fails, the launcher prints an install hint for WebKitGTK and falls back to a chrome-less app window, then your default browser. The server binds to loopback only; nothing is exposed to the network.
 
 ### I imported the wrong folder
 

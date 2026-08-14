@@ -3,7 +3,7 @@ title: Library overview
 description: Browse, search, and safely maintain a mixed Linux game library.
 ---
 
-OpenBoxGL presents imported games in a searchable grid or list. Select a card to open its detail pane, where metadata, artwork, launch, saves, and history stay together. The Web UI keeps one top bar of actions: **Library**, **Add Game**, **Import Folder**, **Import Steam**, **Import Heroic**, **Import Lutris**, **Import Arcade**, **Emulators**, **Settings**, **Big Box**, **Running**, **History**, **Themes**, **Save Filter**, **Save Preset**, **Playlists**, **Achievements**, **Plugins**, **Discovery**, **Storefronts**, **Media**, **Health**, **Bulk Edit**, **Backup**, **Fullscreen**, **Queue**, **Tags**, **Notifications**, and **Webhooks**.
+OpenBoxGL presents imported games in a searchable grid or list. Select a card to open its detail pane, where metadata, artwork, launch, saves, and history stay together. The top bar is grouped into three zones. The **Library** zone holds **Library**, **Add Game**, and **Import Folder**. The **Actions** zone holds **Big Box**, **Running**, and **Queue**. The **Tools** menu holds the rest: **Import Steam**, **Import Heroic**, **Import Lutris**, **Import Arcade**, **Emulators**, **Settings**, **History**, **Themes**, **Save Filter**, **Save Preset**, **Playlists**, **Achievements**, **Plugins**, **Discovery**, **Storefronts**, **Media**, **Health**, **Bulk Edit**, **Backup**, **Fullscreen**, **Tags**, **Notifications**, and **Webhooks**.
 
 <Callout type="tip" title="Why the library never gets broken by reordering">
 
@@ -47,4 +47,4 @@ Removing a game asks twice: first to confirm the library entry removal, then whe
 
 ## Source and status
 
-Capability status belongs to the [parity matrix](/reference/parity/), maintained from `PARITY.md`. Library data lives in `~/.local/share/openbox-game-launcher/library.json` unless `OPENBOX_DATA_DIR` points elsewhere. State is schema version 4, written atomically with a `.bak` last-known-good copy beside it; recovery is covered in [Data and recovery](/reference/data-and-recovery/).
+Capability status belongs to the [parity matrix](/reference/parity/), maintained from `PARITY.md`. Library data lives in `~/.local/share/openbox-game-launcher/library.json` unless `OPENBOX_DATA_DIR` points elsewhere. State is schema version 5, written atomically with a `.bak` last-known-good copy beside it; recovery is covered in [Data and recovery](/reference/data-and-recovery/).

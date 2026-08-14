@@ -3,7 +3,7 @@ title: REST API
 description: Use the local authenticated HTTP API for automation.
 ---
 
-The Web UI exposes a local REST API for automation and third-party tooling. The server binds to loopback only and requires a per-launch token on every request. This page is the index; each operation group has its own reference page, and [How OpenBoxGL works](/reference/how-it-works/) explains the server, the error contract, and the lifecycle.
+The app exposes a local REST API for automation and third-party tooling. The server binds to loopback only and requires a per-launch token on every request. This page is the index; each operation group has its own reference page, and [How OpenBoxGL works](/reference/how-it-works/) explains the server, the error contract, and the lifecycle.
 
 ## Quickstart
 
@@ -29,7 +29,7 @@ curl -s -X POST -H "X-OpenBox-Token: $TOKEN" \
   http://127.0.0.1:$PORT/api/favorite
 ```
 
-Replace `GAME_ID` with a real `game-<hex>` id from `/api/library`. The token and port live only while the Web UI is running — both files are deleted when the server stops.
+Replace `GAME_ID` with a real `game-<hex>` id from `/api/library`. The token and port live only while the app is running; both files are deleted when the server stops.
 
 <Callout type="caution" title="Prefer the header over the query string">
 

@@ -10,7 +10,7 @@ OpenBox is maintained by one person in the open, so the roadmap is short and hon
 
 ## In the current release
 
-The [changelog](/changelog/) is the accurate record. The headline pieces in 0.9.0 are the engineering foundation: a verification gate that runs lint, compile, tests, and coverage on every push, a route registry with structured API errors and request ids, gzip-served libraries that load 96% smaller, rolling state snapshots, and the full LaunchBox media catalog (box backs, spines, 3D boxes, logos, fanart, banners, screens, carts, discs, and ads). The desktop UI opens chrome-less by default, and releases ship with SBOM and signing tooling.
+The [changelog](/changelog/) is the accurate record. The headline pieces in 1.0.0 are the native-first release: a native WebKitGTK window that renders the same UI as the web app (no browser tab, no separate Tk interface), batch LaunchBox metadata auto-match, and Server-Sent Events for session and job updates. The desktop UI opens in the native window by default, and releases ship with SBOM and signing tooling.
 
 ## In progress
 

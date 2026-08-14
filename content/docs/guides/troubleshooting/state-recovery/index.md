@@ -7,7 +7,7 @@ OpenBoxGL writes library state atomically with a last-known-good backup, so a cr
 
 ## How to read the state
 
-- The library is `library.json` (schema version 4) with a `.bak` last-known-good copy and a `.lock` file beside it. Writes are atomic and owner-only.
+- The library is `library.json` (schema version 5) with a `.bak` last-known-good copy and a `.lock` file beside it. Writes are atomic and owner-only.
 - Stable game IDs (`game-<hex>`) survive reordering; legacy index-suffixed IDs are kept as aliases (`legacy_game_ids`).
 
 ## When recovery is needed
@@ -32,7 +32,7 @@ Recovery (`POST /api/state/recover`) loads the `.bak` file, normalizes it, and w
 ## Preventing data loss
 
 - Back up the whole data directory before manual intervention: copy `library.json` and `library.json.bak` together.
-- Schema versions migrate in place on load (v1 → v4); a version above 4, below 1, or with no migration available raises `StateCorruptError` instead of guessing.
+- Schema versions migrate in place on load (v1 → v5); a version above 5, below 1, or with no migration available raises `StateCorruptError` instead of guessing.
 - The `.bak` is always at least as fresh as the primary commit that preceded the last write, because it is written before the swap.
 
 ## See also

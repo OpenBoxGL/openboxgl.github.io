@@ -5,7 +5,7 @@ description: A code-level guide to startup, state, imports, launching, sessions,
 
 This page is for developers and maintainers who want to follow a real OpenBoxGL operation through the code. It starts at process startup, follows a library entry through import and launch, then covers the workers and extension points that sit around that path.
 
-OpenBoxGL has a local application core with two presentation shells. The Web UI is a browser client of a loopback HTTP server. The native UI is a separate Tk presentation layer. Both use the same data directory and state-store rules for durable library data, but only the running Web UI process owns its live browser session maps and game process maps.
+OpenBoxGL has a local application core with one presentation layer served by two hosts. The web UI is the loopback HTTP server; the native window is a small C WebKitGTK shim that spawns that same server as a child and renders the identical `index.html`. Both hosts use the same data directory and state-store rules for durable library data, and both run the same server process, so there is no second presentation stack to keep in parity.
 
 That distinction explains most of the architecture. Durable facts such as games, settings, playlists, queue entries, notifications, and completed history belong in `library.json`. Temporary facts such as an open dialog, an active browser selection, a running `Popen` object, or a queued worker live in memory and disappear when their process stops.
 
@@ -29,12 +29,12 @@ The application is easiest to understand as a set of boundaries around one local
 
 ```text
 AppImage or source entry point
-  -> web_app.main() or openbox.py
+  -> native_host (C WebKitGTK) or web_app.py --web
   -> environment and data-directory selection
   -> JsonStateStore and library bootstrap
-  -> browser shell or native Tk shell
+  -> native window or browser shell
 
-Web shell
+Web shell (either host)
   -> ThreadingHTTPServer on 127.0.0.1 and an ephemeral port
   -> token-authenticated Handler routes
   -> focused domain modules
@@ -54,11 +54,11 @@ Launch path
   -> save backup, integrations, stop event, and after_session plugins
 ```
 
-The composition root for the Web UI is `web_app.py`. The shared launch and data-directory entry points are in `openbox.py`. Persistence rules are in `state_store.py`. The browser implementation is the single `index.html` file. Other modules own narrower rules, such as archive safety, import adapters, metadata, saves, integrations, plugins, themes, and jobs.
+The composition root is `web_app.py`, which owns the loopback server and the domain logic. The native host is `native_host.c`, a C shim that spawns `web_app.py --no-browser` and renders its `index.html` in a WebKitGTK window. Shared launch and data-directory entry points live in `openbox.py`. Persistence rules are in `state_store.py`. The single renderer is `index.html`; other modules own narrower rules, such as archive safety, import adapters, metadata, saves, integrations, plugins, themes, and jobs.
 
 ## Startup and process ownership
 
-The normal Web UI startup path is in `web_app.main()`. The native path is in `openbox.py`. The shell scripts and AppImage wrapper select which Python entry point runs, but they do not become a second application layer.
+The normal native startup path is `native_host` spawning `web_app.main()` with `--no-browser`. The web development path is `web_app.main()` directly. The shell scripts and AppImage wrapper select which host runs, but they do not become a second application layer.
 
 ### Web UI startup order
 
@@ -88,16 +88,16 @@ The server asks the operating system for port `0`, which means the final port is
 
 Configured startup and shutdown commands are parsed with `shlex.split()`. Their first executable path is expanded, and the command runs in a new process session. Startup command failures are logged or ignored by the current implementation rather than becoming a different application startup mode.
 
-### Two shells, one durable data boundary
+### Two hosts, one server, one durable data boundary
 
-| Shell | Entry point | Owns | Does not own |
+| Host | Entry point | Owns | Does not own |
 | --- | --- | --- | --- |
-| Web UI | `web_app.py` and `index.html` | HTTP routes, browser state, Big Box, integrations, plugin hooks, live process maps, session polling | A durable browser database or a separate library format |
-| Native UI | `openbox.py` | Lightweight Tk presentation and direct launch controls | Web routes, browser rendering, web plugin flow, and Web UI live-session maps |
+| Native window | `native_host` (spawns `web_app.py --no-browser`) | Window chrome, single instance, tray, geometry, native dialogs | Application logic, HTTP routes |
+| Web UI | `web_app.py` and `index.html` | HTTP routes, Big Box, integrations, plugin hooks, live process maps, session events | A durable browser database or a separate library format |
 
-Both shells use the same `library.json` and the same sidecar lock. The lock serializes normal state-store transactions across processes. It does not make every in-memory view instantly consistent, and it cannot protect a process that edits `library.json` directly without using the store's lock.
+Both hosts run the same server and the same `index.html`, so they share one durable data boundary and one code path. The lock serializes normal state-store transactions across processes. It does not make every in-memory view instantly consistent, and it cannot protect a process that edits `library.json` directly without using the store's lock.
 
-The native shell can launch games with its own presentation path. The Web UI launch path adds stable-ID resolution, Web UI process tracking, performance handling, and Web UI plugin hooks. A feature implemented in only one shell is therefore not automatically available in the other shell.
+The native host is deliberately dumb: it owns chrome, not rules. Every business rule stays in the Python server, so a feature is available in both hosts automatically.
 
 ### Durable state and process-local state
 
@@ -106,7 +106,7 @@ The native shell can launch games with its own presentation path. The Web UI lau
 | Durable library state | Games, profiles, settings, playlists, queue, notifications | Survives restart | `library.json` |
 | Durable completed-session state | Game name, start time, seconds, exit code when history tracking is enabled | Survives restart | `library.json` history |
 | Durable files | Media, save archives, library backups, themes, plugins, metadata database | Survives restart | Data-directory subdirectories |
-| Web runtime state | `RUNNING`, `PROCESSES`, `SESSION_EVENTS`, browser caches | One Web UI process | Python memory |
+| Web runtime state | `RUNNING`, `PROCESSES`, `SESSION_EVENTS`, server caches | One server process | Python memory |
 | Worker state | Job records, cancellation events, feature-specific progress maps | One process | Python memory, with some result files persisted by workers |
 | Browser state | Selected game, filters, open menus, dialog contents, polling timers | One browser page | JavaScript memory and the URL where applicable |
 
@@ -154,26 +154,27 @@ The environment variable must be available before startup selects `DATA`. An `.e
 
 ### State shape and migration
 
-`default_state()` creates schema version 4 with these top-level collections:
+`default_state()` creates schema version 5 with these top-level collections:
 
 ```json
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "games": [],
   "profiles": {},
   "history": [],
   "settings": {},
   "playlists": [],
   "queue": [],
-  "notifications": []
+  "notifications": [],
+  "ui_state": {}
 }
 ```
 
-The migration path is ordered. Version 1 was a bare game list. Version 2 wrapped that list in a state object and added the main collections. Version 3 replaced index-suffixed game IDs with identity-derived IDs and retained the old IDs as `legacy_game_ids` aliases. Version 4 added queue and notification collections and repaired their caps and basic types.
+The migration path is ordered. Version 1 was a bare game list. Version 2 wrapped that list in a state object and added the main collections. Version 3 replaced index-suffixed game IDs with identity-derived IDs and retained the old IDs as `legacy_game_ids` aliases. Version 4 added queue and notification collections and repaired their caps and basic types. Version 5 added the host-owned `ui_state` block (window geometry, last session, single-instance flag) and left every existing field untouched.
 
 The loader rejects versions below 1, versions above the current schema, and a version for which no migration exists. Corrupt JSON, a state value of the wrong top-level type, a non-list `games` collection, a non-dictionary game, or a game without a usable ID raises `StateCorruptError`. The API turns that condition into a recovery response instead of silently discarding the library.
 
-Normalization is deliberately selective. Unknown top-level and per-game fields are retained. Known fields such as IDs, queue, notifications, and tags are repaired or capped. A schema-4 file can use a fast path when its required keys and basic collection shapes already look valid. That fast path does not prove that every nested settings, playlist, queue, or notification value has valid application semantics. Feature code still validates its own input at the boundary where it uses it.
+Normalization is deliberately selective. Unknown top-level and per-game fields are retained. Known fields such as IDs, queue, notifications, and tags are repaired or capped. A schema-5 file can use a fast path when its required keys and basic collection shapes already look valid. That fast path does not prove that every nested settings, playlist, queue, or notification value has valid application semantics. Feature code still validates its own input at the boundary where it uses it.
 
 ### Stable identity
 
@@ -190,7 +191,7 @@ The store has two locks:
 - an in-process `threading.RLock` for callers sharing one Python process;
 - a sidecar file lock on `.<state filename>.lock` for cooperating OpenBoxGL processes.
 
-`update()` acquires the locks, reloads the current file, passes that state to the mutator, normalizes the result, and writes while the exclusive lock remains held. The transaction is therefore serialized across the Web UI and native UI when both use the store. Direct edits to `library.json` bypass that guarantee.
+`update()` acquires the locks, reloads the current file, passes that state to the mutator, normalizes the result, and writes while the exclusive lock remains held. The transaction is therefore serialized across the native host and the web UI when both run the server. Direct edits to `library.json` bypass that guarantee.
 
 Loads use a file signature containing metadata such as modification time, size, and inode. A matching signature can reuse the in-memory cache. This avoids repeated normalization and JSON decoding for unchanged files. It is metadata-based rather than a content hash, so an external writer that preserves all signature fields could evade cache invalidation. Normal application writes change the signature and invalidate the cache.
 
@@ -263,7 +264,7 @@ Imports turn an external source into normalized game dictionaries. Import adapte
 
 ### Folder import
 
-A browser folder import starts with an absolute path because the browser cannot browse the host filesystem itself:
+A folder import in the native window starts with a GTK file dialog. In the browser fallback it starts with an absolute path, because the browser cannot browse the host filesystem itself:
 
 ```text
 index.html import action
@@ -528,7 +529,7 @@ Keep `web_app.py` as orchestration when a feature already has a focused owner. K
 
 ## Where to go next
 
-- [Interfaces and data](/interfaces-and-data/) for the two shells and the data-directory layout.
+- [Interfaces and data](/interfaces-and-data/) for the two hosts and the data-directory layout.
 - [Data and recovery](/reference/data-and-recovery/) for schema caps, recovery routes, and write details.
 - [Command tokens](/reference/command-tokens/) for launch command construction.
 - [Emulators and launching](/guides/emulators-and-launching/) for profiles and dependencies.

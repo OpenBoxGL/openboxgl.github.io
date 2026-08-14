@@ -3,7 +3,7 @@ title: Queue, tags, and notifications
 description: Manage the persistent play queue, normalized tags, notifications, and webhooks.
 ---
 
-The Web UI's Queue, Tags, Notifications, and Webhooks dialogs are opened from the top bar. All of them are persistent local state stored in the library file (schema version 4).
+OpenBox's Queue, Tags, Notifications, and Webhooks dialogs are opened from the top bar. All of them are persistent local state stored in the library file (schema version 5).
 
 <Callout type="note" title="Why these caps matter for automation">
 

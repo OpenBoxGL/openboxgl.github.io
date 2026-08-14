@@ -1,6 +1,6 @@
 ---
 title: Data and recovery
-description: Understand schema version 4 state files and recovery behavior.
+description: Understand schema version 5 state files and recovery behavior.
 ---
 
 The library is one schema-versioned JSON file with a last-known-good sidecar, cross-process locking, and atomic owner-only writes. This page documents the exact layout, the migration path, stable IDs, caps, and recovery.
@@ -30,15 +30,16 @@ Every read and write happens under the file lock, so two OpenBoxGL processes (We
 
 ## Schema versions and migration
 
-The current schema is version 4 (`STATE_SCHEMA_VERSION`). Older files migrate in place on load:
+The current schema is version 5 (`STATE_SCHEMA_VERSION`). Older files migrate in place on load:
 
 | From | Migration |
 | --- | --- |
 | v1 (bare game list) | Wrapped into a state object, gains `profiles`, `history`, `settings`, `playlists` |
 | v2 | Index-suffixed IDs (`game-<24 hex>-<n>`) are replaced by stable IDs; the old ID moves into `legacy_game_ids` as an alias |
 | v3 | Gains `queue` and `notifications`, capped at 500 and 200 entries; non-list game `tags` become `[]` |
+| v4 | Gains the host-owned `ui_state` block (window geometry and native-host preferences); games, settings, playlists, and history are unchanged |
 
-Unknown fields survive migration; only known collections are normalized. A schema version above 4, below 1, or with no migration available raises `StateCorruptError` instead of guessing. A complete v4 object takes a fast path without normalization.
+Unknown fields survive migration; only known collections are normalized. A schema version above 5, below 1, or with no migration available raises `StateCorruptError` instead of guessing. A complete v5 object takes a fast path without normalization.
 
 ## Stable game IDs
 

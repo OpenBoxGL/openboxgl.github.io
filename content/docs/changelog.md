@@ -6,9 +6,17 @@ sidebar: false
 
 # Changelog
 
-OpenBox follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The full file lives in the repository at [`CHANGELOG.md`](https://github.com/vindeckyy/OpenBoxGL/blob/master/CHANGELOG.md). These are the highlights.
+## 1.0.0 (2026-08-13)
+
+**Native-first**
+
+- OpenBox now opens in a native WebKitGTK window by default, rendering the same library UI as the web app instead of a browser tab or the removed Tk interface. The native host owns server lifecycle, single instance, window geometry, minimize-to-tray, and a fallback to the system-browser app window when WebKitGTK is missing.
+- Batch metadata auto-match binds every unmatched game whose title exactly matches the LaunchBox Games Database in one action, instead of matching one game at a time. Only exact normalized-title hits qualify; ambiguous titles are left unmatched.
+- The topbar regroups into Library, Actions, and Tools zones; session and job events stream over Server-Sent Events with polling kept as a fallback.
+- The `ui_window` app/browser split is removed; native is the default and `--web`/`--app-window` remain for contributors.
 
 ## 0.9.0 (2026-08-12)
+
 
 **LaunchBox media catalog and archive manuals**
 

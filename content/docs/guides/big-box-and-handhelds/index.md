@@ -3,7 +3,7 @@ title: Big Box and handhelds
 description: Browse a library fullscreen with controller-oriented layouts.
 ---
 
-Big Box is the fullscreen controller-oriented view of the Web UI. Click **Big Box** in the top bar (or launch with `?deeplink=bigbox`; OpenBoxGL also opens Big Box automatically when it detects a gamescope guest session).
+Big Box is the fullscreen controller-oriented view of the app. Click **Big Box** in the top bar (or launch with `?deeplink=bigbox`; OpenBoxGL also opens Big Box automatically when it detects a gamescope guest session).
 
 ## Layouts
 

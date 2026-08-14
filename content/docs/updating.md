@@ -5,6 +5,12 @@ description: Update AppImage installations and understand package boundaries.
 
 OpenBoxGL has one built-in updater and it is for the AppImage only. This page explains what it verifies, what happens during an update, what can go wrong, and how the other installation types update instead.
 
+## Upgrading to 1.0.0
+
+Version 1.0.0 removes the Tk interface and opens a native WebKitGTK window by default. Your library data is untouched: the same `library.json` in `~/.local/share/openbox-game-launcher` (or `OPENBOX_DATA_DIR`) keeps working, and the schema migrates to version 5 automatically on first launch (it only adds a host-owned `ui_state` block; games, settings, playlists, and history are unchanged). No re-import or re-download is needed.
+
+The one behavioral change to expect is the window itself: instead of a browser tab, `openbox` opens the native window. `openbox --web` still opens the loopback web UI in a browser for development, and if WebKitGTK is missing the launcher falls back to a chrome-less app window rather than failing.
+
 ## Which installs get the built-in updater
 
 | Installation | Updater | How to update |

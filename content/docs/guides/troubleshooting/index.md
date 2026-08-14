@@ -7,7 +7,7 @@ Start with the diagnostic log and the exact visible error. **Settings** has **Co
 
 ## Startup and browser issues
 
-- The Web UI binds to `127.0.0.1` on a random port. The port and token are written to `<data-dir>/server.port` and `<data-dir>/server.token`; the URL is printed to the terminal. If the browser shows "Could not reach the OpenBox server", check that `web_app.py` is still running.
+- The server binds to `127.0.0.1` on a random port. The port and token are written to `<data-dir>/server.port` and `<data-dir>/server.token`; the URL is printed to the terminal. If the window shows "Could not reach the OpenBox server", check that the server process is still running. In `--web` mode, the same message in the browser has the same cause.
 - `--no-browser` skips opening a browser; useful for remote or scripted starts. `OPENBOX_DATA_DIR` must be set before launch to change the data directory.
 - On Steam Deck / Bazzite Game Mode, the UI opens in a kiosk browser (Chromium, Chrome, Brave, Edge; native or Flatpak). If no kiosk browser is installed the fallback may fail; install one of them. Prefer the AppImage build in Game Mode, since the Flatpak build relies on host tools for window tagging.
 - If an older AppImage build opened but never showed a window after desktop integration, install v0.6.0 or newer, remove the old menu entry, and re-add the AppImage.
@@ -34,7 +34,7 @@ Start with the diagnostic log and the exact visible error. **Settings** has **Co
 
 ## State recovery
 
-- Library state is `library.json` (schema version 4) with a `.bak` last-known-good copy and a `.lock` file beside it. Writes are atomic and owner-only.
+- Library state is `library.json` (schema version 5) with a `.bak` last-known-good copy and a `.lock` file beside it. Writes are atomic and owner-only.
 - If the primary file cannot be read, operations return 503 with "OpenBox library data needs recovery"; the original file is preserved, never overwritten. Recovery loads the `.bak` file, normalizes it, and writes it back. If the backup is also unusable, recovery fails with a clear error.
 - Back up the data directory before manual intervention: copy `library.json` and `library.json.bak` together.
 - Stable game IDs (`game-<hex>`) survive reordering; legacy index-suffixed IDs are kept as aliases (`legacy_game_ids`).

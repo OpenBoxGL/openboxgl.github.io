@@ -10,8 +10,8 @@ OpenBoxGL development requires Linux, Python 3.10+, and Git. The application rep
 ```bash
 git clone https://github.com/vindeckyy/OpenBoxGL.git
 cd OpenBoxGL
-python3 web_app.py     # Web UI
-python3 openbox.py     # Native Tk UI
+python3 web_app.py     # Web UI (development)
+make native-host       # build the native host, then ./openbox-native.sh
 ```
 
 Optional local configuration loads from `~/.env` or a project `.env` file (see `.env.example`). Never commit secrets, tokens, or personal credentials.

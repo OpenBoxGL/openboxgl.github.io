@@ -27,7 +27,7 @@ Before you install, confirm your system meets the baseline:
 | Requirement | AppImage | Flatpak | Source |
 | --- | --- | --- | --- |
 | Linux desktop (X11 or Wayland) | Yes | Yes | Yes |
-| A browser for the Web UI | Yes | Yes | Yes |
+| WebKitGTK for the native window | Bundled | Bundled | Required (`libwebkit2gtk-4.1`) |
 | Python | Bundled | Bundled | 3.10+ |
 | `flatpak` + `flatpak-builder` | Not needed | Required | Not needed |
 | `git` | Not needed | Not needed | Required |
@@ -77,15 +77,13 @@ The source install uses only the Python standard library — there is no `pip in
   ./OpenBox-x86_64.AppImage
   ```
 
-  The first launch starts the local server, writes the per-launch token files into the data directory, and opens the UI in a chrome-less app window by default (falling back to your default browser) on `http://127.0.0.1:PORT/?token=...`. If the browser does not open, run from a terminal and copy the printed URL into a browser.
+  The first launch starts the local server, writes the per-launch token files into the data directory, and opens the native WebKitGTK window. If WebKitGTK is missing, the launcher prints an install hint and falls back to a chrome-less app window (then your default browser).
 
-  Use `--native` for the lightweight Tk interface instead of the Web UI:
+  Use `--web` to force the loopback web UI in a browser instead of the native window:
 
   ```bash
-  ./OpenBox-x86_64.AppImage --native
+  ./OpenBox-x86_64.AppImage --web
   ```
-
-  The Tk interface shares the same library data as the Web UI, so you can switch between them freely.
 
 </InstallOptionCard>
 <InstallOptionCard slot="flatpak">
@@ -100,9 +98,8 @@ The source install uses only the Python standard library — there is no `pip in
   ```
 
   - The manifest (the `flatpak` module) uses the FreeDesktop runtime and grants `--filesystem=home`, so Steam, Heroic, Lutris, and ROM folders under your home directory are readable.
-  - Flatpak builds install the same `openbox` and `openbox-native` launchers; `flatpak run io.openbox.GameLauncher --native` starts the Tk interface.
   - The Flatpak is not updated by OpenBoxGL's built-in updater (it only understands the AppImage). Update by rebuilding the manifest or using the Flatpak workflow you already have for local builds.
-
+  - Flatpak builds install the same `openbox` and `openbox-native` launchers; `flatpak run io.openbox.GameLauncher --web` starts the loopback web UI in a browser.
 </InstallOptionCard>
 <InstallOptionCard slot="source">
 
@@ -118,17 +115,16 @@ The source install uses only the Python standard library — there is no `pip in
 
   Requirements: Python 3.10 or newer on a Linux system with standard desktop tooling. No third-party Python packages are required; the application uses the standard library.
 
-  The Web UI starts and opens your browser. `python3 openbox.py` starts the Tk interface instead.
+  The native window opens (build it first with `make native-host`). `python3 web_app.py` starts the loopback web UI in a browser instead.
 
   For a system install under `/usr/local` (override with `PREFIX=...`):
 
   ```bash
   sudo make install
-  openbox          # Web UI
-  openbox-native   # Native UI
+  openbox          # Native window (default)
+  openbox --web    # Web UI (development)
   sudo make uninstall   # removes everything the target placed
   ```
-
 </InstallOptionCard>
 </InstallOptions>
 
@@ -148,8 +144,8 @@ If an older build opened then never showed a window after integration, install *
 
 <Steps>
 
-<li>Run the entry point from a terminal. It should print a line like `http://127.0.0.1:PORT/?token=...` and open your browser.</li>
-    <li>The browser shows the three-column workspace with an empty cover grid. On first launch with an empty library, the welcome wizard appears.</li>
+<li>Run the entry point from a terminal. It should open the native window showing the three-column workspace.</li>
+    <li>On first launch with an empty library, the welcome wizard appears.</li>
     <li>Settings → About (or `GET /api/settings` with the token) reports the running version and whether it is an AppImage.</li>
     <li>Your data directory (`~/.local/share/openbox-game-launcher` unless `OPENBOX_DATA_DIR` is set) now contains `library.json`, `server.token`, and `server.port`.</li>
 
@@ -180,7 +176,7 @@ All library data, media, backups, themes, and logs live in `~/.local/share/openb
 | --- | --- |
 | `Permission denied` on the AppImage | The file is not executable: `chmod +x OpenBox-x86_64.AppImage`. |
 | AppImage will not mount | FUSE is missing on the host. Install `fuse` (or `fuse2` on newer distros). |
-| Browser does not open | Run from a terminal and open the printed `http://127.0.0.1:PORT/?token=...` URL yourself. |
+| Window does not open | Run from a terminal and read the printed error. In `--web` mode, open the printed `http://127.0.0.1:PORT/?token=...` URL yourself. |
 | Source: `python3: command not found` or `ModuleNotFoundError` | Python 3.10+ is required and must be `python3`. On some distros install `python3` and use `python3 web_app.py`. |
 | Flatpak can't read Steam/ROMs | Keep folders under your home directory; the manifest grants `--filesystem=home`. |
 | Library looks empty after install | Check `OPENBOX_DATA_DIR` — the server reads a different directory than the one you edited. It must be in the process environment at launch. |
@@ -189,7 +185,7 @@ More at [Troubleshooting startup and browser](/guides/troubleshooting/startup-an
 
 ## After installation
 
-Your first launch creates the data directory with an empty library. The Web UI shows the welcome wizard when the library is empty; it walks you through a folder import, a Steam import, metadata syncing, and settings.
+Your first launch creates the data directory with an empty library. The window shows the welcome wizard when the library is empty; it walks you through a folder import, a Steam import, metadata syncing, and settings.
 
 - First-time setup: [Getting started](/getting-started/)
 - What the interfaces look like and where data lives: [Interfaces and data](/interfaces-and-data/)

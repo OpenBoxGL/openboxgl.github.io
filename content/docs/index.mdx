@@ -10,7 +10,7 @@ description: A local-first game library and launcher for Linux.
 
 OpenBoxGL brings mixed game collections into one searchable catalog. Keep library data on your machine, enrich it with artwork and metadata, then launch and track play from the same interface. No account, no cloud lock-in, no telemetry.
 
-<ProductShot src="/openbox-screenshot.png" alt="The OpenBox Web UI: filter rail on the left, cover grid in the center, and the selected game's detail pane on the right." caption="The Web UI: filter rail, cover grid, and game detail pane in one workspace." />
+<ProductShot src="/openbox-screenshot.png" alt="The OpenBox native window: filter rail on the left, grouped cover grid in the center, and the selected game's detail pane on the right." caption="The native window: filter rail, grouped cover grid, and game detail pane in one workspace." />
 
 [**Install OpenBoxGL**](/install/) [**Read the quick start**](/getting-started/)
 
@@ -18,14 +18,14 @@ OpenBoxGL brings mixed game collections into one searchable catalog. Keep librar
 
 OpenBoxGL is an open-source Linux game library manager and launcher. It works with the game files, storefront clients, emulators, and folders you already use. No OpenBox account is required, and the library is stored locally under your control.
 
-The application ships as two interfaces over the same local data:
+The application ships one UI over two hosts, both over the same local data:
 
-| Interface | Entry point | What it is for |
+| Host | Entry point | What it is for |
 | --- | --- | --- |
-| Web UI | `python3 web_app.py` or `openbox` | Full feature set, REST API, Big Box mode |
-| Native UI | `python3 openbox.py` or `openbox-native` | Lightweight desktop window |
+| Native window | `openbox` or `openbox-native` | Default desktop window (WebKitGTK), full feature set |
+| Web UI | `openbox --web` or `python3 web_app.py` | Development and debugging, REST API, Big Box mode |
 
-When you start the Web UI, a local server starts on `127.0.0.1` and your browser opens to it. The server never listens on the network, and every request must carry a per-launch token, so the tab you open is the only client.
+When you start OpenBox, a local server starts on `127.0.0.1` and the native window renders the UI against it. With `--web`, your browser opens to the same server instead. The server never listens on the network, and every request must carry a per-launch token, so the window (or tab) you open is the only client.
 
 <Callout type="note" title="Local-first by design">
 
@@ -82,7 +82,7 @@ The full capability matrix, including what is intentionally not replicated on Li
 
 ## Interfaces and data
 
-The full-featured Web UI provides library management, REST API access, and Big Box mode. The lightweight native Tk UI is also available. Both use the same local library data and launch configuration, and writes are process-safe, so both interfaces can run against the same `library.json`.
+The full-featured UI ships as a native WebKitGTK window by default, with the same UI available over the loopback web server for development. Both render the identical `index.html`, `app.js`, and `app.css`, and both read and write the same local library data, so there is no second interface to drift.
 
 The default data directory is `~/.local/share/openbox-game-launcher`. Set `OPENBOX_DATA_DIR` before starting OpenBoxGL when the library should live elsewhere. The variable must be in the process environment at launch: the data directory is chosen at startup, before any `.env` file is read.
 
@@ -100,7 +100,7 @@ Optional credentials can be supplied through the Settings dialog or through envi
 
 OpenBoxGL writes library state atomically and keeps recovery files beside the primary state. Credentials and session tokens are local configuration. API examples use placeholders such as `TOKEN`, `GAME_ID`, and `/path/to/game`.
 
-- The Web UI token is generated per launch, written to `server.token` in the data directory, and deleted when the server stops. Prefer the `X-OpenBox-Token` header over a `token` query parameter in your own requests; query strings can end up in browser history and logs.
+- The per-launch token is generated each launch, written to `server.token` in the data directory, and deleted when the server stops. Prefer the `X-OpenBox-Token` header over a `token` query parameter in your own requests; query strings can end up in browser history and logs.
 - The diagnostic log (`openbox.log`) rotates automatically and redacts tokens, passwords, and API keys. It can still contain game names and local file paths, so review it before sharing it.
 - Library backups are archives stored in the `backups/` folder. Make one before major changes; see [Library backups](/reference/library-backups/) and [Data and recovery](/reference/data-and-recovery/).
 

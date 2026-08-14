@@ -3,28 +3,32 @@ title: Interfaces and data
 description: Understand OpenBoxGL interfaces, local state, and environment selection.
 ---
 
-OpenBoxGL ships two interfaces that share one local library. This page explains what you see, how the pieces fit together, and exactly where your data lives so you can back it up, move it, or diagnose problems.
+OpenBoxGL ships one UI over two hosts that share one local library. This page explains what you see, how the pieces fit together, and exactly where your data lives so you can back it up, move it, or diagnose problems.
 
-## The two interfaces
+## One UI, two hosts
 
-| Interface | Entry point | What you see | Best for |
+| Host | Entry point | What you see | Best for |
 | --- | --- | --- | --- |
-| Web UI | `python3 web_app.py` or `openbox` | A chrome-less app window by default (falls back to your browser) with a three-column workspace: filter sidebar, cover grid or list, detail pane | Full feature set, REST API, Big Box mode |
-| Native UI | `python3 openbox.py` or `openbox-native` | A regular Tk desktop window with the same library | Lightweight desktop use |
+| Native window | `openbox` or `openbox-native` | A native WebKitGTK window rendering the same three-column workspace: filter sidebar, cover grid or list, detail pane | Default desktop use |
+| Web UI | `openbox --web` or `python3 web_app.py` | The same UI in a chrome-less app window (falls back to your browser) | Development, debugging, REST API, Big Box mode |
+
+Both hosts render the identical `index.html`, `app.js`, and `app.css` served by the loopback server, so there is no second presentation stack to drift. The native host is a small C shim that owns the window chrome and spawns the Python server as a child; it never contains application logic.
+
+### Native host
+
+Starting `openbox` (or `openbox-native`) does three things in order:
+
+1. Acquires a single-instance lock; a second launch focuses the existing window and exits.
+2. Spawns `web_app.py --no-browser` as a child and waits for it to write `server.port` and `server.token`.
+3. Opens a WebKitGTK window at `http://127.0.0.1:PORT/?token=...`, restores the last window geometry, and registers a `window.openboxNative` bridge for native dialogs, external opens, reveal, and window chrome.
+
+On window close the host shuts the server down cleanly. When WebKitGTK is missing, the launcher prints an install hint and falls back to the system-browser app window, so no install bricks.
 
 ### Web UI
 
-Starting the Web UI does three things in order:
+Running `python3 web_app.py` starts the loopback server directly and opens the same UI in a chrome-less app window (falling back to the default browser). Pass `--no-browser` to drive the API yourself.
 
-1. Bootstraps the environment and configures the diagnostic log in the data directory.
-2. Loads and normalizes the library state (running migrations if the schema is older), starts a `ThreadingHTTPServer` bound to `127.0.0.1` on a random port, and writes `server.port` and `server.token` into the data directory.
-3. Prints `http://127.0.0.1:PORT/?token=...` and opens it in your browser, unless `--no-browser` is passed.
-
-The server is loopback-only, so nothing is reachable from the network. The URL carries the per-launch token in the query string; the API also accepts the same value as an `X-OpenBox-Token` header. When the server stops, both files are deleted. A second instance therefore gets a fresh token and port, and the files are shared between interfaces: the keyboard launcher (`scripts/openbox-launcher.sh`) and `openbox://` deep links read these two files to find and authenticate against the running server. See [Command line and deep links](/reference/cli/) for the full flag and URI reference.
-
-### Native UI
-
-The Tk window opens the same `library.json` with the same grid, search, filters, and launch profiles, minus the browser surface. Both processes coordinate writes through a file lock, so running the Web UI and the native UI against the same library at the same time is safe; the last writer wins per transaction, not per file.
+The server is loopback-only, so nothing is reachable from the network. The URL carries the per-launch token in the query string; the API also accepts the same value as an `X-OpenBox-Token` header. When the server stops, both files are deleted. The keyboard launcher (`scripts/openbox-launcher.sh`) and `openbox://` deep links read these two files to find and authenticate against the running server. See [Command line and deep links](/reference/cli/) for the full flag and URI reference.
 
 ## Where data lives
 
@@ -35,8 +39,8 @@ The default data directory is `~/.local/share/openbox-game-launcher`. Everything
 | `library.json` | The library: games, profiles, history, settings, playlists, queue, notifications |
 | `library.json.bak` | Last-known-good copy, rewritten before every commit |
 | `.library.json.lock` | Cross-process lock file coordinating concurrent writes |
-| `server.token`, `server.port` | Per-launch credentials for the running Web UI; deleted on exit |
-| `openbox.log` (+ `.1`...`.4`) | Rotating diagnostic log with secrets redacted |
+| `server.token`, `server.port` | Per-launch credentials for the running app; deleted on exit |
+| `native-host.lock`, `window-geometry`, `native-host-flags` | Native host single-instance lock, last window geometry, and tray flags |
 | `backups/` | Library backup archives (`OpenBoxBackup-*.zip`) |
 | `save-backups/` | Versioned per-game save backups with retention limits |
 | `media/` | Downloaded artwork, screenshots, video, and metadata media, grouped by source |

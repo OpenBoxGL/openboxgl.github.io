@@ -117,7 +117,6 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `gameyfin_install_dir` | "" | Absolute path; created if missing, rejected if symlink or non-existent. Empty by default; the UI shows a `~/Games/Gameyfin` placeholder |
 | `gameyfin_provider` | "" | Provider label; falls back to first available |
 | `ludusavi_backup_path` | "" | Optional absolute path for Ludusavi JSON output |
-| `ui_window` | "app" | One of app, browser — whether the UI opens chrome-less or in a browser tab; overridden by `--app-window` / `--no-app-window` |
 
 Two naming details worth knowing:
 
