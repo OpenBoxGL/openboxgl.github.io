@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Check, Copy, Gamepad2, Play } from "lucide-react"
+import Image from "next/image"
 
 const hudItems = [
   "100% LOCAL",
@@ -98,6 +99,31 @@ export function Hero() {
             <Gamepad2 className="h-4 w-4" />
             Big Box mode
           </a>
+        </div>
+
+        {/* game detail preview — the release hero image */}
+        <div className="group relative mx-auto mt-14 max-w-4xl rounded-2xl border border-border bg-card p-2 shadow-2xl">
+          <div
+            className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-100"
+            style={{ background: "linear-gradient(120deg, oklch(0.665 0.195 44 / 30%), oklch(0.785 0.085 206 / 25%))" }}
+            aria-hidden="true"
+          />
+          <div className="relative overflow-hidden rounded-xl border border-border">
+            <div className="flex items-center gap-2 border-b border-border bg-background/80 px-4 py-2.5">
+              <span className="h-3 w-3 rounded-full bg-destructive/80" />
+              <span className="h-3 w-3 rounded-full bg-primary/80" />
+              <span className="h-3 w-3 rounded-full bg-lime/70" />
+              <span className="ml-3 font-mono text-xs text-muted-foreground">openbox — game detail</span>
+            </div>
+            <Image
+              src="/openbox-game-detail.png"
+              alt="OpenBox game detail view showing box art, metadata, and launch controls"
+              width={1920}
+              height={1080}
+              className="w-full"
+              priority
+            />
+          </div>
         </div>
       </div>
     </section>
