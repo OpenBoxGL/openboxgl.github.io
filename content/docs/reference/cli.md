@@ -29,6 +29,8 @@ The native window renders the same UI as the web fallback; both serve `index.htm
 | `--backup [--items a,b] [--keep N]` | Create a library backup from the command line. Default items are `library,settings`. Prints the archive path. |
 | `--restore-backup <archive>` | Restore a backup archive. The archive must be a real `.zip` inside the data directory or `backups/`. Prints the restored item names. |
 | `--web` | Start the loopback web UI in a browser instead of the native window (development). |
+| `--app-window` | Open the UI in a chrome-less app window (browser `--app=` mode) instead of a normal tab. |
+| `--no-app-window` | Open the UI in a normal browser window; overrides the chrome-less default. |
 
 `--backup` and `--restore-backup` act on the library before the server starts, so they work even when no instance is running. They read `OPENBOX_DATA_DIR` from the environment, like every startup path.
 
