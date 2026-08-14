@@ -26,6 +26,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-brand: var(--brand);
   --color-cyan: var(--cyan);
   --color-lime: var(--lime);
 
@@ -50,8 +51,8 @@
   --popover: oklch(0.215 0.007 78);
   --popover-foreground: oklch(0.954 0.013 82);
 
-  /* Gold brand (from the OpenBox app) */
-  --primary: oklch(0.802 0.111 83);
+  /* Orange-gold brand (bridging the logo orange #f06000) */
+  --primary: oklch(0.710 0.139 59); /* orange-gold #e08a3c, bridges the logo orange */
   --primary-foreground: oklch(0.16 0.01 78);
 
   --secondary: oklch(0.302 0.02 77);
@@ -67,7 +68,8 @@
 
   --border: oklch(0.82 0.02 80 / 20%);
   --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.802 0.111 83);
+  --ring: oklch(0.665 0.195 44); /* logo orange #f06000 */
+  --brand: oklch(0.665 0.195 44); /* logo orange #f06000 */
 
   /* Signature cool accents */
   --cyan: oklch(0.785 0.085 206);
@@ -92,5 +94,5 @@
 }
 
 @utility text-glow-primary {
-  text-shadow: 0 0 24px oklch(0.802 0.111 83 / 45%);
+  text-shadow: 0 0 24px oklch(0.665 0.195 44 / 45%);
 }

@@ -14,7 +14,7 @@ export function CtaFooter() {
     <footer className="relative overflow-hidden px-4 pt-24 pb-8">
       <div
         className="pointer-events-none absolute left-1/2 top-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full opacity-40 blur-[120px]"
-        style={{ background: "radial-gradient(closest-side, oklch(0.802 0.111 83 / 35%), transparent)" }}
+        style={{ background: "radial-gradient(closest-side, oklch(0.665 0.195 44 / 35%), transparent)" }}
         aria-hidden="true"
       />
       <div className="relative mx-auto max-w-4xl text-center">
@@ -23,7 +23,7 @@ export function CtaFooter() {
           alt="OpenBox logo"
           width={64}
           height={64}
-          className="mx-auto h-16 w-16 object-contain drop-shadow-[0_0_24px_oklch(0.802_0.111_83_/_55%)]"
+          className="mx-auto h-16 w-16 object-contain drop-shadow-[0_0_24px_oklch(0.665_0.195_44_/_55%)]"
         />
         <h2 className="mt-6 text-balance text-4xl font-bold tracking-tight md:text-6xl">
           Bring your whole backlog home.

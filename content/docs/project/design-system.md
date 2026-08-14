@@ -3,17 +3,17 @@ title: Design system
 description: The real CSS variables, typography, layout, and component specs for theme authoring.
 ---
 
-OpenBoxGL's base stylesheet uses a dark, warm game-room palette: near-black surfaces, warm off-white text, and amber (`#e1b866`) as the focus/selection/launch signal. This page documents the actual variables shipped in the application's `index.html`, not a separate token layer. Theme authors override these variables in a CSS file imported through **Themes**.
+OpenBoxGL's base stylesheet uses a dark, warm game-room palette: near-black surfaces, warm off-white text, and brand orange (`#f06000`) as the focus/selection signal with orange-gold (`#e08a3c`) for launch actions. This page documents the actual variables shipped in the application's `index.html`, not a separate token layer. Theme authors override these variables in a CSS file imported through **Themes**.
 
 <Callout type="warning" title="These are the shipped tokens">
 
-This page reflects the current `index.html` `:root` block. The application repository also contains a `DESIGN.md` that describes an earlier blue-black palette with cyan focus (`#35a9d5`) and green launch (`#08bf20`). That document is out of date relative to the shipped stylesheet: the running app uses the amber palette below, and the blue/cyan values in `DESIGN.md` are not what a theme overrides today. If you rely on this page's values, always confirm against `index.html` in the repository you are actually running.
+This page reflects the current `index.html` `:root` block. The application repository also contains a `DESIGN.md` that describes an earlier blue-black palette with cyan focus (`#35a9d5`) and green launch (`#08bf20`). That document is out of date relative to the shipped stylesheet: the running app uses the orange palette below, and the blue/cyan values in `DESIGN.md` are not what a theme overrides today. If you rely on this page's values, always confirm against `index.html` in the repository you are actually running.
 
 </Callout>
 
 ## Base palette
 
-All colors are dark by default. Neutral surfaces carry most of the screen; the amber family identifies focus, selection, and launch action.
+All colors are dark by default. Neutral surfaces carry most of the screen; the orange family identifies focus, selection, and launch action.
 
 ### Neutral surfaces
 
@@ -38,18 +38,18 @@ All colors are dark by default. Neutral surfaces carry most of the screen; the a
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--focus` | `#e1b866` | Focus ring, selected controls, active platform markers |
-| `--active` | `#e1b866` | Active navigation, selected cover borders, Big Box cover borders |
-| `--action` | `#d7a34a` | Launch action (Play button), primary dialog confirmations |
-| `--action-ink` | `#1c160d` | Dark text inside the amber action surface |
+| `--focus` | `#f06000` | Focus ring, selected controls, active platform markers |
+| `--active` | `#f06000` | Active navigation, selected cover borders, Big Box cover borders |
+| `--action` | `#e08a3c` | Launch action (Play button), primary dialog confirmations |
+| `--action-ink` | `#1c160d` | Dark text inside the orange-gold action surface |
 | `--white` | `#ffffff` | Occasional pure white highlights |
 | `--cyan` | `#72c9d4` | Teal accent (defined in `:root` but not consumed by the base stylesheet) |
 | `--green` | `#8fbd8d` | Muted sage (defined in `:root` but not consumed by the base stylesheet) |
-| `--gold` | `#e5b65c` | Achievement/gold signal |
-| `--rating` | `#f0bd63` | Rating star signal |
-| `--launch-shadow` | `#d7a34a44` | Shadow tint under the Play button |
+| `--gold` | `#e5b65c` | Achievement/gold signal, decorative highlights |
+| `--rating` | `#e5b65c` | Rating star signal |
+| `--launch-shadow` | `#e08a3c44` | Shadow tint under the Play button |
 | `--danger` | `#743f3f` | Error/destructive state |
-| `--empty-action` | `#d7a34a` | Empty-state action buttons |
+| `--empty-action` | `#e08a3c` | Empty-state action buttons |
 | `--mark-start` | `#f0c36a` | Progress/milestone accent start |
 | `--mark-end` | `#ba593d` | Progress/milestone accent end |
 | `--mark-ink` | `#1c160d` | Text inside milestone fills |
@@ -62,13 +62,13 @@ All colors are dark by default. Neutral surfaces carry most of the screen; the a
 
 <Callout type="note" title="Defined vs consumed">
 
-`--cyan` and `--green` are declared in `:root` but the base stylesheet never reads them with `var()`. The launch action uses `--action` (amber), not `--green`. A theme that sets `--green` alone will not change the Play button; set `--action` and `--action-ink` for that. `--focus`, `--active`, `--action`, and `--launch-shadow` are the amber tokens the base stylesheet actually consumes.
+`--cyan` and `--green` are declared in `:root` but the base stylesheet never reads them with `var()`. The launch action uses `--action` (orange-gold), not `--green`. A theme that sets `--green` alone will not change the Play button; set `--action` and `--action-ink` for that. `--focus`, `--active`, `--action`, and `--launch-shadow` are the orange tokens the base stylesheet actually consumes.
 
 </Callout>
 
 ### State-color rule
 
-Amber (`#e1b866` / `#d7a34a`) identifies both **where the user is focused** and **where the user can launch or is actively playing**. The base stylesheet does not split these roles across two hue families the way earlier `DESIGN.md` text described. If you author a theme that does split focus from launch, keep the two roles visually distinct and never make launch read as a destructive or muted state.
+Orange (`#f06000` / `#e08a3c`) identifies both **where the user is focused** and **where the user can launch or is actively playing**. The brand orange (`#f06000`) carries the high-energy focus/selection/glow roles; the orange-gold primary (`#e08a3c`) carries launch and confirmation surfaces. The base stylesheet does not split these roles across two hue families the way earlier `DESIGN.md` text described. If you author a theme that does split focus from launch, keep the two roles visually distinct and never make launch read as a destructive or muted state.
 
 ## Typography
 
@@ -145,10 +145,10 @@ Depth comes from tonal layering first, shadows second. The real values in the ba
 | Cover lift | `0 8px 18px #0007` |
 | Cover (Cinema Marquee theme) | `0 14px 32px #000a` |
 | Dialog depth | `0 30px 80px #000c` |
-| Big Box cover | `0 0 0 6px #e1b86622, 0 40px 90px #000c` |
+| Big Box cover | `0 0 0 6px #f0600022, 0 40px 90px #000c` |
 | Play button | `0 5px 14px var(--launch-shadow)` |
 
-Hover and selection add an amber separation border plus stronger lift. The selected cover uses a cyan-family halo only in the historical `DESIGN.md`; the shipped base uses amber (`--active`).
+Hover and selection add an orange separation border plus stronger lift. The selected cover uses a cyan-family halo only in the historical `DESIGN.md`; the shipped base uses orange (`--active`).
 
 ## Component specs
 
@@ -156,8 +156,8 @@ Hover and selection add an amber separation border plus stronger lift. The selec
 
 | Variant | Background | Text color | Radius | Padding |
 | --- | --- | --- | --- | --- |
-| Launch (Play) | `var(--action)` → `#d7a34a` | `var(--action-ink)` → `#1c160d` | Pill (`18px`) | `10px` |
-| Primary | `var(--action)` → `#d7a34a` | `var(--action-ink)` | `4px` | `9px 16px` |
+| Launch (Play) | `var(--action)` → `#e08a3c` | `var(--action-ink)` → `#1c160d` | Pill (`18px`) | `10px` |
+| Primary | `var(--action)` → `#e08a3c` | `var(--action-ink)` | `4px` | `9px 16px` |
 | Secondary | `var(--surface-field)` → `#27231e` | `var(--text)` | `4px` | (rule-specific) |
 
 Hover shifts secondary toward a lighter raised surface. Focused controls gain a `2px` focus border (`var(--focus)`) plus a one-pixel ring.
@@ -176,11 +176,11 @@ Rating, status, and ESRB chips use muted text on card surfaces. Achievement sign
 
 ### Inputs / Fields
 
-Fields use `--surface-field` background, `--border-control` border, `4px` radius, and `7px 8px` padding. On focus, the border shifts to `--focus` (`#e1b866`) and gains a one-pixel ring. Disabled actions reduce opacity and show `not-allowed` cursor. No separate error palette exists in the base system; errors reuse the standard flow with a textual message rather than a colored field.
+Fields use `--surface-field` background, `--border-control` border, `4px` radius, and `7px 8px` padding. On focus, the border shifts to `--focus` (`#f06000`) and gains a one-pixel ring. Disabled actions reduce opacity and show `not-allowed` cursor. No separate error palette exists in the base system; errors reuse the standard flow with a textual message rather than a colored field.
 
 ### Navigation
 
-Topbar items are borderless and transparent at rest, gaining a raised background on hover. Active platform rows use a darker panel tone with a small amber marker dot. Inactive navigation is muted and transparent. The rail scrolls horizontally; the workspace columns tighten at `1100px` and stack below `760px`.
+Topbar items are borderless and transparent at rest, gaining a raised background on hover. Active platform rows use a darker panel tone with a small orange marker dot. Inactive navigation is muted and transparent. The rail scrolls horizontally; the workspace columns tighten at `1100px` and stack below `760px`.
 
 ## Big Box specifics
 

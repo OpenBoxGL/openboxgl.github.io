@@ -31,7 +31,7 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-0 grid-backdrop opacity-60" aria-hidden="true" />
       <div
         className="pointer-events-none absolute left-1/2 top-0 h-[520px] w-[820px] -translate-x-1/2 rounded-full opacity-50 blur-[120px]"
-        style={{ background: "radial-gradient(closest-side, oklch(0.802 0.111 83 / 35%), transparent)" }}
+        style={{ background: "radial-gradient(closest-side, oklch(0.665 0.195 44 / 35%), transparent)" }}
         aria-hidden="true"
       />
       <div

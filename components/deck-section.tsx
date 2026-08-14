@@ -28,7 +28,7 @@ export function DeckSection() {
     <section id="deck" className="relative overflow-hidden px-4 py-20">
       <div
         className="pointer-events-none absolute left-0 top-1/4 h-[400px] w-[500px] rounded-full opacity-40 blur-[130px]"
-        style={{ background: "radial-gradient(closest-side, oklch(0.802 0.111 83 / 30%), transparent)" }}
+        style={{ background: "radial-gradient(closest-side, oklch(0.665 0.195 44 / 30%), transparent)" }}
         aria-hidden="true"
       />
       <div className="relative mx-auto max-w-6xl">
