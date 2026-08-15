@@ -82,7 +82,7 @@ The full capability matrix, including what is intentionally not replicated on Li
 
 ## Interfaces and data
 
-The full-featured UI ships as a native WebKitGTK window by default, with the same UI available over the loopback web server for development. Both render the identical `index.html`, `app.js`, and `app.css`, and both read and write the same local library data, so there is no second interface to drift.
+The full-featured UI ships as a native WebKitGTK window by default, with the same UI available over the loopback web server for development. Both render the identical `index.html` and `static/` ES modules (`app.js`, `state.js`, `library.js`, `settings.js`, and the rest), and both read and write the same local library data, so there is no second interface to drift.
 
 The default data directory is `~/.local/share/openbox-game-launcher`. Set `OPENBOX_DATA_DIR` before starting OpenBoxGL when the library should live elsewhere. The variable must be in the process environment at launch: the data directory is chosen at startup, before any `.env` file is read.
 

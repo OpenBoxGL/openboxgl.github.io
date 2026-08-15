@@ -4,7 +4,7 @@ import { Star, Terminal } from "lucide-react"
 const hints = [
   "← → Browse",
   "Enter Play",
-  "Ctrl K Search",
+  "Ctrl , Settings",
   "M Menu",
   "Esc Back",
 ]

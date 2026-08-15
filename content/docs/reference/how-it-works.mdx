@@ -425,7 +425,7 @@ The browser pattern is to return an initial accepted response, keep the triggeri
 
 OpenBoxGL has three distinct extension styles. Python plugins can change selected data or launch input. CSS themes can change presentation. Webhooks can observe allowlisted events outside the process. They have different trust and failure models.
 
-### Plugins
+### The plugin runner
 
 Plugins are packages under `APP_DIR/plugins/`. `plugins.py` validates the manifest, plugin ID, supported hook names, entry-file containment, Python extension, package links, and package archive safety. Installation stages the package, moves an existing version into a backup area, swaps the new version into place, and restores the previous version if the swap fails. Removing a plugin moves it to a recoverable `.removed` directory.
 
@@ -447,7 +447,7 @@ Stock themes are bundled under `themes/` and installed into the data directory b
 
 The Web UI loads an active CSS file through the authenticated theme route. Theme CSS can override visual roles while preserving the HTML and behavior contract. It cannot add a new server operation or execute Python. That is the useful boundary: presentation changes remain cheap, and behavior remains in the application code.
 
-### Webhooks
+### The webhook dispatcher
 
 `automation.py` builds an event envelope from an allowlisted event type and allowlisted data keys. Unknown fields are dropped. The envelope is compact JSON with an event ID, type, version, timestamp, source, and sanitized data. Normal event types include session start and stop, queue advancement, library import and change, metadata sync, backup creation, update installation, and plugin changes.
 

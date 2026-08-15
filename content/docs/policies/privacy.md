@@ -12,7 +12,7 @@ OpenBox is designed so your library, saves, and metadata never leave your machin
 
 - **No telemetry.** No analytics beacons, no crash reports, no usage statistics are sent anywhere. There is nothing to opt out of.
 - **No account.** There is no OpenBox account, no login, no license key. Downloading the AppImage or cloning the repository is the entire installation.
-- **No cloud library.** Library data lives in `library.json` on your machine. The local server binds to `127.0.0.1` only and every request must carry a per-launch token, so the tab you open is the only client.
+- **No cloud library.** Library data lives in `library.json` on your machine. The local server binds to `127.0.0.1` only and every request must carry a per-launch token, so the window (or tab) you open is the only client.
 - **No hidden network calls.** The app does not phone home at startup or on any schedule.
 
 ## What leaves your machine, and when

@@ -12,7 +12,7 @@ The UI string table in `parity_premium.strings_for(locale)` and `GET /api/premiu
 
 ## When localization lands
 
-Localization has not landed in 1.0.0; it is planned for a future release. The blocker is not the runtime seam; it is that the Web UI is one large script with roughly 2,600 lines of JavaScript and every label embedded in template literals. A real localization release means:
+Localization has not landed in 1.0.0; it is planned for a future release. The blocker is not the runtime seam; it is that the Web UI's user-facing strings are still embedded in the `static/*.js` ES modules — `app.js`, `settings.js`, `library.js`, `state.js`, and the dialog markup — rather than extracted into per-locale string files. A real localization release means:
 
 1. Extracting every user-facing string from `static/app.js` and the dialog markup into per-locale string files.
 2. A check that fails CI when a new string ships without a key in every locale.

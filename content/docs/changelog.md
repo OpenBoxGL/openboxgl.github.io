@@ -51,7 +51,7 @@ sidebar: false
 - Structured errors carry stable machine codes (`GAME_NOT_FOUND`, `MEDIA_JOB_RUNNING`, ...) plus a per-request id that appears in the UI and the diagnostic log; POST validation errors become `400 BAD_REQUEST` instead of leaking to the generic 500 path.
 - A versioned `/api/v1` surface aliases the stable routes; legacy paths keep working.
 - The library payload is gzip-compressed once per state change and served with conditional GET: 5,000 games serve in about 2 ms at 638 KB instead of 13.8 MB.
-- Settings saves drop unknown keys against a 72-key whitelist instead of persisting junk.
+- Settings saves drop unknown keys against a 72-key whitelist instead of persisting junk. (The registry in `settings_schema.py` currently defines 72 known keys.)
 
 **Reliability**
 
