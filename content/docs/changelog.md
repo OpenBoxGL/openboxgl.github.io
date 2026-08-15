@@ -47,7 +47,7 @@ sidebar: false
 **Engineering foundation**
 
 - `make check` runs lint, compile checks, the full test suite under coverage, and coverage floors in one command. CI enforces it on push, pull requests, and weekly, and a version-sync check fails when `updates.py` disagrees with any published version spot.
-- The 613-line GET and 195-line POST dispatch chains became a route registry (`routes.py`) with 88 GET and 118 POST entries (including v1 aliases), each a named handler.
+- The 613-line GET and 195-line POST dispatch chains became a route registry (`routes.py`) with 103 GET and 124 POST entries (including v1 aliases, on top of 79 GET and 95 POST base routes), each mapped to a named handler (five via dotted `handlers.native.*` specs).
 - Structured errors carry stable machine codes (`GAME_NOT_FOUND`, `MEDIA_JOB_RUNNING`, ...) plus a per-request id that appears in the UI and the diagnostic log; POST validation errors become `400 BAD_REQUEST` instead of leaking to the generic 500 path.
 - A versioned `/api/v1` surface aliases the stable routes; legacy paths keep working.
 - The library payload is gzip-compressed once per state change and served with conditional GET: 5,000 games serve in about 2 ms at 638 KB instead of 13.8 MB.
