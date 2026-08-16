@@ -35,7 +35,7 @@ See [Interfaces and data](/interfaces-and-data/) for the full file layout and [C
 
 ## The website
 
-This documentation site is a static export served from GitHub Pages. It has no analytics scripts, no cookies, and no tracking. The install one-liner in the hero downloads the latest AppImage from GitHub Releases and verifies its SHA-256 checksum before installing.
+This documentation site is a static export served from GitHub Pages. It has no analytics scripts, no cookies, and no tracking. The install one-liner in the hero downloads the latest AppImage from GitHub Releases, pins the release public key, and verifies its SHA-256 checksum and Ed25519 signature before installing.
 
 ## Reporting a concern
 

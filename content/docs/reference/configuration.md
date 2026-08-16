@@ -19,12 +19,13 @@ A `.env` file sets an environment variable only when that variable is not alread
 
 `env_config.discover_env_files` checks these roots in order and loads every `.env` found:
 
-1. The `OPENBOX_DATA_DIR` you passed in (used as an extra root).
-2. The parent of the data directory.
-3. The current working directory.
-4. The application directory (next to `web_app.py`).
-5. Your home directory (`~/.env`).
-6. `~/.config/openbox-game-launcher/.env`.
+1. An explicit `OPENBOX_ENV_FILE` path, if set (read before the extra roots).
+2. The data directory (the extra root passed to `bootstrap_env`).
+3. The parent of the data directory.
+4. Your home directory (`~/.env`).
+5. `~/.config/openbox-game-launcher/.env`.
+
+The current working directory and the application directory are not searched. Each `.env` file must be an owner-only regular file (mode `0o600`, no group or other permission bits), must not be a symlink, and must be under 1 MiB; anything else is skipped silently.
 
 Values already in the environment are never overridden by `.env`. The template lives at `.env.example` in the repository. Put real secrets in `~/.env` or `~/.config/openbox-game-launcher/.env` only, never in a tracked file.
 
@@ -37,7 +38,9 @@ Values already in the environment are never overridden by `.env`. The template l
 | `OPENBOX_DATA_DIR` | Data directory. Read at import time, before `.env` bootstrap; must be exported in the shell, desktop entry, or systemd unit before launch. Defaults to `~/.local/share/openbox-game-launcher`. |
 | `OPENBOX_SAFE_MODE` | Any non-empty value (conventionally `1`) disables plugin execution and the webhook dispatcher for the whole process. Exposed as `settings.safe_mode`. |
 | `APPIMAGE` | Set automatically when running from an AppImage; the updater refuses to install without it. Exposed as `settings.appimage`. |
+| `OPENBOX_ENV_FILE` | Explicit path to a single `.env` file, checked first before the data-directory roots. Read directly from the process environment; must point at an owner-only regular file (not a symlink) or it is skipped. |
 | `OPENBOX_ALLOW_HTTP_WEBHOOKS` | Set to `1` to allow plain-HTTP webhook URLs. Required only for trusted local test targets; HTTPS is the default and safer. |
+| `OPENBOX_ALLOW_HTTP_GAMEYFIN` | Set to `1` to allow plain-HTTP Gameyfin URLs. HTTPS is the default; loopback (localhost) addresses are always allowed. |
 
 ### Credentials (all optional)
 

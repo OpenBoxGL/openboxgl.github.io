@@ -6,6 +6,93 @@ sidebar: false
 
 # Changelog
 
+## 1.2.0 (2026-08-15)
+
+**Security and SteamOS**
+
+- SteamOS AppImages no longer export bundled libraries into the host shell, fixing startup failures where `/bin/bash` could not resolve `rl_print_keybinding`.
+- Webhook delivery rejects non-public destinations, pins validated DNS results, disables proxies and redirects, and bounds response reads.
+- Library and save backups use private atomic files, reject unsafe archive entries, and protect restore paths against symlinks and archive replacement races.
+- Native bridge authorization now requires the exact OpenBox origin, including its dynamic port.
+- Gameyfin validates IDs before path construction, keeps filesystem operations under the install root, requires HTTPS, and verifies supplied checksums.
+- 7z extraction rejects links, operates on a bounded snapshot, and validates the staging tree before promotion.
+- Media and document reads enforce approved roots, including symlinked parent checks.
+- Environment loading accepts only owner-controlled files and supported keys, and no longer searches the current directory.
+- Job and SSE queues have explicit capacity, expiry, cleanup, and slow-client behavior.
+
+**Release hardening**
+
+- Release artifacts require Ed25519 signatures against the pinned production public key.
+- Release jobs separate build, provenance attestation, and publication permissions, and refuse asset overwrites.
+- Build and CI inputs are pinned, the SBOM is generated from the completed AppImage, and Puppeteer 25.7.0 resolves the audited npm dependency issues.
+- Plugin catalogs require a pinned digest, HTTPS package URLs, and package checksums.
+
+## 1.1.0 (2026-08-15)
+
+**Fixed**
+
+- Cloud sync: the local-wins merge branch contained a dead condition (`remote_played > local_played` can never be true there), so newer per-field remote values were silently dropped.
+- State backup now mirrors the latest committed primary, staged atomically, instead of aliasing the brand-new write.
+- Plugin environment filtering fixed a typo (`GAMEFYIN_` -> `GAMEYFIN_`), so correctly spelled Gameyfin variables are stripped from plugin subprocesses.
+- Play queue: skip flags recorded while advancing are written back to state before a valid item is returned, so they can no longer silently disappear.
+- Queue `path_exists` checks the filesystem instead of reporting any nonempty path string as existing.
+- OBS status: `recording` now requires a recording file produced within the last two minutes instead of reporting any running OBS process as actively recording.
+- Steam and Lutris imports verify the Flatpak app is actually installed (`flatpak info`) before building a `flatpak run` command.
+- IGDB: time-to-beat came from a nonexistent `time_to_beat` field on the games endpoint; it now queries the separate `game_time_to_beats` endpoint and converts its seconds value to hours.
+- Gameyfin: the catalog requests the provider list once, raw responses are returned open and closed by the caller, and the tautological `str(folder) if installed else str(folder)` is gone.
+- Job manager: completed futures are released via a done callback so job bookkeeping cannot accumulate indefinitely.
+- Webhook retry: the injected clock now measures the sleep duration and warns when the wall-clock sleep overshoots.
+- The emulator-defs YAML fallback parser no longer decides a key is a list based on whether its name ends in "s"; indented values build sequences from the actual shape.
+- Native dialog bridge: selected paths are now JSON-quoted strings, so paths with spaces or quotes produce valid JSON and no longer leak the `g_strescape` allocation.
+- Ed25519 point decoding rejects out-of-range coordinates, small-order points, and off-curve values in both `updates.py` and `scripts/verify_release.py`, and checks the canonical scalar before point arithmetic.
+- `remove_exclusion` returns the number of removed entries; the API route reports `removed` truthfully.
+- `sanitize_settings` no longer iterates a non-dict input into garbage dropped-key lists.
+- The 7z archive validator counts a final member even when the listing omits the trailing blank separator.
+- Screenshot capture: the previously ignored `window_hint` now selects active-window flags for gnome-screenshot, spectacle, and scrot.
+
+**Changed**
+
+- `_tdp_args` returns only the argument list; the unused milliwatt value is gone.
+
+## 1.0.1 (2026-08-15)
+
+**Fixed**
+
+- Big Box hybrid mode: platform buttons were emitting a broken `data-bigbox-AppState.platform` attribute that the click handler never matched, so switching platforms did nothing. The attribute now matches the selector.
+- IGDB search sent a malformed `&AppState.platform =` query parameter instead of `platform=`, dropping the platform hint from searches.
+- Custom-field keys in the details pane were rendered without escaping; a crafted key could inject HTML. Keys and values are now both escaped.
+- The session token stayed in the browser address bar after load. It is now scrubbed from history immediately, with deeplink parameters preserved.
+
+**Changed**
+
+- CSP tightened: `script-src 'self'` without `'unsafe-inline'`, plus `object-src 'none'` and `base-uri 'none'`.
+- Requests without a Host header are now rejected instead of bypassing the loopback check.
+- The SSE stream now carries the same security headers as every other response.
+- The startup URL printed to stdout no longer contains the session token.
+- The updater verifies an Ed25519 signature when a release publishes one, and skips with a loud warning while the public key is still the placeholder.
+- WebKit rendering defaults changed: dmabuf renderer disabled unless `OPENBOX_ENABLE_DMABUF` is set (fixes silent window failures on AMD GPUs, including Steam Deck), and hardware acceleration switched to on-demand.
+
+**Hardened**
+
+- The native host now validates full URIs (scheme, host, no userinfo, no control characters) before handing anything to the default handler.
+- Reveal-in-folder is restricted to paths under the data directory or home directory.
+- The native bridge rejects suspicious payloads instead of evaluating them.
+- Plugin catalog downloads now require a valid sha256 checksum; entries without one are refused.
+- Plugin subprocess environments are scrubbed of token, password, secret, and API-key variables.
+- `before_launch` plugin hooks can no longer swap the launch binary or move the working directory outside the game or data directories; tampered results fall back to the original command.
+
+**Fixed (launch reliability)**
+
+- AppImage launches now route through the fallback ladder instead of exec-ing the native host directly, and all launch failures are written to `~/.local/share/openbox-game-launcher/openbox-launch.log` instead of vanishing on a double-click.
+- The native host writes its own log and the single-instance message is no longer invisible.
+- Game Mode with no kiosk browser installed now prints the server URL instead of failing silently.
+
+**Verification**
+
+- `./run_all_tests.sh`: 47 test files, 0 failures.
+- `make check`: lint, compile checks, coverage floors green.
+- CI smoke test now covers Big Box platform switching and IGDB search parameters; JS linting runs in CI; Dependabot watches GitHub Actions and npm.
+
 ## 1.0.0 (2026-08-14)
 
 **Native-first**

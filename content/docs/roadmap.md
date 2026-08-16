@@ -10,7 +10,7 @@ OpenBox is maintained by one person in the open, so the roadmap is short and hon
 
 ## In the current release
 
-The [changelog](/changelog/) is the accurate record. The headline pieces in 1.0.0 are the native-first release: a native WebKitGTK window that renders the same UI as the web app (no browser tab, no separate Tk interface), batch LaunchBox metadata auto-match, Server-Sent Events for session and job updates, a frozen v1 API contract, and cover grouping in the library grid. The desktop UI opens in the native window by default, and releases ship with SBOM and signing tooling.
+The [changelog](/changelog/) is the accurate record. The current release, 1.2.0, is the security and SteamOS compatibility release: release artifacts are Ed25519-signed against the pinned production public key, the SteamOS AppImage startup failure is fixed, and webhook, backup, 7z, Gameyfin, media, and environment handling are hardened, with the native bridge now checking the exact origin before authorizing. The native-first work from 1.0.0 (native WebKitGTK window, batch metadata auto-match, Server-Sent Events, the frozen v1 API contract, cover grouping) still underlies the app, and releases ship with SBOM and signing tooling.
 
 ## In progress
 

@@ -16,7 +16,7 @@ There is no OpenBox account, installer wizard, or license key. Downloading a rel
 | [Source](#from-source) | Development, testing, or patching | `git pull` and re-run |
 | [System install](#system-install) | Installing to `/usr/local` from source | `sudo make install` again |
 
-The fastest path is the [one-liner install](#one-liner-install): `curl ... | bash` downloads the latest AppImage, verifies its checksum, and installs it to `~/.local/bin`.
+The fastest path is the [one-liner install](#one-liner-install): `curl ... | bash` downloads the latest AppImage, pins the release public key, verifies its SHA-256 checksum and Ed25519 signature, and installs it to `~/.local/bin`.
 
 Only the AppImage receives the built-in updater. Flatpak, source, and system installs follow their own package or source workflow; see [Updating](/updating/).
 
@@ -60,7 +60,7 @@ The source install uses only the Python standard library — there is no `pip in
   curl -fsSL https://raw.githubusercontent.com/vindeckyy/OpenBoxGL/master/scripts/install.sh | bash -s -- --run
   ```
 
-  The script resolves the latest release automatically from GitHub, checks the AppImage against its published SHA-256 before installing, and adds a friendly `openbox` launcher. Install to a different directory with `OPENBOX_INSTALL_DIR` (e.g. `OPENBOX_INSTALL_DIR="$HOME/Applications"`).
+  The script resolves the latest release automatically from GitHub, verifies the release public key against a pinned SHA-256 trust anchor, checks the AppImage against its published SHA-256, verifies its Ed25519 signature, and adds a friendly `openbox` launcher. Install to a different directory with `OPENBOX_INSTALL_DIR` (e.g. `OPENBOX_INSTALL_DIR="$HOME/Applications"`).
 
   #### Manual download
 
@@ -153,7 +153,7 @@ If an older build opened then never showed a window after integration, install *
 
 ## Optional local configuration
 
-OpenBoxGL loads optional credentials and settings from `.env` files it discovers: the current directory, the project directory, your home directory, and `~/.config/openbox-game-launcher`. A documented template ships as `.env.example`.
+OpenBoxGL loads optional credentials and settings from `.env` files it discovers: an explicit `OPENBOX_ENV_FILE` path if set, the data directory and its parent, `~/.env`, and `~/.config/openbox-game-launcher/.env`. The current working directory is not searched. Each file must be an owner-only regular file (mode `0o600`, no group or other permission bits) and not a symlink. A documented template ships as `.env.example`.
 
 Secrets and tokens (RetroAchievements, EmuMovies, IGDB, GitHub) are read from these files or from the process environment. Put real secrets in `~/.env` or `~/.config/openbox-game-launcher/.env` only, never in the repository or in a tracked file.
 

@@ -78,7 +78,7 @@ When `OPENBOX_DATA_DIR` is not set and no `library.json` exists yet, OpenBoxGL l
 
 ## Configuring credentials
 
-Credentials and tokens can come from three places, in order: the process environment, discovered `.env` files, and persisted application settings (Settings dialog). The `.env` search order is the `OPENBOX_DATA_DIR` you passed in, the parent of the data directory, the current working directory, the application directory, your home directory (`~/.env`), and `~/.config/openbox-game-launcher/.env`. Values already in the environment are never overridden by `.env`.
+Credentials and tokens can come from three places, in order: the process environment, discovered `.env` files, and persisted application settings (Settings dialog). The `.env` search order is an explicit `OPENBOX_ENV_FILE` path if set, the data directory and its parent, your home directory (`~/.env`), and `~/.config/openbox-game-launcher/.env`. The current working directory is not searched. Values already in the environment are never overridden by `.env`.
 
 Supported variables are documented in `.env.example` and [Configuration](/reference/configuration/); they cover RetroAchievements (`RETROACHIEVEMENTS_USERNAME`, `RETROACHIEVEMENTS_API_KEY`), EmuMovies, IGDB, and `GITHUB_TOKEN` for release-API rate limits. Keep these files private; the API and the diagnostic log redact the values, but a `.env` file itself is plaintext.
 

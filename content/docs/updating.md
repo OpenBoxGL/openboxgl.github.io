@@ -5,9 +5,9 @@ description: Update AppImage installations and understand package boundaries.
 
 OpenBoxGL has one built-in updater and it is for the AppImage only. This page explains what it verifies, what happens during an update, what can go wrong, and how the other installation types update instead.
 
-## Upgrading to 1.0.0
+## Upgrading from a pre-1.0 build
 
-Version 1.0.0 removes the Tk interface and opens a native WebKitGTK window by default. Your library data is untouched: the same `library.json` in `~/.local/share/openbox-game-launcher` (or `OPENBOX_DATA_DIR`) keeps working, and the schema migrates to version 5 automatically on first launch (it only adds a host-owned `ui_state` block; games, settings, playlists, and history are unchanged). No re-import or re-download is needed.
+The Tk interface was removed as of 1.0.0; the app opens a native WebKitGTK window by default. If you are upgrading from any pre-1.0 build, the same notes apply. Your library data is untouched: the same `library.json` in `~/.local/share/openbox-game-launcher` (or `OPENBOX_DATA_DIR`) keeps working, and the schema migrates to version 5 automatically on first launch (it only adds a host-owned `ui_state` block; games, settings, playlists, and history are unchanged). No re-import or re-download is needed.
 
 The one behavioral change to expect is the window itself: instead of a browser tab, `openbox` opens the native window. `openbox --web` still opens the loopback web UI in a browser for development, and if WebKitGTK is missing the launcher falls back to a chrome-less app window rather than failing.
 
@@ -27,9 +27,10 @@ The updater only recognizes an AppImage: it refuses to run when `APPIMAGE` is no
 When you click **Check for updates** in Settings, OpenBoxGL queries the GitHub releases API for the latest release of `vindeckyy/OpenBoxGL` and compares versions:
 
 1. **Version comparison.** The tag must be newer than the running version. Pre-release and build-suffixed tags (`-beta`, `+build`) are never offered as updates, even when their version number is higher.
-2. **Asset verification.** The update is only offered when the release ships the `OpenBox-x86_64.AppImage` asset from the trusted `https://github.com/vindeckyy/OpenBoxGL/releases/download/` prefix, and when a SHA-256 checksum is available either as an asset digest or a `.sha256` file. A release missing either is rejected with a clear error instead of an unsafe download.
-3. **Checksummed download.** The new AppImage downloads to a staging file beside the current one, streaming with a 2 GiB cap. The download fails if the computed SHA-256 does not match the release's checksum.
-4. **Atomic swap with rollback.** The current AppImage is renamed to `OpenBox-x86_64.previous.AppImage` (any older rollback file is removed first), then the new file is moved into place. If the move fails, the previous file is restored and the update reports the error.
+2. **Asset verification.** The update is only offered when the release ships the `OpenBox-x86_64.AppImage` asset from the trusted `https://github.com/vindeckyy/OpenBoxGL/releases/download/` prefix, a SHA-256 checksum is available (asset digest or `.sha256` file), and an Ed25519 release signature (the `.sig` asset) is present. A release missing any of the three is rejected with a clear error instead of an unsafe download.
+3. **Signature verification.** Before anything is downloaded, the Ed25519 signature is verified against the pinned production public key (`openbox-release.pub`, shipped with the app). If the key is unavailable or still the placeholder, the update refuses to proceed with a loud warning.
+4. **Checksummed download.** The new AppImage downloads to a staging file beside the current one, streaming with a 2 GiB cap. The download fails if the computed SHA-256 does not match the release's checksum.
+5. **Atomic swap with rollback.** The current AppImage is renamed to `OpenBox-x86_64.previous.AppImage` (any older rollback file is removed first), then the new file is moved into place. If the move fails, the previous file is restored and the update reports the error.
 
 That is why the Settings dialog says "The current AppImage will be retained as a backup" before you confirm: the `.previous.AppImage` file is the rollback copy, not a leftover.
 
