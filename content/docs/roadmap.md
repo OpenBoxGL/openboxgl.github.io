@@ -10,7 +10,7 @@ OpenBox is maintained by one person in the open, so the roadmap is short and hon
 
 ## In the current release
 
-The [changelog](/changelog/) is the accurate record. The current release, 1.2.0, is the security and SteamOS compatibility release: release artifacts are Ed25519-signed against the pinned production public key, the SteamOS AppImage startup failure is fixed, and webhook, backup, 7z, Gameyfin, media, and environment handling are hardened, with the native bridge now checking the exact origin before authorizing. The native-first work from 1.0.0 (native WebKitGTK window, batch metadata auto-match, Server-Sent Events, the frozen v1 API contract, cover grouping) still underlies the app, and releases ship with SBOM and signing tooling.
+The [changelog](/changelog/) is the accurate record. The current release, 1.3.0, is the plugin-sandbox and maintenance release: plugins run in bubblewrap with isolated namespaces and no network, falling back to opt-in `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` for trusted local plugins, while cloud sync, save/backup restore, launch, validation, and job handling were split into auditable helpers with new coverage. The 1.2.0 security and SteamOS release (Ed25519-signed artifacts, SteamOS startup fix, webhook/backup/7z/Gameyfin/media/environment hardening, exact-origin bridge) and the native-first work from 1.0.0 (native WebKitGTK window, batch metadata auto-match, Server-Sent Events, frozen v1 API contract, cover grouping) still underlie the app, and releases ship with SBOM and signing tooling.
 
 ## In progress
 

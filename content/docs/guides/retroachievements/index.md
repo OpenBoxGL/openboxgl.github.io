@@ -40,7 +40,7 @@ RetroAchievements matching is by ROM hash, so the local file must be the exact R
 | PC Engine | Header stripping applied |
 | Arcade | Matched by set name |
 
-ROMs inside **ZIP and 7z archives** are hashed too. For other platforms, enter a RetroAchievements Game ID manually in **Edit metadata**.
+ROMs inside **ZIP and 7z archives** are hashed too (each archive's largest member is capped at 512 MiB, plain ROMs also capped at 512 MiB before hashing; larger files return `400` with `ROM file is too large`). For other platforms, enter a RetroAchievements Game ID manually in **Edit metadata**.
 
 ## Playing with achievements
 

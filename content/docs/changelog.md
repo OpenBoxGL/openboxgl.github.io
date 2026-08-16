@@ -6,6 +6,31 @@ sidebar: false
 
 # Changelog
 
+## Unreleased
+
+**Hardened**
+
+- API authentication now rate-limits failures per IP (10 in 60 seconds) with `429 Too Many Requests` and `Retry-After` (correct token still succeeds and clears the bucket). The token-bearing URL is no longer printed to stdout or the diagnostic log; `X-OpenBox-Token` header remains the safe path.
+- Game saves via `POST /api/game` now require an absolute path to an existing regular file and reject symlinked components to avoid TOCTOU and path confusion; the stored path is the expanded absolute form.
+- Theme imports via `POST /api/themes/import` now cap CSS files at 256 KiB, reject symlinked sources/destinations, require valid UTF-8, and reject remote `@import` with `http` to respect the `style-src` CSP.
+- RetroAchievements ROM hashing caps archives and plain files at 512 MiB before hashing (`512 MiB` per member for `archive_rom_bytes`, `MAX_ROM_BYTES` for `rom_data`).
+- Error responses sanitize absolute filesystem paths: the server log keeps the full path, the client receives the prefix before the path (for example `Watch folder does not exist.` instead of `/home/...`).
+
+## 1.3.0 (2026-08-16)
+
+### Hardened
+
+- Plugin execution now uses bubblewrap with isolated namespaces, no network access, and temporary mounts for home, temporary, runtime, and removable-media paths when the host supports it. If the sandbox cannot be created, enabled plugins are skipped by default; `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` is an explicit opt-in for trusted local plugins.
+- Gamescope regression tests now launch in their own process groups and terminate the full group on timeout, preventing nested gamescope processes from surviving the test gate.
+
+### Changed
+
+- Cloud sync, save and backup restore, launch handling, settings validation, metadata application, Lutris import, 7z validation, webhook validation, filter matching, and game resolution were split into focused helpers, keeping the security-sensitive paths easier to audit and test.
+- The background job manager now has dedicated coverage for retries, cancellation, queue and name limits, bounded results, shutdown, and completed-future cleanup.
+- Dead backend code and obsolete browser, screenshot, migration, and performance-capture scripts were removed.
+- From-source setup documentation now explains the tokenized UI URL and the supported `OPENBOX_ENV_FILE`, data-directory, home-directory, and user-config locations.
+- CI and release tooling now use the refreshed GitHub Actions and JavaScript dependencies, with CodeQL action components kept on one version and grouped Dependabot updates for future changes.
+
 ## 1.2.0 (2026-08-15)
 
 **Security and SteamOS**

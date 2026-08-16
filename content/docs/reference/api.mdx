@@ -51,7 +51,7 @@ Every route except the static UI page requires a token. Send it as a header:
 X-OpenBox-Token: TOKEN
 ```
 
-The query parameter `token=TOKEN` is also accepted but can leak through browser history, referrer logs, and proxy logs. Prefer the header in anything you write. The token is compared with a constant-time comparison (`secrets.compare_digest`). A missing or wrong token returns `403 {"error":"Unauthorized"}` for every route, including unknown ones, so the route surface is not discoverable without the token.
+The query parameter `token=TOKEN` is also accepted but can leak through browser history, referrer logs, and proxy logs. Prefer the header in anything you write. The app scrubs `?token=` from history immediately (`history.replaceState`) and never logs the token-bearing URL; logs use the token-free `http://127.0.0.1:PORT/`. The token is compared with a constant-time comparison (`secrets.compare_digest`). A missing or wrong token returns `403 {"error":"Unauthorized"}` for every route, including unknown ones, so the route surface is not discoverable without the token. Ten failures in 60 seconds per IP return `429 {"error":"Too many authentication failures. Try again later.", "code":"RATE_LIMITED", "retry_after": 60}` with `Retry-After` (correct token still succeeds and clears the bucket).
 
 ## Response envelope
 
@@ -62,8 +62,9 @@ All JSON responses use the shape `{"key": value, ...}`. Errors are always `{"err
 | `200` | Success |
 | `202` | Accepted; a background job was started (metadata sync, media bulk, emulator install/update, Gameyfin install) |
 | `304` | Not modified (conditional media and theme requests) |
-| `400` | Validation error; the `error` field names the exact problem |
+| `400` | Validation error; the `error` field names the exact problem (absolute paths are sanitized: the server log keeps the full path, the client receives the prefix before the path) |
 | `403` | `{"error":"Unauthorized"}`; missing or wrong token |
+| `429` | `{"error":"Too many authentication failures. Try again later.", "code":"RATE_LIMITED"}`; 10 auth failures in 60 seconds per IP, with `Retry-After` |
 | `404` | `{"error":"Not found"}` for unknown routes or missing games/media/documents |
 | `409` | Required local prerequisite is missing (for example, the metadata database has not been downloaded) |
 | `416` | Invalid byte range on media |

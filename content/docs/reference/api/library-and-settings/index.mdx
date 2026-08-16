@@ -26,7 +26,7 @@ In safe mode the `library` hook is skipped; otherwise plugin `library` hooks can
 Create or update one game. Locate by `id` (numeric) or `game_id` (stable) for updates; omit both to create. Validation:
 
 - `name` required and non-empty.
-- `path` must point to an existing local file (creation and updates).
+- `path` must be an absolute path to an existing regular file; symlinked components are rejected and the stored path is the expanded absolute form.
 - `progress` must be one of `""`, `Playing`, `Paused`, `Beaten`, `Completed`, `Mastered`, `Abandoned`.
 - `rating` is a float between 0 and 5.
 - `disc_count` is a non-negative integer.
