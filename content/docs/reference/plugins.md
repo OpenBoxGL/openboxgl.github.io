@@ -16,11 +16,11 @@ Plugins are local Python packages that extend OpenBoxGL through three hooks. The
 
 ## Reference pages
 
-- [Plugin API overview](/reference/plugins/overview/) — trust boundary and lifecycle
-- [Plugin manifest reference](/reference/plugins/manifest/) — fields, ID validation, entry selection
-- [Plugin hooks reference](/reference/plugins/hooks/) — the three payloads and response rules
-- [Plugin processes and errors](/reference/plugins/process-and-errors/) — protocol limits, timeout, safe mode, rollback
-- [Plugin catalog reference](/reference/plugins/catalog/) — bundled catalog entries and installation
+- [Plugin API overview](/reference/plugins/overview/), trust boundary and lifecycle
+- [Plugin manifest reference](/reference/plugins/manifest/), fields, ID validation, entry selection
+- [Plugin hooks reference](/reference/plugins/hooks/), the three payloads and response rules
+- [Plugin processes and errors](/reference/plugins/process-and-errors/), protocol limits, timeout, safe mode, rollback
+- [Plugin catalog reference](/reference/plugins/catalog/), bundled catalog entries and installation
 
 ## Install locations
 

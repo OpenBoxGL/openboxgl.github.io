@@ -19,9 +19,9 @@ Example:
 
 ```python
 def library(payload):
-    for game in payload.get("games", []):
-        game["notes"] = (game.get("notes") or "") + " [plugin]"
-    return payload
+  for game in payload.get("games", []):
+    game["notes"] = (game.get("notes") or "") + " [plugin]"
+  return payload
 ```
 
 ## `before_launch`
@@ -39,8 +39,8 @@ Example:
 
 ```python
 def before_launch(payload):
-    payload["args"].append("--plugin-worked")
-    return payload
+  payload["args"].append("--plugin-worked")
+  return payload
 ```
 
 ## `after_session`
@@ -53,8 +53,8 @@ Example:
 
 ```python
 def after_session(session):
-    print("played", session["game"], "for", session["seconds"], "seconds")
-    return session
+  print("played", session["game"], "for", session["seconds"], "seconds")
+  return session
 ```
 
 ## Hook chaining

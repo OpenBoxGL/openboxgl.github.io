@@ -49,6 +49,6 @@ The CLI form is `python3 web_app.py --restore-backup <archive>`; the archive mus
 
 ## See also
 
-- [Data and recovery](/reference/data-and-recovery/) — the state store and `.bak` recovery
-- [Save archives](/reference/save-archives/) — per-game save backups
-- [Library backups API reference](/reference/library-backups/) — full archive contract and limits
+- [Data and recovery](/reference/data-and-recovery/), the state store and `.bak` recovery
+- [Save archives](/reference/save-archives/), per-game save backups
+- [Library backups API reference](/reference/library-backups/), full archive contract and limits

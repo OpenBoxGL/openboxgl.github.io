@@ -72,7 +72,7 @@ The launcher reads `server.port` and `server.token` from the data directory, so 
 
 ## Related pages
 
-- [Interfaces and data](/interfaces-and-data/) — where `server.port` and `server.token` live
-- [REST API](/reference/api/) — the API the launcher calls under the hood
-- [Library backups](/reference/library-backups/) — the CLI backup flags in context
-- [Big Box and handhelds](/guides/big-box-and-handhelds/) — `--game-mode` behavior
+- [Interfaces and data](/interfaces-and-data/), where `server.port` and `server.token` live
+- [REST API](/reference/api/), the API the launcher calls under the hood
+- [Library backups](/reference/library-backups/), the CLI backup flags in context
+- [Big Box and handhelds](/guides/big-box-and-handhelds/), `--game-mode` behavior

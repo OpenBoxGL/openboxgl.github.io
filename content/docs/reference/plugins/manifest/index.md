@@ -27,11 +27,11 @@ A manifest missing any of these raises `"Plugin id, name, and version are requir
 
 ```json
 {
-  "id": "example-plugin",
-  "name": "Example Plugin",
-  "version": "1.0.0",
-  "entry": "main.py",
-  "hooks": ["library"]
+ "id": "example-plugin",
+ "name": "Example Plugin",
+ "version": "1.0.0",
+ "entry": "main.py",
+ "hooks": ["library"]
 }
 ```
 

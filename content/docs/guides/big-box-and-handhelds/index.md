@@ -44,7 +44,7 @@ Do not wrap OpenBox in another `gamescope` while already in Game Mode. On a norm
 
 <Callout type="note" title="How the guest session keeps Steam Input working">
 
-OpenBoxGL detects the gamescope guest from the environment and opens Big Box fullscreen in the native window, so gamescope treats it as a real app window. In the web fallback (`--web`), it opens a kiosk browser and marks that window with a dedicated `STEAM_GAME` id (`413091001`) so gamescope treats it as a real app window too. Games you launch from inside OpenBox still go through Steam (`steam -applaunch` / `steam://`), so their Input profiles and overlays stay scoped to those titles. Non-Steam games get a stable synthetic `STEAM_GAME` id derived from their identity (range 700,000,000–899,999,999). The tagging is a window property only — it does not change how the game runs.
+OpenBoxGL detects the gamescope guest from the environment and opens Big Box fullscreen in the native window, so gamescope treats it as a real app window. In the web fallback (`--web`), it opens a kiosk browser and marks that window with a dedicated `STEAM_GAME` id (`413091001`) so gamescope treats it as a real app window too. Games you launch from inside OpenBox still go through Steam (`steam -applaunch` / `steam://`), so their Input profiles and overlays stay scoped to those titles. Non-Steam games get a stable synthetic `STEAM_GAME` id derived from their identity (range 700,000,000-899,999,999). The tagging is a window property only, it does not change how the game runs.
 
 </Callout>
 

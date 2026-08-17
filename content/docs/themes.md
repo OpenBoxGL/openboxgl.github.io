@@ -32,13 +32,13 @@ A theme is a plain `.css` file that overrides the design tokens. The smallest us
 ```css
 /* OpenBox Stock Theme: my-theme */
 :root {
-  --bg: #1a1020;
-  --panel: #241628;
-  --text: #f5eef7;
-  --focus: #c77dff;
-  --active: #c77dff;
-  --action: #c77dff;
-  --action-ink: #1a1020;
+ --bg: #1a1020;
+ --panel: #241628;
+ --text: #f5eef7;
+ --focus: #c77dff;
+ --active: #c77dff;
+ --action: #c77dff;
+ --action-ink: #1a1020;
 }
 ```
 

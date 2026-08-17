@@ -9,7 +9,7 @@ Start with the diagnostic log and the exact visible error. **Settings** has **Co
 
 - The server binds to `127.0.0.1` on a random port. The port and token are written to `<data-dir>/server.port` and `<data-dir>/server.token`; the URL is printed to the terminal. If the window shows "Could not reach the OpenBox server", check that the server process is still running. In `--web` mode, the same message in the browser has the same cause.
 - `--no-browser` skips opening a browser; useful for remote or scripted starts. `OPENBOX_DATA_DIR` must be set before launch to change the data directory.
-- On Steam Deck / Bazzite Game Mode, OpenBox opens Big Box fullscreen in the native window. The web fallback (`--web`) uses a kiosk browser instead (Chromium, Chrome, Brave, Edge; native or Flatpak); if no kiosk browser is installed that fallback may fail — install one of them. Prefer the AppImage build in Game Mode, since the Flatpak build relies on host tools for window tagging.
+- On Steam Deck / Bazzite Game Mode, OpenBox opens Big Box fullscreen in the native window. The web fallback (`--web`) uses a kiosk browser instead (Chromium, Chrome, Brave, Edge; native or Flatpak); if no kiosk browser is installed that fallback may fail, install one of them. Prefer the AppImage build in Game Mode, since the Flatpak build relies on host tools for window tagging.
 - If an older AppImage build opened but never showed a window after desktop integration, install v0.6.0 or newer, remove the old menu entry, and re-add the AppImage.
 - Games that launch through Steam still go through Steam (`steam -applaunch` / `steam://`). If Steam Input or overlays do not work in Game Mode, confirm the title is a real Steam launch and that Steam Input is enabled for the OpenBox shortcut.
 

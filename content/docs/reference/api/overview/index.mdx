@@ -27,18 +27,18 @@ A request flows through a fixed set of stages. Knowing the order tells you which
 
 ```text
 parse + route
-  ├─ unknown route? → 404 ROUTE_NOT_FOUND
-  └─ known route, wrong/missing token? → 403 UNAUTHORIZED
+ ├─ unknown route? → 404 ROUTE_NOT_FOUND
+ └─ known route, wrong/missing token? → 403 UNAUTHORIZED
 authenticate (secrets.compare_digest)
 read body (Content-Length, ≤ 65536 bytes, valid JSON object)
-  ├─ too large → 400 "Request is too large."
-  ├─ truncated → 400 "Request body was truncated."
-  └─ not a JSON object → 400
+ ├─ too large → 400 "Request is too large."
+ ├─ truncated → 400 "Request body was truncated."
+ └─ not a JSON object → 400
 dispatch to handler (routes.py → Handler.<method>)
-  ├─ state corrupt? → 503 STATE_UNAVAILABLE "OpenBox library data needs recovery…"
-  ├─ handler raises ApiError → its status + code (GAME_NOT_FOUND, MEDIA_NOT_FOUND, …)
-  ├─ POST handler raises ValueError/OSError/… → 400 BAD_REQUEST {error: message}
-  └─ any other exception → 500 INTERNAL_ERROR "Unexpected server error. Copy the diagnostic log…"
+ ├─ state corrupt? → 503 STATE_UNAVAILABLE "OpenBox library data needs recovery…"
+ ├─ handler raises ApiError → its status + code (GAME_NOT_FOUND, MEDIA_NOT_FOUND, …)
+ ├─ POST handler raises ValueError/OSError/… → 400 BAD_REQUEST {error: message}
+ └─ any other exception → 500 INTERNAL_ERROR "Unexpected server error. Copy the diagnostic log…"
 send JSON response (nosniff, CSP, Referrer-Policy: no-referrer)
 ```
 
@@ -46,7 +46,7 @@ Every error response carries a stable `code` and a `request_id`. The request id 
 
 POST handlers re-raise `ApiError` unchanged and convert `ValueError`, `OSError`, `TypeError`, `AttributeError`, `KeyError`, `IndexError`, `json.JSONDecodeError`, `GameyfinError`, `FileNotFoundError`, `RuntimeError`, and `subprocess.SubprocessError` into `400 BAD_REQUEST` with the message in `error`. State-corruption errors become `503` before handler dispatch. Everything else is logged and returned as `500`.
 
-This is why almost every operation failure you hit through the API is a `400` with a readable, specific message — and why a `500` is genuinely "something the developers need to see," not a normal error path.
+This is why almost every operation failure you hit through the API is a `400` with a readable, specific message, and why a `500` is genuinely "something the developers need to see," not a normal error path.
 
 ## Bodies
 

@@ -58,7 +58,7 @@ Missing tools and malformed manifests are reported as import errors rather than 
 
 <Callout type="caution" title="Storefront entries without local files">
 
-Storefront imports that mark a title owned-but-uninstalled (`store_installed: false`) create a placeholder entry — its Play button stays disabled (or becomes **INSTALL** for Gameyfin) until the client actually has the game installed. These placeholders are intentional: they let your catalog include your whole owned library ahead of time.
+Storefront imports that mark a title owned-but-uninstalled (`store_installed: false`) create a placeholder entry, its Play button stays disabled (or becomes **INSTALL** for Gameyfin) until the client actually has the game installed. These placeholders are intentional: they let your catalog include your whole owned library ahead of time.
 
 </Callout>
 

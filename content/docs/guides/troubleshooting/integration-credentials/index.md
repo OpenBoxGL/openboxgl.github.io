@@ -36,6 +36,6 @@ Credentials are optional and come from three places in order: persisted settings
 
 ## See also
 
-- [Accounts and media](/integrations/accounts-and-media/) — setup for each provider
-- [Configuration](/reference/configuration/) — the full environment table and aliases
-- [Webhooks](/integrations/webhooks/) — delivery, signing, and URL validation
+- [Accounts and media](/integrations/accounts-and-media/), setup for each provider
+- [Configuration](/reference/configuration/), the full environment table and aliases
+- [Webhooks](/integrations/webhooks/), delivery, signing, and URL validation

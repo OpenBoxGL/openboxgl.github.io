@@ -24,7 +24,7 @@ The native window renders the same UI as the web UI; both are served by the loop
 
 ## Window opens but the library looks empty
 
-Check `OPENBOX_DATA_DIR`. The server is reading a different directory than the one you edited. The variable must be in the process environment at launch — putting it inside a discovered `.env` file is too late.
+Check `OPENBOX_DATA_DIR`. The server is reading a different directory than the one you edited. The variable must be in the process environment at launch, putting it inside a discovered `.env` file is too late.
 
 ## Steam / Game Mode specifics
 
@@ -33,6 +33,6 @@ Check `OPENBOX_DATA_DIR`. The server is reading a different directory than the o
 
 ## See also
 
-- [Installation](/install/) — install paths and prerequisites
-- [Interfaces and data](/interfaces-and-data/) — server startup order, token files, and `OPENBOX_DATA_DIR`
-- [Troubleshooting](/guides/troubleshooting/) — the index of every troubleshooting area
+- [Installation](/install/), install paths and prerequisites
+- [Interfaces and data](/interfaces-and-data/), server startup order, token files, and `OPENBOX_DATA_DIR`
+- [Troubleshooting](/guides/troubleshooting/), the index of every troubleshooting area

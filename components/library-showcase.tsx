@@ -13,7 +13,7 @@ export function LibraryShowcase() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <p className="mb-3 font-mono text-xs tracking-[0.25em] text-primary">// THE LIBRARY</p>
+            <p className="mb-2 font-mono text-xs tracking-widest text-primary">Library</p>
             <h2 className="max-w-xl text-balance text-3xl font-bold tracking-tight md:text-4xl">
               A command center for your entire collection.
             </h2>
@@ -23,14 +23,8 @@ export function LibraryShowcase() {
           </p>
         </div>
 
-        {/* app window */}
-        <div className="group relative rounded-2xl border border-border bg-card p-2 shadow-2xl">
-          <div
-            className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-100"
-            style={{ background: "linear-gradient(120deg, oklch(0.665 0.195 44 / 30%), oklch(0.785 0.085 206 / 25%))" }}
-            aria-hidden="true"
-          />
-          <div className="relative overflow-hidden rounded-xl border border-border">
+        <div className="relative rounded-lg border border-border bg-card p-2 shadow-lg">
+          <div className="relative overflow-hidden rounded-md border border-border">
             {/* window chrome */}
             <div className="flex items-center gap-2 border-b border-border bg-background/80 px-4 py-2.5">
               <span className="h-3 w-3 rounded-full bg-destructive/80" />
@@ -49,10 +43,9 @@ export function LibraryShowcase() {
           </div>
         </div>
 
-        {/* stat row */}
         <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className="rounded-xl border border-border bg-card px-5 py-4">
+            <div key={s.label} className="rounded-lg border border-border bg-card px-5 py-4">
               <div className="text-2xl font-bold text-primary md:text-3xl">{s.value}</div>
               <div className="mt-1 font-mono text-xs tracking-widest text-muted-foreground">{s.label.toUpperCase()}</div>
             </div>

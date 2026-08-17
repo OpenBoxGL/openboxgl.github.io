@@ -37,6 +37,6 @@ Recovery (`POST /api/state/recover`) loads the `.bak` file, normalizes it, and w
 
 ## See also
 
-- [Data and recovery](/reference/data-and-recovery/) — full schema, write path, migration table, caps
-- [API local administrator](/reference/api/local-admin/) — `POST /api/state/recover`
-- [Interfaces and data](/interfaces-and-data/) — where the state files live
+- [Data and recovery](/reference/data-and-recovery/), full schema, write path, migration table, caps
+- [API local administrator](/reference/api/local-admin/), `POST /api/state/recover`
+- [Interfaces and data](/interfaces-and-data/), where the state files live

@@ -21,9 +21,9 @@ export function SiteNav() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
-      <nav className="flex w-full max-w-6xl items-center justify-between gap-4 rounded-2xl border border-border bg-background/70 px-3 py-2.5 pl-4 backdrop-blur-xl">
+      <nav className="flex w-full max-w-6xl items-center justify-between gap-4 rounded-lg border border-border bg-card px-3 py-2.5 pl-4">
         <a href={onDocs ? "/" : "#top"} className="flex items-center gap-2.5" aria-label="OpenBox home">
-          <span className="relative block h-8 w-8 overflow-hidden rounded-md drop-shadow-[0_0_12px_oklch(0.665_0.195_44_/_50%)]">
+          <span className="relative block h-8 w-8 overflow-hidden rounded-md">
             <Image
               src="/openbox-logo.png"
               alt="OpenBox logo"
@@ -64,7 +64,7 @@ export function SiteNav() {
           </a>
           <a
             href="/install/"
-            className="flex items-center gap-2 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
+            className="flex items-center gap-2 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground"
           >
             <Terminal className="h-4 w-4" />
             Install

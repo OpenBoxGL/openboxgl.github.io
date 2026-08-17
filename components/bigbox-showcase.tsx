@@ -9,15 +9,10 @@ const perks = [
 
 export function BigBoxShowcase() {
   return (
-    <section id="bigbox" className="relative overflow-hidden px-4 py-24">
-      <div
-        className="pointer-events-none absolute right-0 top-1/4 h-[500px] w-[600px] rounded-full opacity-40 blur-[130px]"
-        style={{ background: "radial-gradient(closest-side, oklch(0.785 0.085 206 / 30%), transparent)" }}
-        aria-hidden="true"
-      />
+    <section id="bigbox" className="relative px-4 py-24">
       <div className="relative mx-auto max-w-6xl">
         <div className="mb-8 text-center">
-          <p className="mb-3 font-mono text-xs tracking-[0.25em] text-cyan">// BIG BOX MODE</p>
+          <p className="mb-2 font-mono text-xs tracking-widest text-cyan">Big Box mode</p>
           <h2 className="text-balance text-3xl font-bold tracking-tight md:text-5xl">
             From desktop to the couch, instantly.
           </h2>
@@ -27,8 +22,8 @@ export function BigBoxShowcase() {
           </p>
         </div>
 
-        <div className="relative rounded-2xl border border-border bg-card p-2 shadow-2xl">
-          <div className="overflow-hidden rounded-xl border border-border">
+        <div className="relative rounded-lg border border-border bg-card p-2 shadow-lg">
+          <div className="overflow-hidden rounded-md border border-border">
             <Image
               src="/bigbox-mode.png"
               alt="OpenBox Big Box fullscreen mode showing Chrono Trigger box art, description and a large Play button with controller hints"
@@ -43,7 +38,7 @@ export function BigBoxShowcase() {
           {perks.map((p) => {
             const Icon = p.icon
             return (
-              <div key={p.title} className="rounded-xl border border-border bg-card p-5">
+              <div key={p.title} className="rounded-lg border border-border bg-card p-5">
                 <Icon className="h-5 w-5 text-cyan" />
                 <h3 className="mt-3 font-semibold">{p.title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{p.body}</p>

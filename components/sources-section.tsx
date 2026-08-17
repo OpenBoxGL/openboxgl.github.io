@@ -16,7 +16,7 @@ export function SourcesSection() {
     <section id="sources" className="relative border-y border-border bg-card/30 px-4 py-20">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 text-center">
-          <p className="mb-3 font-mono text-xs tracking-[0.25em] text-primary">// EVERY SOURCE</p>
+          <p className="mb-2 font-mono text-xs tracking-widest text-primary">Every source</p>
           <h2 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">
             Import from everywhere. Manage in one place.
           </h2>
@@ -32,7 +32,7 @@ export function SourcesSection() {
             return (
               <div
                 key={s.name}
-                className="group flex items-center gap-3 rounded-xl border border-border bg-background/60 p-4 transition-colors hover:border-primary/40"
+                className="flex items-center gap-3 rounded-lg border border-border bg-card p-4"
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                   <Icon className="h-5 w-5" />

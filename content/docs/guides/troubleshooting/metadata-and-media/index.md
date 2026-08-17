@@ -21,7 +21,7 @@ Metadata and media work against local files and optional external providers. Sta
 
 ## Bezels
 
-A corrupt bezel download never destroys the existing set — extraction stages into a temp directory and swaps only after full success. Re-run **Download bezel** after fixing the archive. Unknown platforms return `400`.
+A corrupt bezel download never destroys the existing set, extraction stages into a temp directory and swaps only after full success. Re-run **Download bezel** after fixing the archive. Unknown platforms return `400`.
 
 ## Duplicate media cleanup
 
@@ -35,6 +35,6 @@ A corrupt bezel download never destroys the existing set — extraction stages i
 
 ## See also
 
-- [Metadata and media](/guides/metadata-and-media/) — the full workflow
-- [Accounts and media](/integrations/accounts-and-media/) — provider credentials and setup
-- [API content and imports](/reference/api/content-and-imports/) — metadata/media routes and errors
+- [Metadata and media](/guides/metadata-and-media/), the full workflow
+- [Accounts and media](/integrations/accounts-and-media/), provider credentials and setup
+- [API content and imports](/reference/api/content-and-imports/), metadata/media routes and errors

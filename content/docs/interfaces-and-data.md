@@ -63,7 +63,7 @@ OPENBOX_DATA_DIR=/mnt/library openbox
 
 <Callout type="caution" title="Moving an existing library">
 
-Migrate by moving the **whole data directory** (not just `library.json`) and pointing the variable at the new location. The sidecar (`.bak`, `.lock`), `media/`, `backups/`, `save-backups/`, `themes/`, `plugins/`, `metadata/`, and `cache/` should move with it — OpenBoxGL expects them all under the data directory. If you copy only `library.json`, media and saves will appear missing and backups will start fresh.
+Migrate by moving the **whole data directory** (not just `library.json`) and pointing the variable at the new location. The sidecar (`.bak`, `.lock`), `media/`, `backups/`, `save-backups/`, `themes/`, `plugins/`, `metadata/`, and `cache/` should move with it, OpenBoxGL expects them all under the data directory. If you copy only `library.json`, media and saves will appear missing and backups will start fresh.
 
 </Callout>
 

@@ -28,13 +28,7 @@ export function Hero() {
 
   return (
     <section id="top" className="relative overflow-hidden px-4 pt-32 pb-16 md:pt-40 md:pb-24">
-      {/* backdrop */}
-      <div className="pointer-events-none absolute inset-0 grid-backdrop opacity-60" aria-hidden="true" />
-      <div
-        className="pointer-events-none absolute left-1/2 top-0 h-[520px] w-[820px] -translate-x-1/2 rounded-full opacity-50 blur-[120px]"
-        style={{ background: "radial-gradient(closest-side, oklch(0.665 0.195 44 / 35%), transparent)" }}
-        aria-hidden="true"
-      />
+      <div className="pointer-events-none absolute inset-0 grid-backdrop opacity-30" aria-hidden="true" />
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-40"
         style={{ background: "linear-gradient(to top, var(--background), transparent)" }}
@@ -42,8 +36,7 @@ export function Hero() {
       />
 
       <div className="relative mx-auto max-w-5xl text-center">
-        {/* HUD strip */}
-        <div className="mx-auto mb-8 flex w-fit flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full border border-border bg-background/60 px-4 py-1.5 font-mono text-[10px] tracking-[0.2em] text-muted-foreground backdrop-blur">
+        <div className="mx-auto mb-8 flex w-fit flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full border border-border bg-card px-4 py-1.5 font-mono text-[10px] tracking-[0.2em] text-muted-foreground">
           <a
             href="/changelog/"
             className="rounded border border-border bg-secondary px-1.5 py-0.5 text-cyan transition-colors hover:text-primary"
@@ -62,7 +55,7 @@ export function Hero() {
         <h1 className="text-balance text-5xl font-bold leading-[0.95] tracking-tight md:text-7xl">
           One library for
           <br />
-          <span className="text-glow-primary text-primary">every game you own.</span>
+          <span className="text-primary">every game you own.</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">
@@ -70,8 +63,7 @@ export function Hero() {
           controller-ready catalog. No account. No cloud. No telemetry. It all lives on your machine.
         </p>
 
-        {/* install command */}
-        <div id="install" className="mx-auto mt-9 flex max-w-3xl items-center gap-2 rounded-xl border border-border bg-card p-1.5 pl-4 font-mono text-xs sm:text-sm">
+        <div id="install" className="mx-auto mt-9 flex max-w-3xl items-center gap-2 rounded-lg border border-border bg-card p-1.5 pl-4 font-mono text-xs sm:text-sm">
           <span className="text-primary">$</span>
           <span className="flex-1 overflow-hidden text-left text-foreground/90">{cmd}</span>
           <button
@@ -87,28 +79,22 @@ export function Hero() {
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#library"
-            className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
+            className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground"
           >
             <Play className="h-4 w-4 fill-current" />
             See it in action
           </a>
           <a
             href="#bigbox"
-            className="flex items-center gap-2 rounded-xl border border-border bg-background/50 px-6 py-3 font-medium text-foreground transition-colors hover:bg-secondary"
+            className="flex items-center gap-2 rounded-lg border border-border bg-card px-6 py-3 font-medium text-foreground transition-colors hover:bg-secondary"
           >
             <Gamepad2 className="h-4 w-4" />
             Big Box mode
           </a>
         </div>
 
-        {/* game detail preview — the release hero image */}
-        <div className="group relative mx-auto mt-14 max-w-4xl rounded-2xl border border-border bg-card p-2 shadow-2xl">
-          <div
-            className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-100"
-            style={{ background: "linear-gradient(120deg, oklch(0.665 0.195 44 / 30%), oklch(0.785 0.085 206 / 25%))" }}
-            aria-hidden="true"
-          />
-          <div className="relative overflow-hidden rounded-xl border border-border">
+        <div className="mx-auto mt-14 max-w-4xl rounded-lg border border-border bg-card p-2 shadow-lg">
+          <div className="relative overflow-hidden rounded-md border border-border">
             <div className="flex items-center gap-2 border-b border-border bg-background/80 px-4 py-2.5">
               <span className="h-3 w-3 rounded-full bg-destructive/80" />
               <span className="h-3 w-3 rounded-full bg-primary/80" />

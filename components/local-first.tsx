@@ -10,11 +10,11 @@ const pillars = [
 export function LocalFirst() {
   return (
     <section id="local" className="relative overflow-hidden border-y border-border bg-card/30 px-4 py-24">
-      <div className="pointer-events-none absolute inset-0 grid-backdrop opacity-40" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-0 grid-backdrop opacity-20" aria-hidden="true" />
       <div className="relative mx-auto max-w-6xl">
         <div className="grid gap-12 lg:grid-cols-2">
           <div>
-            <p className="mb-3 font-mono text-xs tracking-[0.25em] text-primary">// LOCAL-FIRST BY DESIGN</p>
+            <p className="mb-2 font-mono text-xs tracking-widest text-primary">Local-first by design</p>
             <h2 className="text-balance text-3xl font-bold leading-tight tracking-tight md:text-5xl">
               Your games. Your machine.
               <br />
@@ -32,13 +32,13 @@ export function LocalFirst() {
             <div className="mt-6 flex flex-wrap gap-3">
               <a
                 href="/interfaces-and-data/"
-                className="rounded-xl border border-border bg-background/50 px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary"
+                className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary"
               >
                 Interfaces and data
               </a>
               <a
                 href="/policies/privacy/"
-                className="rounded-xl border border-border bg-background/50 px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary"
+                className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary"
               >
                 Privacy policy
               </a>
@@ -49,7 +49,7 @@ export function LocalFirst() {
             {pillars.map((p) => {
               const Icon = p.icon
               return (
-                <div key={p.title} className="rounded-2xl border border-border bg-background/60 p-5">
+                <div key={p.title} className="rounded-lg border border-border bg-card p-5">
                   <Icon className="h-6 w-6 text-primary" />
                   <h3 className="mt-4 font-semibold">{p.title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{p.body}</p>

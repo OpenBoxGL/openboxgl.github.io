@@ -17,15 +17,15 @@ Per-game save backups are ZIP archives stored in `save-backups/` inside the data
 A save backup is a ZIP with DEFLATE compression:
 
 - `manifest.json` at the root:
-  ```json
-  {
-    "game": "Game Name",
-    "roots": [
-      {"path": "/home/you/.config/retroarch/saves", "file": false}
-    ]
-  }
-  ```
-  `file` is true when the root is a single file rather than a directory.
+ ```json
+ {
+  "game": "Game Name",
+  "roots": [
+   {"path": "/home/you/.config/retroarch/saves", "file": false}
+  ]
+ }
+ ```
+ `file` is true when the root is a single file rather than a directory.
 - `roots/<index>/...` mirrors each configured save path: for a single-file root, `roots/<index>/<filename>`; for a directory root, `roots/<index>/<relative path>`.
 
 The manifest is what restore uses to verify the archive matches the game's current `save_paths`.

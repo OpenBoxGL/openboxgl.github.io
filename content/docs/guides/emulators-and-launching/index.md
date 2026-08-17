@@ -7,7 +7,7 @@ OpenBoxGL launches games through tokenized commands, never shell interpolation. 
 
 <Callout type="tip" title="Read the launch pipeline first">
 
-Launching is a fixed sequence — resolve path → extract archive → resolve command → substitute tokens → apply perf → run `before_launch` plugins → spawn → track → `after_session`. The full order and where each validation error fires is documented in [How OpenBoxGL works](/reference/how-it-works/#the-launch-pipeline). Knowing the order tells you exactly which step a failure came from.
+Launching is a fixed sequence, resolve path → extract archive → resolve command → substitute tokens → apply perf → run `before_launch` plugins → spawn → track → `after_session`. The full order and where each validation error fires is documented in [How OpenBoxGL works](/reference/how-it-works/#the-launch-pipeline). Knowing the order tells you exactly which step a failure came from.
 
 </Callout>
 
@@ -56,7 +56,7 @@ A game with **Extract archive before launch** enabled is extracted at launch tim
 
 <Callout type="caution" title="Why the safe extractor refuses things">
 
-The extraction limits exist because a malicious or malformed archive is the one place untrusted bytes enter the filesystem. The extractor refuses symlinks, `..` paths, device nodes, and oversized members *by design*; a "cannot extract" error here means the archive violated a safety rule, not that the extractor is broken. Do not bypass it — repackage the archive.
+The extraction limits exist because a malicious or malformed archive is the one place untrusted bytes enter the filesystem. The extractor refuses symlinks, `..` paths, device nodes, and oversized members *by design*; a "cannot extract" error here means the archive violated a safety rule, not that the extractor is broken. Do not bypass it, repackage the archive.
 
 </Callout>
 

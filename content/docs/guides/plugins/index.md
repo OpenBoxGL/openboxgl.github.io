@@ -7,7 +7,7 @@ Plugins are optional local Python packages that observe or extend OpenBoxGL thro
 
 <Callout type="caution" title="What 'separate process' actually means">
 
-Without bubblewrap, isolation is robustness, not a security sandbox. The child process shares your user privileges and your filesystem — it can read and write any file your OpenBoxGL process can reach. The 5-second timeout, 2 MiB payload cap, and `PYTHONNOUSERSITE=1` environment cleaning prevent runaway behavior, but they don't restrict what the plugin can see on disk. When `bwrap` (bubblewrap) is available, OpenBoxGL runs plugins in an OS sandbox (`--unshare-all`, `--ro-bind / /`, `tmpfs` on `/home`/`/tmp`/`/run`, no network); if the sandbox cannot be created, enabled plugins are skipped unless `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` is set for trusted local plugins. Review every installed `plugin.py` before enabling it, and use `OPENBOX_SAFE_MODE=1` if you're unsure about a package. See [How OpenBoxGL works](/reference/how-it-works/#the-plugin-runner) for the execution pipeline.
+Without bubblewrap, isolation is robustness, not a security sandbox. The child process shares your user privileges and your filesystem, it can read and write any file your OpenBoxGL process can reach. The 5-second timeout, 2 MiB payload cap, and `PYTHONNOUSERSITE=1` environment cleaning prevent runaway behavior, but they don't restrict what the plugin can see on disk. When `bwrap` (bubblewrap) is available, OpenBoxGL runs plugins in an OS sandbox (`--unshare-all`, `--ro-bind / /`, `tmpfs` on `/home`/`/tmp`/`/run`, no network); if the sandbox cannot be created, enabled plugins are skipped unless `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` is set for trusted local plugins. Review every installed `plugin.py` before enabling it, and use `OPENBOX_SAFE_MODE=1` if you're unsure about a package. See [How OpenBoxGL works](/reference/how-it-works/#the-plugin-runner) for the execution pipeline.
 
 </Callout>
 
@@ -26,11 +26,11 @@ Without bubblewrap, isolation is robustness, not a security sandbox. The child p
 3. The package is staged, validated, and moved into `<data-dir>/plugins/<id>/`. Updates replace the previous version atomically with rollback.
 4. Installed plugins list their id, name, version, entry, hooks, and enabled state. Toggle them on/off per plugin (persisted in `plugins-state.json`).
 
-Installing from the **catalog** is also possible (`/api/plugins/catalog`), but the bundled catalog is small and documentation-oriented — today it contains one `local_only` example, so manual installs are the reliable path.
+Installing from the **catalog** is also possible (`/api/plugins/catalog`), but the bundled catalog is small and documentation-oriented, today it contains one `local_only` example, so manual installs are the reliable path.
 
 ## Trust and safety
 
-- Plugins execute with the same user privileges as OpenBoxGL and can read and modify files in your data directory and under your account — unless `bwrap` is available, in which case the OS sandbox hides `~/` and `/tmp` and drops network access.
+- Plugins execute with the same user privileges as OpenBoxGL and can read and modify files in your data directory and under your account, unless `bwrap` is available, in which case the OS sandbox hides `~/` and `/tmp` and drops network access.
 - The child-process isolation is robustness, not a security sandbox without bubblewrap; with `bwrap` it is an OS sandbox (`--unshare-all`, `--ro-bind`, no network).
 - **Install only packages you wrote or audited.** Review `plugin.py` after install (it lives in `plugins/<id>/`).
 - Safe mode (`OPENBOX_SAFE_MODE=1` in the environment) disables all plugin execution process-wide. It is the first thing to try when a plugin causes launch or library failures.
@@ -40,10 +40,10 @@ Installing from the **catalog** is also possible (`/api/plugins/catalog`), but t
 
 The [Plugin API reference](/reference/plugins/) documents the full contract:
 
-- [Manifest](/reference/plugins/manifest/) — `plugin.json` fields and ID validation
-- [Hooks](/reference/plugins/hooks/) — the three payloads and response rules
-- [Processes and errors](/reference/plugins/process-and-errors/) — limits (2 MiB in/out, 5-second timeout), environment cleaning, and failure handling
-- [Catalog](/reference/plugins/catalog/) — bundled entries and installation
+- [Manifest](/reference/plugins/manifest/), `plugin.json` fields and ID validation
+- [Hooks](/reference/plugins/hooks/), the three payloads and response rules
+- [Processes and errors](/reference/plugins/process-and-errors/), limits (2 MiB in/out, 5-second timeout), environment cleaning, and failure handling
+- [Catalog](/reference/plugins/catalog/), bundled entries and installation
 
 A minimal plugin that observes sessions:
 
@@ -53,8 +53,8 @@ A minimal plugin that observes sessions:
 
 ```python
 def after_session(session):
-    print("played", session["game"], "for", session["seconds"], "seconds")
-    return session
+  print("played", session["game"], "for", session["seconds"], "seconds")
+  return session
 ```
 
 ## Troubleshooting
@@ -67,6 +67,6 @@ def after_session(session):
 
 ## See also
 
-- [Troubleshooting plugins](/guides/troubleshooting/plugins/) — safe mode and failure handling
-- [Plugin API reference](/reference/plugins/) — the full contract
-- [API local administrator](/reference/api/local-admin/) — install/toggle/remove routes
+- [Troubleshooting plugins](/guides/troubleshooting/plugins/), safe mode and failure handling
+- [Plugin API reference](/reference/plugins/), the full contract
+- [API local administrator](/reference/api/local-admin/), install/toggle/remove routes

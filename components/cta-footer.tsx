@@ -11,19 +11,14 @@ const hints = [
 
 export function CtaFooter() {
   return (
-    <footer className="relative overflow-hidden px-4 pt-24 pb-8">
-      <div
-        className="pointer-events-none absolute left-1/2 top-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full opacity-40 blur-[120px]"
-        style={{ background: "radial-gradient(closest-side, oklch(0.665 0.195 44 / 35%), transparent)" }}
-        aria-hidden="true"
-      />
+    <footer className="relative px-4 pt-24 pb-8">
       <div className="relative mx-auto max-w-4xl text-center">
         <Image
           src="/openbox-logo.png"
           alt="OpenBox logo"
           width={64}
           height={64}
-          className="mx-auto h-16 w-16 object-contain drop-shadow-[0_0_24px_oklch(0.665_0.195_44_/_55%)]"
+          className="mx-auto h-16 w-16 object-contain"
         />
         <h2 className="mt-6 text-balance text-4xl font-bold tracking-tight md:text-6xl">
           Bring your whole backlog home.
@@ -35,7 +30,7 @@ export function CtaFooter() {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             href="/install/"
-            className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5"
+            className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground"
           >
             <Terminal className="h-4 w-4" />
             Install OpenBox
@@ -44,15 +39,14 @@ export function CtaFooter() {
             href="https://github.com/vindeckyy/OpenBoxGL"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-xl border border-border bg-background/50 px-6 py-3 font-medium transition-colors hover:bg-secondary"
+            className="flex items-center gap-2 rounded-lg border border-border bg-card px-6 py-3 font-medium transition-colors hover:bg-secondary"
           >
             <Star className="h-4 w-4" />
             Star on GitHub
           </a>
         </div>
 
-        {/* HUD hint strip echoing Big Box mode */}
-        <div className="mx-auto mt-14 flex w-fit flex-wrap items-center justify-center gap-x-5 gap-y-2 rounded-xl border border-border bg-card/60 px-6 py-3 font-mono text-[11px] tracking-wider text-muted-foreground backdrop-blur">
+        <div className="mx-auto mt-14 flex w-fit flex-wrap items-center justify-center gap-x-5 gap-y-2 rounded-lg border border-border bg-card px-6 py-3 font-mono text-[11px] tracking-wider text-muted-foreground">
           {hints.map((h) => (
             <span key={h}>{h}</span>
           ))}

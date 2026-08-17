@@ -41,12 +41,12 @@ Every delivery is a compact JSON POST:
 
 ```json
 {
-  "id": "evt-<hex>",
-  "type": "session.stopped",
-  "version": 1,
-  "created_at": "2026-08-11T12:00:00+00:00",
-  "source": "openbox",
-  "data": { ... }
+ "id": "evt-<hex>",
+ "type": "session.stopped",
+ "version": 1,
+ "created_at": "2026-08-11T12:00:00+00:00",
+ "source": "openbox",
+ "data": { ... }
 }
 ```
 
@@ -96,21 +96,21 @@ import hashlib, hmac, json
 SECRET = "your-webhook-secret"
 
 def handle(request_body: bytes, headers):
-    timestamp = headers["X-OpenBox-Timestamp"]
-    provided = headers.get("X-OpenBox-Signature", "").removeprefix("sha256=")
+  timestamp = headers["X-OpenBox-Timestamp"]
+  provided = headers.get("X-OpenBox-Signature", "").removeprefix("sha256=")
 
-    expected = hmac.new(SECRET.encode(), digestmod=hashlib.sha256)
-    expected.update(timestamp.encode())
-    expected.update(b".")
-    expected.update(request_body)
-    if not hmac.compare_digest(expected.hexdigest(), provided):
-        raise ValueError("bad signature")
+  expected = hmac.new(SECRET.encode(), digestmod=hashlib.sha256)
+  expected.update(timestamp.encode())
+  expected.update(b".")
+  expected.update(request_body)
+  if not hmac.compare_digest(expected.hexdigest(), provided):
+    raise ValueError("bad signature")
 
-    event = json.loads(request_body)
-    if event["type"] == "session.stopped":
-        game = event["data"]["name"]
-        seconds = event["data"]["seconds"]
-        print(f"{game} played for {seconds}s")
+  event = json.loads(request_body)
+  if event["type"] == "session.stopped":
+    game = event["data"]["name"]
+    seconds = event["data"]["seconds"]
+    print(f"{game} played for {seconds}s")
 ```
 
 The signature covers the exact transmitted body bytes, so read the raw request body before any framework decodes or reformats it. Configure the webhook with the same `SECRET` in the **Webhooks** dialog; delivery only signs when a secret is set, and `X-OpenBox-Signature` is omitted when the config has none.

@@ -13,13 +13,13 @@ This page is for maintainers publishing an AppImage release from `master`. The r
 4. Prepend release metadata to `openbox.metainfo.xml`.
 5. Update the README release badge, `PARITY.md` latest-release text, the bug-report template's version field, and any branch/version references that should track the current release. Leave historical version references in old changelog/metainfo entries and completed specs unchanged.
 6. Run the local gates:
-   ```bash
-   ./run_all_tests.sh
-   python3 -B test_packaging.py
-   appstreamcli validate --no-net openbox.metainfo.xml   # when available
-   desktop-file-validate openbox.desktop                 # when available
-   git diff --check
-   ```
+  ```bash
+  ./run_all_tests.sh
+  python3 -B test_packaging.py
+  appstreamcli validate --no-net openbox.metainfo.xml  # when available
+  desktop-file-validate openbox.desktop         # when available
+  git diff --check
+  ```
 
 ## Build and verify the artifact locally
 
@@ -40,10 +40,10 @@ Confirm the embedded version matches the release by extracting the AppImage and 
 
 1. Commit the version/changelog/metadata changes, push directly to `master`, and wait for the Python 3.10 and 3.12 CI jobs to pass for that exact commit.
 2. Create and push an annotated tag:
-   ```bash
-   git tag -a vX.Y.Z -m "vX.Y.Z"
-   git push origin vX.Y.Z
-   ```
+  ```bash
+  git tag -a vX.Y.Z -m "vX.Y.Z"
+  git push origin vX.Y.Z
+  ```
 
 ## What CI does
 

@@ -46,36 +46,36 @@ OpenBoxGL is independent from the Openbox window manager and from LaunchBox and 
 Each area has its own guide. The cards below say what you will find there.
 
 <FeatureGrid
-  label="OpenBoxGL guides"
-  items={[
-    { href: '/guides/library/', title: 'Library', eyebrow: 'Browse', description: 'Grid and list browsing, advanced search, filters, favorites, collections, playlists, health checks, and safe removal.' },
-    { href: '/guides/library/importing/', title: 'Imports', eyebrow: 'Bring in', description: 'Steam, Heroic, Lutris, Gameyfin, ROM folders, arcade DAT files, standalone games, and local services.' },
-    { href: '/guides/metadata-and-media/', title: 'Metadata and media', eyebrow: 'Enrich', description: 'LaunchBox Games Database and IGDB matching, artwork, media audits, and bounded background jobs.' },
-    { href: '/guides/emulators-and-launching/', title: 'Launching', eyebrow: 'Play', description: 'Profiles, per-game overrides, archive extraction, dependency checks, and command tokens.' },
-    { href: '/guides/big-box-and-handhelds/', title: 'Big Box', eyebrow: 'Fullscreen', description: 'Controller-oriented layouts, themes, screensavers, and Steam Deck / gamescope support.' },
-    { href: '/guides/sessions-saves-and-backups/', title: 'Saves and sessions', eyebrow: 'Protect', description: 'Play history, save discovery, versioned backups, restore protection, and statistics sync.' },
-    { href: '/guides/library/queue-tags-notifications/', title: 'Organization', eyebrow: 'Automate', description: 'Play queue, normalized tags, notifications, and signed webhook automation.' },
-    { href: '/guides/retroachievements/', title: 'RetroAchievements', eyebrow: 'Achieve', description: 'Match ROMs to achievement sets and track hardcore, beaten, and mastered progress.' },
-    { href: '/guides/plugins/', title: 'Plugins', eyebrow: 'Extend', description: 'Install local Python extensions that observe or change the library and launches.' },
-    { href: '/guides/discovery/', title: 'Discovery', eyebrow: 'Decide', description: 'Recently added, never played, continue playing, and short-session views.' },
-    { href: '/guides/storefront-manager/', title: 'Storefront Manager', eyebrow: 'Catalog', description: 'Browse owned versus installed catalogs and automate imports on startup.' },
-    { href: '/themes/', title: 'Themes', eyebrow: 'Customize', description: 'Five bundled CSS themes and local theme imports, global or per platform.' },
-  ]}
+ label="OpenBoxGL guides"
+ items={[
+  { href: '/guides/library/', title: 'Library', eyebrow: 'Browse', description: 'Grid and list browsing, advanced search, filters, favorites, collections, playlists, health checks, and safe removal.' },
+  { href: '/guides/library/importing/', title: 'Imports', eyebrow: 'Bring in', description: 'Steam, Heroic, Lutris, Gameyfin, ROM folders, arcade DAT files, standalone games, and local services.' },
+  { href: '/guides/metadata-and-media/', title: 'Metadata and media', eyebrow: 'Enrich', description: 'LaunchBox Games Database and IGDB matching, artwork, media audits, and bounded background jobs.' },
+  { href: '/guides/emulators-and-launching/', title: 'Launching', eyebrow: 'Play', description: 'Profiles, per-game overrides, archive extraction, dependency checks, and command tokens.' },
+  { href: '/guides/big-box-and-handhelds/', title: 'Big Box', eyebrow: 'Fullscreen', description: 'Controller-oriented layouts, themes, screensavers, and Steam Deck / gamescope support.' },
+  { href: '/guides/sessions-saves-and-backups/', title: 'Saves and sessions', eyebrow: 'Protect', description: 'Play history, save discovery, versioned backups, restore protection, and statistics sync.' },
+  { href: '/guides/library/queue-tags-notifications/', title: 'Organization', eyebrow: 'Automate', description: 'Play queue, normalized tags, notifications, and signed webhook automation.' },
+  { href: '/guides/retroachievements/', title: 'RetroAchievements', eyebrow: 'Achieve', description: 'Match ROMs to achievement sets and track hardcore, beaten, and mastered progress.' },
+  { href: '/guides/plugins/', title: 'Plugins', eyebrow: 'Extend', description: 'Install local Python extensions that observe or change the library and launches.' },
+  { href: '/guides/discovery/', title: 'Discovery', eyebrow: 'Decide', description: 'Recently added, never played, continue playing, and short-session views.' },
+  { href: '/guides/storefront-manager/', title: 'Storefront Manager', eyebrow: 'Catalog', description: 'Browse owned versus installed catalogs and automate imports on startup.' },
+  { href: '/themes/', title: 'Themes', eyebrow: 'Customize', description: 'Five bundled CSS themes and local theme imports, global or per platform.' },
+ ]}
 />
 
 ## Why OpenBoxGL
 
-OpenBoxGL exists because LaunchBox is a mature, feature-rich Windows library manager with no Linux build, and the Linux options that exist are usually storefront-specific (Steam, Heroic, Lutris) or emulator-specific (RetroArch, EmulationStation). None of them put a mixed collection — Steam games, GOG titles, ROMs, arcade sets, and standalone executables — into one searchable, art-rich, trackable catalog with a controller-friendly fullscreen mode.
+OpenBoxGL exists because LaunchBox is a mature, feature-rich Windows library manager with no Linux build, and the Linux options that exist are usually storefront-specific (Steam, Heroic, Lutris) or emulator-specific (RetroArch, EmulationStation). None of them put a mixed collection, Steam games, GOG titles, ROMs, arcade sets, and standalone executables, into one searchable, art-rich, trackable catalog with a controller-friendly fullscreen mode.
 
 | Goal on Linux | How OpenBoxGL meets it |
 | --- | --- |
 | One catalog for everything | Steam, Heroic, Lutris, Gameyfin, ROM folders, arcade DATs, ScummVM, RPCS3, Vita3K, and loose executables import into one library. |
 | Rich metadata and artwork | LaunchBox Games Database daily sync, IGDB search, Steam/GOG media, EmuMovies, and Bezel Project, with bulk media jobs and duplicate cleanup. |
-| Real launch profiles | Tokenized commands (`{path}`, `{rom_name}`, `{app_id}`, …), per-game overrides, archive extraction, and dependency checks — no shell interpolation. |
+| Real launch profiles | Tokenized commands (`{path}`, `{rom_name}`, `{app_id}`, …), per-game overrides, archive extraction, and dependency checks, no shell interpolation. |
 | Controller-friendly fullscreen | Big Box with Stage, Hybrid, and CoverFlow layouts, gamepad mapping, screensaver/attract mode, and gamescope guest support. |
 | Protect your saves | Save discovery across Steam Cloud, RetroArch, PCSX2, PPSSPP, RPCS3, Dolphin, and Cemu; versioned backups with restore guards; Ludusavi/Hoard hooks. |
 | Track play honestly | Per-session history with duration and exit code, progress automation, and mounted-folder statistics sync across machines. |
-| Automate locally | Play queue, tags, notifications, and HMAC-signed webhooks — all local, no account. |
+| Automate locally | Play queue, tags, notifications, and HMAC-signed webhooks, all local, no account. |
 | No subscription | Every LaunchBox-Premium-equivalent workflow (custom fields, ESRB filters, list view, media packs, cloud statistics sync) ships free. |
 
 The full capability matrix, including what is intentionally not replicated on Linux, lives in the [parity matrix](/reference/parity/).

@@ -26,8 +26,8 @@ Every archive contains `manifest.json`:
 
 ```json
 {
-  "items": ["library", "settings"],
-  "created": "2026-08-11T12:00:00"
+ "items": ["library", "settings"],
+ "created": "2026-08-11T12:00:00"
 }
 ```
 

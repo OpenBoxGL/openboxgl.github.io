@@ -7,7 +7,7 @@ OpenBoxGL enriches games from several optional media and metadata providers. Thi
 
 <Callout type="note" title="Which providers need credentials">
 
-Five providers require **no credentials** and work out of the box: LaunchBox Games Database (public download), Steam (per App ID), GOG (embedded data), Bezel Project (GitHub public repo), and IGDB when you supply `IGDB_CLIENT_ID`/`IGDB_CLIENT_SECRET`. Only EmuMovies requires a paid licensed account. All other providers are optional — your library functions perfectly with zero media providers configured.
+Five providers require **no credentials** and work out of the box: LaunchBox Games Database (public download), Steam (per App ID), GOG (embedded data), Bezel Project (GitHub public repo), and IGDB when you supply `IGDB_CLIENT_ID`/`IGDB_CLIENT_SECRET`. Only EmuMovies requires a paid licensed account. All other providers are optional, your library functions perfectly with zero media providers configured.
 
 </Callout>
 
@@ -27,7 +27,7 @@ Five providers require **no credentials** and work out of the box: LaunchBox Gam
 1. **Find metadata** on a game opens the LaunchBox Games Database dialog. **Download database** fetches and builds the local SQLite database (`<data-dir>/metadata/launchbox.db`); it skips when a download is already running.
 2. **Search** matches the game title with the platform as a hint (up to 20 results, exact-match first).
 3. Select a result to apply fields (name, platform, year, developer, publisher, genre, description, series, ESRB, max players). Check **Box front**, **Background**, **Screenshots** to also download media (up to 12 screenshots); **Replace existing fields and media** overwrites values, otherwise only empty fields are filled.
-4. **Search IGDB** is an alternative provider — it needs the Twitch credentials in `~/.env`. Results apply name, summary, genres, and platforms.
+4. **Search IGDB** is an alternative provider, it needs the Twitch credentials in `~/.env`. Results apply name, summary, genres, and platforms.
 5. **Use Steam data** fills fields from the Steam storefront API for entries with a Steam App ID and downloads the library cover and header image.
 
 ## Set up media
@@ -56,7 +56,7 @@ Five providers require **no credentials** and work out of the box: LaunchBox Gam
 
 ## See also
 
-- [Metadata and media](/guides/metadata-and-media/) — the full workflow and limits
-- [Accounts and media](/integrations/accounts-and-media/) — credentials, aliases, and API details
-- [Configuration](/reference/configuration/) — `IGDB_*`, `EMUMOVIES_*` environment table
-- [API content and imports](/reference/api/content-and-imports/) — metadata/media routes
+- [Metadata and media](/guides/metadata-and-media/), the full workflow and limits
+- [Accounts and media](/integrations/accounts-and-media/), credentials, aliases, and API details
+- [Configuration](/reference/configuration/), `IGDB_*`, `EMUMOVIES_*` environment table
+- [API content and imports](/reference/api/content-and-imports/), metadata/media routes

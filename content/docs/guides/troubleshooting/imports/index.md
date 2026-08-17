@@ -48,10 +48,10 @@ Configure the URL in **Storefronts** and use **Test Gameyfin connection** first.
 
 ## General
 
-Missing tools and malformed manifests never create partial entries: the importer raises a clear error (surfaced as `400`) or skips the unusable record. Re-running an import never duplicates — existing entries are skipped.
+Missing tools and malformed manifests never create partial entries: the importer raises a clear error (surfaced as `400`) or skips the unusable record. Re-running an import never duplicates, existing entries are skipped.
 
 ## See also
 
-- [Library importing](/guides/library/importing/) — the full import workflow
-- [Import sources](/integrations/import-sources/) — source-specific paths and manifests
-- [API content and imports](/reference/api/content-and-imports/) — import route contracts
+- [Library importing](/guides/library/importing/), the full import workflow
+- [Import sources](/integrations/import-sources/), source-specific paths and manifests
+- [API content and imports](/reference/api/content-and-imports/), import route contracts

@@ -10,11 +10,11 @@ OpenBoxGL integrates with local services and command-line tools that already exi
 - **What it is**: a self-hosted game library server. OpenBoxGL reads its catalog over HTTP, downloads games on demand, and tracks owned/installed state.
 - **Setup**: Settings > Gameyfin: `gameyfin_url` (a bare host gets `http://` prepended), optional username/password, `gameyfin_install_dir`, and provider.
 - **Behavior**:
-  - Catalog browse via `GET /api/storefront/catalog?source=gameyfin`.
-  - Install (`POST /api/gameyfin/install`) downloads the game into the install directory with a 4 GiB per-file cap, staging and rollback so a failed download never destroys an existing install; symlinked paths are refused.
-  - Uninstall refuses anything outside the install directory and any symlink.
-  - Install status is exposed through bounded polling of `GET /api/gameyfin/install/status?gameyfin_id=<id>` (state `idle`/`installing`/`done`/`error`).
-  - `storefront_auto_import.gameyfin` enables startup auto-import of the catalog.
+ - Catalog browse via `GET /api/storefront/catalog?source=gameyfin`.
+ - Install (`POST /api/gameyfin/install`) downloads the game into the install directory with a 4 GiB per-file cap, staging and rollback so a failed download never destroys an existing install; symlinked paths are refused.
+ - Uninstall refuses anything outside the install directory and any symlink.
+ - Install status is exposed through bounded polling of `GET /api/gameyfin/install/status?gameyfin_id=<id>` (state `idle`/`installing`/`done`/`error`).
+ - `storefront_auto_import.gameyfin` enables startup auto-import of the catalog.
 - The password is stored in settings and never returned by the API (`gameyfin_password_set` only).
 
 ## OBS Studio

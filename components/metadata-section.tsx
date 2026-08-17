@@ -38,7 +38,7 @@ export function MetadataSection() {
     <section id="media" className="relative px-4 py-20">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 text-center">
-          <p className="mb-3 font-mono text-xs tracking-[0.25em] text-primary">// METADATA AND MEDIA</p>
+          <p className="mb-2 font-mono text-xs tracking-widest text-primary">Metadata and media</p>
           <h2 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">
             Bare folders become rich library entries.
           </h2>
@@ -54,9 +54,9 @@ export function MetadataSection() {
             return (
               <div
                 key={it.title}
-                className="group rounded-xl border border-border bg-background/60 p-5 transition-colors hover:border-primary/40"
+                className="group rounded-lg border border-border bg-card p-5"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-primary">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="mt-4 font-semibold">{it.title}</h3>

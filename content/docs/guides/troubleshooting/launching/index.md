@@ -21,7 +21,7 @@ A game with no launch command and a non-executable file fails before any process
 
 The process started and exited. Check:
 
-- The command tokens (`{path}`, `{rom_name}`, `{app_id}`, ...) — a wrong token substitutes an empty string, not an error.
+- The command tokens (`{path}`, `{rom_name}`, `{app_id}`, ...), a wrong token substitutes an empty string, not an error.
 - The emulator binary and its install state/mode (native vs Flatpak) in **Emulators**.
 - Any BIOS files the game needs: use **Emulators** > dependency check (DuckStation `scph1001.bin`, PCSX2 BIOS, RPCS3 firmware, RetroArch system directory).
 - Paths with spaces stay one argument because commands are tokenized, not shell-interpolated. If the emulator needs its own quoting, add quotes around `{path}` in the profile.
@@ -42,6 +42,6 @@ The Running dialog's **Force close** (SIGKILL) ends the session; unsaved progres
 
 ## See also
 
-- [Emulators and launching](/guides/emulators-and-launching/) — profiles, tokens, archives, dependencies
-- [Command tokens](/reference/command-tokens/) — every token and validation error
-- [Handheld performance](/guides/big-box-and-handhelds/performance/) — TDP profiles
+- [Emulators and launching](/guides/emulators-and-launching/), profiles, tokens, archives, dependencies
+- [Command tokens](/reference/command-tokens/), every token and validation error
+- [Handheld performance](/guides/big-box-and-handhelds/performance/), TDP profiles

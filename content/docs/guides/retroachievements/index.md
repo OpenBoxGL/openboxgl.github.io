@@ -6,7 +6,7 @@ description: Connect RetroAchievements, match ROMs to achievement sets, and trac
 OpenBoxGL integrates with [RetroAchievements](https://retroachievements.org/) to match your ROMs to achievement sets, show earned and hardcore progress, serve badges, and inject your credentials into emulator configs so emulators enable achievements themselves.
 
 <Callout type="note" title="Why hash-based matching matters">
-RetroAchievements matches games by SHA-256 content hash of the ROM file, not by filename or size. That's why two different dumps of "Super Mario Bros" (NES) can have different hashes — they're treated as separate games with separate achievement sets. If a ROM doesn't match any set, try a different dump from No-Intro, Redump, or a well-known source; header-stripping is applied automatically for NES, SNES, N64, Game Boy, Genesis, SMS, GG, Atari 2600/7800, Lynx, and PC Engine.
+RetroAchievements matches games by SHA-256 content hash of the ROM file, not by filename or size. That's why two different dumps of "Super Mario Bros" (NES) can have different hashes, they're treated as separate games with separate achievement sets. If a ROM doesn't match any set, try a different dump from No-Intro, Redump, or a well-known source; header-stripping is applied automatically for NES, SNES, N64, Game Boy, Genesis, SMS, GG, Atari 2600/7800, Lynx, and PC Engine.
 </Callout>
 
 ## What it does
@@ -20,8 +20,8 @@ RetroAchievements matches games by SHA-256 content hash of the ROM file, not by 
 
 1. **Get credentials.** Create a RetroAchievements account and generate a web API key on your RetroAchievements profile page.
 2. **Enter them in Settings > RetroAchievements** (username + web API key), or set the environment variables in `~/.env`:
-   - `RETROACHIEVEMENTS_USERNAME` (aliases `RA_USERNAME`, `OPENBOX_RA_USERNAME`)
-   - `RETROACHIEVEMENTS_API_KEY` (aliases `RA_API_KEY`, `RETROACHIEVEMENTS_KEY`, `OPENBOX_RA_API_KEY`)
+  - `RETROACHIEVEMENTS_USERNAME` (aliases `RA_USERNAME`, `OPENBOX_RA_USERNAME`)
+  - `RETROACHIEVEMENTS_API_KEY` (aliases `RA_API_KEY`, `RETROACHIEVEMENTS_KEY`, `OPENBOX_RA_API_KEY`)
 3. Credentials are validated against `API_GetUserProfile.php` before saving and stored in `retroachievements.json` (mode `0o600`).
 4. Open a game's detail pane. If its platform supports auto-matching, use the RetroAchievements section to match the ROM.
 
@@ -33,9 +33,9 @@ RetroAchievements matching is by ROM hash, so the local file must be the exact R
 | --- | --- |
 | NES, SNES | Header stripping applied |
 | Nintendo 64 | Byte-swapped `.v64`/`.n64` handled |
-| Game Boy / Color / Advance | — |
-| Sega Genesis / Mega Drive | — |
-| Master System, Game Gear | — |
+| Game Boy / Color / Advance |, |
+| Sega Genesis / Mega Drive |, |
+| Master System, Game Gear |, |
 | Atari 2600 / 7800, Lynx | Header stripping applied |
 | PC Engine | Header stripping applied |
 | Arcade | Matched by set name |
@@ -45,7 +45,7 @@ ROMs inside **ZIP and 7z archives** are hashed too (each archive's largest membe
 ## Playing with achievements
 
 - **Inject credentials** (Settings or the RA section) writes `cheevos_*` settings into RetroArch and the equivalent configs for Dolphin and PCSX2, for both native and Flatpak paths. With credentials injected, RetroArch enables achievements in-game (hardcore mode included) without further setup.
-- Progress — earned, hardcore, beaten, mastered — is fetched from the RetroAchievements API and shown per game.
+- Progress, earned, hardcore, beaten, mastered, is fetched from the RetroAchievements API and shown per game.
 - Badges load from `media.retroachievements.org` on demand and are cached locally.
 
 ## Troubleshooting
@@ -60,6 +60,6 @@ ROMs inside **ZIP and 7z archives** are hashed too (each archive's largest membe
 
 ## See also
 
-- [Accounts and media](/integrations/accounts-and-media/) — credentials and environment variables
-- [API saves and operations](/reference/api/saves-and-operations/) — `/api/ra/*` routes
-- [Configuration](/reference/configuration/) — `RETROACHIEVEMENTS_*` environment table
+- [Accounts and media](/integrations/accounts-and-media/), credentials and environment variables
+- [API saves and operations](/reference/api/saves-and-operations/), `/api/ra/*` routes
+- [Configuration](/reference/configuration/), `RETROACHIEVEMENTS_*` environment table

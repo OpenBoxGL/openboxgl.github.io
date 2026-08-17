@@ -36,96 +36,96 @@ Before you install, confirm your system meets the baseline:
 
 <Callout type="tip" title="No Python packages to install">
 
-The source install uses only the Python standard library — there is no `pip install`, no `requirements.txt`, and no virtualenv step. Clone and run.
+The source install uses only the Python standard library, there is no `pip install`, no `requirements.txt`, and no virtualenv step. Clone and run.
 
 </Callout>
 
 <InstallOptions>
 <InstallOptionCard slot="appimage">
 
-  ### AppImage
+ ### AppImage
 
-  The AppImage is a single executable file that bundles OpenBoxGL, Python, and its dependencies. It does not need to be "installed" system-wide and works on immutable images like SteamOS and Bazzite.
+ The AppImage is a single executable file that bundles OpenBoxGL, Python, and its dependencies. It does not need to be "installed" system-wide and works on immutable images like SteamOS and Bazzite.
 
-  #### One-liner install
+ #### One-liner install
 
-  Download the latest AppImage, verify its SHA-256 checksum, and install it to `~/.local/bin` with a single command:
+ Download the latest AppImage, verify its SHA-256 checksum, and install it to `~/.local/bin` with a single command:
 
-  ```bash
-  curl -fsSL https://raw.githubusercontent.com/vindeckyy/OpenBoxGL/master/scripts/install.sh | bash
-  ```
+ ```bash
+ curl -fsSL https://raw.githubusercontent.com/vindeckyy/OpenBoxGL/master/scripts/install.sh | bash
+ ```
 
-  To also launch OpenBox right after installing:
+ To also launch OpenBox right after installing:
 
-  ```bash
-  curl -fsSL https://raw.githubusercontent.com/vindeckyy/OpenBoxGL/master/scripts/install.sh | bash -s -- --run
-  ```
+ ```bash
+ curl -fsSL https://raw.githubusercontent.com/vindeckyy/OpenBoxGL/master/scripts/install.sh | bash -s -- --run
+ ```
 
-  The script resolves the latest release automatically from GitHub, verifies the release public key against a pinned SHA-256 trust anchor, checks the AppImage against its published SHA-256, verifies its Ed25519 signature, and adds a friendly `openbox` launcher. Install to a different directory with `OPENBOX_INSTALL_DIR` (e.g. `OPENBOX_INSTALL_DIR="$HOME/Applications"`).
+ The script resolves the latest release automatically from GitHub, verifies the release public key against a pinned SHA-256 trust anchor, checks the AppImage against its published SHA-256, verifies its Ed25519 signature, and adds a friendly `openbox` launcher. Install to a different directory with `OPENBOX_INSTALL_DIR` (e.g. `OPENBOX_INSTALL_DIR="$HOME/Applications"`).
 
-  #### Manual download
+ #### Manual download
 
-  1. Download the latest release from [GitHub Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest). The file is named `OpenBox-x86_64.AppImage`.
-  2. Make it executable. Downloads are not executable by default, and a non-executable AppImage reports "Permission denied" when you try to run it:
+ 1. Download the latest release from [GitHub Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest). The file is named `OpenBox-x86_64.AppImage`.
+ 2. Make it executable. Downloads are not executable by default, and a non-executable AppImage reports "Permission denied" when you try to run it:
 
-  ```bash
-  chmod +x OpenBox-x86_64.AppImage
-  ```
+ ```bash
+ chmod +x OpenBox-x86_64.AppImage
+ ```
 
-  3. Run it:
+ 3. Run it:
 
-  ```bash
-  ./OpenBox-x86_64.AppImage
-  ```
+ ```bash
+ ./OpenBox-x86_64.AppImage
+ ```
 
-  The first launch starts the local server, writes the per-launch token files into the data directory, and opens the native WebKitGTK window. If WebKitGTK is missing, the launcher prints an install hint and falls back to a chrome-less app window (then your default browser).
+ The first launch starts the local server, writes the per-launch token files into the data directory, and opens the native WebKitGTK window. If WebKitGTK is missing, the launcher prints an install hint and falls back to a chrome-less app window (then your default browser).
 
-  Use `--web` to force the loopback web UI in a browser instead of the native window:
+ Use `--web` to force the loopback web UI in a browser instead of the native window:
 
-  ```bash
-  ./OpenBox-x86_64.AppImage --web
-  ```
+ ```bash
+ ./OpenBox-x86_64.AppImage --web
+ ```
 
 </InstallOptionCard>
 <InstallOptionCard slot="flatpak">
 
-  ### Flatpak
+ ### Flatpak
 
-  Build and install the Flatpak from the project's manifest with `flatpak-builder`:
+ Build and install the Flatpak from the project's manifest with `flatpak-builder`:
 
-  ```bash
-  flatpak-builder --user --install --force-clean build-dir io.openbox.GameLauncher.yml
-  flatpak run io.openbox.GameLauncher
-  ```
+ ```bash
+ flatpak-builder --user --install --force-clean build-dir io.openbox.GameLauncher.yml
+ flatpak run io.openbox.GameLauncher
+ ```
 
-  - The manifest (the `flatpak` module) uses the FreeDesktop runtime and grants `--filesystem=home`, so Steam, Heroic, Lutris, and ROM folders under your home directory are readable.
-  - The Flatpak is not updated by OpenBoxGL's built-in updater (it only understands the AppImage). Update by rebuilding the manifest or using the Flatpak workflow you already have for local builds.
-  - Flatpak builds install the same `openbox` and `openbox-native` launchers; `flatpak run io.openbox.GameLauncher --web` starts the loopback web UI in a browser.
+ - The manifest (the `flatpak` module) uses the FreeDesktop runtime and grants `--filesystem=home`, so Steam, Heroic, Lutris, and ROM folders under your home directory are readable.
+ - The Flatpak is not updated by OpenBoxGL's built-in updater (it only understands the AppImage). Update by rebuilding the manifest or using the Flatpak workflow you already have for local builds.
+ - Flatpak builds install the same `openbox` and `openbox-native` launchers; `flatpak run io.openbox.GameLauncher --web` starts the loopback web UI in a browser.
 </InstallOptionCard>
 <InstallOptionCard slot="source">
 
-  ### Source / system
+ ### Source / system
 
-  Source installs are the fastest way to run the current code, and they need the least tooling:
+ Source installs are the fastest way to run the current code, and they need the least tooling:
 
-  ```bash
-  git clone https://github.com/vindeckyy/OpenBoxGL.git
-  cd OpenBoxGL
-  python3 web_app.py
-  ```
+ ```bash
+ git clone https://github.com/vindeckyy/OpenBoxGL.git
+ cd OpenBoxGL
+ python3 web_app.py
+ ```
 
-  Requirements: Python 3.10 or newer on a Linux system with standard desktop tooling. No third-party Python packages are required; the application uses the standard library.
+ Requirements: Python 3.10 or newer on a Linux system with standard desktop tooling. No third-party Python packages are required; the application uses the standard library.
 
-  The native window opens (build it first with `make native-host`). `python3 web_app.py` starts the loopback web UI in a browser instead.
+ The native window opens (build it first with `make native-host`). `python3 web_app.py` starts the loopback web UI in a browser instead.
 
-  For a system install under `/usr/local` (override with `PREFIX=...`):
+ For a system install under `/usr/local` (override with `PREFIX=...`):
 
-  ```bash
-  sudo make install
-  openbox          # Native window (default)
-  openbox --web    # Web UI (development)
-  sudo make uninstall   # removes everything the target placed
-  ```
+ ```bash
+ sudo make install
+ openbox     # Native window (default)
+ openbox --web  # Web UI (development)
+ sudo make uninstall  # removes everything the target placed
+ ```
 </InstallOptionCard>
 </InstallOptions>
 
@@ -146,9 +146,9 @@ If an older build opened then never showed a window after integration, install *
 <Steps>
 
 <li>Run the entry point from a terminal. It should open the native window showing the three-column workspace.</li>
-    <li>On first launch with an empty library, the welcome wizard appears.</li>
-    <li>Settings → About (or `GET /api/settings` with the token) reports the running version and whether it is an AppImage.</li>
-    <li>Your data directory (`~/.local/share/openbox-game-launcher` unless `OPENBOX_DATA_DIR` is set) now contains `library.json`, `server.token`, and `server.port`.</li>
+  <li>On first launch with an empty library, the welcome wizard appears.</li>
+  <li>Settings → About (or `GET /api/settings` with the token) reports the running version and whether it is an AppImage.</li>
+  <li>Your data directory (`~/.local/share/openbox-game-launcher` unless `OPENBOX_DATA_DIR` is set) now contains `library.json`, `server.token`, and `server.port`.</li>
 
 </Steps>
 
@@ -180,7 +180,7 @@ All library data, media, backups, themes, and logs live in `~/.local/share/openb
 | Window does not open | Run from a terminal and read the printed error. In `--web` mode, open the printed `http://127.0.0.1:PORT/?token=...` URL yourself. |
 | Source: `python3: command not found` or `ModuleNotFoundError` | Python 3.10+ is required and must be `python3`. On some distros install `python3` and use `python3 web_app.py`. |
 | Flatpak can't read Steam/ROMs | Keep folders under your home directory; the manifest grants `--filesystem=home`. |
-| Library looks empty after install | Check `OPENBOX_DATA_DIR` — the server reads a different directory than the one you edited. It must be in the process environment at launch. |
+| Library looks empty after install | Check `OPENBOX_DATA_DIR`, the server reads a different directory than the one you edited. It must be in the process environment at launch. |
 
 More at [Troubleshooting startup and browser](/guides/troubleshooting/startup-and-browser/).
 

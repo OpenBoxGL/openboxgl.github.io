@@ -45,11 +45,11 @@ The CLI form is `python3 web_app.py --backup` for whole-library backups; per-gam
 Restore validates hard before writing anything:
 
 1. An automatic `before-restore` backup of the current saves is created first.
-2. The archive's manifest roots must match the game's currently configured `save_paths` exactly (count and order). If you edited the save paths after the backup, restore refuses with `"Save backup roots do not match this game."` — restore the paths to the archived values, or make a new backup.
+2. The archive's manifest roots must match the game's currently configured `save_paths` exactly (count and order). If you edited the save paths after the backup, restore refuses with `"Save backup roots do not match this game."`, restore the paths to the archived values, or make a new backup.
 3. Members are validated: no absolute paths, no `..`, no duplicates, no symlinked destinations, per-member cap 4 GiB, total cap 32 GiB.
 4. Files are written with mode `0o600` through atomic copy.
 
-Restoring is destructive by design — the `before-restore` archive is your safety copy.
+Restoring is destructive by design, the `before-restore` archive is your safety copy.
 
 ## Ludusavi and Hoard
 
@@ -72,7 +72,7 @@ Both treat restore as destructive (they overwrite local files), so run a backup 
 
 ## See also
 
-- [Sessions, saves, and backups](/guides/sessions-saves-and-backups/) — session history and whole-library backups
-- [Save archives](/reference/save-archives/) — archive format and restore validation in detail
-- [API saves and operations](/reference/api/saves-and-operations/) — the routes behind the UI
-- [Local services](/integrations/local-services/) — Ludusavi and Hoard setup
+- [Sessions, saves, and backups](/guides/sessions-saves-and-backups/), session history and whole-library backups
+- [Save archives](/reference/save-archives/), archive format and restore validation in detail
+- [API saves and operations](/reference/api/saves-and-operations/), the routes behind the UI
+- [Local services](/integrations/local-services/), Ludusavi and Hoard setup

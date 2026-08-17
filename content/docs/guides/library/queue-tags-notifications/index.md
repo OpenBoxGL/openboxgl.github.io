@@ -7,7 +7,7 @@ OpenBox's Queue, Tags, Notifications, and Webhooks dialogs are opened from the t
 
 <Callout type="note" title="Why these caps matter for automation">
 
-The queue is capped at **500 entries** (`play_queue.py CAP = 500`), notifications at **200**, and webhook configs at **32** (`automation.py MAX_WEBHOOKS = 32`). A full webhook queue drops the event with a failure notification rather than blocking your library — this prevents a misconfigured webhook from grinding the server to a halt. See [How OpenBoxGL works](/reference/how-it-works/#the-webhook-dispatcher) for the delivery pipeline.
+The queue is capped at **500 entries** (`play_queue.py CAP = 500`), notifications at **200**, and webhook configs at **32** (`automation.py MAX_WEBHOOKS = 32`). A full webhook queue drops the event with a failure notification rather than blocking your library, this prevents a misconfigured webhook from grinding the server to a halt. See [How OpenBoxGL works](/reference/how-it-works/#the-webhook-dispatcher) for the delivery pipeline.
 
 </Callout>
 

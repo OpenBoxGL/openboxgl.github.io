@@ -31,7 +31,7 @@ OPENBOX_SAFE_MODE=1 openbox
 
 ## See also
 
-- [Plugins](/reference/plugins/) — manifest, hooks, and lifecycle
-- [Plugin overview](/reference/plugins/overview/) — trust boundary and safe mode
-- [Plugin processes and errors](/reference/plugins/process-and-errors/) — limits and failure handling
-- [API local administrator](/reference/api/local-admin/) — install/toggle/remove routes
+- [Plugins](/reference/plugins/), manifest, hooks, and lifecycle
+- [Plugin overview](/reference/plugins/overview/), trust boundary and safe mode
+- [Plugin processes and errors](/reference/plugins/process-and-errors/), limits and failure handling
+- [API local administrator](/reference/api/local-admin/), install/toggle/remove routes

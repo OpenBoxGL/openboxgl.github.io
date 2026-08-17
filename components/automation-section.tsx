@@ -38,7 +38,7 @@ export function AutomationSection() {
     <section id="automation" className="relative px-4 py-20">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 text-center">
-          <p className="mb-3 font-mono text-xs tracking-[0.25em] text-primary">// EXTEND AND AUTOMATE</p>
+          <p className="mb-2 font-mono text-xs tracking-widest text-primary">Extend and automate</p>
           <h2 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">
             Scriptable, pluggable, and local.
           </h2>
@@ -52,11 +52,8 @@ export function AutomationSection() {
           {items.map((it) => {
             const Icon = it.icon
             return (
-              <div
-                key={it.title}
-                className="group rounded-xl border border-border bg-background/60 p-5 transition-colors hover:border-primary/40"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+              <div key={it.title} className="rounded-lg border border-border bg-card p-5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-primary">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="mt-4 font-semibold">{it.title}</h3>
@@ -69,19 +66,19 @@ export function AutomationSection() {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             href="/reference/api/"
-            className="rounded-xl border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+            className="rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
           >
             REST API reference
           </a>
           <a
             href="/guides/plugins/"
-            className="rounded-xl border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+            className="rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
           >
             Plugins guide
           </a>
           <a
             href="/integrations/webhooks/"
-            className="rounded-xl border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+            className="rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
           >
             Webhooks
           </a>

@@ -7,7 +7,7 @@ OpenBoxGL organizes a large catalog through favorites, collections, saved filter
 
 <Callout type="tip" title="Bulk edit never deletes anything">
 
-Bulk Edit changes only the fields you specify — missing keys are preserved unchanged. `favorite` and `hidden` must be booleans; `progress` must be a known status; `rating` is clamped to 0–5. Tags have their own replace/add/remove actions (see [Queue, tags, and notifications](/guides/library/queue-tags-notifications/)) because combining tag replacement with add or remove in one request would be ambiguous.
+Bulk Edit changes only the fields you specify, missing keys are preserved unchanged. `favorite` and `hidden` must be booleans; `progress` must be a known status; `rating` is clamped to 0-5. Tags have their own replace/add/remove actions (see [Queue, tags, and notifications](/guides/library/queue-tags-notifications/)) because combining tag replacement with add or remove in one request would be ambiguous.
 
 </Callout>
 

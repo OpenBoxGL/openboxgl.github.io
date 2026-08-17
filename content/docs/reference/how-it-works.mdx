@@ -10,17 +10,17 @@ OpenBoxGL has a local application core with one presentation layer served by two
 That distinction explains most of the architecture. Durable facts such as games, settings, playlists, queue entries, notifications, and completed history belong in `library.json`. Temporary facts such as an open dialog, an active browser selection, a running `Popen` object, or a queued worker live in memory and disappear when their process stops.
 
 <FeatureGrid
-  label="OpenBoxGL internals"
-  items={[
-    { href: '#startup-and-process-ownership', title: 'Startup', eyebrow: 'boot', description: 'Environment selection, state bootstrap, themes, workers, loopback server, token files, and browser handoff.' },
-    { href: '#the-state-store', title: 'State store', eyebrow: 'persist', description: 'Schema migration, identity, locks, atomic writes, cache behavior, backups, and recovery.' },
-    { href: '#the-request-lifecycle', title: 'HTTP boundary', eyebrow: 'serve', description: 'Authentication, body limits, route dispatch, error mapping, headers, and browser API behavior.' },
-    { href: '#the-import-pipeline', title: 'Imports', eyebrow: 'catalog', description: 'Folder scans, storefront adapters, ROM normalization, deduplication, state mutation, and media work.' },
-    { href: '#the-launch-pipeline', title: 'Launch', eyebrow: 'play', description: 'Path resolution, archive extraction, command tokens, plugins, process groups, tracking, and teardown.' },
-    { href: '#background-jobs', title: 'Workers', eyebrow: 'async', description: 'Generic jobs, feature-specific status maps, retries, cancellation, polling, and restart behavior.' },
-    { href: '#extension-boundaries', title: 'Extensions', eyebrow: 'extend', description: 'Plugin subprocesses, CSS themes, webhook delivery, validation, and trust boundaries.' },
-    { href: '#maintenance-map', title: 'Maintenance map', eyebrow: 'change', description: 'Where to make a change, which contracts it touches, and which tests prove the result.' },
-  ]}
+ label="OpenBoxGL internals"
+ items={[
+  { href: '#startup-and-process-ownership', title: 'Startup', eyebrow: 'boot', description: 'Environment selection, state bootstrap, themes, workers, loopback server, token files, and browser handoff.' },
+  { href: '#the-state-store', title: 'State store', eyebrow: 'persist', description: 'Schema migration, identity, locks, atomic writes, cache behavior, backups, and recovery.' },
+  { href: '#the-request-lifecycle', title: 'HTTP boundary', eyebrow: 'serve', description: 'Authentication, body limits, route dispatch, error mapping, headers, and browser API behavior.' },
+  { href: '#the-import-pipeline', title: 'Imports', eyebrow: 'catalog', description: 'Folder scans, storefront adapters, ROM normalization, deduplication, state mutation, and media work.' },
+  { href: '#the-launch-pipeline', title: 'Launch', eyebrow: 'play', description: 'Path resolution, archive extraction, command tokens, plugins, process groups, tracking, and teardown.' },
+  { href: '#background-jobs', title: 'Workers', eyebrow: 'async', description: 'Generic jobs, feature-specific status maps, retries, cancellation, polling, and restart behavior.' },
+  { href: '#extension-boundaries', title: 'Extensions', eyebrow: 'extend', description: 'Plugin subprocesses, CSS themes, webhook delivery, validation, and trust boundaries.' },
+  { href: '#maintenance-map', title: 'Maintenance map', eyebrow: 'change', description: 'Where to make a change, which contracts it touches, and which tests prove the result.' },
+ ]}
 />
 
 ## The architecture in one view
@@ -29,29 +29,29 @@ The application is easiest to understand as a set of boundaries around one local
 
 ```text
 AppImage or source entry point
-  -> native_host (C WebKitGTK) or web_app.py --web
-  -> environment and data-directory selection
-  -> JsonStateStore and library bootstrap
-  -> native window or browser shell
+ -> native_host (C WebKitGTK) or web_app.py --web
+ -> environment and data-directory selection
+ -> JsonStateStore and library bootstrap
+ -> native window or browser shell
 
 Web shell (either host)
-  -> ThreadingHTTPServer on 127.0.0.1 and an ephemeral port
-  -> token-authenticated Handler routes
-  -> focused domain modules
-  -> state-store transaction or bounded filesystem operation
-  -> JSON response
-  -> index.html refresh, render, toast, dialog, or job polling
+ -> ThreadingHTTPServer on 127.0.0.1 and an ephemeral port
+ -> token-authenticated Handler routes
+ -> focused domain modules
+ -> state-store transaction or bounded filesystem operation
+ -> JSON response
+ -> index.html refresh, render, toast, dialog, or job polling
 
 Launch path
-  -> stable game identity resolution
-  -> build_launch()
-  -> optional archive extraction and performance setup
-  -> before_launch plugin subprocesses
-  -> Popen(start_new_session=True)
-  -> process-local RUNNING and PROCESSES maps
-  -> finish_session()
-  -> durable playtime and optional history
-  -> save backup, integrations, stop event, and after_session plugins
+ -> stable game identity resolution
+ -> build_launch()
+ -> optional archive extraction and performance setup
+ -> before_launch plugin subprocesses
+ -> Popen(start_new_session=True)
+ -> process-local RUNNING and PROCESSES maps
+ -> finish_session()
+ -> durable playtime and optional history
+ -> save backup, integrations, stop event, and after_session plugins
 ```
 
 The composition root is `web_app.py`, which owns the loopback server and the domain logic. The native host is `native_host.c`, a C shim that spawns `web_app.py --no-browser` and renders its `index.html` in a WebKitGTK window. Shared launch and data-directory entry points live in `openbox.py`. Persistence rules are in `state_store.py`. The single renderer is `index.html`; other modules own narrower rules, such as archive safety, import adapters, metadata, saves, integrations, plugins, themes, and jobs.
@@ -66,20 +66,20 @@ The current startup sequence is approximately:
 
 ```text
 web_app.main()
-  -> bootstrap_env(DATA.parent)
-  -> configure diagnostic logging
-  -> initialize or recover environment configuration
-  -> load the state store and purge demo data where applicable
-  -> ensure bundled stock themes exist
-  -> create the auto-import worker
-  -> create ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-  -> generate the per-launch token
-  -> write server.port and server.token
-  -> build the token-bearing localhost URL
-  -> run configured startup commands
-  -> open the browser unless browser opening is disabled
-  -> serve requests
-  -> stop workers, remove token and port files, run shutdown commands
+ -> bootstrap_env(DATA.parent)
+ -> configure diagnostic logging
+ -> initialize or recover environment configuration
+ -> load the state store and purge demo data where applicable
+ -> ensure bundled stock themes exist
+ -> create the auto-import worker
+ -> create ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+ -> generate the per-launch token
+ -> write server.port and server.token
+ -> build the token-bearing localhost URL
+ -> run configured startup commands
+ -> open the browser unless browser opening is disabled
+ -> serve requests
+ -> stop workers, remove token and port files, run shutdown commands
 ```
 
 The exact startup code lives near `main()` in `web_app.py`. The important ordering is that the server must have a bound port and token before the browser URL can be built. The token and port files are owner-readable files under the selected data directory. They are discovery helpers for local tools such as the launcher script and deep-link handling, not a remote service registry.
@@ -158,15 +158,15 @@ The environment variable must be available before startup selects `DATA`. An `.e
 
 ```json
 {
-  "schema_version": 5,
-  "games": [],
-  "profiles": {},
-  "history": [],
-  "settings": {},
-  "playlists": [],
-  "queue": [],
-  "notifications": [],
-  "ui_state": {}
+ "schema_version": 5,
+ "games": [],
+ "profiles": {},
+ "history": [],
+ "settings": {},
+ "playlists": [],
+ "queue": [],
+ "notifications": [],
+ "ui_state": {}
 }
 ```
 
@@ -199,16 +199,16 @@ The normal write path is:
 
 ```text
 mutator
-  -> current state loaded under the exclusive lock
-  -> known collections normalized
-  -> JSON serialized
-  -> temporary file created beside library.json
-  -> temporary file flushed, fsynced, and chmod 0600
-  -> temporary bytes copied to library.json.bak
-  -> os.replace(temp, library.json)
-  -> primary chmod 0600
-  -> containing directory fsynced
-  -> in-memory cache refreshed
+ -> current state loaded under the exclusive lock
+ -> known collections normalized
+ -> JSON serialized
+ -> temporary file created beside library.json
+ -> temporary file flushed, fsynced, and chmod 0600
+ -> temporary bytes copied to library.json.bak
+ -> os.replace(temp, library.json)
+ -> primary chmod 0600
+ -> containing directory fsynced
+ -> in-memory cache refreshed
 ```
 
 Files below the compact serialization threshold are pretty-printed. A payload whose compact form exceeds 1 MiB is written compactly. The file ends with a newline in either case. The backup is written before the primary replacement, which keeps the backup aligned with the state being committed if the primary swap completes.
@@ -227,15 +227,15 @@ The Web UI is a local JSON client. `index.html` calls its `api()` helper, which 
 
 ```text
 browser action
-  -> index.html api(path, options)
-  -> X-OpenBox-Token header or token query parameter
-  -> Handler authorization
-  -> method and route dispatch
-  -> JSON body and boundary validation
-  -> focused domain function
-  -> state transaction or bounded file/process operation
-  -> JSON response
-  -> browser refresh, render, notification, dialog, or polling
+ -> index.html api(path, options)
+ -> X-OpenBox-Token header or token query parameter
+ -> Handler authorization
+ -> method and route dispatch
+ -> JSON body and boundary validation
+ -> focused domain function
+ -> state transaction or bounded file/process operation
+ -> JSON response
+ -> browser refresh, render, notification, dialog, or polling
 ```
 
 ### Authentication and static resources
@@ -268,13 +268,13 @@ A folder import in the native window starts with a GTK file dialog. In the brows
 
 ```text
 index.html import action
-  -> POST /api/import
-  -> import_folder_path()
-  -> parity_import.import_multi_platform()
-  -> candidate discovery and normalization
-  -> duplicate-path checks against current games
-  -> state transaction
-  -> library response and optional media work
+ -> POST /api/import
+ -> import_folder_path()
+ -> parity_import.import_multi_platform()
+ -> candidate discovery and normalization
+ -> duplicate-path checks against current games
+ -> state transaction
+ -> library response and optional media work
 ```
 
 The multi-platform path recognizes executable files, archives, disc images, ROM extensions, and source-specific layouts. Emulator recommendations are separate from persistence. A recommendation can tell the UI which platform profile or dependency may be needed, but it does not grant a ROM a launch command by itself.
@@ -307,20 +307,20 @@ The Web UI launch path starts from a stable game reference and passes through `w
 
 ```text
 POST /api/launch
-  -> resolve stable ID or supported legacy reference
-  -> copy and re-resolve current game state
-  -> validate path
-  -> optionally extract archive into a staged cache
-  -> select per-game command or platform profile
-  -> tokenize and substitute launch markers
-  -> choose fallback for .sh or executable paths
-  -> apply optional performance profile
-  -> run before_launch plugin chain
-  -> validate plugin output
-  -> Popen(..., start_new_session=True)
-  -> update play metadata and live process maps
-  -> publish session.started
-  -> daemon completion thread waits for exit
+ -> resolve stable ID or supported legacy reference
+ -> copy and re-resolve current game state
+ -> validate path
+ -> optionally extract archive into a staged cache
+ -> select per-game command or platform profile
+ -> tokenize and substitute launch markers
+ -> choose fallback for .sh or executable paths
+ -> apply optional performance profile
+ -> run before_launch plugin chain
+ -> validate plugin output
+ -> Popen(..., start_new_session=True)
+ -> update play metadata and live process maps
+ -> publish session.started
+ -> daemon completion thread waits for exit
 ```
 
 ### Path and archive resolution
@@ -362,19 +362,19 @@ The completion path is ordered roughly as follows:
 
 ```text
 process exits
-  -> calculate elapsed time, with a minimum recorded duration of 1 second
-  -> resolve current game
-  -> optional save backup on close
-  -> optional OBS and store cleanup
-  -> update playtime and progress
-  -> append optional name-based history record
-  -> cap history at the newest 500 entries
-  -> remove RUNNING and PROCESSES entries
-  -> restore performance settings
-  -> publish session.stopped
-  -> run after_session plugins
-  -> attempt cloud statistics sync
-  -> restart when the session requested it
+ -> calculate elapsed time, with a minimum recorded duration of 1 second
+ -> resolve current game
+ -> optional save backup on close
+ -> optional OBS and store cleanup
+ -> update playtime and progress
+ -> append optional name-based history record
+ -> cap history at the newest 500 entries
+ -> remove RUNNING and PROCESSES entries
+ -> restore performance settings
+ -> publish session.stopped
+ -> run after_session plugins
+ -> attempt cloud statistics sync
+ -> restart when the session requested it
 ```
 
 A normal history record contains the game name, ISO start time, duration, and exit code. History is only appended when session-history tracking is enabled. Playtime and progress can still update when history recording is disabled.
@@ -397,8 +397,8 @@ The normal states are:
 
 ```text
 queued -> running -> done
-                 -> error
-                 -> cancelled
+         -> error
+         -> cancelled
 ```
 
 Retries are capped at five attempts and use exponential backoff from the configured base delay. Cancellation is cooperative. Setting the event does not terminate arbitrary code; the worker must observe the event or reach a cancellation-aware boundary. A stale worker cannot overwrite a newer replacement job because updates check the submission ID before changing the logical record.

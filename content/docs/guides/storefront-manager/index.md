@@ -3,7 +3,7 @@ title: Storefront Manager
 description: Browse owned and installed catalogs, import either set, and automate imports.
 ---
 
-The **Storefronts** dialog (top bar) browses your storefront catalogs — owned versus installed — and imports either set into the library. It covers Steam, Heroic, Lutris, and Gameyfin.
+The **Storefronts** dialog (top bar) browses your storefront catalogs, owned versus installed, and imports either set into the library. It covers Steam, Heroic, Lutris, and Gameyfin.
 
 <Callout type="note" title="Why owned vs. installed matters">
 
@@ -22,7 +22,7 @@ OpenBoxGL distinguishes between what you *own* on a storefront and what you actu
 
 ## Import owned / uninstalled
 
-Storefront entries without local files are imported as owned-but-uninstalled (`store_installed: false`). For Gameyfin, the Play button on such an entry becomes **INSTALL**, downloading through the configured provider into the install folder (the Settings field is empty by default and shows a `~/Games/Gameyfin` placeholder). For Steam/Heroic/Lutris, an owned-but-uninstalled entry launches once the client has the game installed — the import simply keeps the title in your catalog ahead of time.
+Storefront entries without local files are imported as owned-but-uninstalled (`store_installed: false`). For Gameyfin, the Play button on such an entry becomes **INSTALL**, downloading through the configured provider into the install folder (the Settings field is empty by default and shows a `~/Games/Gameyfin` placeholder). For Steam/Heroic/Lutris, an owned-but-uninstalled entry launches once the client has the game installed, the import simply keeps the title in your catalog ahead of time.
 
 ## Auto-import on startup
 
@@ -43,7 +43,7 @@ Per-source import exclusions keep specific titles out of future imports and resc
 
 ## See also
 
-- [Library importing](/guides/library/importing/) — importing in general
-- [Import sources](/integrations/import-sources/) — source-specific paths and manifests
-- [API content and imports](/reference/api/content-and-imports/) — storefront catalog/import routes
-- [Local services](/integrations/local-services/) — Gameyfin server setup
+- [Library importing](/guides/library/importing/), importing in general
+- [Import sources](/integrations/import-sources/), source-specific paths and manifests
+- [API content and imports](/reference/api/content-and-imports/), storefront catalog/import routes
+- [Local services](/integrations/local-services/), Gameyfin server setup

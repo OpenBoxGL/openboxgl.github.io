@@ -38,7 +38,7 @@ export function EmulatorsSection() {
     <section id="emulators" className="relative border-y border-border bg-card/30 px-4 py-20">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 text-center">
-          <p className="mb-3 font-mono text-xs tracking-[0.25em] text-cyan">// EMULATORS AND LAUNCHING</p>
+          <p className="mb-2 font-mono text-xs tracking-widest text-cyan">Emulators and launching</p>
           <h2 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">
             Emulators installed and configured for you.
           </h2>
@@ -54,9 +54,9 @@ export function EmulatorsSection() {
             return (
               <div
                 key={it.title}
-                className="group rounded-xl border border-border bg-background/60 p-5 transition-colors hover:border-primary/40"
+                className="group rounded-lg border border-border bg-card p-5"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-cyan transition-colors group-hover:bg-cyan group-hover:text-foreground">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-cyan">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="mt-4 font-semibold">{it.title}</h3>

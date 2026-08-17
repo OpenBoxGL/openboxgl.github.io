@@ -30,6 +30,6 @@ Both whole-library backups and per-game save backups validate hard before writin
 
 ## See also
 
-- [Library backups](/guides/sessions-saves-and-backups/library-backups/) — create/rotate/restore workflow
-- [Save discovery and restore](/guides/sessions-saves-and-backups/saves/) — per-game save backups
-- [Save archives](/reference/save-archives/) and [Library backups API reference](/reference/library-backups/) — the archive contracts
+- [Library backups](/guides/sessions-saves-and-backups/library-backups/), create/rotate/restore workflow
+- [Save discovery and restore](/guides/sessions-saves-and-backups/saves/), per-game save backups
+- [Save archives](/reference/save-archives/) and [Library backups API reference](/reference/library-backups/), the archive contracts

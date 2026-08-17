@@ -7,7 +7,7 @@ The library search box supports field-targeted terms, quoted values, and negativ
 
 <Callout type="tip" title="Search runs against stable data">
 
-Search filters operate on `library.json` at query time — not a pre-built index or database. Every filter you apply stays in place until you clear it or navigate away, so chaining multiple sidebar facets (e.g. genre → platform → installed) compounds filters without extra typing. The Explorer facets panel (sidebar) does the same thing visually by showing counts per value; clicking a facet injects the equivalent `field:value` term. See [Library overview](/guides/library/) for the full UI walk-through.
+Search filters operate on `library.json` at query time, not a pre-built index or database. Every filter you apply stays in place until you clear it or navigate away, so chaining multiple sidebar facets (e.g. genre → platform → installed) compounds filters without extra typing. The Explorer facets panel (sidebar) does the same thing visually by showing counts per value; clicking a facet injects the equivalent `field:value` term. See [Library overview](/guides/library/) for the full UI walk-through.
 
 </Callout>
 
@@ -74,5 +74,5 @@ A bare term searches across name, sort title, alternate names, platform, genre, 
 
 ## See also
 
-- [Library overview](/guides/library/) — browse and search in context
-- [Library organizing](/guides/library/organizing/) — saved filters, presets, and explorer facets
+- [Library overview](/guides/library/), browse and search in context
+- [Library organizing](/guides/library/organizing/), saved filters, presets, and explorer facets

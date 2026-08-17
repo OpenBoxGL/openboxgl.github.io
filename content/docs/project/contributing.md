@@ -10,8 +10,8 @@ OpenBoxGL development requires Linux, Python 3.10+, and Git. The application rep
 ```bash
 git clone https://github.com/vindeckyy/OpenBoxGL.git
 cd OpenBoxGL
-python3 web_app.py     # Web UI (development)
-make native-host       # build the native host, then ./openbox-native.sh
+python3 web_app.py   # Web UI (development)
+make native-host    # build the native host, then ./openbox-native.sh
 ```
 
 Optional local configuration loads from `~/.env` or a project `.env` file (see `.env.example`). Never commit secrets, tokens, or personal credentials.
@@ -21,8 +21,8 @@ Optional local configuration loads from `~/.env` or a project `.env` file (see `
 Run the full suite before submitting a pull request:
 
 ```bash
-./run_all_tests.sh   # 49 files, 0 failures (see `scripts/check_tests.py` for 55% total + 44% web_app.py floors)
-make check           # ruff → v1 contract → compile → coverage floors; also `make version-check` for updates.py sync
+./run_all_tests.sh  # 49 files, 0 failures (see `scripts/check_tests.py` for 55% total + 44% web_app.py floors)
+make check      # ruff → v1 contract → compile → coverage floors; also `make version-check` for updates.py sync
 ```
 
 Each `test_*.py` is a standalone contract test (plain asserts or unittest) run directly with `python3 -B <file>`. Iterate on one module with `python3 test_catalog.py`. Packaging checks use `./build_appimage.sh` and `python3 test_packaging.py`. All tests must pass on CI before a PR merges.

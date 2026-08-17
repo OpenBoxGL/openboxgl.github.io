@@ -25,16 +25,11 @@ const perks = [
 
 export function DeckSection() {
   return (
-    <section id="deck" className="relative overflow-hidden px-4 py-20">
-      <div
-        className="pointer-events-none absolute left-0 top-1/4 h-[400px] w-[500px] rounded-full opacity-40 blur-[130px]"
-        style={{ background: "radial-gradient(closest-side, oklch(0.665 0.195 44 / 30%), transparent)" }}
-        aria-hidden="true"
-      />
+    <section id="deck" className="relative px-4 py-20">
       <div className="relative mx-auto max-w-6xl">
         <div className="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <p className="mb-3 font-mono text-xs tracking-[0.25em] text-primary">// STEAM DECK AND HANDHELDS</p>
+            <p className="mb-2 font-mono text-xs tracking-widest text-primary">Steam Deck and handhelds</p>
             <h2 className="max-w-xl text-balance text-3xl font-bold tracking-tight md:text-4xl">
               Built for the couch and the handheld.
             </h2>
@@ -49,11 +44,8 @@ export function DeckSection() {
           {perks.map((p) => {
             const Icon = p.icon
             return (
-              <div
-                key={p.title}
-                className="group rounded-xl border border-border bg-background/60 p-5 transition-colors hover:border-primary/40"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+              <div key={p.title} className="rounded-lg border border-border bg-card p-5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-primary">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="mt-4 font-semibold">{p.title}</h3>

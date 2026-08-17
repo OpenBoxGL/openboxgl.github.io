@@ -44,7 +44,7 @@ That is why the Settings dialog says "The current AppImage will be retained as a
 
 <Callout type="tip" title="The rollback file is your safety net">
 
-Every successful AppImage update renames the current file to `OpenBox-x86_64.previous.AppImage` before swapping in the new one. If the new build will not start, you can always get back to a working launcher — the previous version is sitting right next to it. You never need to re-download to roll back.
+Every successful AppImage update renames the current file to `OpenBox-x86_64.previous.AppImage` before swapping in the new one. If the new build will not start, you can always get back to a working launcher, the previous version is sitting right next to it. You never need to re-download to roll back.
 
 </Callout>
 

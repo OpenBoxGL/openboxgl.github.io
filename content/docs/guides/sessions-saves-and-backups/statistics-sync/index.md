@@ -3,12 +3,12 @@ title: Statistics sync
 description: Merge play statistics across machines through a mounted cloud folder.
 ---
 
-OpenBoxGL merges play statistics between machines through any mounted folder — Syncthing, Dropbox, Nextcloud, Drive, or a plain local path. The folder must be mounted and writable on every machine that should participate.
+OpenBoxGL merges play statistics between machines through any mounted folder, Syncthing, Dropbox, Nextcloud, Drive, or a plain local path. The folder must be mounted and writable on every machine that should participate.
 
 ## Set it up
 
 1. In **Settings**, set **Mounted cloud folder** to the absolute path of the mounted folder (for example `/mnt/cloud/openbox`).
-2. Click **Sync statistics now** to run a merge immediately, or let it run automatically — sync runs automatically after each session ends, so play time propagates without manual action.
+2. Click **Sync statistics now** to run a merge immediately, or let it run automatically, sync runs automatically after each session ends, so play time propagates without manual action.
 3. Configure the same folder on another machine to merge stats there.
 
 ## What syncs and how conflicts resolve
@@ -34,6 +34,6 @@ Deleted local games are **never resurrected**: games present only in the cloud f
 
 ## See also
 
-- [Sessions, saves, and backups](/guides/sessions-saves-and-backups/) — session recording and history
-- [API saves and operations](/reference/api/saves-and-operations/) — `POST /api/cloud/sync`
-- [Data and recovery](/reference/data-and-recovery/) — where local state lives
+- [Sessions, saves, and backups](/guides/sessions-saves-and-backups/), session recording and history
+- [API saves and operations](/reference/api/saves-and-operations/), `POST /api/cloud/sync`
+- [Data and recovery](/reference/data-and-recovery/), where local state lives
