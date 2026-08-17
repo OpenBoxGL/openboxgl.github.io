@@ -47,9 +47,9 @@ export function Hero() {
           <a
             href="/changelog/"
             className="rounded border border-border bg-secondary px-1.5 py-0.5 text-cyan transition-colors hover:text-primary"
-            aria-label="Open the changelog for v1.2.0"
+            aria-label="Open the changelog for v1.3.0"
           >
-            v1.2.0
+            v1.3.0
           </a>
           {hudItems.map((h, i) => (
             <span key={h} className="flex items-center gap-3">
