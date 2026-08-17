@@ -160,6 +160,7 @@ export function buildSidebar(): DocNode[] {
       "policies/security",
       "policies/privacy",
       "policies/legal-and-trademarks",
+      "policies/dmca",
     ]),
   )
 

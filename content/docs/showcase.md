@@ -5,7 +5,7 @@ description: Real OpenBoxGL setups, library views, and Big Box on Linux.
 
 # Showcase
 
-Real screenshots from the repository, not renders. Regenerate them with `python3 scripts/capture_readme_screenshots.py` after `cd scripts && npm ci` when you need fresh captures. All images use real LaunchBox metadata and cover art when a metadata database is present.
+Real screenshots from the repository, not renders. Regenerate them with `python3 scripts/capture_readme_screenshots.py` after `cd scripts && npm ci` when you need fresh captures. All images are user supplied captures of user supplied games and cover art belongs to its publisher. Cover art and game files are not vendored in the repository or the site. Contributions that add an image must state the source and that you have the right to submit it under the [Developer Certificate of Origin](/project/contributing/#developer-certificate-of-origin).
 
 <ProductShot src="/openbox-screenshot.png" alt="OpenBox library grid with platform filters, grouped covers, and detail pane" caption="Library, grid and list views, platform filters, and the detail pane in one workspace." />
 

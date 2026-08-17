@@ -38,8 +38,9 @@ The application uses only the Python standard library at runtime. Build tooling 
 
 Library data is local JSON at `~/.local/share/openbox-game-launcher/library.json`. Set `OPENBOX_DATA_DIR` before launch to relocate it. The server binds to `127.0.0.1` on a random port, requires a per launch token on every request, and never listens on the network. No account, no cloud, no telemetry. See [Interfaces and data](/interfaces-and-data/), [Data and recovery](/reference/data-and-recovery/), and [Privacy](/policies/privacy/).
 
-## Support
+## Support and notices
 
 - Bug report: [Bug report template](https://github.com/vindeckyy/OpenBoxGL/issues/new?template=bug_report.yml)
 - Feature request: [Feature request template](https://github.com/vindeckyy/OpenBoxGL/issues/new?template=feature_request.yml)
 - Security: see [Security](/policies/security/), do not file public issues for sensitive reports.
+- Copyright or trademark: see [DMCA](/policies/dmca/) and [Legal and trademarks](/policies/legal-and-trademarks/). Do not post notices in public issues.

@@ -68,6 +68,8 @@ export function CtaFooter() {
           <a href="/roadmap/" className="transition-colors hover:text-foreground">Roadmap</a>
           <a href="/policies/privacy/" className="transition-colors hover:text-foreground">Privacy</a>
           <a href="/policies/security/" className="transition-colors hover:text-foreground">Security</a>
+          <a href="/policies/dmca/" className="transition-colors hover:text-foreground">DMCA</a>
+          <a href="/policies/legal-and-trademarks/" className="transition-colors hover:text-foreground">Legal</a>
           <a
             href="https://github.com/vindeckyy/OpenBoxGL"
             target="_blank"
