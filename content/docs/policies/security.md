@@ -38,4 +38,4 @@ Security fixes are provided for the latest release on the `master` branch.
 
 ## Scope and warranty
 
-OpenBoxGL is provided under AGPL-3.0 without warranty. The maintenance source is [SECURITY.md](https://github.com/vindeckyy/OpenBoxGL/blob/master/SECURITY.md).
+OpenBoxGL is provided under AGPL-3.0 without warranty. The maintenance source is [SECURITY.md](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/SECURITY.md).

@@ -37,7 +37,7 @@ GitHub processes notices under its own policies. The maintainers will follow Git
 
 ## Sources
 
-- Application maintenance sources are [DISCLAIMER.md](https://github.com/vindeckyy/OpenBoxGL/blob/master/DISCLAIMER.md) and [TRADEMARKS.md](https://github.com/vindeckyy/OpenBoxGL/blob/master/TRADEMARKS.md) in the application repository.
+- Application maintenance sources are [DISCLAIMER.md](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/DISCLAIMER.md) and [TRADEMARKS.md](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/TRADEMARKS.md) in the application repository.
 - Site maintenance source for the documentation is `content/docs/policies/legal-and-trademarks.md`.
 
 For contribution origin, see the Developer Certificate of Origin in [Project and policies](/project/contributing/).

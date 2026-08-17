@@ -57,4 +57,4 @@ Invalid packages are skipped by `list_plugins` and refused by `install_plugin`, 
 
 - [Plugin hooks reference](/reference/plugins/hooks/) for what the entry module must export
 - [Plugin processes and errors](/reference/plugins/process-and-errors/) for the run contract
-- [CONTRIBUTING.md](https://github.com/vindeckyy/OpenBoxGL/blob/master/CONTRIBUTING.md#plugins) for the plugin author workflow
+- [CONTRIBUTING.md](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/CONTRIBUTING.md#plugins) for the plugin author workflow

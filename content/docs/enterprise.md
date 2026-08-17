@@ -9,7 +9,7 @@ Use this page when you need to verify what you are running.
 
 ## License
 
-OpenBox Game Launcher is released under GNU Affero General Public License v3.0. Source is at [vindeckyy/OpenBoxGL](https://github.com/vindeckyy/OpenBoxGL) and the full text is at [LICENSE](https://github.com/vindeckyy/OpenBoxGL/blob/master/LICENSE). Trademark references to LaunchBox, Steam, Heroic, Lutris, RetroArch, and other third party products are used for compatibility description only. See [Legal and trademarks](/policies/legal-and-trademarks/) and [Disclaimer](https://github.com/vindeckyy/OpenBoxGL/blob/master/DISCLAIMER.md).
+OpenBox Game Launcher is released under GNU Affero General Public License v3.0. Source is at [vindeckyy/OpenBoxGL](https://github.com/vindeckyy/OpenBoxGL) and the full text is at [LICENSE](https://github.com/vindeckyy/OpenBoxGL/blob/master/LICENSE). Trademark references to LaunchBox, Steam, Heroic, Lutris, RetroArch, and other third party products are used for compatibility description only. See [Legal and trademarks](/policies/legal-and-trademarks/) and [Disclaimer](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/DISCLAIMER.md).
 
 ## Signed releases
 

@@ -18,7 +18,7 @@ OpenBoxGL exists because LaunchBox is Windows first and gates useful workflows b
 | Automation | Local REST API on loopback with per-launch token auth | Limited external automation surface |
 | Handheld | Big Box Stage, Hybrid, CoverFlow with controller mapping, AppImage on immutable systems, `--game-mode` guest under gamescope | Big Box exists, handheld flows are secondary |
 
-See the full capability matrix with acceptance checks in [Parity matrix](/reference/parity/) and the source matrix at [OpenBoxGL/PARITY.md](https://github.com/vindeckyy/OpenBoxGL/blob/master/PARITY.md).
+See the full capability matrix with acceptance checks in [Parity matrix](/reference/parity/) and the source matrix at [OpenBoxGL/PARITY.md](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/PARITY.md).
 
 ## What ships free
 
