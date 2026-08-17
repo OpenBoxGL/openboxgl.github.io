@@ -41,6 +41,7 @@ Values already in the environment are never overridden by `.env`. The template l
 | `OPENBOX_ENV_FILE` | Explicit path to a single `.env` file, checked first before the data-directory roots. Read directly from the process environment; must point at an owner-only regular file (not a symlink) or it is skipped. |
 | `OPENBOX_ALLOW_HTTP_WEBHOOKS` | Set to `1` to allow plain-HTTP webhook URLs. Required only for trusted local test targets; HTTPS is the default and safer. |
 | `OPENBOX_ALLOW_HTTP_GAMEYFIN` | Set to `1` to allow plain-HTTP Gameyfin URLs. HTTPS is the default; loopback (localhost) addresses are always allowed. |
+| `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS` | Set to `1` to allow unsandboxed plugin execution when bubblewrap is unavailable. Without it, plugins are skipped if the sandbox cannot be created. Maintainer-only `STRIPE_SECRET_KEY` exists for local donate-link creation and is never read from docs. |
 
 ### Credentials (all optional)
 
@@ -50,7 +51,7 @@ Values already in the environment are never overridden by `.env`. The template l
 | `RETROACHIEVEMENTS_API_KEY` | RetroAchievements web API | `RA_API_KEY`, `RETROACHIEVEMENTS_KEY`, `OPENBOX_RA_API_KEY` |
 | `EMUMOVIES_USERNAME` | EmuMovies media downloads | `OPENBOX_EMUMOVIES_USERNAME` |
 | `EMUMOVIES_PASSWORD` | EmuMovies media downloads | `OPENBOX_EMUMOVIES_PASSWORD` |
-| `GITHUB_TOKEN` | GitHub release API rate limit for update checks | `GH_TOKEN`, `OPENBOX_GITHUB_TOKEN` |
+| `GITHUB_TOKEN` | GitHub release API rate limit for update checks (`GITHUB_TOKEN`, `GH_TOKEN`, `OPENBOX_GITHUB_TOKEN` all accepted) | `GH_TOKEN`, `OPENBOX_GITHUB_TOKEN` |
 | `IGDB_CLIENT_ID` | IGDB metadata provider (Twitch developer app) | — |
 | `IGDB_CLIENT_SECRET` | IGDB metadata provider (Twitch developer app) | — |
 

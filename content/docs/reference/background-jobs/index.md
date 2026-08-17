@@ -22,7 +22,7 @@ Every submitted job is a dict with these keys:
 | `error` | Error message on failure, truncated to 800 characters |
 | `duration_seconds` | Rounded to 3 decimals after the terminal state |
 
-Workers run on a `ThreadPoolExecutor` with 4 threads (`max_workers=4`, thread names `openbox-job-*`). A worker may accept a `cancel_event` argument; the manager introspects the signature to decide.
+Workers run on a `ThreadPoolExecutor` with 4 threads (`max_workers=4`, thread names `openbox-job-*`). The manager caps pending items at 128 (`MAX_PENDING_QUEUE`) with `DEFAULT_MAX_PENDING 128` and bounds history at 50 finished jobs; workers share at most 4 concurrent slots. A worker may accept a `cancel_event` argument; the manager introspects the signature to decide.
 
 ## States and transitions
 

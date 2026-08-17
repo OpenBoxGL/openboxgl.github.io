@@ -51,6 +51,8 @@ Unknown fields survive migration; only known collections are normalized. A schem
 - `notifications`: at most 200 entries, newest first.
 - `history`: capped at the last 500 sessions when session history is enabled.
 - Per-game `tags`: 50 tags, 64 characters each (see [API automation](/reference/api/automation/)).
+- `save_paths`: at most 50 entries per game; `screenshots`: at most 100; `alternate_names`: at most 20; `applications`/`versions`/`documents`: at most 100 entries each (extra `name` defaults to the path stem).
+- `custom_fields`: capped per `custom_field_defs` (up to 20 defs); `list_columns`: at most 12; `hidden_sidebar_sections`: at most 20.
 
 ## Corruption and recovery
 

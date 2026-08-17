@@ -52,7 +52,7 @@ YAML definition packs in `emulator_defs/` (dolphin, duckstation, retroarch) map 
 
 ## Archive extraction
 
-A game with **Extract archive before launch** enabled is extracted at launch time into `<data-dir>/cache/archives`. ZIP extraction is native and strictly validated: at most 25,000 members, 2 GiB per member, 8 GiB total, no absolute or `..` paths, no duplicate entries, no symlinks or device nodes, and no symlinked destination. 7z and RAR need `7z` or `7zz` on PATH, which first validates the listing with the same limits. The largest non-artwork file becomes the launch target unless **Archive member** names one; extraction is cached per archive (content-addressed) with a `.complete` marker, so re-launches reuse the cache. A failed extraction raises before any process starts.
+A game with **Extract archive before launch** enabled is extracted at launch time into `<data-dir>/cache/archives`. ZIP extraction is native and strictly validated: at most 25,000 members (`MAX_ARCHIVE_MEMBERS`), 2 GiB per member (`MAX_ARCHIVE_MEMBER_BYTES`), 8 GiB total (`MAX_ARCHIVE_TOTAL_BYTES`), no absolute or `..` paths, no duplicate entries, no symlinks or device nodes, and no symlinked destination; the listing itself is capped at 16 MiB (`MAX_ARCHIVE_LISTING_BYTES`). 7z and RAR need `7z` or `7zz` on PATH, which first validates the listing with the same limits. The largest non-artwork file becomes the launch target unless **Archive member** names one; extraction is cached per archive (content-addressed) with a `.complete` marker, so re-launches reuse the cache. A failed extraction raises before any process starts. Snapshot copies use `O_NOFOLLOW` to avoid replacement races.
 
 <Callout type="caution" title="Why the safe extractor refuses things">
 

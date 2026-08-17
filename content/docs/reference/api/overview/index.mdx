@@ -56,7 +56,7 @@ This is why almost every operation failure you hit through the API is a `400` wi
 
 ## Response headers
 
-JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and a restrictive Content-Security-Policy. Media files are served with immutable cache headers, ETag, Last-Modified, `Accept-Ranges`, and byte-range (206/416) support; `theme.css` revalidates with `public, max-age=0, must-revalidate` and ETag.
+JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and a restrictive Content-Security-Policy (`default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.bunny.net; font-src …; script-src 'self'; object-src 'none'; base-uri 'none'`). Rate-limited auth returns `429` with `Retry-After`. The socket times out after 30 seconds (`Handler.REQUEST_TIMEOUT`), SSE events are capped at 64 KiB (`SSE_MAX_EVENT_BYTES`), at most 16 SSE subscribers (`SSE_MAX_SUBSCRIBERS`), and the webhook envelope at 64 KiB (`MAX_ENVELOPE_BYTES`). Media files are served with immutable cache headers, ETag, Last-Modified, `Accept-Ranges`, and byte-range (206/416) support; `theme.css` revalidates with `public, max-age=0, must-revalidate` and ETag. Gzip is applied when `Accept-Encoding: gzip` and the JSON is at least 1 KiB (`GZIP_THRESHOLD=1024`).
 
 ## Common errors
 
