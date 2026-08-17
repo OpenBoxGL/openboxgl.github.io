@@ -6,12 +6,10 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 const links = [
-  { label: "Library", href: "/#library" },
-  { label: "Saves", href: "/#saves" },
-  { label: "Emulators", href: "/#emulators" },
-  { label: "Big Box", href: "/#bigbox" },
-  { label: "Automate", href: "/#automation" },
-  { label: "Local-first", href: "/#local" },
+  { label: "Compare", href: "/compare/" },
+  { label: "Downloads", href: "/downloads/" },
+  { label: "Showcase", href: "/showcase/" },
+  { label: "Enterprise", href: "/enterprise/" },
   { label: "Docs", href: "/docs/" },
 ]
 
@@ -63,11 +61,11 @@ export function SiteNav() {
             </svg>
           </a>
           <a
-            href="/install/"
+            href="/downloads/"
             className="flex items-center gap-2 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground"
           >
             <Terminal className="h-4 w-4" />
-            Install
+            Download
           </a>
         </div>
       </nav>

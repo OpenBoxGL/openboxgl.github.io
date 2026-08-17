@@ -58,7 +58,7 @@ export function DeckSection() {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             href="/guides/big-box-and-handhelds/"
-            className="flex items-center gap-2 rounded-xl border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+            className="flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
           >
             <Gamepad2 className="h-4 w-4" />
             Big Box and handhelds guide

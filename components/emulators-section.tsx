@@ -54,7 +54,7 @@ export function EmulatorsSection() {
             return (
               <div
                 key={it.title}
-                className="group rounded-lg border border-border bg-card p-5"
+                className="rounded-lg border border-border bg-card p-5"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-cyan">
                   <Icon className="h-5 w-5" />
@@ -66,16 +66,22 @@ export function EmulatorsSection() {
           })}
         </div>
 
+        <div className="mt-6 overflow-x-auto rounded-lg border border-border bg-[#0d1117] p-4 font-mono text-xs">
+          <div className="text-muted-foreground">profiles, one per line, tokens are per argument</div>
+          <div className="mt-2 text-foreground">SNES = retroarch -L /usr/lib/libretro/snes9x_libretro.so "{`{path}`}"</div>
+          <div className="text-muted-foreground">per-game override in Edit metadata: Launch profile override</div>
+        </div>
+
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             href="/guides/emulators-and-launching/"
-            className="rounded-xl border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+            className="rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
           >
             Emulators and launching guide
           </a>
           <a
             href="/guides/big-box-and-handhelds/performance/"
-            className="rounded-xl border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+            className="rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
           >
             Handheld performance
           </a>

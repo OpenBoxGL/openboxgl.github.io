@@ -58,6 +58,10 @@ export function CtaFooter() {
         </div>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          <a href="/compare/" className="transition-colors hover:text-foreground">Compare</a>
+          <a href="/downloads/" className="transition-colors hover:text-foreground">Downloads</a>
+          <a href="/showcase/" className="transition-colors hover:text-foreground">Showcase</a>
+          <a href="/enterprise/" className="transition-colors hover:text-foreground">Enterprise</a>
           <a href="/docs/" className="transition-colors hover:text-foreground">Docs home</a>
           <a href="/faq/" className="transition-colors hover:text-foreground">FAQ</a>
           <a href="/changelog/" className="transition-colors hover:text-foreground">Changelog</a>

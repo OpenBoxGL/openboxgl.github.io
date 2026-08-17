@@ -1,4 +1,5 @@
 import { Award, Blocks, Clock, Palette, Search, Star } from "lucide-react"
+import { LibraryDemo } from "@/components/library-demo"
 
 export function FeatureBento() {
   return (
@@ -25,30 +26,7 @@ export function FeatureBento() {
               filter and jump straight to the game. No mouse required.
             </p>
 
-            <div className="mt-6 overflow-hidden rounded-lg border border-border bg-card">
-              <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <span className="font-mono text-sm text-muted-foreground">chrono</span>
-                <span className="ml-auto rounded border border-border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
-                  FILTERS APPLIED
-                </span>
-              </div>
-              {[
-                { name: "Chrono Trigger", meta: "SNES · Installed" },
-                { name: "Chrono Cross", meta: "PSX · Not installed" },
-                { name: "Chrono series in Playlists", meta: "Filter" },
-              ].map((row, i) => (
-                <div
-                  key={row.name}
-                  className={`flex items-center justify-between px-4 py-2.5 ${
-                    i === 0 ? "bg-primary/10 text-foreground" : "text-muted-foreground"
-                  }`}
-                >
-                  <span className="text-sm">{row.name}</span>
-                  <span className="font-mono text-[11px]">{row.meta}</span>
-                </div>
-              ))}
-            </div>
+            <LibraryDemo />
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:col-span-2 md:row-span-2 sm:grid-cols-2">

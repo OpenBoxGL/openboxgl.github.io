@@ -63,6 +63,20 @@ export function Hero() {
           controller-ready catalog. No account. No cloud. No telemetry. It all lives on your machine.
         </p>
 
+        <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
+          <a href="https://github.com/vindeckyy/OpenBoxGL/blob/master/LICENSE" className="rounded border border-border bg-card px-2 py-1 font-mono">
+            AGPL-3.0
+          </a>
+          <span className="rounded border border-border bg-card px-2 py-1 font-mono">v1.3.0</span>
+          <span className="rounded border border-border bg-card px-2 py-1 font-mono">Python 3.10+</span>
+          <a href="/enterprise/" className="rounded border border-border bg-card px-2 py-1 font-mono hover:text-foreground">
+            Signed releases
+          </a>
+          <a href="/compare/" className="rounded border border-border bg-card px-2 py-1 font-mono hover:text-foreground">
+            Compare
+          </a>
+        </div>
+
         <div id="install" className="mx-auto mt-9 flex max-w-3xl items-center gap-2 rounded-lg border border-border bg-card p-1.5 pl-4 font-mono text-xs sm:text-sm">
           <span className="text-primary">$</span>
           <span className="flex-1 overflow-hidden text-left text-foreground/90">{cmd}</span>
@@ -75,6 +89,11 @@ export function Hero() {
             {copied ? "Copied" : "Copy"}
           </button>
         </div>
+
+        <p className="mx-auto mt-3 max-w-3xl text-center font-mono text-xs text-muted-foreground">
+          Verifies Ed25519 and SHA-256 against a pinned key. See <a href="/downloads/" className="underline hover:text-foreground">Downloads</a> and{" "}
+          <a href="/enterprise/" className="underline hover:text-foreground">Enterprise</a> for the full verify steps.
+        </p>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <a

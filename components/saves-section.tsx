@@ -69,13 +69,13 @@ export function SavesSection() {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             href="/guides/sessions-saves-and-backups/"
-            className="rounded-xl border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+            className="rounded-lg border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
           >
             Sessions, saves, and backups guide
           </a>
           <a
             href="/guides/sessions-saves-and-backups/library-backups/"
-            className="rounded-xl border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+            className="rounded-lg border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
           >
             Library backups
           </a>

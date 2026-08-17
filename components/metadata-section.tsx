@@ -69,13 +69,13 @@ export function MetadataSection() {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             href="/guides/metadata-and-media/"
-            className="rounded-xl border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+            className="rounded-lg border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
           >
             Metadata and media guide
           </a>
           <a
             href="/guides/media-providers/"
-            className="rounded-xl border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+            className="rounded-lg border border-border bg-background/50 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
           >
             Media providers
           </a>
