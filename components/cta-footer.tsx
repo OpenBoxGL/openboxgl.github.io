@@ -16,9 +16,10 @@ export function CtaFooter() {
         <Image
           src="/openbox-logo.png"
           alt="OpenBox logo"
-          width={64}
-          height={64}
-          className="mx-auto h-16 w-16 object-contain"
+          width={240}
+          height={103}
+          className="mx-auto h-16 w-auto object-contain md:h-20 md:w-auto"
+          priority
         />
         <h2 className="mt-6 text-balance text-4xl font-bold tracking-tight md:text-6xl">
           Bring your whole backlog home.
