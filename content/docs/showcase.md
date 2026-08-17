@@ -13,10 +13,6 @@ Real screenshots from the repository, not renders. Regenerate them with `python3
 
 <ProductShot src="/openbox-bigbox.png" alt="OpenBox Big Box Stage layout with cover art and controller hints" caption="Big Box Stage layout, fullscreen and controller first." />
 
-<ProductShot src="/library-view.png" alt="OpenBox library view with box art grid, filter sidebar, and metadata panel" caption="Library view used on the home page, filter sidebar left, detail pane right." />
-
-<ProductShot src="/bigbox-mode.png" alt="OpenBox Big Box fullscreen showing a selected game with Play button and footer legend" caption="Big Box fullscreen, controller legend in the footer." />
-
 ## Add your setup
 
 Open a pull request that adds one image under `public/showcase/` and a row here with hardware, distribution, and platform count. Keep the image under 2 MB and include no personal paths. See [Project and policies](/project/contributing/) for contribution guidance.
