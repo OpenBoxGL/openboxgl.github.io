@@ -11,6 +11,8 @@ Search filters operate on `library.json` at query time, not a pre-built index or
 
 </Callout>
 
+<SearchPlayground />
+
 ## Field terms
 
 Prefix a term with a field name and a colon to target one field:

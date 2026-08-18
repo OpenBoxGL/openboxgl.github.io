@@ -30,6 +30,8 @@ The **Emulators** button opens the Emulator profiles dialog. Profiles are one pe
 | `{heroic_app_id}` | Heroic application ID |
 | `{lutris_id}` | Lutris game identifier |
 
+<CommandBuilder />
+
 If a profile command has no `{path}` and the game has no per-game command, the resolved path is appended. A `.sh` game with no command launches with `bash`; otherwise the path itself runs when it is executable.
 
 **Per-game overrides**: in Edit metadata, set **Launch command, optional override** to use a different command for one title, or **Launch profile override** to select a named profile (the override wins over the platform profile).

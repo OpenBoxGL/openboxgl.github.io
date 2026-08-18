@@ -281,4 +281,11 @@ export function proseClasses() {
   ].join(" ")
 }
 
+export { CommandBuilder } from "@/components/tools/command-builder"
+export { SearchPlayground } from "@/components/tools/search-playground"
+export { ThemePreviewer } from "@/components/tools/theme-previewer"
+export { ControllerDiagram } from "@/components/tools/controller-diagram"
+export { ApiExplorer } from "@/components/tools/api-explorer"
+
 export type { ComponentPropsWithoutRef }
+

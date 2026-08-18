@@ -1,6 +1,21 @@
 import { MDXRemote } from "next-mdx-remote-client/rsc"
 import remarkGfm from "remark-gfm"
-import { ApiEndpoint, Callout, FeatureGrid, InstallOptionCard, InstallOptions, Procedure, ProductShot, StatusBadge, Steps } from "@/components/docs"
+import {
+  ApiEndpoint,
+  Callout,
+  FeatureGrid,
+  InstallOptionCard,
+  InstallOptions,
+  Procedure,
+  ProductShot,
+  StatusBadge,
+  Steps,
+  CommandBuilder,
+  SearchPlayground,
+  ThemePreviewer,
+  ControllerDiagram,
+  ApiExplorer,
+} from "@/components/docs"
 
 const components = {
   ApiEndpoint,
@@ -12,6 +27,11 @@ const components = {
   ProductShot,
   StatusBadge,
   Steps,
+  CommandBuilder,
+  SearchPlayground,
+  ThemePreviewer,
+  ControllerDiagram,
+  ApiExplorer,
 }
 
 /** Strip Astro frontmatter and import lines, keep the body. */

@@ -11,6 +11,8 @@ Themes are plain CSS files with live reload: changing the active theme re-applie
 - **Cinema Marquee**: dark cinema look, Bebas Neue / Source Sans 3, gold accents.
 - **Nordic Mist**: dark slate, Outfit/Fraunces type, muted teal accents.
 
+<ThemePreviewer />
+
 ## Apply a theme
 
 Click **Themes** in the top bar. Choose a scope: **All platforms** or one specific platform, then pick the theme from **Active theme** (Default resets). **Apply** saves the choice; per-platform themes override the global one when viewing that platform. The theme is served from the user themes folder (`<data-dir>/themes`) with revalidation headers, so editing a CSS file on disk shows up after reload.

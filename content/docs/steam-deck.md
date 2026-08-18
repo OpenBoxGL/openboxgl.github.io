@@ -23,6 +23,8 @@ See [Installation](/install/) for AppImage, Flatpak, and source options.
 1. Install the AppImage (preferred on SteamOS, Bazzite, and other immutable images).
 2. In Desktop Mode, add a non-Steam game pointing at the AppImage, with launch options or target args including `--game-mode`.
 3. Enable Steam Input for that shortcut if you want controller profiles in Big Box.
+
+<ControllerDiagram />
 4. Return to Game Mode and launch OpenBox. It opens Big Box fullscreen.
 
 Do not wrap OpenBox in another `gamescope` while already in Game Mode. On a normal desktop, behavior is unchanged unless you pass `--game-mode`. The Flatpak build relies on host tools for the kiosk-browser window tagging, so prefer the AppImage for Game Mode.

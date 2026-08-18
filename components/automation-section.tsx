@@ -1,4 +1,5 @@
 import { Bell, Blocks, Braces, ListOrdered, Plug, Webhook } from "lucide-react"
+import { ApiExplorer } from "@/components/tools/api-explorer"
 
 const items = [
   {
@@ -61,6 +62,11 @@ export function AutomationSection() {
               </div>
             )
           })}
+        </div>
+
+        {/* Interactive Live API Explorer */}
+        <div className="mt-12">
+          <ApiExplorer />
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
