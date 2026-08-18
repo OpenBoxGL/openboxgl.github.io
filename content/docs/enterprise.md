@@ -22,7 +22,7 @@ Every AppImage release is signed with Ed25519. The installer verifies the releas
 | `openbox-release.pub` | Pinned public key | Application repository at `openbox-release.pub`, pinned by SHA-256 in `scripts/install.sh` |
 | `SHA256SUMS` | Checksums for the release | Same release assets |
 
-Verify path: download the AppImage, the `.sig`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.4.0"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. See [Updating](/updating/) for rollback with `OpenBox-x86_64.previous.AppImage`.
+Verify path: download the AppImage, the `.sig`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.5.0"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. See [Updating](/updating/) for rollback with `OpenBox-x86_64.previous.AppImage`.
 
 ## Build and CI
 

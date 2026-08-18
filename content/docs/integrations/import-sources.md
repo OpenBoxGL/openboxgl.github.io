@@ -54,6 +54,17 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 - `POST /api/import/rpcs3`: titles from `dev_hdd0/game/*/PARAM.SFO` (PS3).
 - `POST /api/import/vita3k`: titles from `ux0/app/*/sce_sys/param.sfo` (Vita), resolving title ids to readable names.
 
+## Faugus Launcher
+
+- **Source**: Faugus data directories and manifests (`~/.local/share/faugus`, `~/.var/app/io.github.Foldex.FaugusLauncher/data/faugus`, and flatpak wine prefixes).
+- **Records**: name, path, source `Faugus`, `faugus_id`, `wine_prefix`, and launch command defaulting to `umu-run {path}`.
+- `GET /api/faugus/status` checks if Faugus is installed; `GET /api/faugus/scan` scans available games; `POST /api/faugus/import` imports scanned games with canonical identity deduplication.
+
+## Proton & Wine prefix manager
+
+- **Discovery**: discovers active Wine prefixes across standard locations (`~/.wine`, `~/.local/share/wineprefixes`, Heroic, Lutris, Bottles, and Steam Proton prefixes) and detected Proton installations (`~/.local/share/Steam/compatibilitytools.d`, Steam common Proton runtimes).
+- **Endpoints**: `GET /api/wine/prefixes` lists known prefixes, `GET /api/wine/protons` lists detected Proton versions, and `GET /api/wine/prefix-for-game?game_id=...` resolves or recommends a prefix for a specific title.
+
 ## Import exclusions
 
 Entries added via `/api/import/exclusions` block specific storefront titles from future imports and rescans, keyed by source + external id (Heroic entries can carry a three-part `heroic` key for store-specific exclusions).

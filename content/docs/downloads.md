@@ -5,7 +5,7 @@ description: Every way to install OpenBoxGL, with verification steps per method.
 
 # Downloads
 
-One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBoxGL application, currently **v1.4.0**.
+One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBoxGL application, currently **v1.5.0**.
 
 | Method | Best for | Updates | Verify |
 | --- | --- | --- | --- |
@@ -20,7 +20,7 @@ One table for every install method. Pick the row that matches your system, then 
 The installer pins the release public key, verifies the SHA-256 checksum, and verifies the Ed25519 signature before installing to `~/.local/bin`.
 
 ```bash
-VERSION=1.4.0
+VERSION=1.5.0
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output install.sh \
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"

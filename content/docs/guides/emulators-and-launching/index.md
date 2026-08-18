@@ -17,9 +17,15 @@ The **Emulators** button opens the Emulator profiles dialog. Profiles are one pe
 
 | Token | Value |
 | --- | --- |
-| `{path}` | Absolute game or ROM path (after archive extraction, when enabled) |
-| `{name}` | Game title |
+| `{path}` / `{ImagePath}` | Absolute game or ROM path (after archive extraction, when enabled) |
+| `{name}` / `{Title}` | Game title |
+| `{dir}` / `{Dir}` | Parent directory of the target game file |
+| `{file}` / `{File}` | Filename with extension |
+| `{stem}` / `{FileNameWithoutExtension}` | Filename without extension |
 | `{rom_name}` | ROM filename |
+| `{Platform}` | Platform name |
+| `{EmulatorDir}` | Emulator parent directory |
+| `{DataDir}` | OpenBox data directory path |
 | `{app_id}` | Steam application ID |
 | `{heroic_app_id}` | Heroic application ID |
 | `{lutris_id}` | Lutris game identifier |
@@ -43,12 +49,13 @@ The same dialog lists supported emulators with install state, mode (native or Fl
 - RetroArch (NES, SNES, Nintendo 64, Game Boy, Game Boy Color, Game Boy Advance, Sega Saturn, Arcade)
 - DuckStation (PlayStation `-batch {path}`)
 - melonDS (Nintendo DS `{path}`)
+- Eden (Nintendo Switch `{path}`)
 
-**Install** adds the app from Flathub (adding the Flathub remote if missing) and, when done, adds its profiles to the editor (save to apply). **Install all available emulators** and **Update installed emulators** run bulk background jobs with per-emulator status. **Open** launches the emulator standalone. Detected native binaries (DOSBox, wine, mame, dolphin-emu, pcsx2-qt, ppsspp, rpcs3, duckstation-qt) appear as **Add N detected profiles**.
+**Install** adds the app from Flathub (adding the Flathub remote if missing) and, when done, adds its profiles to the editor (save to apply). **Install all available emulators** and **Update installed emulators** run bulk background jobs with per-emulator status. **Open** launches the emulator standalone. Detected native binaries (DOSBox, wine, mame, dolphin-emu, pcsx2-qt, ppsspp, rpcs3, duckstation-qt, eden) appear as **Add N detected profiles**.
 
 ### Emulator definition packs
 
-YAML definition packs in `emulator_defs/` (dolphin, duckstation, retroarch) map extensions to platforms and startup commands. **Scan ROM folder** in Settings imports a folder through these definitions, and an emulator scan config can auto-update on each startup. Detected profiles are merged into the profile list automatically at boot when missing.
+YAML definition packs in `emulator_defs/` (dolphin, duckstation, eden, retroarch) map extensions to platforms and startup commands. **Scan ROM folder** in Settings imports a folder through these definitions, and an emulator scan config can auto-update on each startup. Detected profiles are merged into the profile list automatically at boot when missing.
 
 ## Archive extraction
 

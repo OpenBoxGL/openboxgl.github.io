@@ -4,10 +4,14 @@ description: Release notes for OpenBox, from the latest AppImage back to the fir
 sidebar: false
 ---
 
-## Unreleased
+## 1.5.0 (2026-08-18)
 
-### Added
+### Changed
 
+- **Proton & Wine Prefix Manager**: Integrated Wine prefix and Proton discovery and assignment (`parity_wine.py`, `handlers/wine.py`, `GET /api/wine/prefixes`, `GET /api/wine/protons`, `GET /api/wine/prefix-for-game`), with UI integration in game settings and auto-detection for Windows titles.
+- **Faugus Launcher Integration**: Added Faugus game discovery and import handlers (`parity_faugus.py`, `handlers/faugus.py`, `GET /api/faugus/status`, `GET /api/faugus/scan`, `POST /api/faugus/import`) with automated UMU prefix detection.
+- **Eden Nintendo Switch Emulator**: Added emulator definitions and profile mapping for Eden (`emulator_defs/eden.yaml`) supporting NSP, XCI, NCA, and NRO packages.
+- **Canonical Identity & Cross-Source Deduplication**: Added canonical identity resolver (`parity_identity.py`, `POST /api/health/dedupe`) to deduplicate cross-source titles accurately across Steam, Heroic, Lutris, Faugus, and local ROM libraries.
 - **Game Dialog Next & Previous Navigation**: Added Previous (`← Prev`) and Next (`Next →`) navigation buttons directly to the Game Edit modal, allowing users to rapidly cycle and edit adjacent games in the active filtered and sorted library without closing the dialog.
 - **Platform-Scoped Media Cleanup**: The media manager and `POST /api/media/cleanup` now accept an optional `platform` parameter, enabling duplicate media auditing and cleanup targeted to a single platform or across the entire collection.
 - **Reset Play Statistics**: Added a "Reset play statistics" action to the game right-click context menu and the Bulk Edit dialog, resetting `play_count` (0), `playtime_seconds` (0), and `last_played` ("").
@@ -16,6 +20,14 @@ sidebar: false
 - **Acronym Title Search Matching**: Search and filter queries now recognize game title acronyms and initials (for example, `oot` matches *The Legend of Zelda: Ocarina of Time*, `mgs` matches *Metal Gear Solid*, `sotn` matches *Castlevania: Symphony of the Night*, `ff` matches *Final Fantasy*).
 - **Expanded Launch Variables**: Emulator startup templates and per-game command overrides now expand `{ImagePath}`, `{dir}`, `{Dir}`, `{file}`, `{File}`, `{stem}`, `{FileNameWithoutExtension}`, `{Platform}`, `{EmulatorDir}`, and `{DataDir}`.
 - **Window Resolution CLI Options**: Added `--fullscreen-width <W>`, `--fullscreen-height <H>`, and `--resolution <WxH>` CLI flags to customize viewport dimensions for kiosk and app window modes.
+
+### Fixed
+
+- Background job manager futures are now popped and cleaned up synchronously when worker jobs finish, preventing latent callback latency races in multi-threaded test and runtime environments.
+
+### Hardened
+
+- Standardized all newly added parity integration modules under `pkg/parity/` with root compatibility shims, adhering strictly to the frozen v1 contract.
 
 ## 1.4.0 (2026-08-17)
 

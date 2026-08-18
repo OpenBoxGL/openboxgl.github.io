@@ -60,6 +60,14 @@ Import installed games from local manifests. Steam reads `steamapps/appmanifest_
 
 Scan ScummVM (`scummvm.ini` sections), RPCS3 (`dev_hdd0/game/*/PARAM.SFO` titles), and Vita3K (`ux0/app/*/sce_sys/param.sfo` titles) libraries. Returns `{"added", "found"}`.
 
+### `GET /api/faugus/status` | `GET /api/faugus/scan` | `POST /api/faugus/import`
+
+Faugus Launcher discovery and import. `GET /api/faugus/status` returns `{"installed": bool, "data_dirs": [...]}`; `GET /api/faugus/scan` returns `{"games": [...], "count": n}`; `POST /api/faugus/import` imports scanned games with UMU launch configurations and wine prefixes.
+
+### `GET /api/wine/prefixes` | `GET /api/wine/protons` | `GET /api/wine/prefix-for-game`
+
+Proton and Wine runner management. `GET /api/wine/prefixes` returns `{"prefixes": [...], "available": bool}`; `GET /api/wine/protons` returns `{"protons": [...], "available": bool}`; `GET /api/wine/prefix-for-game?game_id=<id>` resolves prefix mappings per game.
+
 ## Metadata
 
 <ApiEndpoint method="GET" path="/api/metadata/status">
