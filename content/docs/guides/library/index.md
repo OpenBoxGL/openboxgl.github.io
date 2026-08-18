@@ -23,13 +23,13 @@ Search supports field-targeted terms, quoted values, and negative terms. Prefix 
 - `dev:team` matches developer, `pub:` publisher, `series:`, `genre:`, `region:`, `notes:`, `source:`, `store:`, `progress:`, `rating:`, `favorite:`, `installed:`, `hidden:`, `broken:`, `portable:`, `controller:`, and `tag:` all work.
 - `installed:yes` / `installed:no` and `favorite:yes` / `favorite:no` filter booleans.
 
-Bare terms search name, sort title, alternate names, platform, genre, developer, publisher, series, region, notes, source, play mode, status, progress, controller support, and tags.
+Bare terms search name, sort title, alternate names, platform, genre, developer, publisher, series, region, notes, source, play mode, status, progress, controller support, and tags. Short bare terms also match title initials and acronyms (e.g. `oot` matches *Ocarina of Time*).
 
-Sort options are **Title**, **Rating**, **Recently played**, **Recent activity**, **Play time**, **Date added**, **Platform**, and **Genre**. The **arrange bar** on the right edge jumps through the current sort's groups; it appears once the view has at least four groups. The **Surprise me** button picks a random game from the current view.
+Sort options are **Title**, **Rating**, **Recently played**, **Recent activity**, **Play time**, **Date added**, **Platform**, and **Genre**. The **arrange bar** on the right edge jumps through the current sort's groups; it appears once the view has at least four groups. The **Surprise me** button (or `Ctrl+Alt+Q` / `Ctrl+Alt+R`) picks and focuses a random game from the current view.
 
 The **image group** dropdown changes which artwork shows on cards: Box fronts, Backgrounds, Screenshots, Clear logos, Fanart, Banners, Box backs, Box spines, 3D boxes, and Title screens. The choice can be remembered per platform or per playlist from the dropdown's save action. **List view** shows Title, Platform, Genre, ESRB, Progress, Plays, and Rating columns.
 
-Select multiple games by holding Ctrl or Shift while clicking cards. This enables **Bulk Edit**, which can change platform, genre, progress, rating, favorite, hidden, and ESRB on every selected game at once. Right-click any card for the context menu: Play, Toggle favorite, Edit metadata, Mark progress, Add to playlist, New playlist from game, and Remove from library.
+Select multiple games by holding Ctrl or Shift while clicking cards. This enables **Bulk Edit**, which can change platform, genre, progress, rating, favorite, hidden, ESRB, and reset play statistics on every selected game at once. Right-click any card for the context menu: Play, Toggle favorite, Edit metadata, Mark progress, Reset play statistics, Add to playlist, New playlist from game, and Remove from library. The Edit Game dialog includes **Previous** and **Next** buttons to cycle through the filtered library without closing the modal.
 
 ## Game details
 
@@ -41,7 +41,7 @@ A platform selected in the sidebar shows a platform panel with statistics (games
 
 Use [Importing](/guides/library/importing/), [Organizing](/guides/library/organizing/), and [Queue, tags, and notifications](/guides/library/queue-tags-notifications/) for focused procedures. The **Health** button runs a Library Audit that flags duplicate identities, missing game files, missing box fronts, missing extras (applications, versions, documents), missing save paths, and ROMs without an emulator profile. Audit issues list each entry with its problem; click one to jump to that game. **Remove duplicate entries** inside the audit deletes only the duplicate library entries, never game files.
 
-**Media** opens the Media Manager with a per-platform audit (games, database matched, missing box front, missing background, missing screenshots), bulk downloads for matched games, and **Find duplicate media**, which separates a dry-run from **Delete duplicate media**. Duplicate detection hashes cover, background, and screenshot files; deletion only touches files inside the OpenBox data directory, never symlinks.
+**Media** opens the Media Manager with a per-platform audit (games, database matched, missing box front, missing background, missing screenshots), bulk downloads for matched games, and **Find duplicate media**, which separates a dry-run from **Delete duplicate media** and can be scoped to a single platform or the entire collection. Duplicate detection hashes cover, background, and screenshot files; deletion only touches files inside the OpenBox data directory, never symlinks.
 
 Removing a game asks twice: first to confirm the library entry removal, then whether to also delete the game's listed media files. Game files are never deleted. **Settings** also offers **Remove all imported Steam games**, which removes only Steam entries and keeps files and media.
 

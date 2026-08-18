@@ -11,12 +11,18 @@ Launch commands are tokenized strings: OpenBoxGL substitutes exact placeholders 
 
 | Token | Value | Example |
 | --- | --- | --- |
-| `{path}` | Absolute path to the game file, ROM, or extracted archive member | `/home/you/roms/zelda.nes` |
-| `{name}` | Game title from the library entry | `The Legend of Zelda` |
+| `{path}` (alias `{ImagePath}`) | Absolute path to the game file, ROM, or extracted archive member | `/home/you/roms/zelda.nes` |
+| `{dir}` (alias `{Dir}`) | Parent directory containing the game file or ROM | `/home/you/roms` |
+| `{file}` (alias `{File}`) | Filename with extension | `zelda.nes` |
+| `{stem}` (alias `{FileNameWithoutExtension}`) | Filename without extension | `zelda` |
+| `{name}` (alias `{Name}`) | Game title from the library entry | `The Legend of Zelda` |
+| `{platform}` (alias `{Platform}`) | Platform name | `NES` |
 | `{rom_name}` | ROM filename (for example, the MAME set name or archive member name) | `zelda` |
 | `{app_id}` | Steam application ID (`steam_app_id` field) | `22380` |
 | `{heroic_app_id}` | Heroic application ID (`heroic_app_id` field) | `1091500` |
 | `{lutris_id}` | Lutris game identifier (`lutris_id` field) | `1` |
+| `{EmulatorDir}` | Parent directory of the resolved emulator executable | `/usr/bin` |
+| `{DataDir}` | OpenBox user data directory | `/home/you/.local/share/openbox-game-launcher` |
 
 When a game has no per-game `launch` command, the platform profile from `profiles` is used; the emulator definition packs and `discover_profiles` provide defaults such as `dosbox {path}`, `dolphin-emu -b -e {path}`, and `pcsx2-qt {path}`. Per-game `launch_profile` overrides select a different named profile for that game only.
 

@@ -57,6 +57,17 @@ Quote values that contain spaces or special characters:
 
 A bare term searches across name, sort title, alternate names, platform, genre, developer, publisher, series, region, notes, source, play mode, status, progress, controller support, and tags.
 
+## Acronym matching
+
+Short bare terms (2 to 8 alphanumeric characters) automatically match game title acronyms and initials in addition to substring searches:
+
+- `oot` matches *The Legend of Zelda: Ocarina of Time*
+- `mgs` matches *Metal Gear Solid*
+- `sotn` matches *Castlevania: Symphony of the Night*
+- `ff` matches *Final Fantasy*
+
+Leading articles (*The*, *A*, *An*) are handled cleanly so searches match with or without the leading word.
+
 ## Tags
 
 - `tag:<name>` filters to a single tag. Clicking a tag in the Tags dialog applies exactly this.
