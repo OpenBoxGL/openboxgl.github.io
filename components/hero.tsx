@@ -65,7 +65,7 @@ export function Hero() {
 
         <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
           <a href="https://github.com/vindeckyy/OpenBoxGL" className="rounded border border-border bg-card px-2 py-1 font-mono hover:text-foreground">
-            18 stars
+            23 stars
           </a>
           <a href="https://github.com/vindeckyy/OpenBoxGL/blob/master/LICENSE" className="rounded border border-border bg-card px-2 py-1 font-mono">
             AGPL-3.0
