@@ -15,7 +15,7 @@ This page is for maintainers publishing an AppImage release from `master`. The r
 6. Run the local gates:
   ```bash
   ./run_all_tests.sh
-  python3 -B test_packaging.py
+  python3 -B tests/test_packaging.py
   appstreamcli validate --no-net openbox.metainfo.xml  # when available
   desktop-file-validate openbox.desktop         # when available
   git diff --check

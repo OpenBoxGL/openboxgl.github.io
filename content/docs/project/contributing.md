@@ -25,7 +25,7 @@ Run the full suite before submitting a pull request:
 make check      # ruff → v1 contract → compile → coverage floors; also `make version-check` for updates.py sync
 ```
 
-Each `test_*.py` is a standalone contract test (plain asserts or unittest) run directly with `python3 -B <file>`. Iterate on one module with `python3 test_catalog.py`. Packaging checks use `./build_appimage.sh` and `python3 test_packaging.py`. All tests must pass on CI before a PR merges.
+Each `test_*.py` is a standalone contract test (plain asserts or unittest) run directly with `python3 -B <file>`. Iterate on one module with `python3 -B tests/test_catalog.py`. Packaging checks use `./build_appimage.sh` and `python3 -B tests/test_packaging.py`. All tests must pass on CI before a PR merges.
 
 ## Coding guidelines
 

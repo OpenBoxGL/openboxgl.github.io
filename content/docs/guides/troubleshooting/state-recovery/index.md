@@ -22,16 +22,45 @@ The original file is preserved, never overwritten.
 
 ## Recover
 
-Recovery (`POST /api/state/recover`) loads the `.bak` file, normalizes it, and writes it back through the same atomic path. Success returns `{"ok": true, "games": <count>}`.
+Recovery (`POST /api/state/recover`) can inspect available backups or restore either the `.bak` file or a rolling snapshot:
+
+### Dry-run inspection
+
+Send `POST /api/state/recover` with `{"dry_run": true}` to inspect recovery options without modifying state:
+
+```json
+{
+  "ok": true,
+  "dry_run": true,
+  "backup_exists": true,
+  "backup_games": 42,
+  "snapshots": [
+    {
+      "name": "library.json.20260817_120000.snap",
+      "created_at": 1723896000,
+      "size": 154200
+    }
+  ]
+}
+```
+
+### Restoring state
+
+- **Restore last-known-good backup**: `POST /api/state/recover` with `{}` loads `library.json.bak`, validates/normalizes it, and commits it atomically.
+- **Restore specific snapshot**: `POST /api/state/recover` with `{"snapshot": "library.json.20260817_120000.snap"}` restores a point-in-time snapshot from `library.json.snapshots/` (retains the 5 most recent rolling snapshots).
+
+Success returns `{"ok": true, "games": <count>}`.
 
 | Message | Meaning |
 | --- | --- |
 | `"No last-known-good state exists at <bak path>."` | No `.bak` exists; there is nothing to recover from. |
 | `"The last-known-good state is also unusable: <bak path>"` | Both primary and backup are bad; recovery fails clearly rather than guessing. |
+| `"Snapshot not found: <name>"` | Specified snapshot filename does not exist in `library.json.snapshots/`. |
 
 ## Preventing data loss
 
 - Back up the whole data directory before manual intervention: copy `library.json` and `library.json.bak` together.
+- Rolling snapshots are automatically saved in `library.json.snapshots/` before schema migrations or major updates (capped at 5 rotating snapshots).
 - Schema versions migrate in place on load (v1 → v5); a version above 5, below 1, or with no migration available raises `StateCorruptError` instead of guessing.
 - The `.bak` is always at least as fresh as the primary commit that preceded the last write, because it is written before the swap.
 

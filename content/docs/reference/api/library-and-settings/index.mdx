@@ -20,6 +20,20 @@ In safe mode the `library` hook is skipped; otherwise plugin `library` hooks can
 
 </ApiEndpoint>
 
+<ApiEndpoint method="GET" path="/api/library/delta">
+
+Incremental sync endpoint returning updated projections for a specific subset of games. Accepts `?ids=id1,id2,...` (up to 1,000 game IDs).
+
+Returns:
+```json
+{
+  "games": [ ... ],
+  "media_epoch": 12
+}
+```
+
+</ApiEndpoint>
+
 <ApiEndpoint method="POST" path="/api/game">
 
 

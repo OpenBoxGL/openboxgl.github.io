@@ -17,9 +17,29 @@ The footer shows the control legend: `← → Browse`, `Enter / A Play`, `P Paus
 
 ## Navigation and menus
 
-Keyboard arrows (and gamepad left stick / d-pad, or a gamepad's mapped buttons) move through the list. The gamepad mapping is configurable in Settings (buttons 0-31 per action): Play (default button 0), Back (1), Favorite (2), Random game (3), Previous/Next page (4/5, jump 10 at a time), Running-game menu or pause (8), and Filter and sort menu (9). Page up/down and random also work from the keyboard (`R` shuffles).
+Keyboard arrows (and gamepad left stick / d-pad, or a gamepad's mapped buttons) move through the list. The gamepad mapping is configurable in Settings (buttons 0-31 per action):
 
-**M** opens the Filter and Sort menu: Show (current library view, installed, owned, favorites, in progress, completed), Sort (title, rating, recently played, recent activity, play time, shuffle), Quick preset (filter presets pinned in the desktop UI), and Achievements filter (all, RetroAchievements matched, not matched). **P** opens the pause overlay for the running game with Resume/Pause, Exit game, read documents, and RetroAchievements access.
+| Button Index | Xbox / Standard | PlayStation | Default Action |
+| :--- | :--- | :--- | :--- |
+| `0` | **A** | **Cross (✕)** | Play / Launch / Confirm |
+| `1` | **B** | **Circle (○)** | Back / Cancel / Return |
+| `2` | **X** | **Square (□)** | Toggle Favorite |
+| `3` | **Y** | **Triangle (△)** | Random Game Shuffle (`R`) |
+| `4` / `5` | **LB / RB** | **L1 / R1** | Page Left / Page Right (jumps 10 titles) |
+| `8` | **Back / View** | **Share / Select** | Pause Menu / Session Overlay (`P`) |
+| `9` | **Start / Menu** | **Options / Start** | Filter & Sort Dropdown Menu (`M`) |
+
+### Filter and sort menu
+
+Pressing **M** (or Start on gamepad) opens the Filter and Sort menu with 4 interactive select dropdowns navigateable via controller:
+1. **Show**: All games, Installed, Owned, Favorites, In progress, Completed.
+2. **Sort**: Title, Rating, Recently played, Recent activity, Play time, Shuffle.
+3. **Quick preset**: Filter presets pinned in the desktop UI.
+4. **Achievements**: All, RetroAchievements matched, Not matched.
+
+### Controller prompt packs
+
+Activating a controller media pack (`controller-xbox`, `controller-playstation`, or `controller-nintendo`) via Settings or `POST /api/premium/media-packs/apply` automatically updates the on-screen button legend and prompts to match your physical gamepad layout (`controller_prompt_pack`). Toggle on-screen button hints with `controller_prompt_hint`.
 
 The **screensaver / attract mode** shows a rotating random game after a delay. Settings has two related fields: **Big Box screensaver delay** (`screensaver_seconds`, default 90) and **Attract mode delay** (`attract_mode_seconds`). The screensaver reads `attract_mode_seconds`, which falls back to `screensaver_seconds` when unset, and the Settings dialog keeps both in sync with the same fallback. Both are 0-3600 seconds (0 disables; values 1-29 are rejected). Any control returns; Play launches the displayed game. The screensaver uses the game's background or cover and plays its video when present. An optional **Big Box startup video** plays on entry, and **Library background music** with an optional **Mix video audio with background music** toggle (lower music volume when mixing) plays in Big Box. Battery level and the controller prompt hint display in the Big Box status bar.
 

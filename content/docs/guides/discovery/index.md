@@ -24,16 +24,26 @@ Discovery doesn't store pre-computed lists. Each click regenerates the six views
 
 Each view lists up to 12 games and is regenerated as the library changes.
 
-## Use it
+## Explorer rail
 
-1. Click **Discovery** in the top bar.
-2. Pick a view that matches your mood, **Never played** and **Short sessions** are the two most useful for deciding what to launch.
-3. Click any card to open its detail pane and play.
+The **Explorer** panel in the sidebar breaks your library down by metadata facets:
 
-Because the views are computed from `play_count`, `playtime_seconds`, `last_played`, and rating, they get smarter as you play: titles you finish drop out of "Continue playing", and games you play briefly keep showing up in "Short sessions".
+- **Dimensions**: Genre, Developer, Publisher, Platform, Progress state, and ESRB rating.
+- **Dynamic Counts**: Shows how many games match each value (e.g. `Platformer (24)`, `Capcom (12)`).
+- **Compound Filters**: Clicking a facet immediately applies a scoped search query to your library view.
+- **REST API**: Backed by `GET /api/explorer/facets?field=<field>`, returning the top 40 sorted facets.
+
+## Related games and recommendations
+
+When viewing any game's detail modal or pane, OpenBox dynamically computes the most relevant titles in your collection:
+
+- **Scoring Engine**: Evaluates similarity weights across shared `series` (+5), `developer` (+3), `publisher` (+2), `genre` (+2), `collection` (+2), and `platform` (+1).
+- **Reason Badges**: Badges explain why each game was recommended (e.g. *Same Series*, *Same Developer*, *Shared Genre*).
+- **API Endpoint**: Accessible via `GET /api/related/rich?id=<index>` or `?game_id=<stable_id>`.
 
 ## See also
 
 - [Library overview](/guides/library/), browsing and filtering the full library
 - [API content and imports](/reference/api/content-and-imports/), `GET /api/discovery`
+- [API local administrator](/reference/api/local-admin/), `GET /api/explorer/facets`
 - [Sessions, saves, and backups](/guides/sessions-saves-and-backups/), where play history comes from

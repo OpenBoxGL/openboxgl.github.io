@@ -4,17 +4,20 @@ description: Release notes for OpenBox, from the latest AppImage back to the fir
 sidebar: false
 ---
 
-# Changelog
+## 1.4.0 (2026-08-17)
 
-## Unreleased
+### Fixed
 
-**Hardened**
+- AppImage and Flatpak builds now bundle every static JavaScript module (`util.js`, `state.js`, `library.js`, and related ES modules), preventing 404 errors during client-side navigation.
+- AppImage packaging scripts now ensure parent directories are created for `pkg/parity` modules.
+- Hardened background job manager queue slot cleanup on worker replacement, preventing in-flight job leakages.
+- Handled non-standard filesystem mounts in `fsync_directory` and protected snapshot rotation against concurrent file removals.
+- Resolved Big Box mode switch exit response hang and ensured full controller dropdown navigation.
 
-- API authentication now rate-limits failures per IP (10 in 60 seconds) with `429 Too Many Requests` and `Retry-After` (correct token still succeeds and clears the bucket). The token-bearing URL is no longer printed to stdout or the diagnostic log; `X-OpenBox-Token` header remains the safe path.
-- Game saves via `POST /api/game` now require an absolute path to an existing regular file and reject symlinked components to avoid TOCTOU and path confusion; the stored path is the expanded absolute form.
-- Theme imports via `POST /api/themes/import` now cap CSS files at 256 KiB, reject symlinked sources/destinations, require valid UTF-8, and reject remote `@import` with `http` to respect the `style-src` CSP.
-- RetroAchievements ROM hashing caps archives and plain files at 512 MiB before hashing (`512 MiB` per member for `archive_rom_bytes`, `MAX_ROM_BYTES` for `rom_data`).
-- Error responses sanitize absolute filesystem paths: the server log keeps the full path, the client receives the prefix before the path (for example `Watch folder does not exist.` instead of `/home/...`).
+### Changed
+
+- Reorganized repository structure: documentation moved to `docs/`, tests to `tests/`, and parity integrations to `pkg/parity/` with backward-compatible shims at root.
+- CI workflows, test runners, coverage gates, and token checkers updated to support both flat and packaged layouts.
 
 ## 1.3.0 (2026-08-16)
 

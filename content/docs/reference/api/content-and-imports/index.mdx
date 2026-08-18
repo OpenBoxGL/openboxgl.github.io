@@ -90,6 +90,14 @@ Start a background sync of the LaunchBox Games Database (`https://gamesdb.launch
 
 </ApiEndpoint>
 
+<ApiEndpoint method="POST" path="/api/v1/metadata/match">
+
+`POST /api/v1/metadata/match` (aliased at `POST /api/metadata/match`) triggers a background job (`"metadata-match"`) to batch auto-match library titles against the local LaunchBox database for all games currently missing `launchbox_db_id`.
+
+Body: `{"platform": "all" | "<platform-name>"}`. Returns `202 {"state": "running"}`.
+
+</ApiEndpoint>
+
 <ApiEndpoint method="POST" path="/api/metadata/steam">
 
 

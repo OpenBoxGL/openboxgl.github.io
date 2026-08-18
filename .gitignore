@@ -16,3 +16,4 @@ out/
 bun.lockb
 .DS_Store
 data/
+.omo/

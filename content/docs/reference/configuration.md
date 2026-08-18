@@ -41,7 +41,7 @@ Values already in the environment are never overridden by `.env`. The template l
 | `OPENBOX_ENV_FILE` | Explicit path to a single `.env` file, checked first before the data-directory roots. Read directly from the process environment; must point at an owner-only regular file (not a symlink) or it is skipped. |
 | `OPENBOX_ALLOW_HTTP_WEBHOOKS` | Set to `1` to allow plain-HTTP webhook URLs. Required only for trusted local test targets; HTTPS is the default and safer. |
 | `OPENBOX_ALLOW_HTTP_GAMEYFIN` | Set to `1` to allow plain-HTTP Gameyfin URLs. HTTPS is the default; loopback (localhost) addresses are always allowed. |
-| `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS` | Set to `1` to allow unsandboxed plugin execution when bubblewrap is unavailable. Without it, plugins are skipped if the sandbox cannot be created. Maintainer-only `STRIPE_SECRET_KEY` exists for local donate-link creation and is never read from docs. |
+| `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS` | Set to `1` in the process shell to allow unsandboxed plugin execution when bubblewrap is unavailable. Read directly from the process environment (not `.env`). Without it, plugins are skipped if the sandbox cannot be created. Maintainer-only `STRIPE_SECRET_KEY` exists for local donate-link creation and is never read from docs. |
 
 ### Credentials (all optional)
 
@@ -79,7 +79,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `progress_automation_idle_days` | 30 | 0 to 3,650, days before marking Paused |
 | `progress_on_first_play` | "Playing" | Must be a known progress status |
 | `welcome_completed` | `false` | Boolean, hides the welcome wizard |
-| `image_group` | "cover" | One of cover, background, screenshot, clear_logo, fanart, banner, icon, box_back, box_spine, box_3d, title_screen |
+| `image_group` | "cover" | One of cover, background, screenshot, clear_logo, fanart, banner, icon, box_back, box_spine, box_3d, title_screen, cart_front, cart_back, disc, advertisement, manual |
 | `badge_visibility` | Most badges shown | Subset of favorite, installed, missing_media, saves, documents, versions, storefront, achievements, highscores, progress, rating, broken, portable, controller |
 | `cloud_folder` | "" | Absolute, existing path for mounted-folder statistics sync |
 | `storefront_auto_import` | All off | Object with boolean keys: `steam`, `heroic`, `lutris`, `gameyfin` |
@@ -124,10 +124,10 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `cover_grouping` | `"shape"` | String; shape used to group covers in the library |
 | `image_group_by_platform` | `{}` | Object; per-platform image group overrides |
 | `image_group_by_playlist` | `{}` | Object; per-playlist image group overrides |
-| `sidebar_sections` | `["search", "view", "platforms", "playlists", "filters"]` | List of strings; ordered sidebar section names |
+| `sidebar_sections` | `["search", "view", "platforms", "playlists", "filters"]` | List of strings; valid section names: `search`, `view`, `categories`, `esrb`, `platforms`, `playlists`, `presets`, `explorer` |
 | `platform_documents` | `{}` | Object; per-platform manual/document lists |
 | `filter_presets` | `[]` | List of objects; named filter rules, each needs at least one rule |
-| `import_exclusions` | `[]` | List of strings; paths excluded from import |
+| `import_exclusions` | `[]` | List of objects with `source` (steam, heroic, lutris, gameyfin) and `external_id` |
 | `emulator_scan_configs` | `[]` | List of objects; per-emulator scan configuration |
 | `tracking_process_name` | `""` | String; process name used when `tracking_mode` is `process_name` |
 | `webhook_attempts` | 3 | 1 to 5 delivery retries per webhook |
@@ -135,18 +135,18 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `webhooks` | `[]` | At most 32 configs; each needs a URL and at least one event |
 | `theme` | `""` | String; global theme name, empty uses the stock theme |
 | `theme_by_platform` | `{}` | Object; platform to theme name mappings |
-| `bigbox_quick` | `, (auto-managed)` | Derived; presets flagged as Big Box quick actions, capped at 8 |
-| `controller_prompt_pack` | `, (auto-managed)` | String; media pack id driving controller prompts |
-| `controller_prompt_hint` | `""` | String; mapping hint text for the active prompt pack |
+| `bigbox_quick` | `(auto-managed)` | Derived list; presets flagged as Big Box quick actions, capped at 8 |
+| `controller_prompt_pack` | `"xbox"` | String; active controller prompt pack (`xbox`, `playstation`, `nintendo`) |
+| `controller_prompt_hint` | `false` | Boolean; toggles on-screen controller button prompts in Big Box |
 | `active_media_packs` | `[]` | List of strings; media pack ids, appended when a pack is applied |
-| `last_cloud_sync` | `, ` | Internal, auto-managed by OpenBox; do not edit |
-| `last_update_check` | `, ` | Internal, auto-managed by OpenBox; do not edit |
-| `gameyfin_password_set` | `, ` | Internal, auto-managed by OpenBox; do not edit |
-| `gamescope_guest` | `, ` | Internal, auto-managed by OpenBox; do not edit |
+| `last_cloud_sync` | `""` | Internal, auto-managed timestamp; do not edit |
+| `last_update_check` | `""` | Internal, auto-managed timestamp; do not edit |
+| `gameyfin_password_set` | `false` | Internal, boolean indicator of whether password is set |
+| `gamescope_guest` | `false` | Internal, auto-detected guest mode under Gamescope |
 
 Two naming details worth knowing:
 
-- `bigbox_shutdown_commands` is misnamed: the commands run when Big Box is **entered**, not when it is left. The `entering: false` signal from the UI is ignored by the handler.
+- `bigbox_shutdown_commands` is misnamed: the commands run when Big Box is **entered**, not when it is left.
 - `attract_mode_seconds` is the screensaver delay the Big Box screensaver actually reads; it falls back to `screensaver_seconds` when unset, and the Settings dialog keeps both fields with the same fallback.
 
 Partial saves merge with existing settings: keys you omit are preserved, and concurrent partial saves of different keys do not lose updates (covered by the API sweep tests). An empty `gameyfin_password` in a save leaves the stored password unchanged.
@@ -175,4 +175,4 @@ These are read once during process startup and require a restart to change:
 - Keep `server.token`, provider credentials, and webhook secrets private. The diagnostic log redacts values matching token/password/secret/API-key/authorization patterns, but a `.env` file is plaintext.
 - Restart OpenBoxGL after changing values consumed at process startup.
 
-The authoritative sources are `.env.example`, `env_config.py`, the settings validation in `web_app.py`, and the Settings dialog.
+The authoritative sources are `.env.example`, `env_config.py`, `handlers/settings.py`, `settings_schema.py`, and the Settings dialog.

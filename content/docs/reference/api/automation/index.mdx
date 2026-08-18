@@ -132,6 +132,21 @@ Delivery is asynchronous and best-effort. Envelopes are compact JSON with `id` (
 
 Retries: attempts (1..5, default 3) with exponential backoff 1, 2, 4, 8 seconds; `Retry-After` clamps the delay to at most 30 seconds. Retryable statuses are 408, 425, 429, and 5xx; 3xx is a terminal failure (a redirect is never followed unvalidated). Timeout per attempt is 1..15 seconds (default 5). The delivery queue is bounded at 128 pending items with 4 workers; overflow drops the event and records a failure notification. Delivery failures surface as error notifications and update the config's `last_status`/`last_error`.
 
+## Real-time events
+
+<ApiEndpoint method="GET" path="/api/events">
+
+Server-Sent Events (SSE) stream endpoint for live UI and client push. Clients receive real-time notifications for:
+- `ping`: Periodic keep-alive heartbeats
+- `library`: Emitted when games or playlists are added, updated, or deleted
+- `jobs`: Emitted when background tasks change state (e.g. metadata sync, media downloads, emulator installs)
+- `media`: Emitted when media epochs increment
+- `sessions`: Emitted on game launch, state updates, or session termination
+
+Max 16 concurrent subscribers; 64 KiB buffer per connection. Requires `X-OpenBox-Token` or `?token=`.
+
+</ApiEndpoint>
+
 ## Launcher menu
 
 <ApiEndpoint method="GET" path="/api/launcher/menu">
