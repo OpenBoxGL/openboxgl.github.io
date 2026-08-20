@@ -22,8 +22,8 @@ export function FeatureBento() {
               Find anything the moment you type.
             </h3>
             <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-              The sidebar search fuzzy-matches across every platform and field — start typing a title, platform, tag, or
-              filter and jump straight to the game. No mouse required.
+              The sidebar search fuzzy-matches across every platform and field. Start typing a title, platform, tag, or
+              filter, then jump straight to the game. No mouse required.
             </p>
 
             <LibraryDemo />

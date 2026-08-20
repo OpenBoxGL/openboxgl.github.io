@@ -34,7 +34,7 @@ Start with the diagnostic log and the exact visible error. **Settings** has **Co
 
 ## State recovery
 
-- Library state is `library.json` (schema version 5) with a `.bak` last-known-good copy and a `.lock` file beside it. Writes are atomic and owner-only.
+- Library state is `library.json` (schema version 6) with a `.bak` last-known-good copy and a `.lock` file beside it. Writes are atomic and owner-only.
 - If the primary file cannot be read, operations return 503 with "OpenBox library data needs recovery"; the original file is preserved, never overwritten. Recovery loads the `.bak` file, normalizes it, and writes it back. If the backup is also unusable, recovery fails with a clear error.
 - Back up the data directory before manual intervention: copy `library.json` and `library.json.bak` together.
 - Stable game IDs (`game-<hex>`) survive reordering; legacy index-suffixed IDs are kept as aliases (`legacy_game_ids`).

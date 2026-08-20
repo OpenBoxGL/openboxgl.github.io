@@ -69,19 +69,19 @@ Remove every game with `source` equal to `Steam` (case-insensitive). Returns `{"
 <ApiEndpoint method="POST" path="/api/games/bulk">
 
 
-Apply the same change to many games. Body: `{"ids": [...], "changes": {...}}`. Allowed change keys: `platform`, `genre`, `progress`, `rating`, `favorite`, `hidden`, `esrb`, `custom_fields`, `tags`, `tags_add`, `tags_remove`. Rules:
+Apply the same change to many games. Body: `{"ids": [...], "changes": {...}}`. Allowed change keys include `platform`, `genre`, `progress`, `rating`, `favorite`, `hidden`, `esrb`, `custom_fields`, `tags`, `tags_add`, `tags_remove`, `play_count`, `playtime_seconds`, `last_played`, and `reset_stats`. Rules:
 
-- `ids` accept numeric indexes or stable game ids (including legacy aliases).
+- `ids` accept numeric indexes or stable game ids, including legacy aliases.
 - `tags` cannot be combined with `tags_add`/`tags_remove`; a tag cannot be added and removed in the same request.
-- `favorite`/`hidden` must be booleans; `progress` must be a known value; `rating` between 0 and 5.
-- Returns `{"updated": <count>}`.
+- `favorite`/`hidden`/`reset_stats` must be booleans; `play_count` and `playtime_seconds` must be non-negative integers; `progress` must be a known value; `rating` between 0 and 5.
+- `reset_stats: true` clears `play_count`, `playtime_seconds`, and `last_played` on each selected game. Returns `{"updated": <count>}`.
 
 </ApiEndpoint>
 
 <ApiEndpoint method="POST" path="/api/games/bulk-wizard">
 
 
-Same as bulk edit but validates against the bulk wizard fields (`platform`, `genre`, `progress`, `rating`, `favorite`, `hidden`, `esrb`, `custom_fields`). Returns `{"updated": <count>, "fields": [...]}`.
+Same as bulk edit but validates against the bulk wizard fields (`platform`, `genre`, `progress`, `rating`, `favorite`, `hidden`, `esrb`, `custom_fields`). The wizard route is for guided edits and does not accept `reset_stats`, play counts, raw tags, or arbitrary fields. Returns `{"updated": <count>, "fields": [...]}`.
 
 </ApiEndpoint>
 
@@ -141,6 +141,12 @@ Per-launch-profile TDP limits for handheld tuning. Each entry: `{"enabled": bool
 
 
 `{"launch_id": "...", "action": "pause"|"resume"|"stop"|"restart"|"kill"}`. `stop`/`restart` send SIGTERM to the process group, `kill` sends SIGKILL; paused games are resumed first except for `kill`. A game that is no longer running raises `400`. Returns `{"ok": true, "action": action}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/session/cleanup">
+
+Removes an abandoned persisted active-session row by `launch_id`; it does not signal a running process. Returns `{"ok": true}`.
 
 </ApiEndpoint>
 
@@ -211,7 +217,7 @@ Save a playlist: `{"name", "type": "filter"|"manual", "rules": {...}, "members"|
 <ApiEndpoint method="POST" path="/api/filter-presets">
 
 
-`{"name", "rules", "bigbox_quick": bool}`. Rules keys: `platform`, `view`, `query`, `esrb`, `progress`, `favorite`, `installed`, `platform_category`, `genre`, `developer`, `publisher`, `hidden`. At least one rule required. Returns `{"saved": "<name>"}`.
+`{"name", "rules", "bigbox_quick": bool}`. Rules keys: `platform`, `view`, `query`, `esrb`, `progress`, `favorite`, `installed`, `platform_category`, `genre`, `developer`, `publisher`, `hidden`, `has_saves`, `has_achievements`, `has_missing_media`, and `has_highscores`. At least one rule required. Returns `{"saved": "<name>"}`.
 
 </ApiEndpoint>
 

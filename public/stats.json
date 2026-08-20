@@ -1,9 +1,9 @@
 {
-  "stargazers_count": 18,
+  "stargazers_count": 23,
   "forks_count": 0,
   "open_issues_count": 0,
   "license": "AGPL-3.0",
-  "latest_release": "v1.3.0",
-  "published_at": "2026-08-16T19:52:41Z",
-  "assets": ["install.sh", "OpenBox-1.3.0-sbom.json", "openbox-release.pub", "OpenBox-x86_64.AppImage", "OpenBox-x86_64.AppImage.sha256", "OpenBox-x86_64.AppImage.sig"]
+  "latest_release": "v1.5.1",
+  "published_at": "2026-08-19T00:00:00Z",
+  "assets": ["install.sh", "OpenBox-1.5.1-sbom.json", "openbox-release.pub", "OpenBox-x86_64.AppImage", "OpenBox-x86_64.AppImage.sha256", "OpenBox-x86_64.AppImage.sig"]
 }

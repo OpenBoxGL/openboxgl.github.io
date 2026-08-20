@@ -181,7 +181,7 @@ Start a background media download for every game with a `launchbox_db_id` (optio
 <ApiEndpoint method="POST" path="/api/media/cleanup">
 
 
-`{"apply": bool}` removes duplicate media. With `apply: false` it is a dry run returning candidate paths; with `apply: true` files are deleted (only inside the data directory) and the media epoch bumps. Returns `{"groups", "paths": [...], "applied"}`.
+`{"apply": bool, "platform": "<name>|all"}` removes duplicate media. With `apply: false` it is a dry run returning candidate paths; with `apply: true` files are deleted only inside the data directory and the media epoch bumps. `platform` narrows the scan to one platform; blank or `all` scans the whole library. Returns `{"groups", "paths": [...], "applied", "platform"}`.
 
 </ApiEndpoint>
 

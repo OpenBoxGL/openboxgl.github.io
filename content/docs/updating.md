@@ -7,7 +7,7 @@ OpenBoxGL has one built-in updater and it is for the AppImage only. This page ex
 
 ## Upgrading from a pre-1.0 build
 
-The Tk interface was removed as of 1.0.0; the app opens a native WebKitGTK window by default. If you are upgrading from any pre-1.0 build, the same notes apply. Your library data is untouched: the same `library.json` in `~/.local/share/openbox-game-launcher` (or `OPENBOX_DATA_DIR`) keeps working, and the schema migrates to version 5 automatically on first launch (it only adds a host-owned `ui_state` block; games, settings, playlists, and history are unchanged). No re-import or re-download is needed.
+The Tk interface was removed as of 1.0.0; the app opens a native WebKitGTK window by default. If you are upgrading from any pre-1.0 build, the same notes apply. Your library data is untouched: the same `library.json` in `~/.local/share/openbox-game-launcher` (or `OPENBOX_DATA_DIR`) keeps working, and the schema migrates to version 6 automatically on first launch. Later migrations add queue, notifications, `ui_state`, and `active_sessions` without requiring a re-import or re-download.
 
 The one behavioral change to expect is the window itself: instead of a browser tab, `openbox` opens the native window. `openbox --web` still opens the loopback web UI in a browser for development, and if WebKitGTK is missing the launcher falls back to a chrome-less app window rather than failing.
 

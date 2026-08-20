@@ -31,9 +31,9 @@ The native window renders the same UI as the web fallback; both serve `index.htm
 | `--web` | Start the loopback web UI in a browser instead of the native window (development). |
 | `--app-window` | Web entry point only: open the UI in a chrome-less app window (browser `--app=` mode) instead of a normal tab. The native window is unaffected. |
 | `--no-app-window` | Web entry point only: open the UI in a normal browser window; overrides the chrome-less app window default there. The native window is unaffected. |
-| `--fullscreen-width <W>` | Web entry point: customize the viewport width in kiosk and app window modes. |
-| `--fullscreen-height <H>` | Web entry point: customize the viewport height in kiosk and app window modes. |
-| `--resolution <WxH>` | Web entry point: customize the viewport resolution (e.g. `--resolution 1920x1080`). |
+| `--fullscreen-width <W>` / `--width <W>` | Web entry point: customize the viewport width in kiosk and app window modes. |
+| `--fullscreen-height <H>` / `--height <H>` | Web entry point: customize the viewport height in kiosk and app window modes. |
+| `--resolution <WxH>` / `--resolution=<WxH>` | Web entry point: customize the viewport resolution (e.g. `--resolution 1920x1080`). |
 
 `--backup` and `--restore-backup` act on the library before the server starts, so they work even when no instance is running. They read `OPENBOX_DATA_DIR` from the environment, like every startup path.
 
@@ -45,8 +45,8 @@ The native window renders the same UI as the web fallback; both serve `index.htm
 | --- | --- |
 | `openbox://start` | Open the running UI in the browser. A no-op if the server is already up. |
 | `openbox://search/<query>` | Open the UI with the search field prefilled for `<query>`. |
-| `openbox://showgame/<id>` (alias `game`) | Open the detail pane for a game by stable id. |
-| `openbox://launch/<id>` | Launch a game by stable id. |
+| `openbox://showgame/<id>` (alias `game`) | Open the detail pane for a game by numeric library id. |
+| `openbox://launch/<id>` | Launch a game by numeric library id. |
 | `openbox://bigbox` (alias `fullscreen`) | Switch the running UI to Big Box mode. |
 | `openbox://settings[/<panel>]` | Open Settings. A panel segment is parsed but not currently routed to a specific settings tab. |
 

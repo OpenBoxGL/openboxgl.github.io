@@ -32,7 +32,7 @@ The public design tokens live in the [Design system](/project/design-system/) pa
 A theme is a plain `.css` file that overrides the design tokens. The smallest useful theme just sets the palette (use the base variables, not theme-local names):
 
 ```css
-/* OpenBox Stock Theme: my-theme */
+/* Your custom themes do not need the stock-theme marker. */
 :root {
  --bg: #1a1020;
  --panel: #241628;
@@ -44,7 +44,7 @@ A theme is a plain `.css` file that overrides the design tokens. The smallest us
 }
 ```
 
-Drop the file somewhere on disk and use **Import CSS theme** with its absolute path. Stock themes carry a `/* OpenBox Stock Theme:` marker so the app knows they are managed; your own files are never touched on startup. To target one platform only, apply the theme from the Themes dialog with that platform selected.
+Drop the file somewhere on disk and use **Import CSS theme** with its absolute path. Stock themes carry a `/* OpenBox Stock Theme:` marker so the app knows they are managed; leave that marker out of personal themes unless you are replacing a managed stock file. To target one platform only, apply the theme from the Themes dialog with that platform selected.
 
 </Callout>
 

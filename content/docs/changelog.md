@@ -4,6 +4,25 @@ description: Release notes for OpenBox, from the latest AppImage back to the fir
 sidebar: false
 ---
 
+## 1.5.1 (2026-08-19)
+
+### Performance
+
+- **Optimized State Writes**: Added dirty-field tracking, batched snapshot persistence, and cached library projections for large libraries.
+- **Import & Search Throughput**: Accelerated import scanning, metadata batching, archive inspection throughput, and BigBox CoverFlow title indexing.
+- **Native Host Startup**: Improved native host responsiveness with non-blocking IPC polling.
+
+### Changed
+
+- **Cross-Store Consolidation**: Enhanced cross-store import consolidation across Steam, Heroic, Lutris, Faugus, and ROMs using canonical identity normalization.
+- **CLI & Argument Parsing**: Hardened CLI help formatting and argument parsing for headless and native host invocations.
+- **Parity Documentation**: Updated parity compatibility shims and LaunchBox feature matrix documentation.
+
+### Fixed
+
+- **Synchronous Future Cleanup**: Ensured completed background job futures are released synchronously to eliminate memory and future retention.
+- **Import Validation**: Hardened import endpoint error handling and input validation against malformed payload structures.
+
 ## 1.5.0 (2026-08-18)
 
 ### Changed
@@ -142,8 +161,8 @@ sidebar: false
 
 **Verification**
 
-- `./run_all_tests.sh`: 47 test files, 0 failures (now 49 with the sandbox and hardening coverage).
-- `make check`: lint, compile checks, coverage floors green (now `55%` total and `44%` `web_app.py`, see `scripts/check_tests.py`).
+- `./run_all_tests.sh`: 47 test files, 0 failures at that tag; the current suite has 58 test files.
+- `make check`: lint, compile checks, coverage floors green; current floors are `60%` total and `48%` `web_app.py` in `scripts/check_tests.py`.
 - CI smoke test now covers Big Box platform switching and IGDB search parameters; JS linting runs in CI; Dependabot watches GitHub Actions and npm.
 
 ## 1.0.0 (2026-08-14)
@@ -173,7 +192,7 @@ sidebar: false
 
 **Verification**
 
-- 47 test files, 0 failures at that tag (now 49); `make check` gates (lint, compile, tests, coverage floors of `59%` total and `65%` `web_app.py` at that tag, now `55%` total and `44%` `web_app.py` per `scripts/check_tests.py`) pass; the UI smoke test drives a real server and asserts the Tools menu opens under every stock theme.
+- 47 test files, 0 failures at that tag; `make check` gates passed with the then-current floors. The current suite has 58 test files, `60%` total coverage floor, and `48%` `web_app.py` floor per `scripts/check_tests.py`. The UI smoke test drives a real server and asserts the Tools menu opens under every stock theme.
 
 ## 0.9.0 (2026-08-12)
 

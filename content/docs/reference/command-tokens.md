@@ -29,7 +29,7 @@ When a game has no per-game `launch` command, the platform profile from `profile
 ## Substitution behavior
 
 - Each marker is replaced wherever it appears in the tokenized argv parts.
-- If a game uses a platform profile (no per-game command) and that command does not contain `{path}`, the resolved path is appended as the final argument.
+- If a game uses a platform profile (no per-game command) and that command does not contain `{path}` or `{ImagePath}`, the resolved path is appended as the final argument.
 - A `.sh` file with no command launches as `bash <path>`.
 - Paths containing spaces stay intact because substitution happens before `shlex.split` and the resulting parts are passed to `subprocess.Popen` directly without a shell. Quote the marker in your command when the target executable expects a single argument.
 - Storefront imports set their own tokenized commands: Steam uses `steam -applaunch {app_id}` (or `flatpak run com.valvesoftware.Steam -applaunch {app_id}`, or `xdg-open steam://rungameid/{app_id}`), Heroic uses `xdg-open heroic://launch/legendary/{heroic_app_id}`, and Lutris uses `lutris:rungameid/{lutris_id}`.

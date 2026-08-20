@@ -14,14 +14,14 @@ python3 web_app.py   # Web UI (development)
 make native-host    # build the native host, then ./openbox-native.sh
 ```
 
-Optional local configuration loads from `~/.env` or a project `.env` file (see `.env.example`). Never commit secrets, tokens, or personal credentials.
+Optional local configuration loads from an explicit `OPENBOX_ENV_FILE`, the data directory or its parent, `~/.env`, or `~/.config/openbox-game-launcher/.env` (see `.env.example`). Never commit secrets, tokens, or personal credentials.
 
 ## Testing
 
 Run the full suite before submitting a pull request:
 
 ```bash
-./run_all_tests.sh  # 49 files, 0 failures (see `scripts/check_tests.py` for 55% total + 44% web_app.py floors)
+./run_all_tests.sh  # 58 files, 0 failures (see `scripts/check_tests.py` for 60% total + 48% web_app.py floors)
 make check      # ruff → v1 contract → compile → coverage floors; also `make version-check` for updates.py sync
 ```
 

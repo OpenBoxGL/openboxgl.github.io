@@ -47,4 +47,4 @@ Removing a game asks twice: first to confirm the library entry removal, then whe
 
 ## Source and status
 
-Capability status belongs to the [parity matrix](/reference/parity/), maintained from `PARITY.md`. Library data lives in `~/.local/share/openbox-game-launcher/library.json` unless `OPENBOX_DATA_DIR` points elsewhere. State is schema version 5, written atomically with a `.bak` last-known-good copy beside it; recovery is covered in [Data and recovery](/reference/data-and-recovery/).
+Capability status belongs to the [parity matrix](/reference/parity/), maintained from `PARITY.md`. Library data lives in `~/.local/share/openbox-game-launcher/library.json` unless `OPENBOX_DATA_DIR` points elsewhere. State is schema version 6, written atomically with a `.bak` last-known-good copy beside it; recovery is covered in [Data and recovery](/reference/data-and-recovery/).

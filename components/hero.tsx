@@ -40,9 +40,9 @@ export function Hero() {
           <a
             href="/changelog/"
             className="rounded border border-border bg-secondary px-1.5 py-0.5 text-cyan transition-colors hover:text-primary"
-            aria-label="Open the changelog for v1.5.0"
+            aria-label="Open the changelog for v1.5.1"
           >
-            v1.5.0
+            v1.5.1
           </a>
           {hudItems.map((h, i) => (
             <span key={h} className="flex items-center gap-3">
@@ -70,7 +70,7 @@ export function Hero() {
           <a href="https://github.com/vindeckyy/OpenBoxGL/blob/master/LICENSE" className="rounded border border-border bg-card px-2 py-1 font-mono">
             AGPL-3.0
           </a>
-          <span className="rounded border border-border bg-card px-2 py-1 font-mono">v1.5.0</span>
+          <span className="rounded border border-border bg-card px-2 py-1 font-mono">v1.5.1</span>
           <span className="rounded border border-border bg-card px-2 py-1 font-mono">Python 3.10+</span>
           <a href="/enterprise/" className="rounded border border-border bg-card px-2 py-1 font-mono hover:text-foreground">
             Signed releases
@@ -121,7 +121,7 @@ export function Hero() {
               <span className="h-3 w-3 rounded-full bg-destructive/80" />
               <span className="h-3 w-3 rounded-full bg-primary/80" />
               <span className="h-3 w-3 rounded-full bg-lime/70" />
-              <span className="ml-3 font-mono text-xs text-muted-foreground">openbox — game detail</span>
+              <span className="ml-3 font-mono text-xs text-muted-foreground">openbox - game detail</span>
             </div>
             <Image
               src="/openbox-game-detail.png"

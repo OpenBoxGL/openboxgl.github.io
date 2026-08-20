@@ -9,12 +9,12 @@ OpenBoxGL exists because LaunchBox is Windows first and gates useful workflows b
 
 ## At a glance
 
-| Topic | OpenBoxGL 1.5.0 | LaunchBox on Linux |
+| Topic | OpenBoxGL 1.5.1 | LaunchBox on Linux |
 | --- | --- | --- |
 | License | AGPL-3.0, full source on GitHub | Proprietary, no Linux build |
 | Cost | Free, no subscription | Premium paywall for advanced workflows |
 | Data | Local JSON at `~/.local/share/openbox-game-launcher/library.json`, no account | Cloud library for Premium |
-| Linux native | Steam, Heroic, Lutris, RetroArch, ROMs, Arcade, ScummVM, RPCS3, Vita3K | Windows first, runs on Linux through compatibility layers |
+| Linux native | Steam, Heroic, Lutris, Faugus, RetroArch, ROMs, Arcade, ScummVM, RPCS3, Vita3K, Eden | Windows first, runs on Linux through compatibility layers |
 | Automation | Local REST API on loopback with per-launch token auth | Limited external automation surface |
 | Handheld | Big Box Stage, Hybrid, CoverFlow with controller mapping, AppImage on immutable systems, `--game-mode` guest under gamescope | Big Box exists, handheld flows are secondary |
 
@@ -38,6 +38,6 @@ Every LaunchBox Premium equivalent ships without a subscription in OpenBoxGL: cu
 
 ## How to verify
 
-- Check the current release tag at [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest), currently v1.5.0.
+- Check the current release tag at [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest), currently v1.5.1.
 - Open PARITY.md in the application repository and confirm the acceptance check for any row before relying on it.
 - For pricing, LaunchBox Premium pricing is published by Unbroken Software. OpenBox cost is zero and source is AGPL-3.0 at [LICENSE](https://github.com/vindeckyy/OpenBoxGL/blob/master/LICENSE).

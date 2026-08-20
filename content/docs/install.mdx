@@ -47,21 +47,26 @@ The source install uses only the Python standard library, there is no `pip insta
 
  The AppImage is a single executable file that bundles OpenBoxGL, Python, and its dependencies. It does not need to be "installed" system-wide and works on immutable images like SteamOS and Bazzite.
 
- #### One-liner install
+ #### Versioned release installer
 
- Download the latest AppImage, verify its SHA-256 checksum, and install it to `~/.local/bin` with a single command:
-
- ```bash
- curl -fsSL https://raw.githubusercontent.com/vindeckyy/OpenBoxGL/master/scripts/install.sh | bash
- ```
-
- To also launch OpenBox right after installing:
+ Download the installer from a specific signed release, inspect it, then run it. The installer verifies the release public-key pin, SHA-256 checksum, and Ed25519 signature before installing to `~/.local/bin`:
 
  ```bash
- curl -fsSL https://raw.githubusercontent.com/vindeckyy/OpenBoxGL/master/scripts/install.sh | bash -s -- --run
+ VERSION=1.5.1
+ curl --proto '=https' --tlsv1.2 --fail --location \
+   --output install.sh \
+   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
+ less install.sh
+ OPENBOX_RELEASE_TAG="v${VERSION}" bash install.sh
  ```
 
- The script resolves the latest release automatically from GitHub, verifies the release public key against a pinned SHA-256 trust anchor, checks the AppImage against its published SHA-256, verifies its Ed25519 signature, and adds a friendly `openbox` launcher. Install to a different directory with `OPENBOX_INSTALL_DIR` (e.g. `OPENBOX_INSTALL_DIR="$HOME/Applications"`).
+ To launch OpenBox right after installing, pass `--run` after the tag-pinned invocation:
+
+ ```bash
+ OPENBOX_RELEASE_TAG="v${VERSION}" bash install.sh --run
+ ```
+
+ Omit `OPENBOX_RELEASE_TAG` only when you intentionally want the latest stable release. Install to a different directory with `OPENBOX_INSTALL_DIR` (e.g. `OPENBOX_INSTALL_DIR="$HOME/Applications"`).
 
  #### Manual download
 
@@ -116,7 +121,7 @@ The source install uses only the Python standard library, there is no `pip insta
 
  Requirements: Python 3.10 or newer on a Linux system with standard desktop tooling. No third-party Python packages are required; the application uses the standard library.
 
- The native window opens (build it first with `make native-host`). `python3 web_app.py` starts the loopback web UI in a browser instead.
+ `python3 web_app.py` starts the loopback web UI in a browser. To run the native WebKitGTK window from source, build the host and launch it with `make native-host && ./openbox-native.sh`.
 
  For a system install under `/usr/local` (override with `PREFIX=...`):
 

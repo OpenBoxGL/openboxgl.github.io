@@ -253,7 +253,7 @@ export function ProductShot({ src, alt, caption }: { src: string; alt: string; c
 export function proseClasses() {
   return [
     "text-[15px] leading-relaxed text-foreground/85",
-    // Headings — Space Grotesk look: tight tracking, bold, accent-tinted eyebrows
+    // Headings: Space Grotesk look with tight tracking, bold weight, and accent-tinted eyebrows
     "[&_h2]:mt-10 [&_h2]:mb-3 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:tracking-tight [&_h2]:text-balance",
     "[&_h3]:mt-8 [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:tracking-tight",
     "[&_h4]:mt-6 [&_h4]:mb-2 [&_h4]:font-semibold [&_h4]:tracking-tight",
@@ -264,10 +264,10 @@ export function proseClasses() {
     "[&_li]:my-1 [&_li_>_p]:my-1",
     "[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_a]:transition-colors [&_a:hover]:text-primary/80",
     "[&_code]:rounded [&_code]:bg-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[13px] [&_code]:text-foreground/90",
-    // Code blocks — terminal-style panels like the landing install command
+    // Code blocks: terminal-style panels like the landing install command
     "[&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:border [&_pre]:border-border [&_pre]:bg-[#0d1117] [&_pre]:p-4 [&_pre]:shadow-lg",
     "[&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[13px] [&_pre_code]:leading-relaxed",
-    // Tables — card/border tokens with a subtle header row
+    // Tables: card and border tokens with a subtle header row
     "[&_table]:my-4 [&_table]:w-full [&_table]:border-collapse [&_table]:overflow-hidden [&_table]:rounded-lg [&_table]:border [&_table]:border-border [&_table]:text-sm",
     "[&_th]:border [&_th]:border-border [&_th]:bg-secondary/60 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold [&_th]:tracking-tight [&_th]:text-foreground/90",
     "[&_td]:border [&_td]:border-border [&_td]:px-3 [&_td]:py-2 [&_td]:align-top [&_td]:text-foreground/80",
@@ -276,7 +276,7 @@ export function proseClasses() {
     "[&_hr]:my-8 [&_hr]:border-border",
     "[&_img]:my-4 [&_img]:rounded-xl [&_img]:border [&_img]:border-border",
     "[&_strong]:font-semibold [&_strong]:text-foreground",
-    // kbd — the landing's key-cap treatment
+    // kbd: the landing key-cap treatment
     "[&_kbd]:rounded [&_kbd]:border [&_kbd]:border-border [&_kbd]:bg-secondary [&_kbd]:px-1.5 [&_kbd]:py-0.5 [&_kbd]:font-mono [&_kbd]:text-xs",
   ].join(" ")
 }

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build && node scripts/generate-redirects.mjs && node scripts/generate-sitemap.mjs",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "tsc --noEmit",
     "docs:index": "node scripts/build-docs-index.mjs",
     "test": "node scripts/build-docs-index.mjs && next build && node scripts/generate-redirects.mjs && node scripts/generate-sitemap.mjs && node scripts/check-built-site.mjs",
     "serve": "node server/index.mjs",

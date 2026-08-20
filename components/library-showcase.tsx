@@ -30,7 +30,7 @@ export function LibraryShowcase() {
               <span className="h-3 w-3 rounded-full bg-destructive/80" />
               <span className="h-3 w-3 rounded-full bg-primary/80" />
               <span className="h-3 w-3 rounded-full bg-lime/70" />
-              <span className="ml-3 font-mono text-xs text-muted-foreground">openbox — library</span>
+              <span className="ml-3 font-mono text-xs text-muted-foreground">openbox - library</span>
             </div>
             <Image
               src="/library-view.png"

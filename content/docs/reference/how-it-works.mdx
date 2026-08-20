@@ -154,11 +154,11 @@ The environment variable must be available before startup selects `DATA`. An `.e
 
 ### State shape and migration
 
-`default_state()` creates schema version 5 with these top-level collections:
+`default_state()` creates schema version 6 with these top-level collections:
 
 ```json
 {
- "schema_version": 5,
+ "schema_version": 6,
  "games": [],
  "profiles": {},
  "history": [],
@@ -166,15 +166,16 @@ The environment variable must be available before startup selects `DATA`. An `.e
  "playlists": [],
  "queue": [],
  "notifications": [],
- "ui_state": {}
+ "ui_state": {},
+ "active_sessions": []
 }
 ```
 
-The migration path is ordered. Version 1 was a bare game list. Version 2 wrapped that list in a state object and added the main collections. Version 3 replaced index-suffixed game IDs with identity-derived IDs and retained the old IDs as `legacy_game_ids` aliases. Version 4 added queue and notification collections and repaired their caps and basic types. Version 5 added the host-owned `ui_state` block (window geometry, last session, single-instance flag) and left every existing field untouched.
+The migration path is ordered. Version 1 was a bare game list. Version 2 wrapped that list in a state object and added the main collections. Version 3 replaced index-suffixed game IDs with identity-derived IDs and retained the old IDs as `legacy_game_ids` aliases. Version 4 added queue and notification collections and repaired their caps and basic types. Version 5 added the host-owned `ui_state` block (window geometry, last session, single-instance flag) and left every existing field untouched. Version 6 added the `active_sessions` collection used to reconcile running sessions across restart.
 
 The loader rejects versions below 1, versions above the current schema, and a version for which no migration exists. Corrupt JSON, a state value of the wrong top-level type, a non-list `games` collection, a non-dictionary game, or a game without a usable ID raises `StateCorruptError`. The API turns that condition into a recovery response instead of silently discarding the library.
 
-Normalization is deliberately selective. Unknown top-level and per-game fields are retained. Known fields such as IDs, queue, notifications, and tags are repaired or capped. A schema-5 file can use a fast path when its required keys and basic collection shapes already look valid. That fast path does not prove that every nested settings, playlist, queue, or notification value has valid application semantics. Feature code still validates its own input at the boundary where it uses it.
+Normalization is deliberately selective. Unknown top-level and per-game fields are retained. Known fields such as IDs, queue, notifications, and tags are repaired or capped. A schema-6 file can use a fast path when its required keys and basic collection shapes already look valid. That fast path does not prove that every nested settings, playlist, queue, notification, or active-session value has valid application semantics. Feature code still validates its own input at the boundary where it uses it.
 
 ### Stable identity
 

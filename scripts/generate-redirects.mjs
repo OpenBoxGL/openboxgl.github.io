@@ -1,7 +1,7 @@
 // Generates static redirect stub pages in out/ for URLs that Next.js
 // static export cannot redirect (redirects are server-only).
 // Writes <meta http-equiv="refresh"> pages matching the old Astro site's
-// root→guide redirects, preserving link continuity.
+// root-to-guide redirects, preserving link continuity.
 import fs from "node:fs";
 import path from "node:path";
 
@@ -37,11 +37,11 @@ for (const [slug, destination] of REDIRECTS) {
 <head>
 <meta charset="utf-8">
 <meta http-equiv="refresh" content="0; url=${destination}">
-<title>${title} — OpenBox Docs</title>
+<title>${title} - OpenBox Docs</title>
 <link rel="canonical" href="https://openboxgl.github.io${destination}">
 </head>
 <body>
-<p>Redirecting to <a href="${destination}">${title}</a>…</p>
+<p>Redirecting to <a href="${destination}">${title}</a>...</p>
 </body>
 </html>
 `,

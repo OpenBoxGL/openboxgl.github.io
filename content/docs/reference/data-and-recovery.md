@@ -1,6 +1,6 @@
 ---
 title: Data and recovery
-description: Understand schema version 5 state files and recovery behavior.
+description: Understand schema version 6 state files and recovery behavior.
 ---
 
 The library is one schema-versioned JSON file with a last-known-good sidecar, cross-process locking, and atomic owner-only writes. This page documents the exact layout, the migration path, stable IDs, caps, and recovery.
@@ -11,7 +11,7 @@ Inside the data directory (default `~/.local/share/openbox-game-launcher`, or `O
 
 | Path | Purpose |
 | --- | --- |
-| `library.json` | The primary state: `schema_version`, `games`, `profiles`, `history`, `settings`, `playlists`, `queue`, `notifications` |
+| `library.json` | The primary state: `schema_version`, `games`, `profiles`, `history`, `settings`, `playlists`, `queue`, `notifications`, `ui_state`, `active_sessions` |
 | `library.json.bak` | Last-known-good copy, rewritten before every commit |
 | `library.json.snapshots/` | Rolling snapshots of the last 5 committed states, kept as timestamped JSON copies for point-in-time recovery |
 | `.library.json.lock` | Cross-process `flock` lock coordinating concurrent writers |
@@ -30,7 +30,7 @@ Every read and write happens under the file lock, so two OpenBoxGL processes (We
 
 ## Schema versions and migration
 
-The current schema is version 5 (`STATE_SCHEMA_VERSION`). Older files migrate in place on load:
+The current schema is version 6 (`STATE_SCHEMA_VERSION`). Older files migrate in place on load:
 
 | From | Migration |
 | --- | --- |
@@ -38,8 +38,9 @@ The current schema is version 5 (`STATE_SCHEMA_VERSION`). Older files migrate in
 | v2 | Index-suffixed IDs (`game-<24 hex>-<n>`) are replaced by stable IDs; the old ID moves into `legacy_game_ids` as an alias |
 | v3 | Gains `queue` and `notifications`, capped at 500 and 200 entries; non-list game `tags` become `[]` |
 | v4 | Gains the host-owned `ui_state` block (window geometry and native-host preferences); games, settings, playlists, and history are unchanged |
+| v5 | Gains the `active_sessions` collection used to reconcile running sessions across restart |
 
-Unknown fields survive migration; only known collections are normalized. A schema version above 5, below 1, or with no migration available raises `StateCorruptError` instead of guessing. A complete v5 object takes a fast path without normalization.
+Unknown fields survive migration; only known collections are normalized. A schema version above 6, below 1, or with no migration available raises `StateCorruptError` instead of guessing. A complete v6 object takes a fast path without normalization.
 
 ## Stable game IDs
 
@@ -78,6 +79,6 @@ Snapshots rotate on every commit: the last 5 committed states are kept as timest
 ## Security notes
 
 - All state files are owner-only (`0o600`), including the backup and lock.
-- Back up the whole data directory (not just `library.json`) before manual intervention: the sidecar, media, backups, and settings move together.
+- Back up the whole data directory before manual intervention: `library.json`, the sidecar, media, backups, and settings move together.
 - Exported library data and local paths are sensitive; keep `library.json` exports private.
 - The application state store (`state_store.py`) and `test_state_v4.py` are the maintenance sources.

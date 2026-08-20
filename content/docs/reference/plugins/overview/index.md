@@ -7,9 +7,9 @@ Plugins are optional local Python packages that observe or extend OpenBoxGL. The
 
 ## Trust boundary
 
-- Plugins are local code executed with the same user privileges as OpenBoxGL. A plugin can read and modify files in your data directory and under your account, not just library entries.
-- The runner isolates a plugin into a child process, but that is robustness isolation, not a security sandbox: the child shares your user and your filesystem.
-- Install only packages you wrote or audited. The bundled catalog is small and documentation-oriented; installing from it still runs the downloaded code.
+- Plugins are local code executed with the same user privileges as OpenBoxGL. A plugin can read and modify files in your data directory and under your account, not only library entries.
+- The runner isolates a plugin into a child process and scrubs Python preload paths, but that is robustness isolation, not a security sandbox: the child shares your user and your filesystem.
+- Install only packages you wrote or audited. The bundled catalog is documentation-oriented; installing from it still runs downloaded code.
 
 ## Lifecycle
 
