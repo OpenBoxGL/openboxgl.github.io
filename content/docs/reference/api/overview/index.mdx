@@ -26,10 +26,10 @@ The check uses `secrets.compare_digest`, and unauthenticated requests to any rou
 A request flows through a fixed set of stages. Knowing the order tells you which status code you will get and why:
 
 ```text
-parse + route
- ├─ unknown route? → 404 ROUTE_NOT_FOUND
- └─ known route, wrong/missing token? → 403 UNAUTHORIZED
 authenticate (secrets.compare_digest)
+ └─ wrong/missing token? → 403 UNAUTHORIZED
+parse + route
+ └─ unknown route? → 404 ROUTE_NOT_FOUND
 read body (Content-Length, ≤ 65536 bytes, valid JSON object)
  ├─ too large → 400 "Request is too large."
  ├─ truncated → 400 "Request body was truncated."

@@ -161,7 +161,7 @@ sidebar: false
 
 **Verification**
 
-- `./run_all_tests.sh`: 47 test files, 0 failures at that tag; the current suite has 58 test files.
+- `./run_all_tests.sh`: 47 test files, 0 failures at that tag; the current suite has 62 test files.
 - `make check`: lint, compile checks, coverage floors green; current floors are `60%` total and `48%` `web_app.py` in `scripts/check_tests.py`.
 - CI smoke test now covers Big Box platform switching and IGDB search parameters; JS linting runs in CI; Dependabot watches GitHub Actions and npm.
 
@@ -192,7 +192,7 @@ sidebar: false
 
 **Verification**
 
-- 47 test files, 0 failures at that tag; `make check` gates passed with the then-current floors. The current suite has 58 test files, `60%` total coverage floor, and `48%` `web_app.py` floor per `scripts/check_tests.py`. The UI smoke test drives a real server and asserts the Tools menu opens under every stock theme.
+- 47 test files, 0 failures at that tag; `make check` gates passed with the then-current floors. The current suite has 62 test files, `60%` total coverage floor, and `48%` `web_app.py` floor per `scripts/check_tests.py`. The UI smoke test drives a real server and asserts the Tools menu opens under every stock theme.
 
 ## 0.9.0 (2026-08-12)
 

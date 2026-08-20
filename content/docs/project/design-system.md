@@ -3,11 +3,11 @@ title: Design system
 description: The real CSS variables, typography, layout, and component specs for theme authoring.
 ---
 
-OpenBoxGL's base stylesheet uses a dark, warm game-room palette: near-black surfaces, warm off-white text, and brand orange (`#f06000`) as the focus/selection signal with orange-gold (`#e08a3c`) for launch actions. This page documents the actual variables shipped in the application's `index.html`, not a separate token layer. Theme authors override these variables in a CSS file imported through **Themes**.
+OpenBoxGL's base stylesheet uses a dark, warm game-room palette: near-black surfaces, warm off-white text, and brand orange (`#f06000`) as the focus/selection signal with orange-gold (`#e08a3c`) for launch actions. This page documents the actual variables shipped in the application's `static/app.css` (linked from `index.html`), not a separate token layer. Theme authors override these variables in a CSS file imported through **Themes**.
 
 <Callout type="warning" title="These are the shipped tokens">
 
-This page reflects the current `index.html` `:root` block. The application repository also contains a `DESIGN.md` that describes an earlier blue-black palette with cyan focus (`#35a9d5`) and green launch (`#08bf20`). That document is out of date relative to the shipped stylesheet: the running app uses the orange palette below, and the blue/cyan values in `DESIGN.md` are not what a theme overrides today. If you rely on this page's values, always confirm against `index.html` in the repository you are actually running.
+This page reflects the current `static/app.css` `:root` block (linked via `<link rel="stylesheet" href="/static/app.css">` in `index.html`). The application repository also contains a `DESIGN.md` that describes an earlier blue-black palette with cyan focus (`#35a9d5`) and green launch (`#08bf20`). That document is out of date relative to the shipped stylesheet: the running app uses the orange palette below, and the blue/cyan values in `DESIGN.md` are not what a theme overrides today. If you rely on this page's values, always confirm against `static/app.css` in the repository you are actually running.
 
 </Callout>
 
@@ -99,7 +99,7 @@ Stock themes may replace the entire stack: Midnight Circuit uses Syne + Manrope,
 
 ## Spacing
 
-The base stylesheet does not expose `--sp-*` variables; spacing is hardcoded in each rule. Common values: `2px` for hairline gaps, `6px` for checkbox margins, `8px` for input padding, `12px` for card padding, `16px` for column gaps, and `25px` for wide form grids. When you add custom CSS, derive spacing from the nearest value already used in `index.html` rather than inventing new units.
+The base stylesheet does not expose `--sp-*` variables; spacing is hardcoded in each rule. Common values: `2px` for hairline gaps, `6px` for checkbox margins, `8px` for input padding, `12px` for card padding, `16px` for column gaps, and `25px` for wide form grids. When you add custom CSS, derive spacing from the nearest value already used in `static/app.css` rather than inventing new units.
 
 ## Rounded corners
 
@@ -199,4 +199,4 @@ Harbor Light is the only bundled light theme. It overrides `--bg`, `--panel`, `-
 
 - [Themes](/themes/) for the five stock CSS themes and the import workflow
 - [How OpenBoxGL works](/reference/how-it-works/) for how tokens render at runtime
-- `index.html` in the application repository for the authoritative `:root` block
+- `static/app.css` in the application repository for the authoritative `:root` block
