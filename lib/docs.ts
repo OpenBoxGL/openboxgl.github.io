@@ -129,7 +129,6 @@ export function buildSidebar(): DocNode[] {
     ]),
     section("Extend and automate", [
       "guides/plugins",
-      "guides/plugins/creating-a-plugin",
       "guides/themes/custom-themes",
       "guides/troubleshooting",
     ]),
@@ -178,7 +177,7 @@ export function buildSidebar(): DocNode[] {
       s.children.flatMap((c) => [c.slug, ...slugs.filter((slug) => slug.startsWith(`${c.slug}/`))]),
     ),
   )
-  const orphan = slugs.filter((s) => !covered.has(s) && s !== "index" && s !== "404")
+  const orphan = slugs.filter((s) => !covered.has(s) && s !== "" && s !== "index" && s !== "404")
   if (orphan.length) {
     sections[0].children.push(
       ...orphan.map((slug) => {
@@ -193,5 +192,5 @@ export function buildSidebar(): DocNode[] {
 
 /** Flatten all slugs into a plain list for route generation. */
 export function allDocSlugs(): string[] {
-  return getAllSlugs().filter((s) => s !== "404")
+  return getAllSlugs().filter((s) => s !== "" && s !== "404")
 }

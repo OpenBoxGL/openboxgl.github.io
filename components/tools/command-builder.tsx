@@ -144,7 +144,7 @@ export function CommandBuilder() {
           </div>
         </div>
         <span className="rounded border border-border bg-secondary px-2 py-0.5 font-mono text-[11px] text-cyan">
-          OpenBox v1.5.1
+          OpenBox v1.6.0
         </span>
       </div>
 

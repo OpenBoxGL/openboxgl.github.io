@@ -4,6 +4,28 @@ description: Release notes for OpenBox, from the latest AppImage back to the fir
 sidebar: false
 ---
 
+## 1.6.0 (2026-08-23)
+
+### Architecture & State Management
+
+- **State Decomposition**: Decomposed `webapp_state.py` into focused state modules: `pkg/state/imports.py` (import orchestration, duplicate merging, auto-import), `pkg/state/commands.py` (command execution), and `pkg/state/registry.py` (process and session tracking with typed `Session` dataclass), keeping a lightweight backwards-compatible re-export facade.
+- **Launch Token Centralization**: Centralized launch token expansions (`{path}`, `{name}`, `{dir}`, `{stem}`, `{platform}`, `{app_id}`, `{heroic_app_id}`, `{lutris_id}`, `{rom_name}`, `{DataDir}`, etc.) into `pkg/parity/launch_tokens.py`.
+- **Cache Invalidation Hierarchy**: Consolidated caches and locks into coordinated `CacheEpoch` dataclass with atomic full invalidation (`_invalidate_all()`).
+
+### Frontend & Accessibility
+
+- **Accessible Tools Menu**: Replaced details/summary tools dropdown with fully accessible WAI-ARIA button and menu pattern (`#toolsButton`, `#toolMenu`, and `#toolsWrap.open`) supporting full keyboard navigation (Arrows, Home, End, Escape, Tab).
+- **Memoized Search Index**: Implemented LRU cache, debounced input, and bounded trigram expansion for instant lookups across 20k+ games.
+- **Dialog Focus Traps**: Added dialog focus management with inert fallbacks and proper focus restoration on close.
+- **Virtual Grid Geometry**: Memoized grid geometry calculation for faster library view rendering.
+
+### Security & Hardening
+
+- **Content Security Policy**: Added `frame-ancestors` directive to Content-Security-Policy (CSP) headers.
+- **Narrowed Exception Handling**: Hardened exception handling across handlers, state imports, commands, and SSE streams to eliminate broad except catches and add structured error logging.
+- **Auth & Input Validation**: Added input validation and authentication checks to native dialog, window, and emulator scan endpoints.
+- **Write-Path Performance Benchmark**: Added performance benchmark write-path gate (under 500ms for 10k games).
+
 ## 1.5.1 (2026-08-19)
 
 ### Performance

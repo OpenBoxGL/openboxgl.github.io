@@ -36,7 +36,7 @@ OpenBox is engineered with a strict **local-first, dependency-free runtime** arc
 │              └───────────────┬───────────────┘              │
 │                              │                              │
 │                    Atomic State Store                       │
-│           (games.json + WAL + Rotating Snapshots)           │
+│          (library.json + WAL + Rotating Snapshots)          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -60,7 +60,7 @@ When launched via native binary or AppImage, OpenBox spawns a native C/WebKitGTK
 
 OpenBox treats library state as critical user data:
 - **Atomic File Writes**: Mutations are written to temporary staging files and swapped into place using POSIX `rename(2)` to prevent corruption on sudden power loss.
-- **Automated Snapshot Rotation**: Rotating snapshots (`games.json.bak.1`, `games.json.bak.2`, etc.) are retained automatically before destructive actions.
+- **Automated Snapshot Rotation**: Rotating snapshots (`library.json.bak.1`, `library.json.bak.2`, etc.) are retained automatically before destructive actions.
 - **Deduplication Engine**: Canonical identity hashing prevents duplicate entries when games exist simultaneously across Steam, Heroic, and ROM folders.
 
 ## 4. Asynchronous Background Job System
