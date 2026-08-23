@@ -62,7 +62,11 @@ Returns `{"installed": "<version>", "backup": "<path>"}`. Restart to use the upd
 <ApiEndpoint method="POST" path="/api/state/recover">
 
 
-Restore the library from `library.json.bak` (see [Data and recovery](/reference/data-and-recovery/)). Success returns `{"ok": true, "games": <count>}`; an unusable backup raises `503`-class errors (surfaced as `400` with the message).
+Restore the library from `library.json.bak` or rolling snapshots (see [Data and recovery](/reference/data-and-recovery/)).
+- **Inspect**: Body `{"dry_run": true}` returns available backups and snapshots: `{"dry_run": true, "backup_available": bool, "games": int, "snapshots": [{"name", "size", "modified"}]}`.
+- **Restore backup**: Body `{}` restores `library.json.bak` and returns `{"ok": true, "games": int}`.
+- **Restore snapshot**: Body `{"snapshot": "<name>"}` restores the specified snapshot.
+An unusable backup or unknown snapshot raises an error message.
 
 </ApiEndpoint>
 
@@ -244,11 +248,13 @@ Returns native host capabilities detected by the backend when running inside the
 
 ```json
 {
-  "native": true,
-  "file_picker": true,
-  "folder_picker": true,
-  "reveal": true,
-  "fullscreen": true
+  "webview": true,
+  "dialogs": true,
+  "tray": true,
+  "single_instance": true,
+  "gamepad": "webkit",
+  "fullscreen": true,
+  "clipboard": true
 }
 ```
 
@@ -256,31 +262,35 @@ Returns native host capabilities detected by the backend when running inside the
 
 <ApiEndpoint method="POST" path="/api/native/dialog">
 
-Opens a native file or folder picker dialog on the host system. Body: `{"type": "file" | "folder", "prompt": "..."}`. Returns `{"path": "/selected/path"}` or `{"cancelled": true}`.
+Opens a native file or folder picker dialog on the host system. Body: `{"kind": "folder" | "file" | "save"}` (defaults to `"folder"`). Returns `{"path": "/selected/path"}` or `{"path": null, "cancelled": true}`. Unauthorized requests return `401 {"error": "unauthorized"}`.
 
 </ApiEndpoint>
 
 <ApiEndpoint method="POST" path="/api/native/reveal">
 
-Reveals a file or folder in the default desktop file manager (e.g. Nautilus, Dolphin). Body: `{"path": "/path/to/game.rom"}`.
+Reveals a file or folder in the default desktop file manager (e.g. Nautilus, Dolphin). Body: `{"path": "/path/to/game.rom"}`. Returns `{"ok": bool, "error": str | null}`.
 
 </ApiEndpoint>
 
 <ApiEndpoint method="POST" path="/api/native/open-external">
 
-Opens an external HTTP/HTTPS URL or file path in the host's default web browser or application. Body: `{"url": "https://..."}`.
+Opens an external HTTP/HTTPS URL or file path in the host's default web browser or application. Body: `{"url": "https://..."}` or `{"path": "/path/to/file"}`. Returns `{"ok": bool, "error": str | null}`.
 
 </ApiEndpoint>
 
 <ApiEndpoint method="POST" path="/api/native/window">
 
-Controls the native application window (fullscreen toggle, minimize, close). Body: `{"action": "fullscreen" | "minimize" | "close"}`.
+Controls the native application window. Body: `{"action": "minimize" | "toggle-maximize" | "close" | "set-fullscreen" | "unset-fullscreen"}`. Returns `{"ok": bool}`.
 
 </ApiEndpoint>
 
-### `GET /api/platform/documents` and `GET /api/platform/document`
+### `GET /api/platform/documents`
 
-Per-platform document lists and file serving (`?platform=&index=`). Documents are validated to be regular files; symlinks are rejected. Missing documents return `404`.
+Retrieves the document metadata list for a platform (`?platform=<name>`) or mapping of all platforms when omitted. Returns `{"documents": [{"name", "path"}, ...]}`.
+
+### `GET /api/platform/document`
+
+Serves a platform document file for inline viewing (`?platform=<name>&index=<doc_index>`). Symlinks are rejected. Missing document returns `404 {"error": "Platform document not found"}`.
 
 <ApiEndpoint method="POST" path="/api/platform/documents">
 
@@ -291,7 +301,7 @@ Per-platform document lists and file serving (`?platform=&index=`). Documents ar
 
 ### `GET /api/document`
 
-Serves a game's document file for inline viewing (`?game_id=&index=`). The file is validated to be a regular file (symlinks rejected), served with its guessed MIME type and a sanitized `Content-Disposition` name. Missing game, index, or file returns `404` `{"error": "Document not found"}`.
+Serves a game's document file for inline viewing (`?id=<index>&index=<doc_index>` or `?game_id=<id>&index=<doc_index>`). The file is validated to be a regular file (symlinks rejected), served with its guessed MIME type and a sanitized `Content-Disposition` name. Missing game, index, or file returns `404` `{"error": "Document not found"}`.
 
 ### `GET /api/explorer/facets`
 

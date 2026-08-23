@@ -203,18 +203,16 @@ mutator
  -> current state loaded under the exclusive lock
  -> known collections normalized
  -> JSON serialized
- -> temporary file created beside library.json
+ -> temporary primary file created beside library.json
  -> temporary file flushed, fsynced, and chmod 0600
- -> temporary bytes copied to library.json.bak
+ -> temporary backup file created and committed via os.replace(temp_bak, library.json.bak)
  -> os.replace(temp, library.json)
  -> primary chmod 0600
  -> containing directory fsynced
  -> in-memory cache refreshed
 ```
 
-Files below the compact serialization threshold are pretty-printed. A payload whose compact form exceeds 1 MiB is written compactly. The file ends with a newline in either case. The backup is written before the primary replacement, which keeps the backup aligned with the state being committed if the primary swap completes.
-
-The backup copy itself is not an independent atomic transaction. A failure during the copy can damage the backup, and a primary replacement failure after a successful copy can leave the old primary beside a newer backup. Those are real failure windows to keep in mind when changing durability code.
+Files below the compact serialization threshold are pretty-printed. A payload whose compact form exceeds 1 MiB (or library with >500 games) is written compactly. The file ends with a newline in either case. The backup is staged into a temporary file and committed via `os.replace()` before the primary replacement, ensuring the backup write is atomic without risking corruption to the existing `.bak`.
 
 ### Recovery
 
@@ -353,7 +351,7 @@ The `before_launch` plugin chain receives a JSON payload and may rewrite `args` 
 
 The Web launcher passes `start_new_session=True` to `subprocess.Popen`. The launched game becomes the leader of a new process session and process group. Pause, resume, stop, restart, and force-close then operate on the group with `SIGSTOP`, `SIGCONT`, `SIGTERM`, or `SIGKILL` rather than targeting only the direct child.
 
-Live process data is held in `RUNNING` and `PROCESSES` under `PROCESS_LOCK`. It includes the launch ID, stable identity information, PID, start time, selected profile, and pause state. The browser polls the running endpoint and event sequence to update lifecycle UI. A server restart loses those live maps even though completed history already persisted remains in the library.
+Live process data is held in `RUNNING` and `PROCESSES` under `PROCESS_LOCK`, with active sessions persisted to `active_sessions` in `library.json` (Schema v6). It includes the launch ID, stable identity information, PID, process start time, selected profile, and pause state. On startup, `reconcile_sessions_on_startup()` automatically reattaches to surviving game processes and transitions deceased ones to `abandoned`.
 
 ## Session completion and teardown
 
@@ -384,7 +382,7 @@ Save backup on close requires the setting and configured save paths. The save en
 
 The session publishes `session.started` and `session.stopped`. Webhooks and automation consumers should use the allowlisted event names in `automation.py` and the Webhook reference page.
 
-There are two practical limits to remember. First, live session state is process-local and cannot be reconstructed completely after a server crash. Second, a game deleted while it is running can leave a name-based history record without a current game record to receive the playtime update.
+There are two practical limits to remember. First, although live session records persist and reattach across normal restarts, ungraceful kernel crashes that terminate processes mark unmonitored sessions as `abandoned`. Second, a game deleted while it is running can leave a name-based history record without a current game record to receive the playtime update.
 
 ## Background jobs
 

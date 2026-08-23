@@ -60,20 +60,48 @@ Import installed games from local manifests. Steam reads `steamapps/appmanifest_
 
 Scan ScummVM (`scummvm.ini` sections), RPCS3 (`dev_hdd0/game/*/PARAM.SFO` titles), and Vita3K (`ux0/app/*/sce_sys/param.sfo` titles) libraries. Returns `{"added", "found"}`.
 
-### `GET /api/faugus/status` | `GET /api/faugus/scan` | `POST /api/faugus/import`
+<ApiEndpoint method="GET" path="/api/faugus/status">
 
-Faugus Launcher discovery and import. `GET /api/faugus/status` returns `{"installed": bool, "data_dirs": [...]}`; `GET /api/faugus/scan` returns `{"games": [...], "count": n}`; `POST /api/faugus/import` imports scanned games with UMU launch configurations and wine prefixes.
+Returns Faugus Launcher installation status and discovered data directories: `{"installed": bool, "data_dirs": [str, ...]}`.
 
-### `GET /api/wine/prefixes` | `GET /api/wine/protons` | `GET /api/wine/prefix-for-game`
+</ApiEndpoint>
 
-Proton and Wine runner management. `GET /api/wine/prefixes` returns `{"prefixes": [...], "available": bool}`; `GET /api/wine/protons` returns `{"protons": [...], "available": bool}`; `GET /api/wine/prefix-for-game?game_id=<id>` resolves prefix mappings per game.
+<ApiEndpoint method="GET" path="/api/faugus/scan">
+
+Scans Faugus Launcher JSON manifests and prefix directories. Returns `{"games": [...], "count": int}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/faugus/import">
+
+Imports scanned Faugus games with UMU launch configurations and wine prefixes into the library. Returns `{"added": int, "found": int, "imported": [str, ...], "count": int}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/wine/prefixes">
+
+Discovers configured Proton and Wine prefix directories. Returns `{"prefixes": [{"name", "path"}, ...], "available": bool}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/wine/protons">
+
+Discovers Proton runtime executables (Steam compatibility tools, Faugus runners, Lutris runners, Flatpak/PATH). Returns `{"protons": [{"name", "path"}, ...], "available": bool}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/wine/prefix-for-game">
+
+Resolves the active Wine prefix directory for a given game (`?id=<index>` or `?game_id=<id>`). Returns `{"prefix": str, "available": bool}`. Missing game returns `404`.
+
+</ApiEndpoint>
 
 ## Metadata
 
 <ApiEndpoint method="GET" path="/api/metadata/status">
 
 
-`{"ready": <database file exists>, "job": {...}}` where `job` is the in-memory metadata sync job (state `downloading`/`done`/`error`, plus `error` on failure).
+`{"ready": <database file exists>, "job": {...}, "coverage": {...}}` where `job` is the in-memory metadata sync job (state `downloading`/`done`/`error`), and `coverage` reports library matching statistics (`games`, `matched_games`, `matched_ratio`, `with_cover`, etc.).
 
 </ApiEndpoint>
 
@@ -94,13 +122,13 @@ Start a background sync of the LaunchBox Games Database (`https://gamesdb.launch
 <ApiEndpoint method="POST" path="/api/metadata/apply">
 
 
-`{"id"|"game_id", "database_id": <int>, "media": ["cover"|"background"|"screenshots"], "overwrite": bool}`. Applies text metadata (name, platform, year, developer, publisher, genre, description, series, ESRB, max_players, `launchbox_db_id`) and downloads the selected media into `media/launchbox/<database_id>/` (cover/background 32 MiB cap; screenshots at most 12). Missing database raises `400`. Returns `{"updated": [changed_fields]}` and bumps the media epoch.
+`{"id"|"game_id", "database_id": <int>, "media": ["cover"|"background"|"screenshots"], "overwrite": bool}`. Applies text metadata and downloads the selected media into `media/launchbox/<database_id>/`. Missing database raises `409`. Returns `{"updated": [...], "notes": [...]}` and bumps the media epoch.
 
 </ApiEndpoint>
 
 <ApiEndpoint method="POST" path="/api/v1/metadata/match">
 
-`POST /api/v1/metadata/match` (aliased at `POST /api/metadata/match`) triggers a background job (`"metadata-match"`) to batch auto-match library titles against the local LaunchBox database for all games currently missing `launchbox_db_id`.
+`POST /api/v1/metadata/match` (aliased at `POST /api/metadata/match`) triggers a background job (`"metadata-match"`) to batch auto-match library titles against the local LaunchBox database for all games currently missing `launchbox_db_id`. Missing database raises `409 Conflict`.
 
 Body: `{"platform": "all" | "<platform-name>"}`. Returns `202 {"state": "running"}`.
 
@@ -153,7 +181,7 @@ Serve one media file: `?id=<index>&kind=cover|background|clear_logo|fanart|banne
 <ApiEndpoint method="POST" path="/api/media/bulk">
 
 
-Start a background media download for every game with a `launchbox_db_id` (optionally `?platform=` scoped): `{"media": ["cover"|"background"|"screenshots"], "overwrite": bool}`. Returns `202 {"state":"running"}`. Missing database raises `400`.
+Start a background media download for every game with a `launchbox_db_id`: `{"media": ["cover"|"background"|"screenshots"], "overwrite": bool, "platform": "<platform>|all"}`. Returns `202 {"state":"running"}`. Missing database raises `409`.
 
 </ApiEndpoint>
 
@@ -204,7 +232,7 @@ Capture the screen with the first available tool among gnome-screenshot, spectac
 <ApiEndpoint method="GET" path="/api/emulators">
 
 
-`{"emulators": [...], "install_all": {...}}`. Each emulator: `app_id`, `name`, `platforms`, `installed`, `mode` (`native`|`flatpak`|`""`), `profiles` (platform to command), `can_install` (flatpak present), `recommendations`. The known set is Dolphin, PPSSPP, PCSX2, RPCS3, Cemu, MAME, xemu, ScummVM, RetroArch, DuckStation, melonDS.
+`{"emulators": [...], "install_all": {...}, "update_all": {...}}`. Each emulator: `app_id`, `name`, `platforms`, `installed`, `mode` (`native`|`flatpak`|`""`), `profiles` (platform to command), `can_install` (flatpak present), `recommendations`. The known set is Dolphin, PPSSPP, PCSX2, RPCS3, Cemu, MAME, xemu, ScummVM, RetroArch, DuckStation, melonDS.
 
 </ApiEndpoint>
 

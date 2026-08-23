@@ -13,16 +13,20 @@ When creating a custom theme, you only need to override `:root` variables. No co
 
 | Token | Purpose | Example |
 | --- | --- | --- |
-| `--background` | Main window and background surface | `#0b0e16` |
-| `--surface-card` | Cards, dialogs, drawers, and panels | `#141926` |
-| `--brand` | Primary brand color, play buttons, active highlights | `#ff7a00` |
-| `--focus` | Focus rings, active keyboard / gamepad focus | `#00f0ff` |
-| `--accent` | Secondary interactive accents and badges | `#00f0ff` |
-| `--text-main` | Primary readable text color | `#f0f4fc` |
-| `--text-muted` | Secondary labels, platform tags, metadata | `#8d9bb0` |
-| `--border` | Card and modal borders | `#232a3d` |
-| `--font-sans` | Primary UI typeface | `Space Grotesk, sans-serif` |
-| `--font-mono` | Monospace typeface for paths, tokens, versions | `JetBrains Mono, monospace` |
+| `--bg` | Main window background | `#0f141c` |
+| `--panel` | Sidebar, dialogs, drawers, and panels | `#141a24` |
+| `--surface-deep` | Tools menu backdrop and inset surfaces | `#0b0f16` |
+| `--surface-card` | Game cards and elevated components | `#192230` |
+| `--surface-field` | Form inputs, search fields, textareas | `#121822` |
+| `--text` | Primary readable text color | `#eef3ff` |
+| `--muted` | Secondary labels, platform tags, metadata | `#8490ab` |
+| `--focus` | Focus rings, active keyboard / gamepad focus | `#61afef` |
+| `--active` | Active tab and selection highlight | `#61afef` |
+| `--action` | Primary action buttons and play controls | `#e06c75` |
+| `--action-ink` | Text color on action buttons | `#ffffff` |
+| `--border-card` | Card borders | `#2c384c` |
+| `--border-control` | Input and button borders | `#242e3f` |
+| `--line` | Divider lines and separators | `#1e2634` |
 
 ## Installing a Custom Theme
 
@@ -34,13 +38,20 @@ When creating a custom theme, you only need to override `:root` variables. No co
 2. Paste your `:root` definition:
    ```css
    :root {
-     --background: #0f141c;
+     --bg: #0f141c;
+     --panel: #141a24;
+     --surface-deep: #0b0f16;
      --surface-card: #192230;
-     --brand: #e06c75;
+     --surface-field: #121822;
+     --text: #eef3ff;
+     --muted: #8490ab;
      --focus: #61afef;
-     --accent: #98c379;
-     --text-main: #abb2bf;
-     --border: #2c384c;
+     --active: #61afef;
+     --action: #e06c75;
+     --action-ink: #ffffff;
+     --border-card: #2c384c;
+     --border-control: #242e3f;
+     --line: #1e2634;
    }
    ```
 3. Open OpenBox, navigate to **Settings** -> **Appearance**, and select **Mytheme** from the theme dropdown.

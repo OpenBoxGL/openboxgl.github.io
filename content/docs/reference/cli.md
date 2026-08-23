@@ -22,9 +22,10 @@ The native window renders the same UI as the web fallback; both serve `index.htm
 
 | Flag | Behavior |
 | --- | --- |
+| `-h`, `--help` | Show command-line options and usage summary, then exit. |
 | `--no-browser` | Start the server without opening a window. Useful for remote or scripted starts; the printed URL still works. |
 | `--game-mode` | Force gamescope guest behavior (Steam Deck / Bazzite Game Mode). On the web entry point this opens Big Box fullscreen in a kiosk browser; the native window detects gamescope guests from the environment and needs no flag. |
-| `--uri <openbox://...>` | Dispatch a deep link against a running instance (or start one) and exit. |
+| `--uri <openbox://...>` | Dispatch a deep link against a running instance (or start one) and exit. You can also pass a bare `openbox://...` URI directly as a positional argument. |
 | `--launcher` | Open the rofi/wofi/dmenu keyboard launcher against the running instance and exit. |
 | `--backup [--items a,b] [--keep N]` | Create a library backup from the command line. Default items are `library,settings`. Prints the archive path. |
 | `--restore-backup <archive>` | Restore a backup archive. The archive must be a real `.zip` inside the data directory or `backups/`. Prints the restored item names. |

@@ -13,10 +13,10 @@ There is no OpenBox account, installer wizard, or license key. Downloading a rel
 | --- | --- | --- |
 | [AppImage](#appimage) | Desktop, Steam Deck, handhelds, immutable systems | Built-in verified updater |
 | [Flatpak](#flatpak) | Sandboxed installs from a manifest | Your normal Flatpak workflow |
-| [Source](#from-source) | Development, testing, or patching | `git pull` and re-run |
-| [System install](#system-install) | Installing to `/usr/local` from source | `sudo make install` again |
+| [Source](#source--system) | Development, testing, or patching | `git pull` and re-run |
+| [System install](#source--system) | Installing to `/usr/local` from source | `sudo make install` again |
 
-The fastest path is the [one-liner install](#one-liner-install): `curl ... | bash` downloads the latest AppImage, pins the release public key, verifies its SHA-256 checksum and Ed25519 signature, and installs it to `~/.local/bin`.
+The fastest path is the [versioned release installer](#versioned-release-installer): `curl ... | bash` downloads the latest AppImage, pins the release public key, verifies its SHA-256 checksum and Ed25519 signature, and installs it to `~/.local/bin`.
 
 Only the AppImage receives the built-in updater. Flatpak, source, and system installs follow their own package or source workflow; see [Updating](/updating/).
 

@@ -21,10 +21,10 @@ Inside the data directory (default `~/.local/share/openbox-game-launcher`, or `O
 
 `JsonStateStore` (`state_store.py`) commits like this:
 
-1. Serialize with compact JSON when the payload exceeds 1 MiB (`COMPACT_JSON_THRESHOLD`), pretty-printed below it; always write a trailing newline.
+1. Serialize with compact JSON when the payload exceeds 1 MiB (`COMPACT_JSON_THRESHOLD`) or the library exceeds 500 games; pretty-printed below it; always write a trailing newline.
 2. Write to a temp file in the same directory, `fsync` it, chmod `0o600`.
-3. Copy the temp to `library.json.bak` first (so a failure cannot leave a fresh primary paired with a stale backup), chmod `0o600`.
-4. `os.replace` the temp over `library.json`, chmod `0o600`, then `fsync` the directory.
+3. Staged atomic backup: write to temporary backup file and `os.replace` over `library.json.bak`, chmod `0o600`.
+4. `os.replace` the primary temp over `library.json`, chmod `0o600`, then `fsync` the directory.
 
 Every read and write happens under the file lock, so two OpenBoxGL processes (Web UI and native UI) can share one library safely. The last writer wins per transaction, not per file. Loaded state is deep-copied per request, so callers cannot mutate the cache by accident.
 

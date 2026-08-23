@@ -175,7 +175,7 @@ Max 16 concurrent subscribers; 64 KiB buffer per connection. Requires `X-OpenBox
 <ApiEndpoint method="POST" path="/api/import/exclusions/delete">
 
 
-`{"source", "external_id"}` removes it. Returns `{"removed": true}`.
+`{"source", "external_id"}` removes it. Returns `{"removed": bool, "count": int}`.
 
 Excluded storefront entries are filtered out of future imports and storefront rescans.
 

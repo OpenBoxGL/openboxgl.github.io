@@ -10,14 +10,17 @@ OpenBox includes a local-first Wine and Proton prefix manager. It automatically 
 OpenBox's Wine subsystem inspects standard local directories at startup and caches known runtime environments:
 
 1. **Prefix Discovery**:
-   - Flatpak & Native Bottles: `~/.var/app/com.usebottles.bottles/data/bottles/prefixes/` and `~/.local/share/bottles/prefixes/`
-   - Heroic Games Launcher: `~/.var/app/com.heroicgameslauncher.hgl/data/prefixes/` and `~/.config/heroic/prefixes/`
-   - Lutris: `~/.local/share/lutris/runners/` and detected Wine runners
-   - Steam Proton: `~/.local/share/Steam/steamapps/compatdata/` and Proton runtime installations in `compatibilitytools.d/`
    - System standard: `~/.wine`, `~/.local/share/wineprefixes/`
+   - Lutris: `~/.local/share/lutris/runners/wine`
+   - Faugus Launcher: `~/.config/faugus-launcher/prefixes`, `~/Faugus`
+   - Bottles: `~/.local/share/bottles/bottles`
+   - Custom folders: `~/Games` and `WINEPREFIX` environment variable
 
 2. **Proton Runtime Discovery**:
-   - GE-Proton, Proton-TKG, Proton Experimental, and standard Steam Proton builds are detected in `~/.local/share/Steam/compatibilitytools.d` and `~/.steam/root/compatibilitytools.d`.
+   - Steam Proton: `~/.local/share/Steam/compatibilitytools.d`, `~/.steam/root/compatibilitytools.d`, `~/.steam/steam/compatibilitytools.d`
+   - Faugus runners: `~/.config/faugus-launcher/runners`, `~/.local/share/faugus-launcher/runners`
+   - Lutris runners: `~/.local/share/lutris/runners/wine`
+   - System and Flatpak executables: `wine`, `wine64`, `proton`, `umu-run`, `umu-launcher`
 
 ## Assigning a Prefix to a Game
 

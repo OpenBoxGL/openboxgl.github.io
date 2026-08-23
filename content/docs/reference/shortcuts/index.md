@@ -12,30 +12,43 @@ OpenBox is designed for seamless navigation whether you are sitting at a desktop
 | Shortcut | Action | Description |
 | --- | --- | --- |
 | <kbd>Ctrl</kbd> + <kbd>,</kbd> | **Settings** | Opens the global settings dialog (scrapers, integrations, backups, themes). |
-| <kbd>Ctrl</kbd> + <kbd>F</kbd> | **Search** | Focuses the search bar with instant filter and acronym matching. |
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Q</kbd> | **Random Game** | Picks a random title from the active collection and focuses it. |
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>R</kbd> | **Random Game (Alt)** | Alternative hotkey for random game picker. |
-| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> | **Toggle Big Box** | Switches between desktop window and controller-first Big Box interface. |
 | <kbd>F11</kbd> | **Fullscreen** | Toggles borderless fullscreen window mode. |
-| <kbd>Enter</kbd> | **Launch Game** | Launches the currently selected title with its configured profile. |
-| <kbd>Space</kbd> | **Detail Drawer** | Toggles the game details pane without leaving the grid view. |
-| <kbd>Escape</kbd> | **Dismiss** | Closes the active dialog, drawer, or search query. |
-| <kbd>Arrow Keys</kbd> | **Grid Navigation** | Moves focus up, down, left, and right across game cards. |
-| <kbd>Delete</kbd> | **Delete Title** | Opens the game removal dialog with optional media unlinking. |
+| <kbd>Escape</kbd> | **Dismiss** | Closes active dialog, tools menu, or context popup. |
+
+## Tools Menu Keyboard Navigation (WAI-ARIA)
+
+| Shortcut | Action | Description |
+| --- | --- | --- |
+| <kbd>ArrowDown</kbd> / <kbd>ArrowUp</kbd> | **Navigate Items** | Cycles through tools dropdown items with circular wrapping. |
+| <kbd>Home</kbd> / <kbd>End</kbd> | **First / Last** | Jumps focus to the first or last tools menu option. |
+| <kbd>Escape</kbd> | **Close Menu** | Dismisses the menu and returns focus to the Tools trigger button. |
+| <kbd>Tab</kbd> | **Exit Focus** | Closes the menu when tabbing away. |
+
+## Big Box Keyboard Navigation
+
+| Shortcut | Action | Description |
+| --- | --- | --- |
+| <kbd>ArrowLeft</kbd> / <kbd>ArrowRight</kbd> | **Previous / Next** | Cycles through game titles or cover flow items. |
+| <kbd>Enter</kbd> | **Launch / Confirm** | Launches the selected game or applies the focused menu action. |
+| <kbd>P</kbd> | **Session Control** | Opens the running session control overlay (pause, resume, kill). |
+| <kbd>M</kbd> | **Filter Menu** | Opens the Big Box platform, playlist, and sort filter menu. |
+| <kbd>R</kbd> | **Shuffle** | Jumps to a random title in the current list. |
+| <kbd>F</kbd> | **Favorite** | Toggles the Favorite flag on the active title. |
+| <kbd>Escape</kbd> / <kbd>Backspace</kbd> | **Back / Exit** | Exits Big Box mode or returns from submenus. |
 
 ## Big Box Gamepad Bindings
 
-In Big Box mode, OpenBox maps standard SDL2 controller inputs:
+OpenBox maps standard gamepad inputs (customizable via Settings for button indices 0–31):
 
-| Button | Primary Action | CoverFlow / Stage Action |
-| --- | --- | --- |
-| <kbd>A</kbd> | **Launch / Confirm** | Launch centered game / confirm selection |
-| <kbd>B</kbd> | **Back / Cancel** | Exit submenu or return to main menu |
-| <kbd>X</kbd> | **Game Details** | Flip 3D box to view spine / back cover |
-| <kbd>Y</kbd> | **Toggle Favorite** | Toggle Favorite status for selected title |
-| <kbd>D-Pad</kbd> | **Directional Navigation** | Move focus across cards / wheel |
-| <kbd>LB</kbd> / <kbd>RB</kbd> | **Category Cycle** | Cycle through platforms and playlists |
-| <kbd>LT</kbd> / <kbd>RT</kbd> | **View Mode Cycle** | Switch layout (Grid, CoverFlow 3D, Stage) |
-| <kbd>Start</kbd> / <kbd>Menu</kbd> | **Quick Menu** | Open Big Box power, settings, and filter menu |
-| <kbd>Select</kbd> / <kbd>View</kbd> | **Search** | Open search input and virtual on-screen keyboard |
-| <kbd>Left Stick</kbd> | **Analog Scroll** | High-speed smooth scrolling through large catalogs |
+| Button | Default Index | Action | Description |
+| --- | --- | --- | --- |
+| <kbd>A</kbd> | `0` (`play`) | **Launch / Confirm** | Launch centered game / confirm selection |
+| <kbd>B</kbd> | `1` (`back`) | **Back / Exit** | Return to menu / exit Big Box mode |
+| <kbd>X</kbd> | `2` (`favorite`) | **Toggle Favorite** | Toggle Favorite flag for current game |
+| <kbd>Y</kbd> | `3` (`random`) | **Random Shuffle** | Jump to a random game |
+| <kbd>LB</kbd> / <kbd>RB</kbd> | `4` / `5` (`page_left` / `page_right`) | **Page Scroll** | Rapidly page backward and forward through library |
+| <kbd>Select</kbd> / <kbd>View</kbd> | `8` (`pause`) | **Session Control** | Open running session pause and management overlay |
+| <kbd>Start</kbd> / <kbd>Menu</kbd> | `9` (`menu`) | **Quick Menu** | Open Big Box platform filter and sort menu |
+| <kbd>D-Pad</kbd> / <kbd>Stick</kbd> | Axes / Hats | **Directional Navigation** | Move focus across game cards and carousel |

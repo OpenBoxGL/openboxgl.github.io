@@ -11,9 +11,10 @@ Read and write the library, settings, profiles, launch configuration, and game r
 <ApiEndpoint method="GET" path="/api/library">
 
 
-Returns the full public library projection, cached until the library file, media epoch, or plugin epoch changes. Served gzip-compressed to clients that accept it (the compressed bytes are computed once per state change, so polling is cheap) with an ETag for conditional GET: a client that sends `If-None-Match` gets `304 Not Modified` when nothing changed. Top-level keys:
+Returns the public library projection, cached until the library file, media epoch, or plugin epoch changes. Supports pagination via `?offset=<int>&limit=<int>`. Served gzip-compressed to clients that accept it with an ETag for conditional GET (`If-None-Match` returns `304 Not Modified`). Top-level keys:
 
-- `games`: array of game objects. Each game includes every editable field (with `""` defaults), plus computed flags: `id` (numeric index), `game_id` (stable id), `favorite`, `hidden`, `hide_in_bigbox`, `last_played`, `play_count`, `playtime_seconds`, `path_exists`, `has_cover`, `has_background`, `has_clear_logo`, `has_fanart`, `has_banner`, `has_icon`, `has_box_back`, `has_box_spine`, `has_box_3d`, `has_title_screen`, `has_video`, `active_video_field`, `has_music`, `has_saves`, `has_documents`, `has_versions`, `has_achievements`, `has_highscores`, `has_missing_media`, `extract_archive`, `applications`, `versions`, `documents`, `save_paths`, `screenshots`, `alternate_names`, `available_screenshots`, `esrb`, `custom_fields`, `platform_category`, `tags`, `store_catalog`, `store_installed`, `owned`, `installable`, `gameyfin_id`. Editable string fields also include `collection` (a free-text grouping used by related-game scoring) and, for per-game tracking overrides, `tracking_mode`, `tracking_delay`, `tracking_frequency`, and `tracking_process_name`.
+- `games`: array of game objects (or page slice when `limit` is specified).
+- `total_count`, `offset`, `limit`: present when paginated.
 - `playlists`, `filter_presets`, `ra_configured`, `settings`, `discovery`, `media_epoch`.
 
 In safe mode the `library` hook is skipped; otherwise plugin `library` hooks can transform the games list before it is returned.
@@ -37,9 +38,9 @@ Returns:
 <ApiEndpoint method="POST" path="/api/game">
 
 
-Create or update one game. Locate by `id` (numeric) or `game_id` (stable) for updates; omit both to create. Validation:
+Create or update one game. Locate by top-level `id` (numeric) or `game_id` (stable) for updates; omit both to create. The game properties must be nested under `"game"`: `{"id": int (opt), "game_id": str (opt), "game": {"name": "...", "path": "...", ...}}`. Validation:
 
-- `name` required and non-empty.
+- `name` required and non-empty inside `"game"`.
 - `path` must be an absolute path to an existing regular file; symlinked components are rejected and the stored path is the expanded absolute form.
 - `progress` must be one of `""`, `Playing`, `Paused`, `Beaten`, `Completed`, `Mastered`, `Abandoned`.
 - `rating` is a float between 0 and 5.
@@ -55,7 +56,7 @@ Returns `{"ok": true}`.
 <ApiEndpoint method="POST" path="/api/game/delete">
 
 
-Remove a game by `id` or `game_id`. With `delete_media: true`, associated media files (cover, background, screenshots, and all media fields) are removed only when they are safe files inside the data directory; media deletions bump the media epoch. Returns `{"removed": "<name>"}`.
+Remove a game by `id` or `game_id`. With `delete_media: true`, associated media files (cover, background, screenshots, and all media fields) are removed only when they are safe files inside the data directory; media deletions bump the media epoch. Returns `{"removed": "<name>", "deleted_media": [...], "shared_media": [...]}`.
 
 </ApiEndpoint>
 
@@ -133,7 +134,7 @@ Per-launch-profile TDP limits for handheld tuning. Each entry: `{"enabled": bool
 <ApiEndpoint method="GET" path="/api/running">
 
 
-`{"running": [...], "events": [...], "last_event": <sequence>}`. Poll with `?after=<sequence>` to receive only new session lifecycle events (id, kind `started|stopped|paused|resumed`, launch_id, game, time, optional exit_code/seconds). In-memory event buffer holds the last 100 events.
+`{"running": [...], "abandoned": [...], "events": [...], "last_event": <sequence>}`. Poll with `?after=<sequence>` to receive only new session lifecycle events (id, kind `started|stopped|paused|resumed`, launch_id, game, time, optional exit_code/seconds). In-memory event buffer holds the last 100 events.
 
 </ApiEndpoint>
 
@@ -233,7 +234,7 @@ Save a playlist: `{"name", "type": "filter"|"manual", "rules": {...}, "members"|
 <ApiEndpoint method="POST" path="/api/image-group">
 
 
-`{"group": "default"|"cover"|"background"|"screenshot"|"clear_logo"|"fanart"|"banner"|"icon"|"box_back"|"box_spine"|"box_3d"|"title_screen", "scope": "global"|"platform"|"playlist", "name": "<platform or playlist>"}`. Global sets `image_group`; scoped sets/clears `image_group_by_platform` or `image_group_by_playlist`. Returns updated settings.
+`{"group": "default"|"cover"|"background"|"screenshot"|"clear_logo"|"fanart"|"banner"|"icon"|"box_back"|"box_spine"|"box_3d"|"title_screen"|"cart_front"|"cart_back"|"disc"|"advertisement"|"manual", "scope": "global"|"platform"|"playlist", "name": "<platform or playlist>"}`. Global sets `image_group`; scoped sets/clears `image_group_by_platform` or `image_group_by_playlist`. Returns updated settings.
 
 </ApiEndpoint>
 

@@ -20,7 +20,9 @@ Every AppImage release is signed with Ed25519. The installer verifies the releas
 | `OpenBox-x86_64.AppImage` | Release binary | [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest) |
 | `OpenBox-x86_64.AppImage.sig` | Ed25519 signature | Same release assets |
 | `openbox-release.pub` | Pinned public key | Application repository at `openbox-release.pub`, pinned by SHA-256 in `scripts/install.sh` |
-| `SHA256SUMS` | Checksums for the release | Same release assets |
+| `OpenBox-x86_64.AppImage.sha256` | SHA-256 checksum | Same release assets |
+| `OpenBox-<version>-sbom.json` | CycloneDX 1.4 SBOM | Same release assets |
+| `install.sh` | Cryptographically verified installer | Same release assets |
 
 Verify path: download the AppImage, the `.sig`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.6.0"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. See [Updating](/updating/) for rollback with `OpenBox-x86_64.previous.AppImage`.
 

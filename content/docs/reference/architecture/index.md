@@ -36,14 +36,14 @@ OpenBox is engineered with a strict **local-first, dependency-free runtime** arc
 │              └───────────────┬───────────────┘              │
 │                              │                              │
 │                    Atomic State Store                       │
-│          (library.json + WAL + Rotating Snapshots)          │
+│    (library.json + Atomic Writes + Rotating Snapshots)      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ## 1. Zero-Dependency Loopback Core
 
 The runtime engine uses Python 3's built-in standard library (`http.server`, `urllib`, `sqlite3`, `json`, `concurrent.futures`, `hashlib`, `gzip`). 
-- Runs locally bound to `127.0.0.1:47990` with strict loopback validation.
+- Runs locally bound to ephemeral loopback ports (or configured host/port) with strict Host and Origin validation.
 - No third-party Python packages are bundled or required at runtime.
 - Fast cold start under 120ms.
 
@@ -59,8 +59,8 @@ When launched via native binary or AppImage, OpenBox spawns a native C/WebKitGTK
 ## 3. Atomic State Store & Recovery
 
 OpenBox treats library state as critical user data:
-- **Atomic File Writes**: Mutations are written to temporary staging files and swapped into place using POSIX `rename(2)` to prevent corruption on sudden power loss.
-- **Automated Snapshot Rotation**: Rotating snapshots (`library.json.bak.1`, `library.json.bak.2`, etc.) are retained automatically before destructive actions.
+- **Atomic File Writes**: Mutations are written to temporary staging files (`.<path>.tmp`), flushed with `fsync`, and swapped into place using POSIX `rename(2)` / `os.replace` to prevent corruption on sudden power loss.
+- **Automated Snapshot Rotation**: Rotating snapshots (`library.json.snapshots/<stamp>-<token>.json`) are retained automatically on committed mutations using zero-copy hardlinks and debouncing.
 - **Deduplication Engine**: Canonical identity hashing prevents duplicate entries when games exist simultaneously across Steam, Heroic, and ROM folders.
 
 ## 4. Asynchronous Background Job System

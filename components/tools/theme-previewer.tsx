@@ -16,54 +16,54 @@ interface ThemePreset {
 
 const STOCK_THEMES: ThemePreset[] = [
   {
-    id: "default",
-    name: "Default Dark (Orange/Cyan)",
-    bg: "#0b0e16",
-    card: "#141926",
-    brand: "#ff7a00",
-    accent: "#00f0ff",
-    text: "#f0f4fc",
-    border: "#232a3d",
+    id: "midnight-circuit",
+    name: "Midnight Circuit",
+    bg: "#070b14",
+    card: "#0e1524",
+    brand: "#2dff9a",
+    accent: "#3de0ff",
+    text: "#e6f0ff",
+    border: "#1b283d",
   },
   {
-    id: "cyberpunk",
-    name: "Cyberpunk Neon",
-    bg: "#070814",
-    card: "#12142b",
-    brand: "#00ffc8",
-    accent: "#ff007f",
-    text: "#e6f8ff",
-    border: "#24274c",
+    id: "cinema-marquee",
+    name: "Cinema Marquee",
+    bg: "#0a0808",
+    card: "#141010",
+    brand: "#e8c46a",
+    accent: "#e8c46a",
+    text: "#f5eee6",
+    border: "#2c2222",
   },
   {
-    id: "synthwave",
-    name: "Retro Synthwave",
-    bg: "#160e26",
-    card: "#24183d",
-    brand: "#ff3b94",
-    accent: "#ffc83b",
-    text: "#fcedf4",
-    border: "#3d2b63",
+    id: "harbor-light",
+    name: "Harbor Light",
+    bg: "#eef2f6",
+    card: "#ffffff",
+    brand: "#0b7ea8",
+    accent: "#0b7ea8",
+    text: "#152033",
+    border: "#cbd5e1",
   },
   {
-    id: "dracula",
-    name: "Dracula Night",
-    bg: "#1e1f29",
-    card: "#282a36",
-    brand: "#bd93f9",
-    accent: "#50fa7b",
-    text: "#f8f8f2",
-    border: "#44475a",
+    id: "nordic-mist",
+    name: "Nordic Mist",
+    bg: "#0f1419",
+    card: "#171e26",
+    brand: "#6eb5c9",
+    accent: "#6eb5c9",
+    text: "#e8eef4",
+    border: "#27323f",
   },
   {
-    id: "nord",
-    name: "Nord Frost",
-    bg: "#242933",
-    card: "#2e3440",
-    brand: "#88c0d0",
-    accent: "#81a1c1",
-    text: "#eceff4",
-    border: "#434c5e",
+    id: "phosphor-terminal",
+    name: "Phosphor Terminal",
+    bg: "#020402",
+    card: "#061008",
+    brand: "#49ff7a",
+    accent: "#49ff7a",
+    text: "#c8ffc8",
+    border: "#122c18",
   },
 ]
 
@@ -89,15 +89,17 @@ export function ThemePreviewer() {
 
   const generatedCss = `/* OpenBox Custom Theme: ${selectedTheme.name} */
 :root {
-  --background: ${customBg};
+  --bg: ${customBg};
+  --panel: ${customCard};
   --surface-card: ${customCard};
-  --brand: ${customBrand};
+  --surface-deep: ${customBg};
+  --text: ${customText};
   --focus: ${customAccent};
-  --accent: ${customAccent};
-  --text-main: ${customText};
-  --border: ${customBorder};
-  --border-muted: ${customBorder};
-  --brand-rgb: ${parseInt(customBrand.slice(1, 3), 16)}, ${parseInt(customBrand.slice(3, 5), 16)}, ${parseInt(customBrand.slice(5, 7), 16)};
+  --action: ${customBrand};
+  --action-ink: #041510;
+  --border-card: ${customBorder};
+  --border-control: ${customBorder};
+  --line: ${customBorder};
 }`
 
   const copyCss = async () => {

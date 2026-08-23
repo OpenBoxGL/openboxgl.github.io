@@ -3,7 +3,7 @@ title: Library backups
 description: Create, rotate, and restore whole-library backup archives.
 ---
 
-The **Backup** dialog (top bar) creates whole-library ZIP archives under `<data-dir>/backups/` named `OpenBoxBackup-<timestamp>.zip`. Each archive contains a manifest plus any of: settings, library, media, plugins, themes, and extension data.
+The **Backup** dialog (top bar) creates whole-library ZIP archives under `<data-dir>/backups/` named `OpenBoxBackup-%Y-%m-%d-%H-%M-%S-%f.zip`. Each archive contains a manifest plus any of: settings, library, media, plugins, themes, and extension data. Local credentials are redacted from export and safely preserved on restore.
 
 ## Create a backup
 

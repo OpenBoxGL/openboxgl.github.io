@@ -8,7 +8,7 @@ Whole-library backups are ZIP archives in `backups/` that can include settings, 
 ## Archive location and naming
 
 - Directory: `<data_dir>/backups/`.
-- Name: `OpenBoxBackup-<YYYY-MM-DD-HH-MM-SS>.zip`.
+- Name: `OpenBoxBackup-%Y-%m-%d-%H-%M-%S-%f.zip` (with microsecond timestamp).
 - Written via a temp file and `os.replace`, then the directory is fsynced.
 
 ## Selectable items
@@ -27,11 +27,12 @@ Every archive contains `manifest.json`:
 ```json
 {
  "items": ["library", "settings"],
- "created": "2026-08-11T12:00:00"
+ "created": "2026-08-11T12:00:00",
+ "redacted_secrets": true
 }
 ```
 
-When no items are given, the default is `["library", "settings"]` (also used by the CLI `--backup`). Unknown or empty item lists raise `"Select at least one backup item."` Item names are case-folded and deduplicated.
+When no items are given, the default is `["library", "settings"]` (also used by the CLI `--backup`). Backups automatically redact sensitive API keys/passwords, and local credentials are automatically preserved and remerged on restore. Unknown or empty item lists raise `"Select at least one backup item."` Item names are case-folded and deduplicated.
 
 ## Limits
 

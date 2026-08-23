@@ -10,6 +10,7 @@ interface SampleGame {
   genre: string
   developer: string
   year: number
+  favorite?: boolean
   hasSaves: boolean
   hasAchievements: boolean
   hasMedia: boolean
@@ -25,6 +26,7 @@ const SAMPLE_GAMES: SampleGame[] = [
     genre: "Action-Adventure",
     developer: "Nintendo",
     year: 1998,
+    favorite: true,
     hasSaves: true,
     hasAchievements: true,
     hasMedia: true,
@@ -38,6 +40,7 @@ const SAMPLE_GAMES: SampleGame[] = [
     genre: "Stealth",
     developer: "Konami",
     year: 1998,
+    favorite: false,
     hasSaves: true,
     hasAchievements: true,
     hasMedia: true,
@@ -51,6 +54,7 @@ const SAMPLE_GAMES: SampleGame[] = [
     genre: "Metroidvania",
     developer: "Konami",
     year: 1997,
+    favorite: true,
     hasSaves: true,
     hasAchievements: true,
     hasMedia: true,
@@ -186,19 +190,26 @@ export function SearchPlayground() {
           return game.tags.some((t) => t.toLowerCase() === val)
         }
 
-        // Capability filters
-        if (tok.toLowerCase() === "has:saves") return game.hasSaves
-        if (tok.toLowerCase() === "has:achievements") return game.hasAchievements
-        if (tok.toLowerCase() === "has:media") return game.hasMedia
-        if (tok.toLowerCase() === "status:completed") return game.status === "completed"
-        if (tok.toLowerCase() === "status:playing") return game.status === "playing"
+        // Field filter: favorite:true / fav:true
+        if (tok.toLowerCase() === "favorite:true" || tok.toLowerCase() === "fav:true" || tok.toLowerCase() === "favorite:1") return game.favorite
+        if (tok.toLowerCase() === "favorite:false" || tok.toLowerCase() === "fav:false" || tok.toLowerCase() === "favorite:0") return !game.favorite
 
-        // Acronym match check: 2-8 chars matching initials
+        // Field filter: status:X / progress:X
+        if (tok.toLowerCase().startsWith("status:") || tok.toLowerCase().startsWith("progress:")) {
+          const val = tok.slice(tok.indexOf(":") + 1).toLowerCase()
+          return game.status.toLowerCase() === val
+        }
+
+        // Acronym match check: 2-8 chars matching full initials or article-stripped initials
         const lowerTok = tok.toLowerCase()
-        const words = game.title.toLowerCase().split(/[\s:.-]+/).filter((w) => w && !["the", "of", "a", "an", "and"].includes(w))
-        const initials = words.map((w) => w[0]).join("")
-        if (lowerTok.length >= 2 && lowerTok.length <= 8 && initials.startsWith(lowerTok)) {
-          return true
+        const words = game.title.match(/[A-Za-z0-9]+/g) || []
+        const acronym = words.map((w) => w[0].toLowerCase()).join("")
+        if (lowerTok.length >= 2 && lowerTok.length <= 8) {
+          if (acronym === lowerTok || acronym.includes(lowerTok)) return true
+          if (words.length > 1 && words[0] && ["the", "a", "an"].includes(words[0].toLowerCase())) {
+            const subAcronym = words.slice(1).map((w) => w[0]?.toLowerCase() || "").join("")
+            if (subAcronym === lowerTok || subAcronym.includes(lowerTok)) return true
+          }
         }
 
         // Regular substring matching across title, platform, developer, tags

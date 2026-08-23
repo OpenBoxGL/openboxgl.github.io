@@ -22,9 +22,7 @@ All colors are dark by default. Neutral surfaces carry most of the screen; the o
 | `--bg` | `#11100e` | Page canvas, deepest fullscreen surfaces |
 | `--topbar` | `#171513` | Command rail background |
 | `--panel` | `#1b1916` | Sidebar, detail pane, dialogs, lifecycle surfaces |
-| `--panel2` | `#24211d` | Secondary panel tone |
-| `--surface-deep` | `#141311` | Sticky library header background |
-| `--surface-header` | `#1c1916` | Header surface |
+| `--surface-deep` | `#141311` | Sticky library header and tools menu background |
 | `--surface-card` | `#211e1a` | Detail cards, emulator items, result rows, history items |
 | `--surface-field` | `#27231e` | Form controls, secondary buttons |
 | `--surface-hover` | `#342d23` | Hovered raised panels |
@@ -39,36 +37,23 @@ All colors are dark by default. Neutral surfaces carry most of the screen; the o
 | Token | Value | Use |
 | --- | --- | --- |
 | `--focus` | `#f06000` | Focus ring, selected controls, active platform markers |
+| `--brand` | `#f06000` | Brand identity color |
 | `--active` | `#f06000` | Active navigation, selected cover borders, Big Box cover borders |
 | `--action` | `#e08a3c` | Launch action (Play button), primary dialog confirmations |
 | `--action-ink` | `#1c160d` | Dark text inside the orange-gold action surface |
-| `--white` | `#ffffff` | Occasional pure white highlights |
-| `--cyan` | `#72c9d4` | Teal accent (defined in `:root` but not consumed by the base stylesheet) |
-| `--green` | `#8fbd8d` | Muted sage (defined in `:root` but not consumed by the base stylesheet) |
+| `--white` | `#fff` | Occasional pure white highlights |
+| `--cyan` | `#72c9d4` | Teal accent (defined in `:root`) |
 | `--gold` | `#e5b65c` | Achievement/gold signal, decorative highlights |
-| `--rating` | `#e5b65c` | Rating star signal |
+| `--rating` | `#ef8c38` | Rating star signal |
 | `--launch-shadow` | `#e08a3c44` | Shadow tint under the Play button |
 | `--danger` | `#743f3f` | Error/destructive state |
 | `--empty-action` | `#e08a3c` | Empty-state action buttons |
-| `--mark-start` | `#f0c36a` | Progress/milestone accent start |
-| `--mark-end` | `#ba593d` | Progress/milestone accent end |
-| `--mark-ink` | `#1c160d` | Text inside milestone fills |
 | `--cover-title-start` | `#51412d` | Cover gradient start tone |
-| `--achievement` | `#e8ba55` | RetroAchievements badge, achievement points |
+| `--achievement` | `#eaa54f` | RetroAchievements badge, achievement points |
 | `--lifecycle-bg` | `#45351d` | Session lifecycle overlay background |
 | `--lifecycle-kicker` | `#f0c36a` | Lifecycle kicker accent |
 | `--bigbox-bg` | `#30261a` | Big Box cover backdrop |
 | `--bigbox-copy` | `#d0c0a5` | Big Box secondary text |
-
-<Callout type="note" title="Defined vs consumed">
-
-`--cyan` and `--green` are declared in `:root` but the base stylesheet never reads them with `var()`. The launch action uses `--action` (orange-gold), not `--green`. A theme that sets `--green` alone will not change the Play button; set `--action` and `--action-ink` for that. `--focus`, `--active`, `--action`, and `--launch-shadow` are the orange tokens the base stylesheet actually consumes.
-
-</Callout>
-
-### State-color rule
-
-Orange (`#f06000` / `#e08a3c`) identifies both **where the user is focused** and **where the user can launch or is actively playing**. The brand orange (`#f06000`) carries the high-energy focus/selection/glow roles; the orange-gold primary (`#e08a3c`) carries launch and confirmation surfaces. The base stylesheet does not split these roles across two hue families the way earlier `DESIGN.md` text described. If you author a theme that does split focus from launch, keep the two roles visually distinct and never make launch read as a destructive or muted state.
 
 ## Typography
 
@@ -76,8 +61,8 @@ The base stack is `ui-sans-serif, system-ui, sans-serif` (no bundled webfont in 
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--font-micro` | `9px` | Tiny counters, badge numbers |
-| `--font-label` | `11px` | Section labels, field labels, nav categories |
+| `--font-micro` | `10px` | Tiny counters, badge numbers |
+| `--font-label` | `12px` | Section labels, field labels, nav categories |
 | `--font-meta` | `12px` | Release year, region tags, auxiliary metadata |
 | `--font-body-small` | `13px` | Inline hints, status chips |
 | `--font-body` | `14px` | Default application copy, form content |
@@ -138,17 +123,27 @@ Auto-filled columns with a minimum cover width of `132px` (`105px` at ≤ 1100px
 
 ## Shadows
 
-Depth comes from tonal layering first, shadows second. The real values in the base stylesheet:
+Depth comes from tonal layering first, tokens second. The real token values in the base stylesheet (ADR 0004):
 
-| Context | Value |
-| --- | --- |
-| Cover lift | `0 8px 18px #0007` |
-| Cover (Cinema Marquee theme) | `0 14px 32px #000a` |
-| Dialog depth | `0 30px 80px #000c` |
-| Big Box cover | `0 0 0 6px #f0600022, 0 40px 90px #000c` |
-| Play button | `0 5px 14px var(--launch-shadow)` |
-
-Hover and selection add an orange separation border plus stronger lift. The selected cover uses a cyan-family halo only in the historical `DESIGN.md`; the shipped base uses orange (`--active`).
+| Token | Value | Role |
+| --- | --- | --- |
+| `--shadow-cover` | `#0006` | Default card and box art elevation shadow |
+| `--shadow-cover-strong` | `#0007` | Hovered and raised card shadow |
+| `--shadow-cover-selected` | `#000a` | Selected and focused card shadow |
+| `--shadow-dialog` | `#000c` | Modal dialog backdrop shadow |
+| `--shadow-elevated` | `#0009` | Drawer and floating menu elevation |
+| `--shadow-empty` | `#0005` | Empty-state container shadow |
+| `--accent-ghost` | `#f0600055` | Strong translucent focus halo |
+| `--accent-ghost-soft` | `#f0600044` | Medium focus glow |
+| `--accent-ghost-faint` | `#f060002e` | Subtle focus glow |
+| `--overlay-backdrop` | `#050403d9` | Dialog and modal screen overlay |
+| `--overlay-backdrop-strong` | `#05070bd9` | Darkened backdrop overlay |
+| `--overlay-backdrop-soft` | `#05070bcc` | Soft dimmed background overlay |
+| `--overlay-screensaver-start` | `#05070bcf` | Screensaver top gradient |
+| `--overlay-screensaver-mid` | `#05070b1f` | Screensaver middle gradient |
+| `--surface-sheet` | `#171513dd` | Translucent bottom sheet surface |
+| `--border-sheet` | `#ffffff55` | Sheet border highlight |
+| `--hero-scrim` | `#0d0b0815` | Hero banner gradient tint |
 
 ## Component specs
 

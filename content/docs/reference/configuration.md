@@ -41,7 +41,15 @@ Values already in the environment are never overridden by `.env`. The template l
 | `OPENBOX_ENV_FILE` | Explicit path to a single `.env` file, checked first before the data-directory roots. Read directly from the process environment; must point at an owner-only regular file (not a symlink) or it is skipped. |
 | `OPENBOX_ALLOW_HTTP_WEBHOOKS` | Set to `1` to allow plain-HTTP webhook URLs. Required only for trusted local test targets; HTTPS is the default and safer. |
 | `OPENBOX_ALLOW_HTTP_GAMEYFIN` | Set to `1` to allow plain-HTTP Gameyfin URLs. HTTPS is the default; loopback (localhost) addresses are always allowed. |
-| `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS` | Set to `1` in the process shell to allow unsandboxed plugin execution when bubblewrap is unavailable. Read directly from the process environment (not `.env`). Without it, plugins are skipped if the sandbox cannot be created. Maintainer-only `STRIPE_SECRET_KEY` exists for local donate-link creation and is never read from docs. |
+| `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS` | Set to `1` in the process shell to allow unsandboxed plugin execution when bubblewrap is unavailable. Read directly from the process environment (not `.env`). |
+| `OPENBOX_MEDIA_ROOTS` | Colon-separated list (`os.pathsep`) of additional absolute directories approved for scanning and media storage. Up to 32 roots. |
+| `OPENBOX_ENABLE_DMABUF` | Set to `1` to enable WebKitGTK DMA-BUF rendering in the native window. Disabled by default to prevent silent blank windows on AMD GPUs (including Steam Deck). |
+| `OPENBOX_WEBKIT_HARDWARE_ACCELERATION` | WebKitGTK hardware acceleration policy in native window (`always` or `on-demand`; default is `on-demand`). |
+| `OPENBOX_SNAPSHOT_DEBOUNCE` | Debounce delay in seconds (float) for background library state snapshot writes (defaults to `0.0`). |
+| `OPENBOX_INSTALL_DIR` | Custom installation directory used by `install.sh` (defaults to `~/.local/bin`). |
+| `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v1.6.0`) during `install.sh` execution. |
+| `OPENBOX_PYTHON` | Path to the Python interpreter invoked by the native host (defaults to `python3`). |
+| `OPENBOX_WEB_APP` | Path to `web_app.py` invoked by the native host. |
 
 ### Credentials (all optional)
 
@@ -80,10 +88,10 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `progress_on_first_play` | "Playing" | Must be a known progress status |
 | `welcome_completed` | `false` | Boolean, hides the welcome wizard |
 | `image_group` | "cover" | One of cover, background, screenshot, clear_logo, fanart, banner, icon, box_back, box_spine, box_3d, title_screen, cart_front, cart_back, disc, advertisement, manual |
-| `badge_visibility` | Most badges shown | Subset of favorite, installed, missing_media, saves, documents, versions, storefront, achievements, highscores, progress, rating, broken, portable, controller |
+| `badge_visibility` | favorite, installed, saves, documents, progress, storefront, achievements, rating | Subset of favorite, installed, missing_media, saves, documents, versions, storefront, achievements, highscores, progress, rating, broken, portable, controller |
 | `cloud_folder` | "" | Absolute, existing path for mounted-folder statistics sync |
 | `storefront_auto_import` | All off | Object with boolean keys: `steam`, `heroic`, `lutris`, `gameyfin` |
-| `auto_import_media_types` | All types | Subset of cover, background, screenshots, applied during import-time media jobs |
+| `auto_import_media_types` | ["background", "cover", "screenshots"] | Subset of MEDIA_TYPES_ALL (18 types including cover, background, screenshots, clear_logo, box_back, manual, video, etc.) |
 | `media_download_limit` | 0 (unlimited) | 0 to 10,000 |
 | `region_priority` | (default list) | Non-empty ordered list, ranks which regional media to prefer |
 | `video_priority` | snap, theme, trailer, recording | Subset of video_snap, video_theme, video_trailer, video_recording, video |
@@ -110,7 +118,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `platform_categories` | Built-in mapping | Platform-to-category overrides (Nintendo, Sony, Microsoft, Computer, Arcade, Adventure, Other) |
 | `list_columns` | Defaults | Capped at 12 columns per platform or global view |
 | `library_view` | "grid" | Current persistent view preference |
-| `locale` | "en" | English only; localization returns in a future release. Unknown locales fall back to English |
+| `locale` | "en" | Language locale code (en, es, de, fr, pt). Defaults to en. |
 | `hidden_sidebar_sections` | `[]` | Capped at 20 entries |
 | `tray_enabled` | `false` | Boolean, shows system tray icon |
 | `minimize_to_tray` | `false` | Boolean, minimizes to tray instead of closing |

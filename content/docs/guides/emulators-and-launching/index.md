@@ -18,12 +18,12 @@ The **Emulators** button opens the Emulator profiles dialog. Profiles are one pe
 | Token | Value |
 | --- | --- |
 | `{path}` / `{ImagePath}` | Absolute game or ROM path (after archive extraction, when enabled) |
-| `{name}` / `{Title}` | Game title |
+| `{name}` / `{Name}` | Game title |
 | `{dir}` / `{Dir}` | Parent directory of the target game file |
 | `{file}` / `{File}` | Filename with extension |
 | `{stem}` / `{FileNameWithoutExtension}` | Filename without extension |
 | `{rom_name}` | ROM filename |
-| `{Platform}` | Platform name |
+| `{platform}` / `{Platform}` | Platform name |
 | `{EmulatorDir}` | Emulator parent directory |
 | `{DataDir}` | OpenBox data directory path |
 | `{app_id}` | Steam application ID |
@@ -48,7 +48,7 @@ The same dialog lists supported emulators with install state, mode (native or Fl
 - MAME (Arcade `{path}`)
 - xemu (Xbox `-dvd_path {path}`)
 - ScummVM (`{path}`)
-- RetroArch (NES, SNES, Nintendo 64, Game Boy, Game Boy Color, Game Boy Advance, Sega Saturn, Arcade)
+- RetroArch (NES, SNES, Nintendo 64, Game Boy Advance, Game Boy, Game Boy Color, Nintendo DS, Sega Master System, Game Gear, Sega Genesis)
 - DuckStation (PlayStation `-batch {path}`)
 - melonDS (Nintendo DS `{path}`)
 - Eden (Nintendo Switch `{path}`)

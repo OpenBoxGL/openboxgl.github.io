@@ -56,7 +56,7 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 
 ## Faugus Launcher
 
-- **Source**: Faugus data directories and manifests (`~/.local/share/faugus`, `~/.var/app/io.github.Foldex.FaugusLauncher/data/faugus`, and flatpak wine prefixes).
+- **Source**: Faugus data directories and manifests (`~/.config/faugus-launcher`, `~/.local/share/faugus-launcher`, `~/Faugus`, and prefix directories with `drive_c`).
 - **Records**: name, path, source `Faugus`, `faugus_id`, `wine_prefix`, and launch command defaulting to `umu-run {path}`.
 - `GET /api/faugus/status` checks if Faugus is installed; `GET /api/faugus/scan` scans available games; `POST /api/faugus/import` imports scanned games with canonical identity deduplication.
 

@@ -62,7 +62,10 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 
 | Status | Envelope | When |
 | --- | --- | --- |
-| 403 | `{"error":"Unauthorized","code":"UNAUTHORIZED","request_id":"…"}` | Missing or wrong token |
+| 401 | `{"error":"unauthorized"}` | Native host routes (`/api/native/*`) without a valid token |
+| 403 | `{"error":"Unauthorized","code":"UNAUTHORIZED","request_id":"…"}` | Missing or wrong token on general API routes |
+| 403 | `{"error":"Request host is not allowed.","code":"BAD_HOST","request_id":"…"}` | Host header mismatch or foreign network host rejected |
+| 429 | `{"error":"Too many authentication failures. Try again later.","code":"RATE_LIMITED","retry_after":n}` | Rate limited after repeated auth failures (`Retry-After` header sent) |
 | 400 | `{"error": "<message>", "code": "BAD_REQUEST", "request_id": "…"}` | Validation failures, missing prerequisites surfaced by handlers, provider errors, unknown queue/notification actions, malformed payloads |
 | 404 | `{"code": "ROUTE_NOT_FOUND"}` | Unknown route |
 | 404 | `GAME_NOT_FOUND` / `MEDIA_NOT_FOUND` / `DOCUMENT_NOT_FOUND` / `PLATFORM_DOCUMENT_NOT_FOUND` / `BADGE_NOT_FOUND` | Lookups that miss |
