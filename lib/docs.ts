@@ -81,11 +81,16 @@ export function buildSidebar(): DocNode[] {
       const children = slugs
         .filter((s) => s.startsWith(`${item}/`))
         .sort((a, b) => {
-          // Keep save-related children in user-flow order: saves, backups, sync.
           const order: Record<string, number> = {
-            [`${item}/saves`]: 1,
-            [`${item}/library-backups`]: 2,
-            [`${item}/statistics-sync`]: 3,
+            [`${item}/setup-center`]: 1,
+            [`${item}/importing`]: 2,
+            [`${item}/organizing`]: 3,
+            [`${item}/queue-tags-notifications`]: 4,
+            [`${item}/insights`]: 5,
+            [`${item}/activity-center`]: 1,
+            [`${item}/saves`]: 2,
+            [`${item}/library-backups`]: 3,
+            [`${item}/statistics-sync`]: 4,
           }
           return (order[a] ?? 100) - (order[b] ?? 100) || a.localeCompare(b)
         })

@@ -11,13 +11,23 @@ Open a game's detail pane and click **Find metadata** to open the LaunchBox Game
 
 Select a result to apply fields: name, platform, year, developer, publisher, genre, description, series, ESRB, and max players. Check **Box front**, **Background**, and **Screenshots** to also download media (up to 12 screenshots); **Replace existing fields and media** (overwrite) updates values that are already set, otherwise only empty fields are filled. Downloads go to `<data-dir>/media/launchbox/<database_id>/`. ESRB values are accepted from the standard set (E, E10+, T, M, AO, RP, EC, K-A, Unrated). The game keeps a `launchbox_db_id` so later jobs can find it.
 
+## Metadata Match Review
+
+After batch imports, OpenBox provides a dedicated **Metadata Match Review** queue:
+
+- **Review Batches**: `GET /api/v2/metadata/matches/batches` lists import batches with unresolved or pending metadata candidate matches.
+- **Inspect Candidates**: `GET /api/v2/metadata/matches/items` returns paginated candidate lists with confidence scores and field previews.
+- **Apply or Reject**:
+  - `POST /api/v2/metadata/matches/apply`: Confirms matched metadata and artwork for selected items or entire batches.
+  - `POST /api/v2/metadata/matches/reject`: Dismisses proposed candidates without altering game records.
+
 **Search IGDB** is an alternative provider; it needs `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET` in `~/.env` (Twitch developer app credentials). IGDB results apply name, summary, genres, and platforms.
 
 **Use Steam data** fills name, developer, publisher, genre, year, and description from the Steam storefront API for entries with a Steam App ID, and downloads the library cover and header image.
 
-## Media Manager and bulk jobs
+## Media Manager and Durable Operations
 
-The **Media** button opens the Media Manager, which shows a per-platform audit: games, database matched, missing box front, missing background, and missing screenshots. Check the types to download (cover, background, screenshots) and whether to replace existing media, then **Download for matched games**. This runs a bounded background job: it iterates only games that already have a `launchbox_db_id`, applies metadata with the same field rules, and reports progress (`current`, `total`, `updated`) plus the last 20 errors. The status endpoint is polled until the job reaches `done`; errors are per-game and listed before retrying.
+The **Media** button opens the Media Manager, which shows a per-platform audit: games, database matched, missing box front, missing background, and missing screenshots. Check the types to download (cover, background, screenshots) and whether to replace existing media, then **Download for matched games**. This runs a durable background operation tracked in the **Activity drawer** (`#activityButton`), backed by `operations.json` with live Server-Sent Events (SSE) progress and cancel/resume support.
 
 ## Duplicate media cleanup
 

@@ -24,7 +24,7 @@ Every AppImage release is signed with Ed25519. The installer verifies the releas
 | `OpenBox-<version>-sbom.json` | CycloneDX 1.4 SBOM | Same release assets |
 | `install.sh` | Cryptographically verified installer | Same release assets |
 
-Verify path: download the AppImage, the `.sig`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.6.0"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. See [Updating](/updating/) for rollback with `OpenBox-x86_64.previous.AppImage`.
+Verify path: download the AppImage, the `.sig`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.7.1"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. See [Updating](/updating/) for rollback with `OpenBox-x86_64.previous.AppImage`.
 
 ## Build and CI
 

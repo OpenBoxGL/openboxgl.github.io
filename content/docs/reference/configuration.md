@@ -47,7 +47,7 @@ Values already in the environment are never overridden by `.env`. The template l
 | `OPENBOX_WEBKIT_HARDWARE_ACCELERATION` | WebKitGTK hardware acceleration policy in native window (`always` or `on-demand`; default is `on-demand`). |
 | `OPENBOX_SNAPSHOT_DEBOUNCE` | Debounce delay in seconds (float) for background library state snapshot writes (defaults to `0.0`). |
 | `OPENBOX_INSTALL_DIR` | Custom installation directory used by `install.sh` (defaults to `~/.local/bin`). |
-| `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v1.6.0`) during `install.sh` execution. |
+| `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v1.7.1`) during `install.sh` execution. |
 | `OPENBOX_PYTHON` | Path to the Python interpreter invoked by the native host (defaults to `python3`). |
 | `OPENBOX_WEB_APP` | Path to `web_app.py` invoked by the native host. |
 
@@ -86,7 +86,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `progress_automation_play_minutes` | 30 | 0 to 100,000, minutes before marking Playing |
 | `progress_automation_idle_days` | 30 | 0 to 3,650, days before marking Paused |
 | `progress_on_first_play` | "Playing" | Must be a known progress status |
-| `welcome_completed` | `false` | Boolean, hides the welcome wizard |
+| `welcome_completed` | `false` | Boolean, suppresses opening the Library Setup Center on empty library launch |
 | `image_group` | "cover" | One of cover, background, screenshot, clear_logo, fanart, banner, icon, box_back, box_spine, box_3d, title_screen, cart_front, cart_back, disc, advertisement, manual |
 | `badge_visibility` | favorite, installed, saves, documents, progress, storefront, achievements, rating | Subset of favorite, installed, missing_media, saves, documents, versions, storefront, achievements, highscores, progress, rating, broken, portable, controller |
 | `cloud_folder` | "" | Absolute, existing path for mounted-folder statistics sync |

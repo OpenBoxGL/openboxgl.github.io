@@ -5,7 +5,7 @@ description: Every way to install OpenBoxGL, with verification steps per method.
 
 # Downloads
 
-One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBoxGL application, currently **v1.6.0**.
+One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBoxGL application, currently **v1.7.1**.
 
 | Method | Best for | Updates | Verify |
 | --- | --- | --- | --- |
@@ -20,7 +20,7 @@ One table for every install method. Pick the row that matches your system, then 
 The installer pins the release public key, verifies the SHA-256 checksum, and verifies the Ed25519 signature before installing to `~/.local/bin`.
 
 ```bash
-VERSION=1.6.0
+VERSION=1.7.1
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output install.sh \
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -44,8 +44,6 @@ chmod +x OpenBox-x86_64.AppImage
 ./OpenBox-x86_64.AppImage --web
 ```
 
-If an older AppImage opened then never showed a window after desktop integration, install v0.6.0 or newer, remove the old menu entry, and re-add the AppImage.
-
 ## Flatpak
 
 ```bash
@@ -53,7 +51,7 @@ flatpak-builder --user --install --force-clean build-dir io.openbox.GameLauncher
 flatpak run io.openbox.GameLauncher
 ```
 
-The manifest uses the FreeDesktop runtime and grants `--filesystem=home`, so Steam, Heroic, Lutris, and ROM folders under home remain readable. The Flatpak is not updated by the built-in updater. Rebuild the manifest to update.
+The manifest targets the GNOME / Flatpak 25.08 runtime and grants `--filesystem=home`, so Steam, Heroic, Lutris, and ROM folders under home remain readable. The Flatpak is not updated by the built-in updater. Rebuild the manifest to update.
 
 ## From source
 

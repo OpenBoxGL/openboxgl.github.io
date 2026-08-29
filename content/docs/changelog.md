@@ -4,6 +4,55 @@ description: Release notes for OpenBox, from the latest AppImage back to the fir
 sidebar: false
 ---
 
+## 1.7.1 (2026-08-29)
+
+### Play Insights
+
+- Local-first **Play Insights** dashboard: 366-day heatmap (levels 0–4), current/longest streaks, top platforms/genres, and 30-day play momentum from local history with zero telemetry. Endpoints: `GET /api/v2/insights/summary` and `GET /api/v2/insights/heatmap`.
+
+### Performance
+
+- Virtual spacer-window library grid with `localStorage['openbox-virtual-grid']` kill-switch, `IntersectionObserver` + `contain-intrinsic-size`, and rAF coalescing for smooth 60 FPS scrolling with 20,000 games.
+- Off-main-thread search indexing and trigram lookups via `static/worker.search.js` with instant acronym search matching.
+- `pkg/state/cache.py` `FacetCache` LRU (capacity 64) with epoch bumping on state changes; `state_store.py` 50ms write coalescing with single fsync.
+
+### Setup & Launch Doctor Polish
+
+- Setup Center `preview_document` includes human-readable progress storytelling messages (`preview_document.message`).
+- Launch Doctor blocking checks carry structured, actionable `fix_action` objects (`flatpak_install`, `reveal_bios_path`, `pick_core`, `explain_token`) with one-click fix buttons in the UI.
+
+### Frontend & Themes
+
+- New design system tokens: `--overlay-insight-cell-0` through `--overlay-insight-cell-4`, `--border-insight`, `--shadow-insight`, `--surface-insight-card`, and `--focus-ring`. All themes updated.
+- Lazy-loaded `static/insights.js` dashboard panel rendered above the library grid.
+
+## 1.7.0 (2026-08-26)
+
+### Library Setup Center
+
+- Guided **Library Setup Center** (`#setupLibraryButton`) with preview-before-commit scan, paginated review, decision overrides, emulator readiness, and idempotent commit.
+- Side-effect-free scan previews with stale-preview guards and `import_batch_id` tagging for instant post-import filtering.
+
+### Activity Center
+
+- Durable Operation Service backed by `operations.json` (replacing in-memory job maps) with queued, running, cancelling, done, partial, error, cancelled, and interrupted states.
+- Persistent topbar Activity button (`#activityButton`), live SSE progress events, task cancellation, and restart recovery with retry/resume.
+
+### Launch Doctor
+
+- Preflight validation for game paths, adapters, Flatpak/native executables, BIOS/firmware, and tokenized launch arguments before launching.
+- Authoritative flat adapter-per-platform emulator registry (`emulator_defs/`) with explicit launch precedence rules and ambiguity handling.
+
+### Additive v2 API
+
+- Exact `/api/v2/*` routes for setup preview/commit, emulator registry, launch preflight, metadata match review, and durable operations.
+- Canonical `library.json` schema remains version 6; previews and operations use separate isolated storage files.
+
+### Packaging & Scale
+
+- Formal performance support target of **20,000** games.
+- AppImage release built on Ubuntu 22.04 LTS (x86_64); Flatpak targets runtime 25.08 (`org.gnome.Platform`).
+
 ## 1.6.0 (2026-08-23)
 
 ### Architecture & State Management

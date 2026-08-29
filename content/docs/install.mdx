@@ -52,7 +52,7 @@ The source install uses only the Python standard library, there is no `pip insta
  Download the installer from a specific signed release, inspect it, then run it. The installer verifies the release public-key pin, SHA-256 checksum, and Ed25519 signature before installing to `~/.local/bin`:
 
  ```bash
- VERSION=1.6.0
+ VERSION=1.7.1
  curl --proto '=https' --tlsv1.2 --fail --location \
    --output install.sh \
    "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -103,7 +103,7 @@ The source install uses only the Python standard library, there is no `pip insta
  flatpak run io.openbox.GameLauncher
  ```
 
- - The manifest (the `flatpak` module) uses the FreeDesktop runtime and grants `--filesystem=home`, so Steam, Heroic, Lutris, and ROM folders under your home directory are readable.
+ - The manifest (the `flatpak` module) uses the GNOME / Flatpak 25.08 runtime and grants `--filesystem=home`, so Steam, Heroic, Lutris, and ROM folders under your home directory are readable.
  - The Flatpak is not updated by OpenBoxGL's built-in updater (it only understands the AppImage). Update by rebuilding the manifest or using the Flatpak workflow you already have for local builds.
  - Flatpak builds install the same `openbox` and `openbox-native` launchers; `flatpak run io.openbox.GameLauncher --web` starts the loopback web UI in a browser.
 </InstallOptionCard>
@@ -144,14 +144,12 @@ The current `sudo make install` wrapper path is not the recommended installation
 
 Open Settings and choose **Install desktop shortcut** (the button appears when OpenBoxGL detects it is running from an AppImage). This writes a `.desktop` entry under `~/.local/share/applications` pointing at the AppImage's current path. If you move the AppImage afterwards, re-run the install shortcut so the entry follows the new location. Desktop integrators such as Gear Lever also work.
 
-If an older build opened then never showed a window after integration, install **v0.6.0 or newer**, remove the old menu entry, and re-add the AppImage.
-
 ## Verify your install
 
 <Steps>
 
 <li>Run the entry point from a terminal. It should open the native window showing the three-column workspace.</li>
-  <li>On first launch with an empty library, the welcome wizard appears.</li>
+  <li>On first launch with an empty library, the Library Setup Center appears.</li>
   <li>Settings → About (or `GET /api/settings` with the token) reports the running version and whether it is an AppImage.</li>
   <li>Your data directory (`~/.local/share/openbox-game-launcher` unless `OPENBOX_DATA_DIR` is set) now contains `library.json`, `server.token`, and `server.port`.</li>
 
@@ -191,7 +189,7 @@ More at [Troubleshooting startup and browser](/guides/troubleshooting/startup-an
 
 ## After installation
 
-Your first launch creates the data directory with an empty library. The window shows the welcome wizard when the library is empty; it walks you through a folder import, a Steam import, metadata syncing, and settings.
+Your first launch creates the data directory with an empty library. The window shows the Library Setup Center when the library is empty; it walks you through a guided preview-before-commit scan, emulator readiness checks, metadata match review, and initial preferences.
 
 - First-time setup: [Getting started](/getting-started/)
 - What the interfaces look like and where data lives: [Interfaces and data](/interfaces-and-data/)

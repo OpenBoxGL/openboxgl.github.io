@@ -11,12 +11,25 @@ Each imported game gets a `game_id` derived from a SHA-256 over its *identity* (
 
 </Callout>
 
-## Import a folder of ROMs or executables
+## Library Setup Center (Recommended)
 
-Click **Import Folder** in the top bar (or **Add Game** for a single entry) and enter an absolute path. OpenBoxGL scans recursively by extension and assigns a platform from the extension table:
+Click **Set up library** (`#setupLibraryButton`) in the top bar to launch the guided **Library Setup Center**:
 
-- `.nes` NES, `.sfc`/`.smc` SNES, `.gba` Game Boy Advance, `.gb` Game Boy, `.gbc` Game Boy Color, `.n64`/`.z64`/`.v64` Nintendo 64, `.nds` Nintendo DS, `.3ds`/`.cia` Nintendo 3DS, `.wbfs`/`.wia`/`.wad` Wii / WiiWare, `.rvz`/`.gcm`/`.gcz` GameCube, `.xci`/`.nsp` Nintendo Switch, `.pbp` PSP, `.vpk` PlayStation Vita, `.xex` Xbox 360, `.iso`/`.cue`/`.chd`/`.ciso`/`.m3u` Disc image
+1. **Preview Before Commit**: Setup Center performs a read-only scan of folders and storefronts (`POST /api/v2/setup/preview`). No changes are written to `library.json` until you approve them.
+2. **Storytelling Progress**: Scans report discovered games, platforms, and actionable decision counts.
+3. **Paginated Review & Candidate Resolution**: Review discovered titles in batches (`GET /api/v2/setup/preview/items`). Resolve shared extensions (e.g. `.iso` matching PS2 or GameCube) with your chosen platform/emulator.
+4. **Idempotent Commit**: Confirm your choices (`POST /api/v2/setup/commit`). Imported games receive a unique `import_batch_id` for instant post-import filtering and batch metadata review.
+
+## Direct Folder Import
+
+Click **Import Folder** in the top bar (or **Add Game** for a single entry) and select an absolute path. OpenBoxGL scans recursively by extension and assigns a platform from the extension table:
+
+- `.nes` NES, `.sfc`/`.smc` SNES, `.gba` Game Boy Advance, `.gb` Game Boy, `.gbc` Game Boy Color, `.n64`/`.z64`/`.v64` Nintendo 64, `.nds` Nintendo DS, `.3ds`/`.cia` Nintendo 3DS, `.wbfs`/`.wia`/`.wad` Wii / WiiWare, `.rvz`/`.gcm`/`.gcz` GameCube, `.xci`/`.nsp` Nintendo Switch, `.pbp` PSP, `.vpk` PlayStation Vita, `.xex` Xbox 360, `.cue`/`.chd`/`.ciso`/`.m3u` Disc image
 - `.sh`, `.appimage`, `.exe`, `.rom`, `.zip`, `.7z`, `.rar` also import as-is.
+
+### Ambiguous Extension Resolution
+
+Per ADR 0012, shared disc extensions (such as `.iso`) no longer guess platforms silently. OpenBox flags ambiguous multi-platform extensions (`AMBIGUOUS_PLATFORM`) and presents explicit platform candidates for user resolution in Setup Center and Launch Doctor.
 
 When several files share a base name with a `(Disc 1)`, `(Disc 2)`, `(CD 1)`, `(Side A)` style marker, they are grouped into one entry with a generated `.m3u` and the game name without the disc marker. When several files map to the same platform and name, only the best-ranked ROM is imported; the runner-up candidates are kept on the entry as `version_candidates`. Ranking prefers clean regional names (World and USA above Europe, then Japan), penalizes `(Beta)`, `(Proto)`, `(Demo)`, `(Sample)`, `(Unl)`, `(Pirate)`, `(Hack)`, and `(Translation)` tags, favors `.chd`, `.cue`, and `.m3u`, and treats a missing or unreadable file as the worst score.
 
@@ -35,6 +48,10 @@ Click **Import Heroic**. OpenBoxGL reads Epic, GOG, and Amazon manifests from `~
 ## Lutris
 
 Click **Import Lutris**. OpenBoxGL runs `lutris --list-games --installed --json` (or the Flatpak variant) and imports installed entries. Entries tagged Xbox or Game Pass become source Xbox; Origin or EA App entries become EA; Ubisoft or Uplay entries become Ubisoft. Each entry keeps its Lutris numeric ID and launches through `lutris:rungameid/{lutris_id}`. Cover art is picked up from Lutris coverart folders when present.
+
+## Faugus Launcher
+
+OpenBox integrates with **Faugus Launcher** (`/api/faugus/*`), scanning native or Flatpak manifests from `~/.config/faugus` or `~/.var/app/io.github.Faugus.Launcher`. It reads installed Wine/Proton games, detects UMU prefix identifiers, and launches via Faugus runners.
 
 ## Arcade sets
 

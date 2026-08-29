@@ -3,7 +3,15 @@ title: Library overview
 description: Browse, search, and safely maintain a mixed Linux game library.
 ---
 
-OpenBoxGL presents imported games in a searchable grid or list. Select a card to open its detail pane, where metadata, artwork, launch, saves, and history stay together. The top bar is grouped into three zones. The **Library** zone holds **Library**, **Add Game**, and **Import Folder**. The **Actions** zone holds **Big Box**, **Running**, and **Queue**. The **Tools** menu holds the rest: **Import Steam**, **Import Heroic**, **Import Lutris**, **Import Arcade**, **Emulators**, **Settings**, **History**, **Themes**, **Save Filter**, **Save Preset**, **Playlists**, **Achievements**, **Plugins**, **Discovery**, **Storefronts**, **Media**, **Health**, **Bulk Edit**, **Backup**, **Fullscreen**, **Tags**, **Notifications**, and **Webhooks**.
+OpenBoxGL presents imported games in a searchable grid or list. Select a card to open its detail pane, where metadata, artwork, launch, saves, and history stay together. The top bar is grouped into three zones:
+
+- The **Library** zone holds **Library**, **Set up library** (`#setupLibraryButton`), **Add game**, and **Import folder**.
+- The **Actions** zone holds **Big Box**, **Running**, **Queue**, and **Activity** (`#activityButton` with live running operation count).
+- The **Tools** menu (`#toolsButton`) is organized into four accessible WAI-ARIA semantic groups:
+  1. **Library**: Metadata, Media, Health, Bulk Edit, Tags, Playlists, Backup, History, Achievements, Save Filter, Save Preset.
+  2. **Sources**: Storefronts, Emulators, Import Steam, Import Heroic, Import Lutris, Import Arcade, Discovery.
+  3. **Personalize**: Themes, Plugins, Settings, Fullscreen.
+  4. **Automation**: Webhooks, Notifications.
 
 <Callout type="tip" title="Why the library never gets broken by reordering">
 

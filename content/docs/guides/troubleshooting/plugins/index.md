@@ -25,9 +25,9 @@ OPENBOX_SAFE_MODE=1 openbox
 
 ## Trust boundary
 
-- Plugins execute with the same user privileges as OpenBoxGL and can read and modify files in your data directory and under your account.
-- The child-process isolation is robustness, not a security sandbox.
-- Install only packages you wrote or audited. The bundled catalog is small and documentation-oriented; installing from it still runs downloaded code.
+- Plugins execute in an isolated Bubblewrap (`bwrap`) OS sandbox (`--unshare-all`, `--ro-bind / /`, tmpfs on `/home`, `/tmp`, `/run`, and network disabled).
+- If `bwrap` is missing on the host, plugins are skipped unless `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` is set for trusted local environments.
+- Install only packages you wrote or audited. The bundled catalog is small and documentation-oriented; installing from it still runs local code.
 
 ## See also
 

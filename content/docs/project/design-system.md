@@ -51,9 +51,17 @@ All colors are dark by default. Neutral surfaces carry most of the screen; the o
 | `--cover-title-start` | `#51412d` | Cover gradient start tone |
 | `--achievement` | `#eaa54f` | RetroAchievements badge, achievement points |
 | `--lifecycle-bg` | `#45351d` | Session lifecycle overlay background |
-| `--lifecycle-kicker` | `#f0c36a` | Lifecycle kicker accent |
 | `--bigbox-bg` | `#30261a` | Big Box cover backdrop |
 | `--bigbox-copy` | `#d0c0a5` | Big Box secondary text |
+| `--overlay-insight-cell-0` | `#1c1915` | Play Insights 0-playtime cell background |
+| `--overlay-insight-cell-1` | `#4a2c0a` | Play Insights level 1 playtime cell background |
+| `--overlay-insight-cell-2` | `#8a4f10` | Play Insights level 2 playtime cell background |
+| `--overlay-insight-cell-3` | `#c97316` | Play Insights level 3 playtime cell background |
+| `--overlay-insight-cell-4` | `#f06000` | Play Insights level 4 (peak) playtime cell background |
+| `--border-insight` | `#3d3932` | Play Insights heatmap and stat card borders |
+| `--shadow-insight` | `#00000066` | Play Insights card shadow |
+| `--surface-insight-card` | `#1b1916` | Play Insights card surface background |
+| `--focus-ring` | `#f06000` | Global accessible focus outline |
 
 ## Typography
 

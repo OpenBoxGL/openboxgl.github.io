@@ -42,7 +42,7 @@ export function FeatureBento() {
             <Star className="h-5 w-5 shrink-0 text-primary" />
             <p className="text-sm text-muted-foreground">
               <span className="font-semibold text-foreground">Rate, tag and organize.</span> Star ratings, custom
-              categories, smart playlists and saved filter presets keep even a 10,000-game backlog navigable.
+              categories, smart playlists and saved filter presets keep even a 20,000-game backlog navigable.
             </p>
           </div>
         </div>

@@ -39,6 +39,8 @@ The default data directory is `~/.local/share/openbox-game-launcher`. Everything
 | `library.json` | The library: games, profiles, history, settings, playlists, queue, notifications |
 | `library.json.bak` | Last-known-good copy, rewritten before every commit |
 | `.library.json.lock` | Cross-process lock file coordinating concurrent writes |
+| `operations.json` | Durable background operations and task lifecycle states |
+| `setup_previews/` | Transient scan preview documents before commit |
 | `server.token`, `server.port` | Per-launch credentials for the running app; deleted on exit |
 | `native-host.lock`, `window-geometry`, `native-host-flags` | Native host single-instance lock, last window geometry, and tray flags |
 | `backups/` | Library backup archives (`OpenBoxBackup-*.zip`) |

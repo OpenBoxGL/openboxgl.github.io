@@ -75,7 +75,26 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 
 ## Versioned surface
 
-The stable contract lives at `/api/v1/*`. Legacy `/api/*` paths keep serving the same handlers for older clients. The v1 prefix currently covers the library, settings, launch, games, queue, tags, notifications, webhooks, playlists, sessions, saves, media, metadata, imports, emulators, profiles, themes, updates, backups, jobs, diagnostics, plugins, recovery, and filter presets. New work targets v1.
+- **Frozen v1 Contract (`/api/v1/*`)**: Stable, frozen remote contract (enforced via `v1_contracts.json`).
+- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 and v1.7.1:
+  - **Setup Center**: `POST /api/v2/setup/preview`, `GET /api/v2/setup/preview/status`, `GET /api/v2/setup/preview/items`, `POST /api/v2/setup/preview/decision`, `POST /api/v2/setup/commit`
+  - **Launch Doctor**: `POST /api/v2/launch/preflight`, `POST /api/v2/launch/preflight/batch`
+  - **Emulator Registry**: `GET /api/v2/emulators/registry`
+  - **Metadata Matches**: `GET /api/v2/metadata/matches/batches`, `GET /api/v2/metadata/matches/items`, `POST /api/v2/metadata/matches/apply`, `POST /api/v2/metadata/matches/reject`
+  - **Durable Operations**: `GET /api/v2/jobs`, `GET /api/v2/jobs/events`, `POST /api/v2/jobs/{id}/cancel`, `POST /api/v2/jobs/{id}/retry`, `POST /api/v2/jobs/{id}/resume`
+  - **Play Insights**: `GET /api/v2/insights/summary`, `GET /api/v2/insights/heatmap`
+
+### Machine-Readable Error Codes
+
+| Code | Meaning |
+| --- | --- |
+| `PREVIEW_NOT_FOUND` / `PREVIEW_STALE` | Setup preview session expired or stale |
+| `UNRESOLVED_CANDIDATES` | Commit attempted while ambiguous candidates remain unresolved |
+| `INVALID_DECISION` | Invalid platform or emulator assignment submitted |
+| `EMULATOR_REQUIRED` / `AMBIGUOUS_PLATFORM` / `MISSING_BIOS` | Launch Doctor preflight failure conditions |
+| `JOB_CONFLICT` / `JOB_NOT_FOUND` | Durable operation scheduling or state conflict |
+| `JOB_NOT_CANCELABLE` / `JOB_NOT_RETRYABLE` | Operation transition disallowed in current state |
+| `CLOUD_SYNC_CONFLICT` | Sync conflict detected on mounted cloud backup |
 
 ## Limits that apply across routes
 

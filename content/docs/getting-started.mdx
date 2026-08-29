@@ -33,39 +33,39 @@ The workspace looks like this once you have a library entry: filters on the left
 
 <Steps>
 
-<li><strong>Install and start OpenBox.</strong> From the AppImage, Flatpak, or source as described on the [Installation](/install/) page. When the library is empty, the welcome wizard appears; you can close it and use the topbar buttons, or start from its **Import a ROM or game folder** step.</li>
+<li><strong>Install and start OpenBox.</strong> From the AppImage, Flatpak, or source as described on the [Installation](/install/) page. When the library is empty, the **Library Setup Center** appears; you can close it and use the topbar buttons, or start from its guided **Set up library** preview-before-commit scan.</li>
 
 <Callout type="note">
 
-**You should see:** An empty cover grid in the center, no cards in any view. The welcome wizard suggests importing a folder or scanning for emulators. If the window did not open, run OpenBox from a terminal and read the printed error. In `--web` mode OpenBoxGL prints `http://127.0.0.1:PORT/?token=...`; open that URL yourself.
+**You should see:** An empty cover grid in the center. The Library Setup Center suggests scanning game folders or connecting storefronts with a safe, non-destructive preview before committing to your library. If the window did not open, run OpenBox from a terminal and read the printed error. In `--web` mode OpenBoxGL prints `http://127.0.0.1:PORT/?token=...`; open that URL yourself.
 
 </Callout>
 
-<li><strong>Choose Import Folder.</strong> Click **Import Folder** in the topbar (or the wizard's folder step). In the native window a folder picker dialog opens, so you choose the folder directly. In the browser fallback (`--web`) the app asks for the absolute path of the folder to import, and you type or paste it, for example `/home/you/test-game`.</li>
+<li><strong>Choose Set up library or Import Folder.</strong> Click **Set up library** in the topbar (or **Import Folder**). In the native window a folder picker dialog opens to select your games folder. In the browser fallback (`--web`) the app prompts for the absolute path, for example `/home/you/test-game`.</li>
 
 <Callout type="note">
 
-**You should see:** In the native window, a GTK folder picker. Choose the folder and confirm. In the browser fallback, a text input field labeled "Folder path"; type or paste the path and press Enter. The browser cannot browse your filesystem, so the fallback always asks for the full path.
+**You should see:** In the native window, a GTK folder picker. Choose the folder and confirm. In the browser fallback, a text input field labeled "Folder path"; type or paste the path and press Enter.
 
 </Callout>
 
-<li><strong>Select a folder containing one executable `.sh` file.</strong> The import scans the folder for supported files (`.sh`, `.appimage`, `.exe`, `.iso`, `.rom`, common console extensions, and archives), checks each against existing library entries so nothing is duplicated, and adds what is new. If the import also finds a known emulator on your system, it may offer to install or configure a profile; with a plain `.sh` file, nothing extra is needed.</li>
+<li><strong>Select a folder containing one executable `.sh` file.</strong> Setup Center performs a read-only scan for supported files (`.sh`, `.appimage`, `.exe`, `.iso`, `.rom`, console extensions, and archives), presents a preview with storytelling progress, checks for duplicates, and commits cleanly without side effects.</li>
 
 <Callout type="note">
 
-**You should see:** Either a brief notification ("X found, Y added") or the imported card appearing instantly in the grid. If zero files were added, re-check the path, the importer prints a specific error when no recognized files exist. Existing entries are never duplicated.
+**You should see:** A preview summary showing discovered games. Click **Finish & commit** to import them into your library. Existing entries are never duplicated.
 
 </Callout>
 
-<li><strong>Confirm the imported title in the library.</strong> A grid card appears with the game's name. The detail pane on the right shows the launch path, the platform, and empty metadata fields that you can later fill from the LaunchBox Games Database or edit by hand.</li>
+<li><strong>Confirm the imported title in the library.</strong> A grid card appears with the game's name. The detail pane on the right shows the launch path, the platform, and metadata fields that you can enrich from the LaunchBox Games Database or edit manually.</li>
 
 <Callout type="note">
 
-**You should see:** One card in the grid whose label matches your file's name or folder name. Selecting it opens the detail pane showing a **PLAY** button (greyed out until a platform profile is set), the file path, and an empty Emulator row. No artwork exists yet, you'll add that later.
+**You should see:** One card in the grid whose label matches your file's name or folder name. Selecting it opens the detail pane showing a **PLAY** button, the file path, and emulator configuration.
 
 </Callout>
 
-<li><strong>Open the game card to view its details.</strong> Selecting the card opens its detail pane: the launch command, the launch profile for its platform, per-game overrides, save locations, and history stay together here. This is also where you review or fix a launch failure.</li>
+<li><strong>Open the game card to view its details.</strong> Selecting the card opens its detail pane: the launch command, the launch profile for its platform, per-game overrides, save locations, and history stay together here. Launch Doctor validates the executable and dependencies before launch.</li>
 
 <Callout type="note">
 
@@ -79,7 +79,7 @@ The workspace looks like this once you have a library entry: filters on the left
 
 <Callout type="note">
 
-**You should see:** If the path or permissions are wrong, PLAY stays greyed-out with a message naming which part is missing. If correct, a small "Starting…" banner appears at the top, then "Session ended" with the play time and a link to the History view. The game card's "Play count" increments to 1 and "Play time" grows to match the script's duration.
+**You should see:** If the path or permissions are wrong, Launch Doctor flags the issue with an actionable fix button. If correct, a small "Starting…" banner appears at the top, then "Session ended" with the play time and a link to the History view. The game card's "Play count" increments to 1 and "Play time" grows to match the script's duration.
 
 </Callout>
 
@@ -91,21 +91,21 @@ The workspace looks like this once you have a library entry: filters on the left
 - One completed session in the History view with a non-zero-free exit code and a play time of a few seconds.
 - `play_count` incremented and `playtime_seconds` grown on the game card.
 
-ROMs are the deliberate exception: they require a configured platform emulator profile before they can launch. An `.nes` file with no emulator profile produces a launch validation error until you set one, by design, so nothing half-configured ever runs.
+ROMs are the deliberate exception: they require a configured platform emulator profile before they can launch. An `.nes` file with no emulator profile produces a Launch Doctor preflight notification until you set one, by design, so nothing half-configured ever runs.
 
 ## Common failures and recovery
 
 ### The game is missing after import
 
-Check the folder path you typed. The import resolves `~` but does not guess; a wrong path imports nothing and reports it. Re-run Import Folder with the correct absolute path. Existing entries are never duplicated, so re-importing the same folder is safe.
+Check the folder path you selected. The import resolves `~` but does not guess; a wrong path imports nothing and reports it. Re-run Setup Center with the correct absolute path. Existing entries are never duplicated, so re-importing the same folder is safe.
 
 ### PLAY is disabled or launch fails with a validation error
 
-Open the game detail view. The message tells you which part is missing:
+Open the game detail view or check Launch Doctor preflight notifications. Launch Doctor provides actionable fix buttons:
 
-- **"has no launch command and its file is not executable"**: make the file executable (`chmod +x`), or set a launch command for the platform in Emulator profiles, or set one per game under Edit game. This check runs before anything spawns, so no half-started process is left behind.
+- **"has no launch command and its file is not executable"**: make the file executable (`chmod +x`), or assign an emulator profile. Launch Doctor displays an explanation and fix options.
 - **"The configured path no longer exists"**: the imported file was moved or deleted. Point the game at the new path under Edit game, or re-import the folder.
-- **"Set a launch command for the platform"**: the platform has no profile. See [Emulators and launching](/guides/emulators-and-launching/).
+- **"Set a launch command for the platform"**: the platform has no profile. See [Emulators and launching](/guides/emulators-and-launching/). Launch Doctor can automatically install missing Flathub emulators.
 
 ### The session reports a failure
 

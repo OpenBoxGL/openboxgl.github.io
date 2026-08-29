@@ -34,7 +34,15 @@ The **Emulators** button opens the Emulator profiles dialog. Profiles are one pe
 
 If a profile command has no `{path}` and the game has no per-game command, the resolved path is appended. A `.sh` game with no command launches with `bash`; otherwise the path itself runs when it is executable.
 
-**Per-game overrides**: in Edit metadata, set **Launch command, optional override** to use a different command for one title, or **Launch profile override** to select a named profile (the override wins over the platform profile).
+### Launch Precedence Hierarchy
+
+When launching a title, OpenBox resolves the executable and arguments using a strict 5-level hierarchy (ADR 0012):
+
+1. **Per-Game Launch Command**: Explicit command configured in Edit Metadata (`launch_command`).
+2. **Per-Game Selected Adapter/Profile**: Profile override set on the game entry (`emulator_adapter_id` or `emulator_id`).
+3. **Platform-Level Profile**: User-configured platform profile in Emulator Profiles.
+4. **Authoritative Adapter Registry**: Auto-detected matching adapter from `emulator_defs/` (`GET /api/v2/emulators/registry`).
+5. **Direct Executable Fallback**: Native binary execution if target file has executable permissions (`+x`).
 
 ### Emulator catalog
 
@@ -55,9 +63,9 @@ The same dialog lists supported emulators with install state, mode (native or Fl
 
 **Install** adds the app from Flathub (adding the Flathub remote if missing) and, when done, adds its profiles to the editor (save to apply). **Install all available emulators** and **Update installed emulators** run bulk background jobs with per-emulator status. **Open** launches the emulator standalone. Detected native binaries (DOSBox, wine, mame, dolphin-emu, pcsx2-qt, ppsspp, rpcs3, duckstation-qt, eden) appear as **Add N detected profiles**.
 
-### Emulator definition packs
+### Authoritative Emulator Registry
 
-YAML definition packs in `emulator_defs/` (dolphin, duckstation, eden, retroarch) map extensions to platforms and startup commands. **Scan ROM folder** in Settings imports a folder through these definitions, and an emulator scan config can auto-update on each startup. Detected profiles are merged into the profile list automatically at boot when missing.
+Authoritative definitions in `emulator_defs/` map extensions to platforms and startup commands. `GET /api/v2/emulators/registry` provides real-time adapter and compatibility views. Custom user profiles in `library.json` always override registry defaults.
 
 ## Archive extraction
 
@@ -69,16 +77,18 @@ The extraction limits exist because a malicious or malformed archive is the one 
 
 </Callout>
 
-## Dependency checks
+## Launch Doctor & Preflight Checks
 
-`/api/emulators/dependencies` checks known BIOS/firmware locations per emulator and reports what is missing:
+Launch Doctor (`POST /api/v2/launch/preflight` and `POST /api/v2/launch/preflight/batch`) inspects game readiness before any process spawns:
 
-- DuckStation: `scph1001.bin` under `~/.local/share/duckstation/bios` (or the Flatpak data path)
-- PCSX2: PS2 BIOS folder under `~/.config/PCSX2/bios` (or Flatpak)
-- RPCS3: PS3 firmware under `~/.config/rpcs3/dev_flash` (or Flatpak)
-- RetroArch: System/BIOS directory under `~/.config/retroarch/system` (or Flatpak)
-
-Missing items are reported, not fixed; the emulator may still run, but games that need BIOS files will not.
+- **Executable & Path**: Verifies that files exist on disk and have executable permissions.
+- **Emulator Readiness**: Checks for required emulators (`EMULATOR_REQUIRED`) or ambiguous platform extensions (`AMBIGUOUS_PLATFORM`).
+- **BIOS & Firmware**: Checks required system files (e.g. DuckStation `scph1001.bin`, PCSX2 BIOS, RPCS3 `dev_flash`, RetroArch system assets).
+- **Structured Fix Actions (`fix_action`)**: When a preflight check fails, Launch Doctor presents structured remedy buttons directly in the UI:
+  - `flatpak_install`: One-click button to install the missing Flathub emulator.
+  - `reveal_bios_path`: Opens or displays the target directory where required BIOS files must be placed.
+  - `pick_core`: Prompts for Libretro core selection when multiple cores are available.
+  - `explain_token`: Displays guidance on resolving unexpanded or invalid command tokens.
 
 ## Launching and session controls
 
