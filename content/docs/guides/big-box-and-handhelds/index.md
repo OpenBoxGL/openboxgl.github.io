@@ -71,3 +71,28 @@ OpenBoxGL detects the gamescope guest from the environment and opens Big Box ful
 Steam Input profiles stay scoped to your shortcut; the STEAM_GAME tagging is only a window property. OpenBoxGL does not control TDP; use Steam's QAM or your image's handheld tools. Developers can approximate Deck/Bazzite Game Mode on a desktop with `./scripts/emulate_deck_gamemode.sh` (requires gamescope; runs a nested session with `SteamDeck=1` advertising).
 
 See [Handheld performance](/guides/big-box-and-handhelds/performance/) for the TDP profile behavior supported by the current release.
+
+## Gamescope presets (v1.7.2)
+
+Settings → Controller includes a **gamescope preset** selector with 8 display profiles for handheld and desktop use:
+
+| Preset | Resolution | Scaling |
+|---|---|---|
+| Steam Deck | 1280×800 | Integer |
+| Steam Deck (HD) | 1920×1200 | Integer |
+| 1080p Full HD | 1920×1080 | Fit |
+| 1440p QHD | 2560×1440 | Fit |
+| 4K UHD | 3840×2160 | Fit |
+| Integer Scale | Native | Integer |
+| Stretch to Fit | Native | Stretch |
+| Borderless Window | Native | Borderless |
+
+When a preset is selected, OpenBoxGL applies the corresponding gamescope command-line arguments on game launch. The preset does not affect the OpenBoxGL window itself — only the games it launches.
+
+## MangoHud performance overlay (v1.7.2)
+
+Settings → Controller includes a **MangoHud** toggle. When enabled, `MANGOHUD=1` is set in the environment when launching games, causing the MangoHud on-screen performance overlay (FPS, CPU/GPU usage, frame pacing) to appear. MangoHud must be installed on your system separately.
+
+## Controller bench (v1.7.2)
+
+Settings → Controller includes a **controller bench** tab with a live SVG gamepad visualization. The bench reads `navigator.getGamepads()` and renders button presses, stick positions, and trigger values in real time, so you can verify controller connectivity and mapping without launching a game.

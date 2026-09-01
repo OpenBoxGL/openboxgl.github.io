@@ -66,6 +66,18 @@ The CLI form is `python3 web_app.py --backup [--items a,b] [--keep N]` for creat
 
 `GET /api/backups` lists archives newest first with `name`, `path`, `size`, `created` and `items` from the manifest, and `invalid: true` when the ZIP or manifest cannot be read. `GET /api/backup/manifest` returns the six selectable item keys.
 
+## Backup diff (v1.7.2+)
+
+`GET /api/v2/backup/diff?archive=<name>` compares the current library against a backup archive without restoring it. Returns:
+
+- `added`: game IDs present in the current library but not in the backup.
+- `removed`: game IDs present in the backup but not in the current library.
+- `changed`: game IDs present in both but with differing fields.
+- `settings_changed`: boolean indicating whether app settings differ.
+- `summary`: counts (`added`, `removed`, `changed`).
+
+Invalid or missing archive returns `404`. This is useful for reviewing what changed since a backup before deciding whether to restore.
+
 ## Security notes
 
 - Restoring `library` replaces your current library (after the automatic `library.before-restore.json` copy). Keep both copies safe.

@@ -293,6 +293,12 @@ Install every not-installed emulator. Returns `202 {"state":"installing"}`; comp
 
 Saved scan configurations (`folder`, `emulator_id`, `auto_update`). The auto-import worker executes configs with `auto_update: true`.
 
+<ApiEndpoint method="GET" path="/api/v2/emulators/registry">
+
+Returns the emulator registry with platform coverage, adapter types, and installed status. Add `?health=1` to include per-adapter health status: `bios_ok` (BIOS file exists and SHA1 matches if expected), `firmware_ok`, and `core_ok`. The health check also reports `BIOS_SHA1_DRIFT` when a BIOS file exists but its hash doesn't match the expected value from the emulator definition. (v1.7.2+ for `?health=1`)
+
+</ApiEndpoint>
+
 ## Storefront catalog
 
 <ApiEndpoint method="GET" path="/api/storefront/catalog">

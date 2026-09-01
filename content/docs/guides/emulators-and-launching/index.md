@@ -83,7 +83,7 @@ Launch Doctor (`POST /api/v2/launch/preflight` and `POST /api/v2/launch/prefligh
 
 - **Executable & Path**: Verifies that files exist on disk and have executable permissions.
 - **Emulator Readiness**: Checks for required emulators (`EMULATOR_REQUIRED`) or ambiguous platform extensions (`AMBIGUOUS_PLATFORM`).
-- **BIOS & Firmware**: Checks required system files (e.g. DuckStation `scph1001.bin`, PCSX2 BIOS, RPCS3 `dev_flash`, RetroArch system assets).
+- **BIOS & Firmware**: Checks required system files (e.g. DuckStation `scph1001.bin`, PCSX2 BIOS, RPCS3 `dev_flash`, RetroArch system assets). When an emulator definition includes an expected SHA1 hash for a BIOS file, Launch Doctor computes the file's SHA1 and reports `BIOS_SHA1_DRIFT` if it doesn't match — catching corrupted or wrong-version BIOS files before launch (v1.7.2+). For definitions pointing to a BIOS directory, checks directory existence and non-empty status.
 - **Structured Fix Actions (`fix_action`)**: When a preflight check fails, Launch Doctor presents structured remedy buttons directly in the UI:
   - `flatpak_install`: One-click button to install the missing Flathub emulator.
   - `reveal_bios_path`: Opens or displays the target directory where required BIOS files must be placed.

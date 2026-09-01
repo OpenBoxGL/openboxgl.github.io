@@ -17,6 +17,10 @@ The sidebar **View** selector covers All games, Favorites, Recently played, Neve
 
 **Save Filter** stores the current platform, category, view, search query, ESRB, and progress as a playlist-style rule set. **Save Preset** does the same but keeps the rules as a **filter preset**, optionally pinned as a **Big Box quick preset** (marked with a star in the sidebar, selectable from the Big Box Filter and Sort menu). Both appear in the sidebar; presets restore their rules when clicked and can be deleted with the × button.
 
+### Visual chip builder (v1.7.2+)
+
+Filter presets render as **visual chips** — compact badges showing the field, operator, and value for each rule (e.g. `platform = SNES`, `genre contains RPG`, `favorite = true`). Chips are generated from the underlying JSON rules via `rules_to_chips()` and convert back via `chips_to_rules()` with round-trip fidelity, so editing a chip and saving produces the same rule structure as before. This makes complex collections with many rules easier to scan and edit at a glance.
+
 ## Playlists
 
 Open the **Playlists** dialog for **New manual playlist** and **New filter playlist**. Manual playlists keep an exact ordered set of games; the manager shows each member with up and down buttons to reorder, plus notes and an optional parent playlist for grouping. Filter playlists store the same rule set as a saved filter and update membership automatically from their rules. Add games to a manual playlist from the context menu or the queue dialog. Deleting a playlist only removes the playlist, never the games.

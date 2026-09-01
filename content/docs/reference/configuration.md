@@ -50,6 +50,7 @@ Values already in the environment are never overridden by `.env`. The template l
 | `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v1.7.2`) during `install.sh` execution. |
 | `OPENBOX_PYTHON` | Path to the Python interpreter invoked by the native host (defaults to `python3`). |
 | `OPENBOX_WEB_APP` | Path to `web_app.py` invoked by the native host. |
+| `OPENBOX_ENABLE_SQLITE_READ` | Set to `1` to enable the optional SQLite read model (`pkg/state/sqlite_readmodel.py`) for accelerated search and facets on large libraries (50k+). Uses stdlib `sqlite3` with FTS5 full-text search (LIKE fallback if FTS5 is unavailable). JSON remains the source of truth; SQLite is a read-only projection. Disabled by default. (v1.7.2+) |
 
 ### Credentials (all optional)
 
@@ -82,6 +83,9 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `watch_folders` | `[]` | List of at most 50 absolute, existing directories; duplicates removed |
 | `screensaver_seconds` | 90 | `0` (off) or between 30 and 3600; values 1-29 are rejected |
 | `controller_map` | `{}` | Actions limited to `play`, `back`, `favorite`, `random`, `page_left`, `page_right`, `pause`, `menu`; button numbers 0-31 |
+| `gamescope_preset` | `""` | Selected gamescope preset name (one of: `steam-deck`, `steam-deck-hd`, `1080p`, `1440p`, `4k`, `integer`, `stretch`, `borderless`). Empty string = no preset. (v1.7.2+) |
+| `mangohud_enabled` | `false` | Boolean; when true, `MANGOHUD=1` is set on game launch to enable the MangoHud performance overlay. (v1.7.2+) |
+| `locale` | `"en"` | Interface language code (one of: `en`, `es`, `de`, `fr`, `pt`). (v1.7.2+) |
 | `progress_automation_enabled` | `false` | Boolean; enables/disables automatic progress changes |
 | `progress_automation_play_minutes` | 30 | 0 to 100,000, minutes before marking Playing |
 | `progress_automation_idle_days` | 30 | 0 to 3,650, days before marking Paused |

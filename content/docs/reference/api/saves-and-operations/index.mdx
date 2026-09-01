@@ -273,6 +273,21 @@ Write credentials into emulator configs (RetroArch `cheevos_*`, Dolphin, PCSX2) 
 
 </ApiEndpoint>
 
+<ApiEndpoint method="GET" path="/api/v2/backup/diff">
+
+Compare the current library state against a named backup archive. Query parameter: `archive=<name>` (the backup archive name as listed by `GET /api/library/backup`).
+
+Returns `{"added": [...game_ids], "removed": [...game_ids], "changed": [...game_ids], "settings_changed": <bool>, "summary": {"added": <count>, "removed": <count>, "changed": <count>}}`.
+
+- `added`: games present in the current library but not in the backup.
+- `removed`: games present in the backup but not in the current library.
+- `changed`: games present in both but with differing fields.
+- `settings_changed`: whether app settings differ between backup and current state.
+
+Invalid or missing archive name returns `404`. (v1.7.2+)
+
+</ApiEndpoint>
+
 ## Errors
 
 Missing games return `404`; destructive operations validate prerequisites before touching files; provider and tool failures return `400` with the exact reason. See [REST API overview](/reference/api/overview/) for the shared envelope and [Save archives](/reference/save-archives/) / [Library backups](/reference/library-backups/) for the archive contracts.

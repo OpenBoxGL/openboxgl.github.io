@@ -84,6 +84,7 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
   - **Durable Operations**: `GET /api/v2/jobs`, `GET /api/v2/jobs/events`, `POST /api/v2/jobs/{id}/cancel`, `POST /api/v2/jobs/{id}/retry`, `POST /api/v2/jobs/{id}/resume`
   - **Play Insights**: `GET /api/v2/insights/summary`, `GET /api/v2/insights/heatmap`
   - **Backup Diff**: `GET /api/v2/backup/diff?archive=<name>` (v1.7.2)
+- **Locale files** (public, no auth): `GET /locales/{en,es,de,fr,pt}.json` — serves JSON locale files for the i18n system (v1.7.2)
 
 ### Machine-Readable Error Codes
 

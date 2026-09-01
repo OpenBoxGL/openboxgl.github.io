@@ -127,6 +127,75 @@ const ENDPOINTS: EndpointDef[] = [
       offline_ready: true,
     },
   },
+  {
+    id: "backup-diff",
+    method: "GET",
+    path: "/api/v2/backup/diff?archive=library-2026-08-29",
+    title: "Backup Diff (v1.7.2)",
+    description: "Compare current library state against a named backup archive without restoring.",
+    mockResponse: {
+      added: ["game-03", "game-07"],
+      removed: ["game-12"],
+      changed: ["game-01", "game-05"],
+      settings_changed: true,
+      summary: { added: 2, removed: 1, changed: 2 },
+    },
+  },
+  {
+    id: "emulator-health",
+    method: "GET",
+    path: "/api/v2/emulators/registry?health=1",
+    title: "Emulator Registry Health (v1.7.2)",
+    description: "Emulator registry with per-adapter BIOS/firmware/core health status and SHA1 drift detection.",
+    mockResponse: {
+      adapters: [
+        {
+          id: "duckstation",
+          name: "DuckStation",
+          platforms: ["PS1"],
+          installed: true,
+          health: { bios_ok: true, firmware_ok: true, core_ok: true },
+        },
+        {
+          id: "pcsx2",
+          name: "PCSX2",
+          platforms: ["PS2"],
+          installed: true,
+          health: { bios_ok: false, firmware_ok: true, core_ok: true, bios_status: "BIOS_SHA1_DRIFT" },
+        },
+      ],
+    },
+  },
+  {
+    id: "insights",
+    method: "GET",
+    path: "/api/v2/insights/summary",
+    title: "Play Insights Summary (v1.7.1)",
+    description: "Local-first playtime analytics: streaks, momentum, top platforms and genres.",
+    mockResponse: {
+      total_playtime_seconds: 540000,
+      current_streak_days: 7,
+      longest_streak_days: 23,
+      momentum_30d_percent: 15.2,
+      top_platforms: [{ platform: "PC", playtime_seconds: 280000 }, { platform: "SNES", playtime_seconds: 120000 }],
+      top_genres: [{ genre: "RPG", playtime_seconds: 210000 }, { genre: "FPS", playtime_seconds: 180000 }],
+    },
+  },
+  {
+    id: "locales",
+    method: "GET",
+    path: "/locales/en.json",
+    title: "Locale File (v1.7.2)",
+    description: "Public JSON locale file for the i18n system. No auth required. Available for en, es, de, fr, pt.",
+    mockResponse: {
+      "nav.library": "Library",
+      "nav.add_game": "Add game",
+      "nav.import_folder": "Import folder",
+      "nav.big_box": "Big Box",
+      "settings.title": "Settings",
+      "settings.interface_language": "Interface language",
+    },
+  },
 ]
 
 export function ApiExplorer() {

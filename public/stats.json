@@ -3,7 +3,7 @@
   "forks_count": 0,
   "open_issues_count": 0,
   "license": "AGPL-3.0",
-  "latest_release": "v1.5.1",
-  "published_at": "2026-08-19T00:00:00Z",
-  "assets": ["install.sh", "OpenBox-1.5.1-sbom.json", "openbox-release.pub", "OpenBox-x86_64.AppImage", "OpenBox-x86_64.AppImage.sha256", "OpenBox-x86_64.AppImage.sig"]
+  "latest_release": "v1.7.2",
+  "published_at": "2026-09-01T00:00:00Z",
+  "assets": ["install.sh", "OpenBox-1.7.2-sbom.json", "openbox-release.pub", "OpenBox-x86_64.AppImage", "OpenBox-x86_64.AppImage.sha256", "OpenBox-x86_64.AppImage.sig", "OpenBox-x86_64.AppImage.zsync", "OpenBox-x86_64.flatpak"]
 }
