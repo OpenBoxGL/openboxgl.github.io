@@ -1,29 +1,41 @@
 ---
 title: Localization
-description: OpenBox ships in English today. How localization will arrive, and how to help.
+description: OpenBox ships in 5 languages. How the i18n system works, and how to add more.
 sidebar: false
 ---
 
 # Localization
 
-OpenBox ships in English. Earlier releases showed five interface languages, but only a handful of strings were ever translated, so the selector was honest about that and removed until real localization lands. The setting stays in **Settings > Interface language** with English as the only option, and the choice still persists in your library settings.
+OpenBox ships with full internationalization support for **English, Spanish, German, French, and Brazilian Portuguese** as of v1.7.2. The locale selector is in **Settings > Interface language**; switching re-translates the entire UI without a page reload.
 
-The UI string table in `parity_premium.strings_for(locale)` and `GET /api/premium/strings?locale=<code>` remain in the app source, so the seam for translation work is unchanged.
+## How it works
 
-## When localization lands
+The i18n system uses three layers:
 
-Localization has not landed; it is planned for a future release. The blocker is not the runtime seam; it is that the Web UI's user-facing strings are still embedded in the `static/*.js` ES modules, `app.js`, `settings.js`, `library.js`, `state.js`, and the dialog markup, rather than extracted into per-locale string files. A real localization release means:
+1. **Locale files**: JSON files in `locales/{en,es,de,fr,pt}.json` with a nested key structure (e.g. `nav.library`, `sidebar.search`, `settings.title`).
+2. **HTML translation**: `data-i18n="key"` attributes on translatable elements; `data-i18n-placeholder`, `data-i18n-title`, and `data-i18n-aria-label` for attribute translation.
+3. **JS translation**: `t(key, params)` from `static/i18n.js` with `{placeholder}` interpolation and automatic English fallback for missing keys.
 
-1. Extracting every user-facing string from `static/app.js` and the dialog markup into per-locale string files.
-2. A check that fails CI when a new string ships without a key in every locale.
-3. Shipping only languages that are complete, instead of partial dropdowns that mix languages.
+The locale is loaded via `fetch('/locales/{locale}.json')` on page load, with `en.json` as the canonical fallback. The available locales are exposed in `public_settings` as `available_locales`.
 
-## How to help
+## Gate enforcement
 
-If you want a translation to exist:
+`scripts/check_i18n.py` runs on every `make check` and verifies:
 
-1. Open an issue with the feature request template, naming the language.
-2. When localization work starts, translations will live in the app repository as per-locale string files; open a pull request there.
+- All 5 locale files have 100% key coverage (no missing keys in any locale).
+- All `data-i18n` and `t()` references in the codebase have corresponding keys in `en.json`.
+
+A locale file with missing keys will fail CI. This prevents shipping partial translations.
+
+## Adding a new language
+
+1. Create `locales/{code}.json` with the same key structure as `locales/en.json`.
+2. Add the locale code to `SUPPORTED_LOCALES` in `static/i18n.js`.
+3. Add the locale file route in `routes.py` and `web_app.py`.
+4. Add the locale to `PUBLIC_GET_PATHS` in `routes.py`.
+5. Add the locale to `available_locales` in `pkg/state/cache.py`.
+6. Run `python3 scripts/check_i18n.py` to verify 100% key coverage.
+7. Run `make check` to verify the full gate passes.
 
 ## Related pages
 

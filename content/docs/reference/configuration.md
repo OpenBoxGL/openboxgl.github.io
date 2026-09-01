@@ -47,7 +47,7 @@ Values already in the environment are never overridden by `.env`. The template l
 | `OPENBOX_WEBKIT_HARDWARE_ACCELERATION` | WebKitGTK hardware acceleration policy in native window (`always` or `on-demand`; default is `on-demand`). |
 | `OPENBOX_SNAPSHOT_DEBOUNCE` | Debounce delay in seconds (float) for background library state snapshot writes (defaults to `0.0`). |
 | `OPENBOX_INSTALL_DIR` | Custom installation directory used by `install.sh` (defaults to `~/.local/bin`). |
-| `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v1.7.1`) during `install.sh` execution. |
+| `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v1.7.2`) during `install.sh` execution. |
 | `OPENBOX_PYTHON` | Path to the Python interpreter invoked by the native host (defaults to `python3`). |
 | `OPENBOX_WEB_APP` | Path to `web_app.py` invoked by the native host. |
 

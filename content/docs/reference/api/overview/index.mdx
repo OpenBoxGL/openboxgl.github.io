@@ -76,13 +76,14 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 ## Versioned surface
 
 - **Frozen v1 Contract (`/api/v1/*`)**: Stable, frozen remote contract (enforced via `v1_contracts.json`).
-- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 and v1.7.1:
+- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0, v1.7.1, and v1.7.2:
   - **Setup Center**: `POST /api/v2/setup/preview`, `GET /api/v2/setup/preview/status`, `GET /api/v2/setup/preview/items`, `POST /api/v2/setup/preview/decision`, `POST /api/v2/setup/commit`
   - **Launch Doctor**: `POST /api/v2/launch/preflight`, `POST /api/v2/launch/preflight/batch`
-  - **Emulator Registry**: `GET /api/v2/emulators/registry`
+  - **Emulator Registry**: `GET /api/v2/emulators/registry` (with `?health=1` for BIOS/firmware/core status)
   - **Metadata Matches**: `GET /api/v2/metadata/matches/batches`, `GET /api/v2/metadata/matches/items`, `POST /api/v2/metadata/matches/apply`, `POST /api/v2/metadata/matches/reject`
   - **Durable Operations**: `GET /api/v2/jobs`, `GET /api/v2/jobs/events`, `POST /api/v2/jobs/{id}/cancel`, `POST /api/v2/jobs/{id}/retry`, `POST /api/v2/jobs/{id}/resume`
   - **Play Insights**: `GET /api/v2/insights/summary`, `GET /api/v2/insights/heatmap`
+  - **Backup Diff**: `GET /api/v2/backup/diff?archive=<name>` (v1.7.2)
 
 ### Machine-Readable Error Codes
 

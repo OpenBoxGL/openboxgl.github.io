@@ -4,6 +4,41 @@ description: Release notes for OpenBox, from the latest AppImage back to the fir
 sidebar: false
 ---
 
+## 1.7.2 (2026-09-01)
+
+### Localization
+
+- Full **i18n system** with `data-i18n` attributes in `index.html`, `t(key)` in JS via `static/i18n.js`, and JSON locale files for **English, Spanish, German, French, and Portuguese** in `locales/`.
+- Settings → Interface language selector populated from `available_locales` in `public_settings`; switching re-translates the UI without reload.
+- `scripts/check_i18n.py` gate verifies 100% key coverage across all locale files; wired into `make check`.
+
+### Scale Foundation
+
+- Optional **SQLite read model** (`pkg/state/sqlite_readmodel.py`) behind `OPENBOX_ENABLE_SQLITE_READ=1` env flag. Provides FTS5 full-text search (with LIKE fallback), indexed filtered queries, and GROUP BY facets. Disabled by default; zero behavior change when off.
+
+### Deck Polish
+
+- **Gamescope presets**: 8 profiles (Steam Deck, HD, 1080p, 1440p, 4K, integer, stretch, borderless) in `pkg/parity/parity_gamescope.py`; selectable in Settings → Controller.
+- **MangoHud** performance overlay toggle; `apply_mangohud_env()` sets `MANGOHUD=1` on game launch when enabled.
+- Controller bench tab in Settings with live gamepad SVG visualization.
+
+### Emulator Health
+
+- **BIOS SHA1 drift detection** in Launch Doctor: reports `BIOS_SHA1_DRIFT` when a BIOS file exists but its hash doesn't match the expected value in `emulator_defs/*.yaml`.
+- Health badge CSS classes (ok/warn/fail) with tokens in `static/app.css` and all 5 themes.
+
+### Smart Collections & Backup Diff
+
+- **Visual chip builder** for filter presets: `rules_to_chips()` and `chips_to_rules()` in `pkg/parity/parity_filter_presets.py`.
+- **Backup diff**: `GET /api/v2/backup/diff?archive=<name>` compares current library against a backup archive, returning added/removed/changed game IDs and settings change status.
+
+### Gates & Release
+
+- New runtime module `pkg/state/sqlite_readmodel.py` added to `runtime_modules.txt` (115 entries). 90% coverage (floor 85%).
+- 7 new GET routes (1 static + 5 locale JSONs + 1 backup diff v2).
+- ADRs: `docs/adr/0014-sqlite-read-model.md`, `docs/adr/0015-i18n-system.md`.
+- 15 new design tokens (6 gamepad + 9 health) across `static/app.css` and all 5 stock themes. Token baseline: 0.
+
 ## 1.7.1 (2026-08-29)
 
 ### Play Insights
