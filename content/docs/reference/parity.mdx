@@ -55,3 +55,37 @@ Each `done` row carries an acceptance check, and the parity test modules (`test_
 ## Status updates
 
 When behavior changes, `PARITY.md` is updated in the application repository and this page follows it. Do not claim a capability here before the source matrix and its acceptance check agree.
+
+## Parity internals
+
+The capability rows above are implemented by 27 modules in `pkg/parity/` (application repository), each with a root compatibility shim. This is an inventory, not a second status matrix — status still lives in the table above.
+
+| Module | Area |
+| --- | --- |
+| `parity_backup.py` | Library backups |
+| `parity_deeplinks.py` | Deep links |
+| `parity_discovery.py` | Discovery queue |
+| `parity_emulator_defs.py` | Emulator-def registry |
+| `parity_export.py` | Library export |
+| `parity_faugus.py` | Faugus integration |
+| `parity_filter_presets.py` | Filter presets |
+| `parity_gamescope.py` | Gamescope guest |
+| `parity_gameyfin.py` | Gameyfin storefront |
+| `parity_identity.py` | Identity / instance |
+| `parity_igdb.py` | IGDB metadata |
+| `parity_import.py` | Imports |
+| `parity_import_policy.py` | Import policy |
+| `parity_insights.py` | Play insights |
+| `parity_integrations.py` | Third-party integrations |
+| `parity_launch_doctor.py` | Launch Doctor preflight |
+| `parity_media.py` | Media jobs |
+| `parity_perf.py` | Performance projections |
+| `parity_premium.py` | Premium-equivalent workflows |
+| `parity_redact.py` | Log redaction |
+| `parity_saves.py` | Saves |
+| `parity_save_tools.py` | Save tools (Ludusavi/Hoard) |
+| `parity_screenscraper.py` | ScreenScraper matching |
+| `parity_setup_preview.py` | Setup Center preview |
+| `parity_storefront.py` | Storefront imports |
+| `parity_tracking.py` | Play tracking |
+| `parity_wine.py` | Wine/Proton prefix management |

@@ -198,6 +198,18 @@ Big Box reuses the palette and typography tokens, then scales them:
 
 Harbor Light is the only bundled light theme. It overrides `--bg`, `--panel`, `--panel2`, `--line`, `--text`, `--muted`, `--cyan`, `--green`, `--accent`, and `--danger` with paper tones, but the base stylesheet does not define a `--accent` variable or a `--sl-color-*` token set. Those names are theme-local, not part of the base contract. If you author a light theme, ensure `--focus`, `--active`, `--action`, and `--action-ink` remain legible against your light surfaces and that text contrast stays at least 4.5:1.
 
+## Token contract
+
+The `:root` block in `static/app.css` currently defines 141 `--*` custom properties — that block is the theme contract. Every stock theme overrides `:root` and (almost) nothing else:
+
+- `themes/Cinema Marquee.css`
+- `themes/Harbor Light.css` (the only bundled light theme)
+- `themes/Midnight Circuit.css`
+- `themes/Nordic Mist.css`
+- `themes/Phosphor Terminal.css`
+
+`scripts/check_tokens.py` enforces the contract in CI: raw hex outside `:root` must stay at the ratcheted baseline of 0. A new visual value means a new `:root` token plus its entry in each of the five theme files. For the full per-token table, read the `:root` block in `static/app.css` in the repository you are running — this page documents the palette groups, not every one of the 141 names.
+
 ## Related
 
 - [Themes](/themes/) for the five stock CSS themes and the import workflow

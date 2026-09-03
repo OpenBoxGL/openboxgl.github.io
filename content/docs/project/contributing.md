@@ -21,8 +21,8 @@ Optional local configuration loads from an explicit `OPENBOX_ENV_FILE`, the data
 Run the full suite before submitting a pull request:
 
 ```bash
-./run_all_tests.sh  # 82 files, 0 failures (see `scripts/check_tests.py` for 70% total + 54% web_app.py floors)
-make check      # ruff → v1 contract → compile → coverage floors; also `make version-check` for updates.py sync
+./run_all_tests.sh  # 85 files, 0 failures (see `scripts/check_tests.py` for 72.0% total + 54.0% web_app.py floors)
+make check      # scripts/check_tests.py: ruff, runtime_modules, v1 contract, version_sync, frontend, i18n, compile, tests, coverage floors, changed-line, new-module, tokens; also `make version-check` for updates.py sync
 ```
 
 Each `test_*.py` is a standalone contract test (plain asserts or unittest) run directly with `python3 -B <file>`. Iterate on one module with `python3 -B tests/test_catalog.py`. Packaging checks use `./build_appimage.sh` and `python3 -B tests/test_packaging.py`. All tests must pass on CI before a PR merges.
@@ -34,7 +34,7 @@ Each `test_*.py` is a standalone contract test (plain asserts or unittest) run d
 - Use explicit, user-facing error messages for validation failures.
 - Keep user-facing strings clear and neutral.
 - Do not commit ROMs, BIOS images, API tokens, or personal library data.
-- Update `README.md`, `PARITY.md`, and `CHANGELOG.md` when behavior changes (and `openbox.metainfo.xml`/`SECURITY.md` for releases and support policy).
+- Update `README.md`, `docs/PARITY.md`, and `docs/CHANGELOG.md` when behavior changes (and `openbox.metainfo.xml`/`SECURITY.md` for releases and support policy).
 - Commit messages are concise and imperative: `Add storefront startup auto-import setting`, `Fix emulator dependency check for missing flatpak`, `docs: update parity matrix for OBS attach workflow`.
 
 ## Plugins

@@ -9,7 +9,7 @@ This page is for maintainers publishing an AppImage release from `master`. The r
 
 1. Work from a clean `master` that tracks `origin/master`; confirm the target tag does not already exist.
 2. Bump `updates.py` `VERSION` to the new semver.
-3. Add a dated section to `CHANGELOG.md` (Keep a Changelog format) and the comparison links, and update `RELEASE_NOTES.md` (CI publishes it as the release body).
+3. Add a dated section to `docs/CHANGELOG.md` (Keep a Changelog format) and the comparison links, and update `RELEASE_NOTES.md` (CI publishes it as the release body).
 4. Prepend release metadata to `openbox.metainfo.xml`.
 5. Update the README release badge, `PARITY.md` latest-release text, the bug-report template's version field, and any branch/version references that should track the current release. Leave historical version references in old changelog/metainfo entries and completed specs unchanged.
 6. Run the local gates:
@@ -23,9 +23,13 @@ This page is for maintainers publishing an AppImage release from `master`. The r
 
 ## Build and verify the artifact locally
 
+Prerequisites: `gcc`, `pkg-config`, and the WebKitGTK dev package (`libwebkit2gtk-4.1-dev` on Debian/Ubuntu, `webkit2gtk-4.1` on Fedora) — the build compiles `native_host.c` against `webkit2gtk-4.1` and bundles the host `python3` interpreter and stdlib.
+
 ```bash
 bash build_appimage.sh
 ```
+
+`OPENBOX_ARCH` overrides architecture detection (`x86_64` or `aarch64`); the output is `OpenBox-$arch.AppImage` (default `OpenBox-x86_64.AppImage`).
 
 The build produces `OpenBox-x86_64.AppImage` and `OpenBox-x86_64.AppImage.zsync`, but does not regenerate the `.sha256` sidecar. Regenerate it explicitly:
 
