@@ -14,7 +14,7 @@ The diagnostic log is the first place to look when anything misbehaves. It recor
 
 ## Copy it
 
-**Settings > Copy diagnostic log** copies the current rotating log to the clipboard (or prints its path). This is the canonical way to attach logs to an issue.
+**Settings > Copy diagnostic log** copies a redacted diagnostic **summary** to the clipboard (it excludes secrets and the full log). This is the canonical way to attach diagnostics to an issue. The complete rotating log is available separately: `GET /api/log` returns its last 250 KB for local scripting.
 
 `GET /api/log` returns the last 250 KB of the log for local scripting.
 

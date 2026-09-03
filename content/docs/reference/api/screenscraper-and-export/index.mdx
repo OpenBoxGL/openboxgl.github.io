@@ -1,0 +1,104 @@
+---
+title: API ScreenScraper and export
+description: The 1.8.0 additive v2 workflows — per-ROM-hash ScreenScraper scraping and library export.
+---
+
+These are additive `/api/v2/*` routes introduced in 1.8.0. All require `X-OpenBox-Token: TOKEN`; POST bodies are JSON objects. Durable operations return `202` with a `job_id` you can track through `GET /api/v2/jobs` and cancel with `POST /api/v2/jobs/cancel`.
+
+## ScreenScraper provider
+
+Per-ROM-hash metadata and media scraping against ScreenScraper. Credentials are required: `SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` in `~/.env` (optional `SCREENSCRAPER_DEV_ID`/`SCREENSCRAPER_DEV_PASSWORD`). Requests are throttled to 1/second with 429/5xx backoff and a 30-day disk cache under `cache/screenscraper/`.
+
+<ApiEndpoint method="GET" path="/api/v2/screenscraper/status">
+
+```json
+{ "configured": true, "cache_entries": 42 }
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/screenscraper/search">
+
+Query parameters: `?q=<title>&platform=<platform>`. Title search against ScreenScraper; exact matches first.
+
+```json
+{ "results": [ { "scraper_id": "12345", "name": "Super Mario World", "platform": "SNES" } ] }
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/screenscraper/test">
+
+Verifies the configured credentials.
+
+```json
+{ "ok": true, "user": { "id": "u", "level": 1 } }
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/screenscraper/info">
+
+Body: `{ "scraper_id": "12345", "platform": "SNES" }` or `{ "rom_path": "/path/to/rom.sfc", "platform": "SNES" }` (ROM paths are matched by md5/sha1/crc hash, 512 MB cap). Returns the metadata dict for the match.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/screenscraper/match">
+
+Body: `{ "ids": ["GAME_ID", ...] }` (batch ≤ 100, cancellable). Queues a durable job:
+
+```json
+{ "state": "queued", "job_id": "screenscraper-match" }
+```
+
+The worker result is `{ "matches": [...], "count": 2 }`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/screenscraper/apply">
+
+Body: `{ "id": "GAME_ID", "scraper_id": "12345", "rom_path": "...", "fields": [...], "media": [...], "replace_existing": false }`. Queues a durable job that downloads media outside the state lock:
+
+```json
+{ "state": "queued", "job_id": "screenscraper-apply" }
+```
+
+The worker result is `{ "applied": true, "game": "Super Mario World", "media": [...] }`.
+
+</ApiEndpoint>
+
+## Library export
+
+Export the library (or a scope of it) to JSON or CSV. Only the game-field projection is exported — settings, credentials, webhooks, and history are never included. Media paths are opt-in. Files land in `<data dir>/exports/` with the newest 10 kept.
+
+<ApiEndpoint method="POST" path="/api/v2/library/export">
+
+Body: `{ "format": "json" | "csv", "scope": "all" | "platform" | "playlist", "scope_name": "...", "include_media_paths": false }`. Queues a durable job:
+
+```json
+{ "state": "queued", "job_id": "library-export" }
+```
+
+The worker result is `{ "file": "openbox-export-2026-09-03.json", "count": 412 }`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/library/export/exports">
+
+```json
+{ "exports": [ { "name": "openbox-export-2026-09-03.json", "size": 182044, "created": 1756848000 } ] }
+```
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/library/export/download">
+
+Query parameter: `?file=<name>`. Names are validated against a strict regex and directory containment; the response is the file attachment with `Content-Disposition`. Unknown or invalid names return `404`.
+
+</ApiEndpoint>
+
+## See also
+
+- [API overview](/reference/api/overview/) for the versioned surface and error codes
+- [Media providers](/guides/media-providers/) for the ScreenScraper setup guide
+- [Background jobs](/reference/background-jobs/) for the durable job lifecycle

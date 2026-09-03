@@ -19,7 +19,7 @@ RetroAchievements matches games by SHA-256 content hash of the ROM file, not by 
 ## Set it up
 
 1. **Get credentials.** Create a RetroAchievements account and generate a web API key on your RetroAchievements profile page.
-2. **Enter them in Settings > RetroAchievements** (username + web API key), or set the environment variables in `~/.env`:
+2. **Enter them in Tools → Achievements** (username + web API key), or set the environment variables in `~/.env`:
   - `RETROACHIEVEMENTS_USERNAME` (aliases `RA_USERNAME`, `OPENBOX_RA_USERNAME`)
   - `RETROACHIEVEMENTS_API_KEY` (aliases `RA_API_KEY`, `RETROACHIEVEMENTS_KEY`, `OPENBOX_RA_API_KEY`)
 3. Credentials are validated against `API_GetUserProfile.php` before saving and stored in `retroachievements.json` (mode `0o600`).

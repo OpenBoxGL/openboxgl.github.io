@@ -83,8 +83,12 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `watch_folders` | `[]` | List of at most 50 absolute, existing directories; duplicates removed |
 | `screensaver_seconds` | 90 | `0` (off) or between 30 and 3600; values 1-29 are rejected |
 | `controller_map` | `{}` | Actions limited to `play`, `back`, `favorite`, `random`, `page_left`, `page_right`, `pause`, `menu`; button numbers 0-31 |
-| `gamescope_preset` | `""` | Selected gamescope preset name (one of: `steam-deck`, `steam-deck-hd`, `1080p`, `1440p`, `4k`, `integer`, `stretch`, `borderless`). Empty string = no preset. (v1.7.2+) |
+| `gamescope_preset` | `""` | Selected gamescope preset name (one of: `deck`, `deck_hd`, `1080p`, `1440p`, `4k`, `integer`, `stretch`, `borderless`, or a custom preset name). Empty string = no preset. (v1.7.2+) |
 | `mangohud_enabled` | `false` | Boolean; when true, `MANGOHUD=1` is set on game launch to enable the MangoHud performance overlay. (v1.7.2+) |
+| `gamescope_custom_presets` | `[]` | Up to 16 user-defined gamescope presets (unique names, bounded integer args). A custom name shadows a stock preset; a per-game `gamescope_preset` override wins over the global choice. (v1.8.0+) |
+| `list_sort` | `""` | List-view sort column key (e.g. `title`, `rating`); empty = default order. (v1.8.0+) |
+| `list_sort_dir` | `""` | List-view sort direction: `""` (ascending) or `"reversed"`. (v1.8.0+) |
+| `show_insights` | `true` | Boolean; toggles the Play Insights panel in the library pane. (v1.8.0+) |
 | `locale` | `"en"` | Interface language code (one of: `en`, `es`, `de`, `fr`, `pt`). (v1.7.2+) |
 | `progress_automation_enabled` | `false` | Boolean; enables/disables automatic progress changes |
 | `progress_automation_play_minutes` | 30 | 0 to 100,000, minutes before marking Playing |
@@ -122,7 +126,6 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `platform_categories` | Built-in mapping | Platform-to-category overrides (Nintendo, Sony, Microsoft, Computer, Arcade, Adventure, Other) |
 | `list_columns` | Defaults | Capped at 12 columns per platform or global view |
 | `library_view` | "grid" | Current persistent view preference |
-| `locale` | "en" | Language locale code (en, es, de, fr, pt). Defaults to en. |
 | `hidden_sidebar_sections` | `[]` | Capped at 20 entries |
 | `tray_enabled` | `false` | Boolean, shows system tray icon |
 | `minimize_to_tray` | `false` | Boolean, minimizes to tray instead of closing |

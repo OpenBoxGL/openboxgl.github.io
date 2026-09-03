@@ -39,7 +39,7 @@ Pressing **M** (or Start on gamepad) opens the Filter and Sort menu with 4 inter
 
 ### Controller prompt packs
 
-Activating a controller media pack (`controller-xbox`, `controller-playstation`, or `controller-nintendo`) via Settings or `POST /api/premium/media-packs/apply` automatically updates the on-screen button legend and prompts to match your physical gamepad layout (`controller_prompt_pack`). Toggle on-screen button hints with `controller_prompt_hint`.
+Activating a controller media pack (`controller-xbox` or `controller-playstation`) via Settings or `POST /api/premium/media-packs/apply` automatically updates the on-screen button legend and prompts to match your physical gamepad layout (`controller_prompt_pack`). Toggle on-screen button hints with `controller_prompt_hint`.
 
 The **screensaver / attract mode** shows a rotating random game after a delay. Settings has two related fields: **Big Box screensaver delay** (`screensaver_seconds`, default 90) and **Attract mode delay** (`attract_mode_seconds`). The screensaver reads `attract_mode_seconds`, which falls back to `screensaver_seconds` when unset, and the Settings dialog keeps both in sync with the same fallback. Both are 0-3600 seconds (0 disables; values 1-29 are rejected). Any control returns; Play launches the displayed game. The screensaver uses the game's background or cover and plays its video when present. An optional **Big Box startup video** plays on entry, and **Library background music** with an optional **Mix video audio with background music** toggle (lower music volume when mixing) plays in Big Box. Battery level and the controller prompt hint display in the Big Box status bar.
 

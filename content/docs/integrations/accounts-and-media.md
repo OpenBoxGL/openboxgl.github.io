@@ -8,7 +8,7 @@ RetroAchievements, IGDB, EmuMovies, and Bezel Project integrations are optional.
 ## RetroAchievements
 
 - **What it does**: match ROMs to achievement sets by hash, show progress (earned, hardcore, beaten, mastered), serve badges, and inject credentials into RetroArch/Dolphin/PCSX2 configs so emulators enable achievements.
-- **Setup**: Settings > RetroAchievements with your username and web API key, or environment variables:
+- **Setup**: Tools → Achievements with your username and web API key, or environment variables:
  - `RETROACHIEVEMENTS_USERNAME` (aliases `RA_USERNAME`, `OPENBOX_RA_USERNAME`)
  - `RETROACHIEVEMENTS_API_KEY` (aliases `RA_API_KEY`, `RETROACHIEVEMENTS_KEY`, `OPENBOX_RA_API_KEY`)
 - Credentials are validated against `API_GetUserProfile.php` before saving and stored in `retroachievements.json` (mode `0o600`).

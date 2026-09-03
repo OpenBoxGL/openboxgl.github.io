@@ -7,7 +7,7 @@ OpenBoxGL enriches games from several optional media and metadata providers. Thi
 
 <Callout type="note" title="Which providers need credentials">
 
-Five providers require **no credentials** and work out of the box: LaunchBox Games Database (public download), Steam (per App ID), GOG (embedded data), Bezel Project (GitHub public repo), and IGDB when you supply `IGDB_CLIENT_ID`/`IGDB_CLIENT_SECRET`. Only EmuMovies requires a paid licensed account. All other providers are optional, your library functions perfectly with zero media providers configured.
+Four providers require **no credentials** and work out of the box: LaunchBox Games Database (public download), Steam (per App ID), GOG (embedded data), and Bezel Project (GitHub public repo). IGDB and ScreenScraper need credentials in `~/.env`. Only EmuMovies requires a paid licensed account. All other providers are optional, your library functions perfectly with zero media providers configured.
 
 </Callout>
 
@@ -21,7 +21,7 @@ Five providers require **no credentials** and work out of the box: LaunchBox Gam
 | GOG | Cover + background for Heroic/GOG entries | None |
 | EmuMovies | Licensed media (box art) | Licensed account (`EMUMOVIES_USERNAME`/`EMUMOVIES_PASSWORD`) |
 | Bezel Project | Per-platform bezel sets for RetroArch-style presentation | None |
-| ScreenScraper | Per-ROM-hash metadata + media for emulated games (ROM hash matching) | Optional (`SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` in `~/.env`; anonymous access is rate-limited harder) |
+| ScreenScraper | Per-ROM-hash metadata + media for emulated games (ROM hash matching) | Required (`SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` in `~/.env`) |
 
 ## Set up metadata
 
@@ -39,7 +39,7 @@ Five providers require **no credentials** and work out of the box: LaunchBox Gam
 - **EmuMovies**: licensed account in Settings or `~/.env`, then download per game. Downloads expect an `image/` content type and cap at 32 MiB.
 - **Download bezel** fetches Bezel Project artwork per platform and extracts into `<data-dir>/bezels`; a corrupt replacement never destroys the working set (staging + swap).
 - **Capture screenshot** uses the first available of gnome-screenshot, spectacle, scrot, or ImageMagick `import`, appending to the game's screenshots.
-- **ScreenScraper** (v1.8.0): matches emulated games by ROM hash (md5/sha1/crc, 512 MB cap) against ScreenScraper's endpoints, so ROMs with generic filenames still get correct metadata and media. Throttled to 1 request/second with 429/5xx backoff and a 30-day disk cache under `cache/screenscraper/`. Media is picked by your region priority and URLs are forced to https. Credentials are optional but recommended; set `SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` in `~/.env`. The metadata dialog has **ScreenScraper search** and **hash-match** actions; hash-match can run as a batch (up to 100 games, cancellable) or as a durable apply job that downloads media outside the state lock.
+- **ScreenScraper** (v1.8.0): matches emulated games by ROM hash (md5/sha1/crc, 512 MB cap) against ScreenScraper's endpoints, so ROMs with generic filenames still get correct metadata and media. Throttled to 1 request/second with 429/5xx backoff and a 30-day disk cache under `cache/screenscraper/`. Media is picked by your region priority and URLs are forced to https. Credentials are required: set `SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` in `~/.env` (there is no anonymous access path). The metadata dialog has **ScreenScraper search** and **hash-match** actions; hash-match can run as a batch (up to 100 games, cancellable) or as a durable apply job that downloads media outside the state lock.
 
 ## Region priority and download limits
 

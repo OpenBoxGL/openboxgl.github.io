@@ -16,7 +16,7 @@ No OpenBox account is required. Optional integrations may have their own account
 
 ## What operating systems are supported?
 
-OpenBox targets Linux desktops, laptops, Steam Deck systems, and handheld PCs. Source installs require Python 3.10 or newer; the AppImage bundles its own Python runtime. See [Installation](/install/).
+OpenBox targets Linux desktops, laptops, Steam Deck systems, and handheld PCs on **x86_64 and aarch64**. Release artifacts are built for both architectures — pick the AppImage matching `uname -m`, and the built-in updater only offers the artifact matching the running architecture. Source installs require Python 3.10 or newer; the AppImage bundles its own Python runtime. See [Installation](/install/).
 
 ## Is my data sent anywhere?
 
@@ -44,7 +44,7 @@ No. OpenBox is free and open source (AGPL-3.0). The workflows that LaunchBox gat
 
 ## Can I use a gamepad?
 
-Yes. The desktop UI supports gamepad navigation, and Big Box is controller-native with configurable button mapping. See [Big Box and handhelds](/guides/big-box-and-handhelds/).
+Yes. Since 1.8.0 the library grid and list support full keyboard and gamepad navigation (arrows/Home/End/Page, `f` favorite, Escape clear) with a configurable controller map, and Big Box is controller-native. See [Library navigation](/guides/library/navigation/) and [Big Box and handhelds](/guides/big-box-and-handhelds/).
 
 ## Does it work on the Steam Deck?
 

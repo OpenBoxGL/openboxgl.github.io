@@ -30,7 +30,7 @@ Every plugin requires a `plugin.json` manifest placed in its directory under `~/
 | Field | Type | Description |
 | --- | --- | --- |
 | `id` | string | Unique plugin identifier (alphanumeric, hyphens, underscores). |
-| `name` | string | Display name shown in Settings → Plugins. |
+| `name` | string | Display name shown in Tools → Plugins. |
 | `version` | string | Semantic version string (e.g. `1.0.0`). |
 | `description` | string | Optional short summary of plugin capabilities. |
 | `author` | string | Optional author or organization name. |
@@ -107,6 +107,6 @@ To bypass sandboxing on development setups, set `OPENBOX_ALLOW_UNSANDBOXED_PLUGI
 
 1. Create directory `~/.local/share/openbox-game-launcher/plugins/my-plugin/`.
 2. Add `plugin.json` and `plugin.py`. Make `plugin.py` executable (`chmod +x plugin.py`).
-3. Open OpenBox → **Tools** → **Personalize** → **Plugins**.
+3. Open OpenBox → **Tools** → **Plugins**.
 4. Enable your plugin in the list.
 5. Review plugin execution logs in `~/.local/share/openbox-game-launcher/logs/plugins.log`.
