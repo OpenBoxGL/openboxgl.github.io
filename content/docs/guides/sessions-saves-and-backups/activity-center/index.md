@@ -8,8 +8,8 @@ OpenBox manages all background operations through the durable **Operation Servic
 ## Features
 
 - **Activity Drawer**: Click the **Activity** button (`#activityButton`) in the top bar to inspect running and historical operations.
-- **Real-Time Progress**: Live Server-Sent Events (SSE) stream progress updates, byte counters, and status messages (`GET /api/v2/jobs/events`).
-- **Cancellation & Safety**: In-flight operations can be cancelled cleanly without leaving corrupted or half-written states (`POST /api/v2/jobs/{id}/cancel`).
+- **Real-Time Progress**: Live Server-Sent Events (SSE) stream progress updates, byte counters, and status messages (`GET /api/events`).
+- **Cancellation & Safety**: In-flight operations can be cancelled cleanly without leaving corrupted or half-written states (`POST /api/v2/jobs/cancel` with `job_id` in the JSON body).
 - **Restart Recovery**: If OpenBox is closed or restarted while an operation is running, the task is marked `interrupted`. You can resume or retry it with one click.
 
 ## Supported Operations

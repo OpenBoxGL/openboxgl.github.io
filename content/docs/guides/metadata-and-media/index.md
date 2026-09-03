@@ -15,11 +15,11 @@ Select a result to apply fields: name, platform, year, developer, publisher, gen
 
 After batch imports, OpenBox provides a dedicated **Metadata Match Review** queue:
 
-- **Review Batches**: `GET /api/v2/metadata/matches/batches` lists import batches with unresolved or pending metadata candidate matches.
+- **Preview Matches**: `POST /api/v2/metadata/matches/preview` queues a metadata match preview for a batch or game set; `GET /api/v2/metadata/matches/preview?preview_id=` retrieves the preview result with candidate scores and field previews.
 - **Inspect Candidates**: `GET /api/v2/metadata/matches/items` returns paginated candidate lists with confidence scores and field previews.
-- **Apply or Reject**:
+- **Apply or Decide**:
+  - `POST /api/v2/metadata/matches/decisions`: Submits per-item accept/reject decisions for matched candidates.
   - `POST /api/v2/metadata/matches/apply`: Confirms matched metadata and artwork for selected items or entire batches.
-  - `POST /api/v2/metadata/matches/reject`: Dismisses proposed candidates without altering game records.
 
 **Search IGDB** is an alternative provider; it needs `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET` in `~/.env` (Twitch developer app credentials). IGDB results apply name, summary, genres, and platforms.
 

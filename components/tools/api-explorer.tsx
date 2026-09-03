@@ -120,7 +120,7 @@ const ENDPOINTS: EndpointDef[] = [
     description: "Self-diagnostic audit checking database integrity, snapshot consistency, and disk state.",
     mockResponse: {
       status: "ok",
-      version: "1.7.2",
+      version: "1.8.0",
       python_version: "3.12.3",
       db_integrity: "valid",
       snapshots_available: 5,

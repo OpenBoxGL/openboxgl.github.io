@@ -76,14 +76,16 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 ## Versioned surface
 
 - **Frozen v1 Contract (`/api/v1/*`)**: Stable, frozen remote contract (enforced via `v1_contracts.json`).
-- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0, v1.7.1, and v1.7.2:
-  - **Setup Center**: `POST /api/v2/setup/preview`, `GET /api/v2/setup/preview/status`, `GET /api/v2/setup/preview/items`, `POST /api/v2/setup/preview/decision`, `POST /api/v2/setup/commit`
+- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through v1.8.0:
+  - **Setup Center**: `POST /api/v2/setup/preview`, `GET /api/v2/setup/preview`, `GET /api/v2/setup/preview/items`, `POST /api/v2/setup/preview/decisions`, `POST /api/v2/setup/preview/revalidate`, `POST /api/v2/setup/commit`, `GET /api/v2/setup/summary`
   - **Launch Doctor**: `POST /api/v2/launch/preflight`, `POST /api/v2/launch/preflight/batch`
   - **Emulator Registry**: `GET /api/v2/emulators/registry` (with `?health=1` for BIOS/firmware/core status)
-  - **Metadata Matches**: `GET /api/v2/metadata/matches/batches`, `GET /api/v2/metadata/matches/items`, `POST /api/v2/metadata/matches/apply`, `POST /api/v2/metadata/matches/reject`
-  - **Durable Operations**: `GET /api/v2/jobs`, `GET /api/v2/jobs/events`, `POST /api/v2/jobs/{id}/cancel`, `POST /api/v2/jobs/{id}/retry`, `POST /api/v2/jobs/{id}/resume`
+  - **Metadata Matches**: `POST /api/v2/metadata/matches/preview`, `GET /api/v2/metadata/matches/preview`, `GET /api/v2/metadata/matches/items`, `POST /api/v2/metadata/matches/decisions`, `POST /api/v2/metadata/matches/apply`
+  - **Durable Operations**: `GET /api/v2/jobs`, `GET /api/v2/jobs/items`, `POST /api/v2/jobs/cancel`, `POST /api/v2/jobs/retry`, `POST /api/v2/jobs/resume`
   - **Play Insights**: `GET /api/v2/insights/summary`, `GET /api/v2/insights/heatmap`
   - **Backup Diff**: `GET /api/v2/backup/diff?archive=<name>` (v1.7.2)
+  - **ScreenScraper**: `GET /api/v2/screenscraper/status`, `GET /api/v2/screenscraper/search`, `POST /api/v2/screenscraper/test`, `POST /api/v2/screenscraper/info`, `POST /api/v2/screenscraper/match` (batch, cancellable), `POST /api/v2/screenscraper/apply` (durable job that downloads media outside the state lock) (v1.8.0)
+  - **Library Export**: `POST /api/v2/library/export` (queues durable job), `GET /api/v2/library/export/exports`, `GET /api/v2/library/export/download` (v1.8.0)
 - **Locale files** (public, no auth): `GET /locales/{en,es,de,fr,pt}.json` — serves JSON locale files for the i18n system (v1.7.2)
 
 ### Machine-Readable Error Codes

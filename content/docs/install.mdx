@@ -52,7 +52,7 @@ The source install uses only the Python standard library, there is no `pip insta
  Download the installer from a specific signed release, inspect it, then run it. The installer verifies the release public-key pin, SHA-256 checksum, and Ed25519 signature before installing to `~/.local/bin`:
 
  ```bash
- VERSION=1.7.2
+ VERSION=1.8.0
  curl --proto '=https' --tlsv1.2 --fail --location \
    --output install.sh \
    "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -70,17 +70,17 @@ The source install uses only the Python standard library, there is no `pip insta
 
  #### Manual download
 
- 1. Download the latest release from [GitHub Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest). The file is named `OpenBox-x86_64.AppImage`.
+ 1. Download the latest release from [GitHub Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest). Release artifacts are built for both **x86_64** and **aarch64**; pick the one matching your CPU (`uname -m`).
  2. Make it executable. Downloads are not executable by default, and a non-executable AppImage reports "Permission denied" when you try to run it:
 
  ```bash
- chmod +x OpenBox-x86_64.AppImage
+ chmod +x OpenBox-$(uname -m).AppImage
  ```
 
  3. Run it:
 
  ```bash
- ./OpenBox-x86_64.AppImage
+ ./OpenBox-$(uname -m).AppImage
  ```
 
  The first launch starts the local server, writes the per-launch token files into the data directory, and opens the native WebKitGTK window. If WebKitGTK is missing, the launcher prints an install hint and falls back to a chrome-less app window (then your default browser).

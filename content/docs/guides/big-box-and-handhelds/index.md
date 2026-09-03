@@ -89,6 +89,10 @@ Settings → Controller includes a **gamescope preset** selector with 8 display 
 
 When a preset is selected, OpenBoxGL applies the corresponding gamescope command-line arguments on game launch. The preset does not affect the OpenBoxGL window itself — only the games it launches.
 
+## Custom gamescope presets (v1.8.0)
+
+Settings → Controller also supports **user-defined presets**: up to 16 custom presets with unique names and bounded integer arguments. A custom preset whose name matches a stock preset shadows it. A per-game `gamescope_preset` override (set in the game editor's Launch tab) wins over the global preset at launch.
+
 ## MangoHud performance overlay (v1.7.2)
 
 Settings → Controller includes a **MangoHud** toggle. When enabled, `MANGOHUD=1` is set in the environment when launching games, causing the MangoHud on-screen performance overlay (FPS, CPU/GPU usage, frame pacing) to appear. MangoHud must be installed on your system separately.

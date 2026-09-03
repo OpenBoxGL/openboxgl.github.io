@@ -21,7 +21,7 @@ Every submitted operation is recorded with these fields:
 | `error` | Error message on failure |
 | `metadata` | Context-specific parameters and batch identifiers |
 
-Workers execute on a managed `ThreadPoolExecutor` with 4 concurrent slots (`openbox-job-*`). Live status and incremental events stream to the frontend over Server-Sent Events (SSE) via `/api/v2/jobs/events`.
+Workers execute on a managed `ThreadPoolExecutor` with 4 concurrent slots (`openbox-job-*`). Live status and incremental events stream to the frontend over Server-Sent Events (SSE) via `/api/events`.
 
 ## States and lifecycle transitions
 
@@ -40,7 +40,7 @@ queued -> running -> cancelling -> cancelled
 - **`done`**: Operation completed successfully.
 - **`partial`**: Operation completed with some skipped or non-fatal item errors.
 - **`error`**: Unrecoverable failure occurred.
-- **`interrupted`**: Process restart occurred while job was in flight. Can be resumed or retried via `POST /api/v2/jobs/{id}/resume` or `POST /api/v2/jobs/{id}/retry`.
+- **`interrupted`**: Process restart occurred while job was in flight. Can be resumed or retried via `POST /api/v2/jobs/resume` or `POST /api/v2/jobs/retry` (both accept `job_id` in the JSON body).
 
 ## Durability & Recovery (`operations.json`)
 
@@ -52,9 +52,11 @@ Unlike legacy in-memory job queues, all operations are persisted atomically to `
 ## Observability & Endpoints
 
 - `GET /api/v2/jobs`: Lists active, pending, and recent operations.
-- `GET /api/v2/jobs/events`: SSE stream of real-time operation state and progress updates.
-- `POST /api/v2/jobs/{id}/cancel`: Cancels an in-flight operation.
-- `POST /api/v2/jobs/{id}/retry`: Retries a failed or interrupted operation.
+- `GET /api/v2/jobs/items`: Paginated list of operation items for a specific job (`?job_id=`).
+- `POST /api/v2/jobs/cancel`: Cancels an in-flight operation (accepts `job_id` in JSON body).
+- `POST /api/v2/jobs/retry`: Retries a failed or interrupted operation (accepts `job_id` in JSON body).
+- `POST /api/v2/jobs/resume`: Resumes an interrupted operation (accepts `job_id` in JSON body).
+- `GET /api/events`: SSE stream of real-time operation state and progress updates.
 - `GET /api/jobs`: Backwards-compatible legacy route returning combined live and finished jobs.
 
 ## Related
