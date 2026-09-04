@@ -45,9 +45,23 @@ Rescan all configured watch folders once. Returns `{"added", "found", "errors": 
 
 ## Storefront imports
 
-### `POST /api/import/steam` | `POST /api/import/heroic` | `POST /api/import/lutris`
+<ApiEndpoint method="POST" path="/api/import/steam">
 
-Import installed games from local manifests. Steam reads `steamapps/appmanifest_*.acf` across all library folders; Heroic reads `legendary`/`gog`/`nile` installed manifests; Lutris shells out to `lutris --list-games --installed --json` (or Flatpak) with a 30-second timeout. Missing launchers raise `400` (for example, `"Steam, Flatpak, or xdg-open is required to launch imported Steam games."`, `"xdg-open is required to launch imported Heroic games."`, `"Lutris or Flatpak is required to import Lutris games."`). Returns `{"added", "found"}`. The health route `POST /api/health/dedupe` removes library duplicates by identity.
+Import installed Steam games from local manifests (`steamapps/appmanifest_*.acf` across all library folders). Missing launcher raises `400` (for example, `"Steam, Flatpak, or xdg-open is required to launch imported Steam games."`). Returns `{"added", "found"}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/import/heroic">
+
+Import installed Heroic games (`legendary`/`gog`/`nile` installed manifests). Missing launcher raises `400` (`"xdg-open is required to launch imported Heroic games."`). Returns `{"added", "found"}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/import/lutris">
+
+Import installed Lutris games (`lutris --list-games --installed --json`, or Flatpak) with a 30-second timeout. Missing launcher raises `400` (`"Lutris or Flatpak is required to import Lutris games."`). Returns `{"added", "found"}`. The health route `POST /api/health/dedupe` removes library duplicates by identity.
+
+</ApiEndpoint>
 
 <ApiEndpoint method="POST" path="/api/import/arcade">
 
@@ -56,9 +70,23 @@ Import installed games from local manifests. Steam reads `steamapps/appmanifest_
 
 </ApiEndpoint>
 
-### `POST /api/import/scummvm` | `POST /api/import/rpcs3` | `POST /api/import/vita3k`
+<ApiEndpoint method="POST" path="/api/import/scummvm">
 
-Scan ScummVM (`scummvm.ini` sections), RPCS3 (`dev_hdd0/game/*/PARAM.SFO` titles), and Vita3K (`ux0/app/*/sce_sys/param.sfo` titles) libraries. Returns `{"added", "found"}`.
+Scan the ScummVM library (`scummvm.ini` sections). Returns `{"added", "found"}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/import/rpcs3">
+
+Scan the RPCS3 library (`dev_hdd0/game/*/PARAM.SFO` titles). Returns `{"added", "found"}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/import/vita3k">
+
+Scan the Vita3K library (`ux0/app/*/sce_sys/param.sfo` titles). Returns `{"added", "found"}`.
+
+</ApiEndpoint>
 
 <ApiEndpoint method="GET" path="/api/faugus/status">
 
@@ -264,9 +292,17 @@ Install every not-installed emulator. Returns `202 {"state":"installing"}`; comp
 
 </ApiEndpoint>
 
-### `POST /api/emulators/update` | `POST /api/emulators/update-all`
+<ApiEndpoint method="POST" path="/api/emulators/update">
 
-`{"app_id"}` updates one (Flatpak required; `400` `"Flatpak is required for emulator updates."`); update-all updates installed flatpak-mode emulators. Returns `202 {"state":"updating"}`.
+`{"app_id"}` updates one emulator (Flatpak required; `400` `"Flatpak is required for emulator updates."`). Returns `202 {"state":"updating"}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/emulators/update-all">
+
+Updates all installed flatpak-mode emulators. Returns `202 {"state":"updating"}`.
+
+</ApiEndpoint>
 
 <ApiEndpoint method="POST" path="/api/emulators/open">
 
@@ -289,9 +325,17 @@ Install every not-installed emulator. Returns `202 {"state":"installing"}`; comp
 
 </ApiEndpoint>
 
-### `GET /api/emulators/scan-configs` | `POST /api/emulators/scan-configs`
+<ApiEndpoint method="GET" path="/api/emulators/scan-configs">
 
-Saved scan configurations (`folder`, `emulator_id`, `auto_update`). The auto-import worker executes configs with `auto_update: true`.
+Lists saved scan configurations (`folder`, `emulator_id`, `auto_update`). The auto-import worker executes configs with `auto_update: true`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/emulators/scan-configs">
+
+Saves a scan configuration (`folder`, `emulator_id`, `auto_update`). Returns `{"config": {...}}`.
+
+</ApiEndpoint>
 
 <ApiEndpoint method="GET" path="/api/v2/emulators/registry">
 

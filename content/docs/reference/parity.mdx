@@ -15,7 +15,7 @@ Every workflow in `PARITY.md` is marked `done`, or carries a decision status for
 
 ## Capability status
 
-The current matrix lists 87 LaunchBox-aligned capabilities as <StatusBadge status="done" /> (including Localization with 5 languages: English, Spanish, German, French, and Portuguese), including the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), all without a subscription. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
+The source matrix lists 111 LaunchBox-aligned capabilities as <StatusBadge status="done" /> (including Localization with 5 languages: English, Spanish, German, French, and Portuguese), including the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), all without a subscription. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
 
 | Area | Status | Notes |
 | --- | --- | --- |
@@ -31,6 +31,10 @@ The current matrix lists 87 LaunchBox-aligned capabilities as <StatusBadge statu
 | Plugins | <StatusBadge status="done" /> | `library`, `before_launch`, `after_session` hooks |
 | Local automation | <StatusBadge status="done" /> | Queue, tags, notifications, HMAC-signed webhooks |
 | Premium workflows (free) | <StatusBadge status="done" /> | Custom fields, ESRB filters, list view, media packs, cloud stats sync |
+| Discovery (v1.9.0) | <StatusBadge status="done" /> | "What should I play?" picker, Constellation graph, SQLite FTS search |
+| Insights (v1.9.0) | <StatusBadge status="done" /> | Wrapped year-in-review, Mastery Map, history timeline |
+| Party & personalization (v1.9.0) | <StatusBadge status="done" /> | Game Night party mode, Big Box video snaps, Mood Match adaptive theming |
+| Migration & sync (v1.9.0) | <StatusBadge status="done" /> | LaunchBox XML import, full-library mounted-folder sync, manual shelf entries |
 
 ## Intentionally not replicated on Linux
 
@@ -43,7 +47,7 @@ Windows-only workflows without a Linux equivalent remain documented as boundarie
 | Teknoparrot arcade launcher | Use Lutris/Wine launch profiles for supported titles |
 | Native Xbox PC package scanning | Use Heroic/Lutris/Xbox Cloud entries instead |
 | Bundled proprietary media packs | Replaced by free bundled media packs in OpenBox |
-| LaunchBox Premium account cloud library | Replaced by mounted-folder sync plus local backups |
+| LaunchBox Premium account cloud library | Replaced by OpenBox's own mounted-folder sync plus local backups (no LaunchBox account involved) |
 | LaunchBox online theme storefront | Replaced by local CSS theme import and open-folder workflow |
 
 ## How to read the evidence

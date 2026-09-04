@@ -4,6 +4,31 @@ description: Release notes for OpenBox, from the latest AppImage back to the fir
 sidebar: false
 ---
 
+## 1.9.0 (2026-09-04) — Look, Discover, Play
+
+### Mood Match — Adaptive Cover Theming
+- New **Settings → Appearance** toggles "Adaptive cover theming" (`mood_match_enabled`) and "Adaptive theming in Big Box" (`mood_match_bigbox`), off by default. The UI tints itself from a 5-color palette extracted live from the selected cover.
+
+### What Should I Play? (Picker)
+- New picker replaces the random "Surprise me" button: pick by available time, mood (action/chill/story/retro/party), familiarity (new/favorite), and players. Top pick comes with an explanatory reason plus Launch / Details / Again actions (`POST /api/v2/library/pick`).
+
+### Constellation
+- New **Tools → Constellation**: full-screen, pan/zoomable relationship graph by series, developer, publisher, genre, platform family, and co-play history (`GET /api/v2/library/constellation`).
+
+### Wrapped + Timeline + Mastery
+- New **Insights → Wrapped**: printable "Your Year in Games" report (`GET /api/v2/insights/wrapped?year=YYYY`); **History → Timeline** tab groups sessions by day.
+- New **Tools → Mastery**: completionist dashboard with per-platform/decade bars over local progress states plus a RetroAchievements column (`GET /api/v2/insights/mastery`).
+
+### Game Night Party Mode
+- New **Big Box → Game Night**: 2–8 players, couch-multiplayer queue, spinning wheel, persistent rounds, gamepad/keyboard control.
+
+### Library Migration & Sync
+- **LaunchBox XML migration**: preview then apply (`POST /api/v2/import/launchbox/preview`, `/apply`); emulator mappings are reported, never silently applied.
+- **Full library sync** via mounted folder with tombstones and last-writer-wins (`POST /api/v2/library/sync/publish`, `/pull`).
+- **Manual shelf entries** for games without local files (`POST /api/v2/library/manual-entry`, `manual_entry: true`).
+- **Big Box video snaps**: looping gameplay videos in stage mode with debounce, BGM ducking, and reduced-motion support.
+- **SQLite read model graduation**: `OPENBOX_ENABLE_SQLITE_READ=1` now powers faceted search and `GET /api/v2/library/search` (FTS5 or LIKE fallback).
+
 ## 1.8.0 (2026-09-02)
 
 ### Navigation & Routing

@@ -52,7 +52,7 @@ The source install uses only the Python standard library, there is no `pip insta
  Download the installer from a specific signed release, inspect it, then run it. The installer verifies the release public-key pin, SHA-256 checksum, and Ed25519 signature before installing to `~/.local/bin`:
 
  ```bash
- VERSION=1.8.0
+ VERSION=1.9.0
  curl --proto '=https' --tlsv1.2 --fail --location \
    --output install.sh \
    "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -103,7 +103,7 @@ The source install uses only the Python standard library, there is no `pip insta
  flatpak run io.openbox.GameLauncher
  ```
 
- - The manifest (the `flatpak` module) uses the GNOME / Flatpak 25.08 runtime and grants `--filesystem=home`, so Steam, Heroic, Lutris, and ROM folders under your home directory are readable.
+ - The manifest (the `flatpak` module) uses the GNOME Flatpak runtime (`org.gnome.Platform` 49) and grants `--filesystem=home`, so Steam, Heroic, Lutris, and ROM folders under your home directory are readable.
  - The Flatpak is not updated by OpenBoxGL's built-in updater (it only understands the AppImage). Update by rebuilding the manifest or using the Flatpak workflow you already have for local builds.
  - Flatpak builds install the same `openbox` and `openbox-native` launchers; `flatpak run io.openbox.GameLauncher --web` starts the loopback web UI in a browser.
 </InstallOptionCard>

@@ -84,7 +84,7 @@ Returns `{"restored": "<name>"}`.
 - Backs up no symlinks (raises on any symlink in the source).
 - `keep` (when > 0) rotates old `OpenBoxBackup-*.zip` files to retain the newest `keep`.
 
-Returns `{"archive": "<path>", "name": "<filename>"}`.
+Returns `202 {"state": "queued", "job_id": "<id>"}` — backup creation runs as a durable background job. Poll the job via `GET /api/v2/jobs` (cancel with `POST /api/v2/jobs/cancel`); the worker result carries `{"archive": "<path>", "name": "<filename>"}`.
 
 </ApiEndpoint>
 
@@ -98,7 +98,7 @@ Returns `{"archive": "<path>", "name": "<filename>"}`.
 <ApiEndpoint method="GET" path="/api/backup">
 
 
-Downloads the current library state as a JSON attachment (`openbox-library.json`). This is a raw snapshot of `library.json`, not a backup archive; it is useful for inspection and external tooling. The response is streamed with `Content-Disposition: attachment; filename=openbox-library.json`.
+Downloads a redacted, portable export of the current library state as a JSON attachment (`openbox-portable-redacted-export.json`). This is a redacted export (credentials and secrets stripped), not a raw `library.json` snapshot nor a backup archive; it is useful for inspection and external tooling. The response is streamed with `Content-Disposition: attachment; filename=openbox-portable-redacted-export.json`.
 
 </ApiEndpoint>
 
@@ -120,7 +120,7 @@ Downloads the current library state as a JSON attachment (`openbox-library.json`
 - An archive older than the current `library.json` is refused unless `force: true`: `400` `"This backup is older than the current library. Pass force=True to restore it anyway."`
 - Media/plugins/themes/extension-data members are written atomically with mode `0o600` under the data directory; symlink destinations are rejected before and after mkdir.
 
-Returns `{"restored": ["library", ...]}`. Media restores bump the media epoch.
+Returns `202 {"state": "queued", "job_id": "<id>"}` — restore runs as a durable background job. Poll the job via `GET /api/v2/jobs` (cancel with `POST /api/v2/jobs/cancel`); the worker result carries `{"restored": ["library", ...]}`. Media restores bump the media epoch.
 
 </ApiEndpoint>
 
@@ -275,9 +275,9 @@ Write credentials into emulator configs (RetroArch `cheevos_*`, Dolphin, PCSX2) 
 
 <ApiEndpoint method="GET" path="/api/v2/backup/diff">
 
-Compare the current library state against a named backup archive. Query parameter: `archive=<name>` (the backup archive name as listed by `GET /api/library/backup`).
+Compare the current library state against a named backup archive. Query parameter: `archive=<name>` (the backup archive name as listed by `GET /api/backups`).
 
-Returns `{"added": [...game_ids], "removed": [...game_ids], "changed": [...game_ids], "settings_changed": <bool>, "summary": {"added": <count>, "removed": <count>, "changed": <count>}}`.
+Returns `{"added": [...game_ids], "removed": [...game_ids], "changed": [...game_ids], "settings_changed": <bool>, "summary": {"added": <count>, "removed": <count>, "changed": <count>, "total": <count>}}` (`total` is the current library game count).
 
 - `added`: games present in the current library but not in the backup.
 - `removed`: games present in the backup but not in the current library.

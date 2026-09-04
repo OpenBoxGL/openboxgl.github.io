@@ -21,7 +21,7 @@ Optional local configuration loads from an explicit `OPENBOX_ENV_FILE`, the data
 Run the full suite before submitting a pull request:
 
 ```bash
-./run_all_tests.sh  # 85 files, 0 failures (see `scripts/check_tests.py` for 72.0% total + 54.0% web_app.py floors)
+./run_all_tests.sh  # 100 files, 0 failures (see `scripts/check_tests.py` for 72.0% total + 54.0% web_app.py + 80% changed-line + 85% new-module floors; CI enforces a stricter 95% changed-line floor)
 make check      # scripts/check_tests.py: ruff, runtime_modules, v1 contract, version_sync, frontend, i18n, compile, tests, coverage floors, changed-line, new-module, tokens; also `make version-check` for updates.py sync
 ```
 

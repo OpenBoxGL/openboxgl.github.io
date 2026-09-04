@@ -37,3 +37,7 @@ Deleted local games are **never resurrected**: games present only in the cloud f
 - [Sessions, saves, and backups](/guides/sessions-saves-and-backups/), session recording and history
 - [API saves and operations](/reference/api/saves-and-operations/), `POST /api/cloud/sync`
 - [Data and recovery](/reference/data-and-recovery/), where local state lives
+
+## Full library sync (v1.9.0)
+
+Statistics sync above covers play stats only. **Full library sync** replicates the entire library (games, metadata, deletions) through the same mounted folder via `POST /api/v2/library/sync/publish` and `POST /api/v2/library/sync/pull`. Deletions propagate as tombstones and conflicts resolve last-writer-wins — this is OpenBox's own folder sync, not a LaunchBox account service.

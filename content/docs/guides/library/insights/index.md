@@ -32,3 +32,11 @@ The Play Insights heatmap and cards use dedicated design tokens:
 
 - `GET /api/v2/insights/summary`: High-level analytics summary (total playtime, session count, active streaks, top platforms and genres).
 - `GET /api/v2/insights/heatmap?days=366&end_date=YYYY-MM-DD`: Daily playtime array for rendering custom heatmaps.
+
+## Year in Review (Wrapped)
+
+The **Wrapped** report (**Insights → Wrapped**) aggregates your year into a printable "Your Year in Games" summary: playtime, sessions, streaks, progress, and top game/platform/genre. Backed by `GET /api/v2/insights/wrapped?year=YYYY`. The **History → Timeline** tab groups past sessions by day with covers and recording badges (`GET /api/v2/history/timeline?days=90`).
+
+## Mastery Map
+
+The **Mastery Map** (**Tools → Mastery**) is a completionist dashboard: stacked per-platform and per-decade bars over local progress states (never / played / beaten / completed / mastered), plus a RetroAchievements column read from the existing RA disk cache — no new network calls. Clicking a segment filters the library to that platform. Backed by `GET /api/v2/insights/mastery`.

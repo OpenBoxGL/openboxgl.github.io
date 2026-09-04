@@ -9,7 +9,7 @@ OpenBoxGL exists because LaunchBox is Windows first and gates useful workflows b
 
 ## At a glance
 
-| Topic | OpenBoxGL 1.8.0 | LaunchBox on Linux |
+| Topic | OpenBoxGL 1.9.0 | LaunchBox on Linux |
 | --- | --- | --- |
 | License | AGPL-3.0, full source on GitHub | Proprietary, no Linux build |
 | Cost | Free, no subscription | Premium paywall for advanced workflows |
@@ -33,11 +33,11 @@ Every LaunchBox Premium equivalent ships without a subscription in OpenBoxGL: cu
 | Teknoparrot arcade launcher | Use Lutris and Wine launch profiles for supported titles |
 | Native Xbox PC package scanning | Use Heroic, Lutris, and Xbox Cloud entries instead |
 | Bundled proprietary media packs | Replaced by free bundled media packs in OpenBox |
-| LaunchBox Premium cloud library | Replaced by mounted folder sync plus local backups |
+| LaunchBox Premium cloud library | Replaced by OpenBox's own mounted-folder sync plus local backups (no LaunchBox account involved) |
 | LaunchBox online theme storefront | Replaced by local CSS theme import and open folder workflow |
 
 ## How to verify
 
-- Check the current release tag at [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest), currently v1.8.0.
+- Check the current release tag at [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest), currently v1.9.0.
 - Open PARITY.md in the application repository and confirm the acceptance check for any row before relying on it.
 - For pricing, LaunchBox Premium pricing is published by Unbroken Software. OpenBox cost is zero and source is AGPL-3.0 at [LICENSE](https://github.com/vindeckyy/OpenBoxGL/blob/master/LICENSE).

@@ -77,7 +77,7 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 
 - **Frozen v1 Contract (`/api/v1/*`)**: Stable, frozen remote contract (enforced via `v1_contracts.json`, currently 60 routes; the contract pins path + methods, per-route params are manually verified).
 - **Base-only routes (`/api/*` without a `/api/v1/*` alias)**: local-workflow routes such as `GET /api/emulators/recommend`, `GET /api/plugins/catalog`, `POST /api/webhooks/test`, `POST /api/plugins/install|toggle|remove`, `/api/wine/*`, and `/api/faugus/*` are documented on the group pages as `/api/*` with no v1 alias. Treat them as local operations, not part of the frozen remote contract; v1 aliases are added only when a route becomes a stable remote dependency.
-- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through v1.8.0:
+- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through v1.9.0:
   - **Setup Center**: `POST /api/v2/setup/preview`, `GET /api/v2/setup/preview`, `GET /api/v2/setup/preview/items`, `POST /api/v2/setup/preview/decisions`, `POST /api/v2/setup/preview/revalidate`, `POST /api/v2/setup/commit`, `GET /api/v2/setup/summary`
   - **Launch Doctor**: `POST /api/v2/launch/preflight`, `POST /api/v2/launch/preflight/batch`
   - **Emulator Registry**: `GET /api/v2/emulators/registry` (with `?health=1` for BIOS/firmware/core status)
@@ -87,6 +87,13 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
   - **Backup Diff**: `GET /api/v2/backup/diff?archive=<name>` (v1.7.2)
   - **ScreenScraper**: `GET /api/v2/screenscraper/status`, `GET /api/v2/screenscraper/search`, `POST /api/v2/screenscraper/test`, `POST /api/v2/screenscraper/info`, `POST /api/v2/screenscraper/match` (batch, cancellable), `POST /api/v2/screenscraper/apply` (durable job that downloads media outside the state lock) (v1.8.0)
   - **Library Export**: `POST /api/v2/library/export` (queues durable job), `GET /api/v2/library/export/exports`, `GET /api/v2/library/export/download` (v1.8.0)
+  - **Picker** (v1.9.0): `POST /api/v2/library/pick` (scored recommendations by time, mood, familiarity, players)
+  - **Constellation** (v1.9.0): `GET /api/v2/library/constellation` (capped deterministic nodes/edges)
+  - **Wrapped + Timeline + Mastery** (v1.9.0): `GET /api/v2/insights/wrapped?year=YYYY`, `GET /api/v2/history/timeline?days=90`, `GET /api/v2/insights/mastery`
+  - **Game Night** (v1.9.0): `POST /api/v2/party/queue`, `GET /api/v2/party/queue`, `POST /api/v2/party/next`
+  - **LaunchBox Migration** (v1.9.0): `POST /api/v2/import/launchbox/preview`, `POST /api/v2/import/launchbox/apply`
+  - **Library Sync + Manual Entries** (v1.9.0): `POST /api/v2/library/sync/publish`, `POST /api/v2/library/sync/pull`, `POST /api/v2/library/manual-entry`
+  - **SQLite Search** (v1.9.0): `GET /api/v2/library/search?q=&limit=` (FTS5 or LIKE fallback; needs `OPENBOX_ENABLE_SQLITE_READ=1`)
 - **Locale files** (public, no auth): `GET /locales/{en,es,de,fr,pt}.json` — serves JSON locale files for the i18n system (v1.7.2)
 
 ### Machine-Readable Error Codes

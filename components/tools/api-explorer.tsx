@@ -20,7 +20,9 @@ const ENDPOINTS: EndpointDef[] = [
     title: "Library Collection",
     description: "Fetch all games, metadata, launch profiles, and session statistics.",
     mockResponse: {
-      count: 2,
+      total_count: 2,
+      offset: 0,
+      limit: 500,
       games: [
         {
           id: "game-01",
@@ -29,9 +31,9 @@ const ENDPOINTS: EndpointDef[] = [
           year: 1998,
           developer: "Nintendo",
           genre: "Action-Adventure",
-          play_time_seconds: 14200,
-          launch_count: 18,
-          status: "completed",
+          playtime_seconds: 14200,
+          play_count: 18,
+          progress: "completed",
           favorite: true,
         },
         {
@@ -41,8 +43,8 @@ const ENDPOINTS: EndpointDef[] = [
           year: 2020,
           developer: "CD Projekt Red",
           genre: "RPG",
-          play_time_seconds: 35600,
-          launch_count: 42,
+          playtime_seconds: 35600,
+          play_count: 42,
           wine_prefix: "/home/deck/.local/share/bottles/prefixes/gaming",
         },
       ],
@@ -99,17 +101,16 @@ const ENDPOINTS: EndpointDef[] = [
     title: "Background Job Manager",
     description: "Returns active and historical background tasks (metadata sync, bulk backups, imports).",
     mockResponse: {
-      active_count: 0,
-      jobs: [
-        {
-          id: "job-metadata-sync-941",
-          type: "metadata_sync",
-          status: "completed",
+      jobs: {
+        "metadata-sync": {
+          job_id: "job-metadata-sync-941",
+          state: "completed",
           progress: 100,
           elapsed_seconds: 14.2,
           records_processed: 4850,
         },
-      ],
+      },
+      history: [],
     },
   },
   {
@@ -117,14 +118,21 @@ const ENDPOINTS: EndpointDef[] = [
     method: "POST",
     path: "/api/health",
     title: "System Health & Integrity",
-    description: "Self-diagnostic audit checking database integrity, snapshot consistency, and disk state.",
+    description: "Library health audit reporting duplicates, missing paths, unconfigured entries, and missing media.",
     mockResponse: {
-      status: "ok",
-      version: "1.8.0",
-      python_version: "3.12.3",
-      db_integrity: "valid",
-      snapshots_available: 5,
-      offline_ready: true,
+      games: 2,
+      missing: 0,
+      duplicates: 0,
+      unconfigured: 0,
+      missing_media: 1,
+      issues: [
+        {
+          id: 1,
+          game: "Cyberpunk 2077",
+          type: "Missing box front",
+          detail: "No local cover image",
+        },
+      ],
     },
   },
   {

@@ -125,9 +125,17 @@ Replace all profiles: `{"profiles": {"Platform": "command {path}", ...}}` (blank
 
 </ApiEndpoint>
 
-### `GET /api/perf_profiles` / `POST /api/perf_profiles`
+<ApiEndpoint method="GET" path="/api/perf_profiles">
 
-Per-launch-profile TDP limits for handheld tuning. Each entry: `{"enabled": bool, "tdp_w": float, "restore_tdp_w": float}`; blank names and all-zero entries are dropped; non-numeric TDP raises `400`. Returns `{"saved": <count>}`.
+Reads per-launch-profile TDP limits for handheld tuning. Each entry: `{"enabled": bool, "tdp_w": float, "restore_tdp_w": float}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/perf_profiles">
+
+Saves per-launch-profile TDP limits for handheld tuning. Each entry: `{"enabled": bool, "tdp_w": float, "restore_tdp_w": float}`; blank names and all-zero entries are dropped; non-numeric TDP raises `400`. Returns `{"saved": <count>}`.
+
+</ApiEndpoint>
 
 ## Running sessions and history
 

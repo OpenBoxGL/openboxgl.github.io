@@ -25,7 +25,7 @@ Stock themes carry a `/* OpenBox Stock Theme:` marker. On startup, missing stock
 
 ## Authoring guidance
 
-The public design tokens live in the [Design system](/project/design-system/) page. In short: the default look is dark, warm surfaces, off-white text, and a brand orange (`#f06000`) focus/selection signal with orange-gold (`#e08a3c`) launch actions. Themes may change palette, typography, and surface treatment while preserving the interaction structure. Keep readable contrast on both light and dark surfaces, visible focus states (the base stylesheet outlines focused controls), and legible controls; avoid permanent glow, deep shadows on every component, and low-contrast text. The base CSS defines variables such as `--bg`, `--panel`, `--text`, `--muted`, `--focus`, `--active`, `--action`, `--action-ink`, `--danger`, `--surface-card`, `--surface-field`, and `--border-card`; themes that override these variables inherit consistent behavior across dialogs and Big Box. `--accent` is a theme-local name used by the stock themes, not a variable the base stylesheet consumes.
+The public design tokens live in the [Design system](/project/design-system/) page. In short: the default look is dark, warm surfaces, off-white text, and a brand orange (`#f06000`) focus/selection signal with orange-gold (`#e08a3c`) launch actions. Themes may change palette, typography, and surface treatment while preserving the interaction structure. Keep readable contrast on both light and dark surfaces, visible focus states (the base stylesheet outlines focused controls), and legible controls; avoid permanent glow, deep shadows on every component, and low-contrast text. The base CSS defines variables such as `--bg`, `--panel`, `--text`, `--muted`, `--focus`, `--active`, `--action`, `--action-ink`, `--danger`, `--surface-card`, `--surface-field`, and `--border-card`; themes that override these variables inherit consistent behavior across dialogs and Big Box. `--accent` is defined by the base stylesheet as an alias of `--active` (`--accent: var(--active)`) and is consumed for focus rings, skeleton shimmer, and `--mood-secondary`; themes may override it directly.
 
 <Callout type="tip" title="Author your first theme">
 
@@ -49,3 +49,12 @@ Drop the file somewhere on disk and use **Import CSS theme** with its absolute p
 </Callout>
 
 Themes apply to the single UI rendered in both the native window and the web fallback.
+
+## Adaptive cover theming (Mood Match, v1.9.0)
+
+Two **Settings → Appearance** toggles personalize the UI from your games' art:
+
+- **Adaptive cover theming** (`mood_match_enabled`) extracts a 5-color palette (primary, ink, secondary, glow, tint) from the selected cover and tints the selected card, detail hero, and play-button hover via `--mood-*` tokens.
+- **Adaptive theming in Big Box** (`mood_match_bigbox`) extends the effect to the Big Box background and cover ring.
+
+Both default off. Theme authors can restyle the effect through the `--mood-primary`, `--mood-ink`, `--mood-secondary`, `--mood-glow`, `--mood-tint`, and `--mood-transition` tokens.

@@ -100,3 +100,11 @@ Settings → Controller includes a **MangoHud** toggle. When enabled, `MANGOHUD=
 ## Controller bench (v1.7.2)
 
 Settings → Controller includes a **controller bench** tab with a live SVG gamepad visualization. The bench reads `navigator.getGamepads()` and renders button presses, stick positions, and trigger values in real time, so you can verify controller connectivity and mapping without launching a game.
+
+## Game Night party mode (v1.9.0)
+
+**Game Night** (**Big Box → Game Night**) turns Big Box into a couch-multiplayer party screen: set players (2–8) and session length, build a queue of party-friendly games, spin the wheel to pick, launch, and advance rounds. The queue and round index persist across restarts. Control it with a gamepad or keyboard (arrows/Enter/N/Escape). Backed by `POST /api/v2/party/queue`, `GET /api/v2/party/queue`, and `POST /api/v2/party/next`.
+
+## Video snaps in stage mode (v1.9.0)
+
+Big Box stage mode plays looping gameplay videos behind the selected cover when a video is available, with a 600ms debounce so fast scrolling stays smooth, background-music ducking while video audio plays, and `prefers-reduced-motion` support. Without a video it falls back to the static cover.

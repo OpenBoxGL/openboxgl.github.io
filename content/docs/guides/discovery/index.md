@@ -47,3 +47,18 @@ When viewing any game's detail modal or pane, OpenBox dynamically computes the m
 - [API content and imports](/reference/api/content-and-imports/), `GET /api/discovery`
 - [API local administrator](/reference/api/local-admin/), `GET /api/explorer/facets`
 - [Sessions, saves, and backups](/guides/sessions-saves-and-backups/), where play history comes from
+
+## What should I play? (Picker)
+
+The **"What should I play?"** picker (replacing the old random "Surprise me" button) scores your library against your current constraints instead of picking blindly. Choose:
+
+- **Available time** — only games that fit the session you have.
+- **Mood** — action, chill, story, retro, or party.
+- **Familiarity** — something new, or a favorite worth revisiting.
+- **Players** — solo or couch-multiplayer options.
+
+The top pick renders with an explanatory reason plus quick **Launch**, **Details**, and **Again** actions, and a "Just surprise me" fallback. Backed by `POST /api/v2/library/pick` (`pkg/parity/parity_picker.py`).
+
+## Constellation
+
+**Tools → Constellation** opens a full-screen, pan/zoomable relationship graph of your library. Nodes are games; edges link shared series, developers, publishers, genres, platform family, and co-play history, so clusters reveal what your collection is really about. Clicking a node selects it in the library. Backed by `GET /api/v2/library/constellation`.
