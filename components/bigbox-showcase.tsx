@@ -1,50 +1,31 @@
 import Image from "next/image"
-import { Gamepad2, Tv, Zap } from "lucide-react"
-
-const perks = [
-  { icon: Tv, title: "10-foot UI", body: "Living-room ready layouts that look right from the couch." },
-  { icon: Gamepad2, title: "Controller-native", body: "Full navigation with a gamepad. Keyboard optional." },
-  { icon: Zap, title: "Instant launch", body: "Pick a game, hit A, you're playing. No menus in the way." },
-]
 
 export function BigBoxShowcase() {
   return (
-    <section id="bigbox" className="relative px-4 py-24">
-      <div className="relative mx-auto max-w-6xl">
-        <div className="mb-8 text-center">
-          <p className="mb-2 font-mono text-xs tracking-widest text-cyan">Big Box mode</p>
-          <h2 className="text-balance text-3xl font-bold tracking-tight md:text-5xl">
-            From desktop to the couch, instantly.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground">
-            One shortcut flips OpenBox into a fullscreen, controller-first launcher. Perfect for the Steam Deck, a
-            handheld, or a TV-connected battlestation.
-          </p>
-        </div>
-
-        <div className="relative rounded-lg border border-border bg-card p-2 shadow-lg">
-          <div className="overflow-hidden rounded-md border border-border">
-            <Image
-              src="/bigbox-mode.png"
-              alt="OpenBox Big Box fullscreen mode showing Chrono Trigger box art, description and a large Play button with controller hints"
-              width={1920}
-              height={1080}
-              className="w-full"
-            />
+    <section id="bigbox" className="ob-bigbox" aria-labelledby="bigbox-title">
+      <div className="ob-shell">
+        <div className="ob-bigbox-heading" data-reveal>
+          <div>
+            <p className="ob-index">Small screen. Big Box.</p>
+            <h2 id="bigbox-title" className="ob-display">Take the whole shelf.<br/><em>Leave the desk.</em></h2>
           </div>
+          <p>The same collection, a different kind of evening. Big Box puts your games within thumb’s reach on a handheld, a TV, or the couch.</p>
         </div>
-
-        <div className="mt-8 grid gap-3 md:grid-cols-3">
-          {perks.map((p) => {
-            const Icon = p.icon
-            return (
-              <div key={p.title} className="rounded-lg border border-border bg-card p-5">
-                <Icon className="h-5 w-5 text-cyan" />
-                <h3 className="mt-3 font-semibold">{p.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{p.body}</p>
-              </div>
-            )
-          })}
+        <figure className="ob-handheld-scene" data-reveal>
+          <div className="ob-handheld">
+            <div className="ob-handheld-grip ob-grip-left" aria-hidden="true"><i className="ob-stick"/><i className="ob-dpad"/><span className="ob-speaker"/></div>
+            <div className="ob-handheld-display">
+              <Image src="/bigbox-mode.png" alt="OpenBox Big Box controller-first interface with Chrono Trigger selected" width={1920} height={1080} sizes="(max-width: 800px) 76vw, 840px" />
+              <span aria-hidden="true">OPENBOX</span>
+            </div>
+            <div className="ob-handheld-grip ob-grip-right" aria-hidden="true"><div className="ob-face-buttons"><i>Y</i><i>X</i><i>B</i><i>A</i></div><i className="ob-stick"/><span className="ob-speaker"/></div>
+          </div>
+          <figcaption>Actual Big Box view · Illustrative handheld</figcaption>
+        </figure>
+        <div className="ob-handheld-details" data-reveal>
+          <a href="/guides/big-box-and-handhelds/"><span>01</span><div><h3>Made for the controller</h3><p>CoverFlow, Stage view, and Steam Game Mode. Your library follows your lead.</p></div></a>
+          <a href="/guides/big-box-and-handhelds/performance/"><span>02</span><div><h3>Tuned for each game</h3><p>Per-game gamescope, MangoHud, and TDP profiles for the way you play.</p></div></a>
+          <a href="/guides/big-box-and-handhelds/"><span>03</span><div><h3>Room for player two</h3><p>Game Night keeps a couch queue, a spinning wheel, and the next round ready.</p></div></a>
         </div>
       </div>
     </section>

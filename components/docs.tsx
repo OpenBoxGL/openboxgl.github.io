@@ -249,10 +249,18 @@ export function ProductShot({ src, alt, caption }: { src: string; alt: string; c
   )
 }
 
+export function DocTable(props: ComponentPropsWithoutRef<"table">) {
+  return (
+    <div className="max-w-full overflow-x-auto [overflow-wrap:normal]" role="region" aria-label="Scrollable reference table" tabIndex={0}>
+      <table {...props} />
+    </div>
+  )
+}
+
 /** Typography styles applied to raw markdown output (prose-like). */
 export function proseClasses() {
   return [
-    "text-[15px] leading-relaxed text-foreground/85",
+    "text-[15px] leading-relaxed text-foreground/85 [overflow-wrap:anywhere]",
     // Headings: Space Grotesk look with tight tracking, bold weight, and accent-tinted eyebrows
     "[&_h2]:mt-10 [&_h2]:mb-3 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:tracking-tight [&_h2]:text-balance",
     "[&_h3]:mt-8 [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:tracking-tight",
@@ -288,4 +296,3 @@ export { ControllerDiagram } from "@/components/tools/controller-diagram"
 export { ApiExplorer } from "@/components/tools/api-explorer"
 
 export type { ComponentPropsWithoutRef }
-

@@ -1,56 +1,49 @@
-import Image from "next/image"
+"use client"
 
-const stats = [
-  { value: "30+", label: "Platforms" },
-  { value: "1-click", label: "Import" },
-  { value: "235", label: "API routes" },
-  { value: "5", label: "Themes" },
+import Image from "next/image"
+import { useRef, useState } from "react"
+
+const views = [
+  { label: "The collection", src: "/library-view.png", title: "A shelf worth getting lost in.", detail: "Every platform, every cover shape, every forgotten favorite. Search and filter your collection without leaving the library.", alt: "OpenBox game library with cover art grouped by shape and platform filters", href: "/guides/library/" },
+  { label: "The details", src: "/openbox-game-detail.png", title: "Every game has a story.", detail: "Artwork, release details, play history, and launch controls together. The detail pane stays beside your collection so you never lose your place.", alt: "OpenBox game detail pane showing Elden Ring metadata and launch controls", href: "/guides/metadata-and-media/" },
+  { label: "The couch", src: "/bigbox-mode.png", title: "A little further from the screen.", detail: "Switch to Big Box for a controller-first view of the same library. Made for handhelds, living rooms, and a very comfortable chair.", alt: "OpenBox Big Box fullscreen view showing Chrono Trigger with controller hints", href: "/guides/big-box-and-handhelds/" },
 ]
 
 export function LibraryShowcase() {
+  const [selected, setSelected] = useState(0)
+  const dialog = useRef<HTMLDialogElement>(null)
+  const view = views[selected]
   return (
-    <section id="library" className="relative px-4 pb-24">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-          <div>
-            <p className="mb-2 font-mono text-xs tracking-widest text-primary">Library</p>
-            <h2 className="max-w-xl text-balance text-3xl font-bold tracking-tight md:text-4xl">
-              A command center for your entire collection.
-            </h2>
-          </div>
-          <p className="max-w-sm text-pretty text-sm leading-relaxed text-muted-foreground">
-            Faceted filters, rich box art, per-game metadata, achievements and play history. Every detail, one keystroke away.
-          </p>
-        </div>
-
-        <div className="relative rounded-lg border border-border bg-card p-2 shadow-lg">
-          <div className="relative overflow-hidden rounded-md border border-border">
-            {/* window chrome */}
-            <div className="flex items-center gap-2 border-b border-border bg-background/80 px-4 py-2.5">
-              <span className="h-3 w-3 rounded-full bg-destructive/80" />
-              <span className="h-3 w-3 rounded-full bg-primary/80" />
-              <span className="h-3 w-3 rounded-full bg-lime/70" />
-              <span className="ml-3 font-mono text-xs text-muted-foreground">openbox - library</span>
+    <section id="library" className="ob-library" aria-labelledby="library-title">
+      <div className="ob-shell">
+        <header className="ob-library-heading" data-reveal>
+          <div><p className="ob-index">A closer look</p><h2 id="library-title" className="ob-display">Less launcher hopping.<br /><em>More “one more game.”</em></h2></div>
+          <p>A familiar home for a wonderfully<br />unreasonable collection.</p>
+        </header>
+        <div className="ob-viewer" data-reveal>
+          <div className="ob-viewer-toolbar">
+            <div className="ob-viewer-tabs" role="tablist" aria-label="Product views">
+              {views.map((item, index) => <button key={item.label} id={`view-tab-${index}`} role="tab" type="button" aria-selected={selected === index} aria-controls="product-view" tabIndex={selected === index ? 0 : -1} onClick={() => setSelected(index)} onKeyDown={(event) => {
+                if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return
+                event.preventDefault()
+                const next = event.key === "Home" ? 0 : event.key === "End" ? views.length - 1 : (selected + (event.key === "ArrowRight" ? 1 : -1) + views.length) % views.length
+                setSelected(next); document.getElementById(`view-tab-${next}`)?.focus()
+              }}><span aria-hidden="true">0{index + 1}</span>{item.label}</button>)}
             </div>
-            <Image
-              src="/library-view.png"
-              alt="OpenBox library view showing a grid of game box art with a filter sidebar and a detailed metadata panel"
-              width={1920}
-              height={1080}
-              className="w-full"
-              priority
-            />
+            <span className="ob-viewer-note">Actual app. Your library goes here.</span>
+          </div>
+          <div id="product-view" role="tabpanel" aria-labelledby={`view-tab-${selected}`}>
+            <button type="button" className="ob-viewer-image" onClick={() => dialog.current?.showModal()} aria-label={`Enlarge ${view.label.toLowerCase()} screenshot`}>
+              <Image key={view.src} src={view.src} alt={view.alt} width={1920} height={1080} sizes="(max-width: 1200px) 94vw, 1160px" />
+              <span className="ob-enlarge-label">View full size <span aria-hidden="true">⤢</span></span>
+            </button>
+            <div className="ob-viewer-caption"><h3>{view.title}</h3><p>{view.detail}</p><a href={view.href}>Read the guide <span aria-hidden="true">↗</span></a></div>
           </div>
         </div>
-
-        <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-          {stats.map((s) => (
-            <div key={s.label} className="rounded-lg border border-border bg-card px-5 py-4">
-              <div className="text-2xl font-bold text-primary md:text-3xl">{s.value}</div>
-              <div className="mt-1 font-mono text-xs tracking-widest text-muted-foreground">{s.label.toUpperCase()}</div>
-            </div>
-          ))}
-        </div>
+        <dialog ref={dialog} className="ob-image-dialog" aria-label={view.alt} onClick={(event) => { if (event.target === event.currentTarget) dialog.current?.close() }}>
+          <button type="button" className="ob-dialog-close" onClick={() => dialog.current?.close()}>Close <kbd>Esc</kbd></button>
+          <Image src={view.src} alt={view.alt} width={1920} height={1080} sizes="96vw" />
+        </dialog>
       </div>
     </section>
   )

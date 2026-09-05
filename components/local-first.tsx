@@ -1,62 +1,47 @@
-import { CloudOff, GitBranch, Lock, ShieldCheck } from "lucide-react"
-
-const pillars = [
-  { icon: CloudOff, title: "No cloud", body: "Your library, saves and metadata never leave the device." },
-  { icon: Lock, title: "No account", body: "Nothing to sign up for. Open the app and start playing." },
-  { icon: ShieldCheck, title: "Zero telemetry", body: "We don't track you. There is nothing to track." },
-  { icon: GitBranch, title: "Open source", body: "AGPL-3.0-licensed and auditable, top to bottom." },
+const promises = [
+  ["00", "No account", "Open the app and use your own library."],
+  ["01", "No telemetry", "OpenBox does not send analytics about you or your games."],
+  ["10", "No cloud dependency", "The library, saves, and metadata remain on the device."],
+  ["11", "Open source", "The AGPL-3.0 code is available to inspect and change."],
 ]
 
 export function LocalFirst() {
   return (
-    <section id="local" className="relative overflow-hidden border-y border-border bg-card/30 px-4 py-24">
-      <div className="pointer-events-none absolute inset-0 grid-backdrop opacity-20" aria-hidden="true" />
-      <div className="relative mx-auto max-w-6xl">
-        <div className="grid gap-12 lg:grid-cols-2">
-          <div>
-            <p className="mb-2 font-mono text-xs tracking-widest text-primary">Local-first by design</p>
-            <h2 className="text-balance text-3xl font-bold leading-tight tracking-tight md:text-5xl">
-              Your games. Your machine.
-              <br />
-              <span className="text-muted-foreground">Nobody else&apos;s business.</span>
-            </h2>
-            <p className="mt-5 max-w-md text-pretty leading-relaxed text-muted-foreground">
-              OpenBox is built on a simple promise: everything runs locally. No sync servers, no analytics beacons, no
-              hidden network calls. It works perfectly offline because that&apos;s the whole point.
-            </p>
-            <p className="mt-4 max-w-md text-pretty text-sm leading-relaxed text-muted-foreground">
-              Two interfaces share the same local library: the full-featured Web UI with Big Box and the REST API, and a
-              lightweight native desktop window. Both write to the same <code className="rounded border border-border bg-secondary px-1.5 py-0.5 font-mono text-xs">library.json</code>,
-              process-safe, so you can switch between them freely.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a
-                href="/interfaces-and-data/"
-                className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary"
-              >
-                Interfaces and data
-              </a>
-              <a
-                href="/policies/privacy/"
-                className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary"
-              >
-                Privacy policy
-              </a>
-            </div>
+    <section id="local" className="ob-local" aria-labelledby="local-title">
+      <div className="ob-shell ob-local-layout">
+        <div className="ob-local-manifesto" data-reveal>
+          <p className="ob-index">Yours means yours</p>
+          <h2 id="local-title" className="ob-display">
+            The internet<br/>
+            <em>is optional.</em>
+          </h2>
+          <p>
+            OpenBox works from files on your machine. The web interface, native window, Big Box mode, and local API all
+            read the same process-safe library.
+          </p>
+          <div className="ob-local-route" aria-label="OpenBox local data path">
+            <span>Your files</span>
+            <b aria-hidden="true">/</b>
+            <span>OpenBox</span>
+            <b aria-hidden="true">/</b>
+            <span>Your game</span>
           </div>
+          <div className="ob-section-links">
+            <a href="/interfaces-and-data/">See where the data lives</a>
+            <a href="/policies/privacy/">Read the privacy policy</a>
+          </div>
+        </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {pillars.map((p) => {
-              const Icon = p.icon
-              return (
-                <div key={p.title} className="rounded-lg border border-border bg-card p-5">
-                  <Icon className="h-6 w-6 text-primary" />
-                  <h3 className="mt-4 font-semibold">{p.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{p.body}</p>
-                </div>
-              )
-            })}
-          </div>
+        <div className="ob-promise-list" data-reveal>
+          {promises.map(([number, title, body]) => (
+            <article key={number}>
+              <span aria-hidden="true">✓</span>
+              <div>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>

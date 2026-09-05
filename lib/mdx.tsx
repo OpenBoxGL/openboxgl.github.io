@@ -15,9 +15,11 @@ import {
   ThemePreviewer,
   ControllerDiagram,
   ApiExplorer,
+  DocTable,
 } from "@/components/docs"
 
 const components = {
+  table: DocTable,
   ApiEndpoint,
   Callout,
   FeatureGrid,

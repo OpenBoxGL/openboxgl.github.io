@@ -1,23 +1,24 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Space_Grotesk, JetBrains_Mono } from "next/font/google"
+import { Bricolage_Grotesque, IBM_Plex_Mono } from "next/font/google"
 import "./globals.css"
 
-const spaceGrotesk = Space_Grotesk({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
+  variable: "--font-bricolage",
   display: "swap",
 })
 
-const jetbrainsMono = JetBrains_Mono({
+const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
+  variable: "--font-ibm-plex-mono",
   display: "swap",
+  weight: ["400", "500", "600"],
 })
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://openboxgl.github.io"),
-  title: "OpenBox — The local-first launcher for every game you own",
+  title: "OpenBox | Every game. One box.",
   description:
     "OpenBox unifies Steam, GOG, Heroic, Lutris, ROMs and arcade sets into one art-rich, controller-ready library. Open source. Local-first. Zero telemetry.",
   keywords: [
@@ -31,19 +32,19 @@ export const metadata: Metadata = {
     "local-first",
   ],
   openGraph: {
-    title: "OpenBox — One library for every game you own",
+    title: "OpenBox | Every game. One box.",
     description:
-      "Steam, GOG, Heroic, Lutris, ROMs and arcade — unified into one art-rich, controller-ready, local-first library.",
+      "Steam, GOG, Heroic, Lutris, ROMs and arcade in one art-rich, controller-ready, local-first library.",
     type: "website",
     url: "https://openboxgl.github.io/",
     siteName: "OpenBox",
-    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "OpenBox — one library for every game you own" }],
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "OpenBox, one library for every game you own" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "OpenBox — One library for every game you own",
+    title: "OpenBox | Every game. One box.",
     description:
-      "Steam, GOG, Heroic, Lutris, ROMs and arcade — unified into one art-rich, controller-ready, local-first library.",
+      "Steam, GOG, Heroic, Lutris, ROMs and arcade in one art-rich, controller-ready, local-first library.",
     images: ["/og-default.png"],
   },
 }
@@ -60,7 +61,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`dark bg-background ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" className={`dark bg-background ${bricolage.variable} ${ibmPlexMono.variable}`}>
       <body className="font-sans antialiased">{children}</body>
     </html>
   )

@@ -1,74 +1,50 @@
 "use client"
 
 import Image from "next/image"
-import { Terminal } from "lucide-react"
 import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import { useEffect, useRef, useState } from "react"
 
 const links = [
-  { label: "Compare", href: "/compare/" },
-  { label: "Downloads", href: "/downloads/" },
+  { label: "The library", href: "/#library" },
   { label: "Showcase", href: "/showcase/" },
-  { label: "Enterprise", href: "/enterprise/" },
   { label: "Docs", href: "/docs/" },
+  { label: "GitHub ↗", href: "https://github.com/vindeckyy/OpenBoxGL" },
 ]
 
 export function SiteNav() {
   const pathname = usePathname()
-  const onDocs = pathname !== "/"
+  const [open, setOpen] = useState(false)
+  const toggle = useRef<HTMLButtonElement>(null)
+  useEffect(() => { setOpen(false) }, [pathname])
+  useEffect(() => {
+    if (!open) return
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { setOpen(false); toggle.current?.focus() }
+    }
+    const desktop = window.matchMedia("(min-width: 900px)")
+    const resize = () => { if (desktop.matches) setOpen(false) }
+    window.addEventListener("keydown", escape)
+    desktop.addEventListener("change", resize)
+    return () => { window.removeEventListener("keydown", escape); desktop.removeEventListener("change", resize) }
+  }, [open])
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
-      <nav className="flex w-full max-w-6xl items-center justify-between gap-4 rounded-lg border border-border bg-card px-3 py-2.5 pl-4">
-        <a href={onDocs ? "/" : "#top"} className="flex items-center gap-2.5" aria-label="OpenBox home">
-          <span className="relative block h-8 w-8 overflow-hidden rounded-md bg-card">
-            <Image
-              src="/openbox-icon.png"
-              alt="OpenBox logo"
-              width={64}
-              height={64}
-              className="h-full w-full object-contain p-1"
-            />
-          </span>
-          <span className="text-sm font-bold tracking-[0.16em]">OPENBOX</span>
+    <header className="ob-nav">
+      <nav className="ob-shell ob-nav-inner" aria-label="Primary navigation">
+        <a href={pathname === "/" ? "#top" : "/"} className="ob-brand" onClick={() => setOpen(false)} aria-label="OpenBox home">
+          <Image src="/openbox-icon.png" alt="OpenBox cube" width={40} height={40} priority />
+          <span>OpenBox<span className="ob-brand-dot">.</span></span>
         </a>
-
-        <div className="hidden items-center gap-1 md:flex">
-          {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className={cn(
-                "rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
-                l.href.startsWith("/") && !l.href.startsWith("/#") && onDocs && "text-primary",
-              )}
-            >
-              {l.label}
-            </a>
-          ))}
+        <div className="ob-nav-links">
+          {links.map(link => <a key={link.href} href={link.href} aria-current={pathname === link.href ? "page" : undefined}>{link.label}</a>)}
         </div>
-
-        <div className="flex items-center gap-2">
-          <a
-            href="https://github.com/vindeckyy/OpenBoxGL"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="OpenBox on GitHub"
-            className="hidden h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:text-foreground sm:flex"
-          >
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
-              <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.58.23 2.75.11 3.04.73.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.77 1.04.77 2.1 0 1.52-.01 2.74-.01 3.11 0 .3.2.66.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z" />
-            </svg>
-          </a>
-          <a
-            href="/downloads/"
-            className="flex items-center gap-2 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground"
-          >
-            <Terminal className="h-4 w-4" />
-            Download
-          </a>
-        </div>
+        <a href="/downloads/" className="ob-nav-download">Get OpenBox <span aria-hidden="true">↗</span></a>
+        <button ref={toggle} type="button" className="ob-menu-toggle" aria-expanded={open} aria-controls="mobile-navigation" aria-label={open ? "Close main menu" : "Open main menu"} onClick={() => setOpen(!open)}>{open ? "Close −" : "Menu +"}</button>
       </nav>
+      {open && <nav id="mobile-navigation" className="ob-mobile-nav" aria-label="Mobile navigation">
+        {links.map(link => <a key={link.href} href={link.href} onClick={() => setOpen(false)}>{link.label}</a>)}
+        <a href="/downloads/">Download OpenBox</a>
+      </nav>}
     </header>
   )
 }
