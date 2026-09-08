@@ -4,6 +4,17 @@ description: Release notes for OpenBox, from the latest AppImage back to the fir
 sidebar: false
 ---
 
+## 1.10.0 (2026-09-08) — Safer migrations and synchronization
+
+- **Causal catalog sync**: opt-in, content-addressed events carry device identity, ancestry, tombstones, recovery snapshots, and acknowledged outboxes. Preview incoming changes, resolve conflicts by field, and apply the reviewed plan transactionally; launch paths, commands, credentials, statistics, and media remain local.
+- **Legacy sync safety**: the older whole-library `publish`/`pull` protocol now fails closed before mutation with `LIBRARY_SYNC_UNAVAILABLE`. Statistics sync remains available, while catalog publication requires the explicit v3 payload (`{"protocol":"v3"}`).
+- **LaunchBox XML migration**: preview discovered games, deduplication, emulator mappings, exclusions, and path decisions before applying a bounded migration transaction.
+- **Manual shelf entries**: create, update, filter, export, and explicitly convert pathless entries for physical games and other catalog records without executable files.
+- **Large-library consistency**: search, facets, health, exports, and shelf records use the same canonical state model; the optional SQLite read model accelerates indexed search while JSON remains the source of truth.
+- **Launch and packaging hardening**: atomic launch reservations prevent duplicate starts, and release validation publishes signed x86_64 and aarch64 AppImages plus an x86_64 Flatpak bundle with checksums, zsync metadata, SBOMs, and installer tooling.
+
+[Full OpenBox 1.10.0 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.10.0) · [Compare v1.9.0...v1.10.0](https://github.com/vindeckyy/OpenBoxGL/compare/v1.9.0...v1.10.0)
+
 ## 1.9.0 (2026-09-04) — Look, Discover, Play
 
 ### Mood Match — Adaptive Cover Theming
@@ -24,7 +35,7 @@ sidebar: false
 
 ### Library Migration & Sync
 - **LaunchBox XML migration**: preview then apply (`POST /api/v2/import/launchbox/preview`, `/apply`); emulator mappings are reported, never silently applied.
-- **Full library sync** via mounted folder with tombstones and last-writer-wins (`POST /api/v2/library/sync/publish`, `/pull`).
+- **Full library sync (legacy design)** via mounted folder with tombstones and last-writer-wins (`POST /api/v2/library/sync/publish`, `/pull`). Superseded in 1.10.0: those legacy routes fail closed before mutation; use the reviewed causal catalog transport instead.
 - **Manual shelf entries** for games without local files (`POST /api/v2/library/manual-entry`, `manual_entry: true`).
 - **Big Box video snaps**: looping gameplay videos in stage mode with debounce, BGM ducking, and reduced-motion support.
 - **SQLite read model graduation**: `OPENBOX_ENABLE_SQLITE_READ=1` now powers faceted search and `GET /api/v2/library/search` (FTS5 or LIKE fallback).

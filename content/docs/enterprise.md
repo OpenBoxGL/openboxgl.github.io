@@ -13,18 +13,21 @@ OpenBox Game Launcher is released under GNU Affero General Public License v3.0. 
 
 ## Signed releases
 
-Every AppImage release is signed with Ed25519. The installer verifies the release against a pinned public key and a published SHA-256 checksum.
+Every AppImage release is signed with Ed25519. The installer selects the matching architecture and verifies the release against a pinned public key and a published SHA-256 checksum.
 
 | Artifact | What it is | Where to find it |
 | --- | --- | --- |
-| `OpenBox-x86_64.AppImage` | Release binary | [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest) |
-| `OpenBox-x86_64.AppImage.sig` | Ed25519 signature | Same release assets |
+| `OpenBox-x86_64.AppImage` | x86_64 release binary | [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest) |
+| `OpenBox-x86_64.AppImage.sig` | x86_64 Ed25519 signature | Same release assets |
+| `OpenBox-aarch64.AppImage` | aarch64 release binary | Same release assets |
+| `OpenBox-aarch64.AppImage.sig` | aarch64 Ed25519 signature | Same release assets |
 | `openbox-release.pub` | Pinned public key | Application repository at `openbox-release.pub`, pinned by SHA-256 in `scripts/install.sh` |
-| `OpenBox-x86_64.AppImage.sha256` | SHA-256 checksum | Same release assets |
-| `OpenBox-<version>-sbom.json` | CycloneDX 1.4 SBOM | Same release assets |
+| `OpenBox-x86_64.AppImage.sha256` and `OpenBox-aarch64.AppImage.sha256` | Architecture-specific SHA-256 checksums | Same release assets |
+| `OpenBox-<version>-sbom.json` and arch-suffixed SBOM | CycloneDX 1.4 SBOM | Same release assets |
+| `OpenBox-x86_64.flatpak` | x86_64 Flatpak bundle | Same release assets |
 | `install.sh` | Cryptographically verified installer | Same release assets |
 
-Verify path: download the AppImage, the `.sig`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.9.0"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. See [Updating](/updating/) for rollback with `OpenBox-x86_64.previous.AppImage`.
+Verify path: download the AppImage matching your architecture, its `.sig` and `.sha256`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.10.0"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. See [Updating](/updating/) for architecture-matched rollback.
 
 ## Build and CI
 
@@ -38,7 +41,7 @@ The application uses only the Python standard library at runtime. Build tooling 
 
 ## Data and privacy
 
-Library data is local JSON at `~/.local/share/openbox-game-launcher/library.json`. Set `OPENBOX_DATA_DIR` before launch to relocate it. The server binds to `127.0.0.1` on a random port, requires a per launch token on every request, and never listens on the network. No account, no cloud, no telemetry. See [Interfaces and data](/interfaces-and-data/), [Data and recovery](/reference/data-and-recovery/), and [Privacy](/policies/privacy/).
+Library data is local JSON at `~/.local/share/openbox-game-launcher/library.json`. Set `OPENBOX_DATA_DIR` before launch to relocate it. The server binds to `127.0.0.1` on a random port, requires a per launch token on every request, and never listens on the network. No account, no vendor-hosted cloud, no telemetry. Local mounted-folder statistics and catalog synchronization remain opt-in. See [Interfaces and data](/interfaces-and-data/), [Data and recovery](/reference/data-and-recovery/), and [Privacy](/policies/privacy/).
 
 ## Support and notices
 

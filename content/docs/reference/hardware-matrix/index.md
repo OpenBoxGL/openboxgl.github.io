@@ -5,15 +5,17 @@ description: Compatibility, performance flags, and configuration recommendations
 
 OpenBox is optimized for Linux gaming handhelds, offering full game-pad navigation, low power draw, and SteamOS / gamescope integration.
 
-## Tested Devices
+## Validation profiles
+
+Release CI validates both x86_64 and aarch64 AppImages and the gamescope/native-host integration. The profiles below are configuration guidance for common Linux handhelds; they are not a claim that each physical model has been tested by the maintainer.
 
 | Device | Display | OS / Distro | Recommended Mode | Notes |
 | --- | --- | --- | --- | --- |
 | **Steam Deck LCD** | 800p 60Hz | SteamOS 3.5+ | Big Box Kiosk | Add as Non-Steam Game with `--kiosk` flag |
 | **Steam Deck OLED** | 800p 90Hz HDR | SteamOS 3.5+ | Big Box Kiosk | Native 90 FPS CoverFlow animations |
-| **ASUS ROG Ally / X** | 1080p 120Hz VRR | Bazzite / Nobara | Big Box 1080p | Full controller and TDP mapping supported |
+| **ASUS ROG Ally / X** | 1080p 120Hz VRR | Bazzite / Nobara | Big Box 1080p | Configuration target; validate controller and TDP behavior on the installed image |
 | **Lenovo Legion Go** | 1600p 144Hz | Bazzite / ChimeraOS | Big Box 1200p / 1600p | Touchscreen and gamepad hybrid navigation |
-| **AYANEO / GPD Win** | 1080p 60Hz | Arch / Fedora / Ubuntu | Desktop / Big Box | Full Wayland and X11 controller support |
+| **AYANEO / GPD Win** | 1080p 60Hz | Arch / Fedora / Ubuntu | Desktop / Big Box | Configuration target; validate Wayland/X11 controller behavior on the installed image |
 
 ## Adding OpenBox to SteamOS Game Mode
 
@@ -21,7 +23,7 @@ To run OpenBox directly in Steam Deck Gaming Mode:
 
 1. Switch to **Desktop Mode** on your Steam Deck.
 2. Open Steam -> **Games** -> **Add a Non-Steam Game to My Library...**
-3. Select `OpenBox-x86_64.AppImage` from your downloads or installation directory.
+3. Select the AppImage matching the device architecture (`OpenBox-x86_64.AppImage` or `OpenBox-aarch64.AppImage`) from your downloads or installation directory.
 4. Right-click the shortcut in Steam -> **Properties**:
    - **Launch Options**: `--kiosk --fullscreen`
 5. Switch back to **Gaming Mode**. OpenBox will launch with full Steam Deck controller and gamescope overlay support.

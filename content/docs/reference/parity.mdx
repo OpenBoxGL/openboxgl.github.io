@@ -31,10 +31,10 @@ The source matrix lists 111 LaunchBox-aligned capabilities as <StatusBadge statu
 | Plugins | <StatusBadge status="done" /> | `library`, `before_launch`, `after_session` hooks |
 | Local automation | <StatusBadge status="done" /> | Queue, tags, notifications, HMAC-signed webhooks |
 | Premium workflows (free) | <StatusBadge status="done" /> | Custom fields, ESRB filters, list view, media packs, cloud stats sync |
-| Discovery (v1.9.0) | <StatusBadge status="done" /> | "What should I play?" picker, Constellation graph, SQLite FTS search |
-| Insights (v1.9.0) | <StatusBadge status="done" /> | Wrapped year-in-review, Mastery Map, history timeline |
-| Party & personalization (v1.9.0) | <StatusBadge status="done" /> | Game Night party mode, Big Box video snaps, Mood Match adaptive theming |
-| Migration & sync (v1.9.0) | <StatusBadge status="done" /> | LaunchBox XML import, full-library mounted-folder sync, manual shelf entries |
+| Discovery (shipped in v1.9.0) | <StatusBadge status="done" /> | "What should I play?" picker, Constellation graph, SQLite FTS search |
+| Insights (shipped in v1.9.0) | <StatusBadge status="done" /> | Wrapped year-in-review, Mastery Map, history timeline |
+| Party & personalization (shipped in v1.9.0) | <StatusBadge status="done" /> | Game Night party mode, Big Box video snaps, Mood Match adaptive theming |
+| Migration & sync (v1.10.0) | <StatusBadge status="done" /> | Review-first LaunchBox XML import, opt-in causal catalog sync with preview/apply/publish, and manual shelf entries; legacy full-library routes fail closed before mutation |
 
 ## Intentionally not replicated on Linux
 
@@ -47,7 +47,7 @@ Windows-only workflows without a Linux equivalent remain documented as boundarie
 | Teknoparrot arcade launcher | Use Lutris/Wine launch profiles for supported titles |
 | Native Xbox PC package scanning | Use Heroic/Lutris/Xbox Cloud entries instead |
 | Bundled proprietary media packs | Replaced by free bundled media packs in OpenBox |
-| LaunchBox Premium account cloud library | Replaced by OpenBox's own mounted-folder sync plus local backups (no LaunchBox account involved) |
+| LaunchBox Premium account cloud library | Replaced by OpenBox's local mounted-folder statistics sync and opt-in catalog sync plus local backups (no LaunchBox account involved) |
 | LaunchBox online theme storefront | Replaced by local CSS theme import and open-folder workflow |
 
 ## How to read the evidence
@@ -62,11 +62,12 @@ When behavior changes, `PARITY.md` is updated in the application repository and 
 
 ## Parity internals
 
-The capability rows above are implemented by 27 modules in `pkg/parity/` (application repository), each with a root compatibility shim. This is an inventory, not a second status matrix — status still lives in the table above.
+The capability rows above are implemented by 32 modules in `pkg/parity/` (application repository). Root `parity_*.py` compatibility shims were removed in v1.9.0; `pkg/parity/__init__.py` now registers `_ParityFlatFinder` so legacy flat imports resolve to the canonical package modules. This is an inventory, not a second status matrix — status still lives in the table above.
 
 | Module | Area |
 | --- | --- |
 | `parity_backup.py` | Library backups |
+| `parity_constellation.py` | Constellation relationship graph |
 | `parity_deeplinks.py` | Deep links |
 | `parity_discovery.py` | Discovery queue |
 | `parity_emulator_defs.py` | Emulator-def registry |
@@ -82,8 +83,12 @@ The capability rows above are implemented by 27 modules in `pkg/parity/` (applic
 | `parity_insights.py` | Play insights |
 | `parity_integrations.py` | Third-party integrations |
 | `parity_launch_doctor.py` | Launch Doctor preflight |
+| `parity_launchbox_import.py` | LaunchBox XML migration |
+| `parity_library_sync.py` | Causal catalog synchronization |
 | `parity_media.py` | Media jobs |
 | `parity_perf.py` | Performance projections |
+| `parity_party.py` | Big Box party mode |
+| `parity_picker.py` | Play picker recommendations |
 | `parity_premium.py` | Premium-equivalent workflows |
 | `parity_redact.py` | Log redaction |
 | `parity_saves.py` | Saves |

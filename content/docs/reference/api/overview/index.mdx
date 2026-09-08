@@ -10,7 +10,7 @@ The Web UI starts a `ThreadingHTTPServer` bound to `127.0.0.1` on a random port.
 - The server binds to `("127.0.0.1", 0)`, so nothing is reachable from the network.
 - OpenBoxGL does not terminate HTTPS. Use a trusted network and an external reverse proxy if you must expose it beyond the host.
 - Requests carry a 30-second socket timeout (`Handler.REQUEST_TIMEOUT`).
-- The static UI is served at `/` and `/index.html`; the favicon is served at `/favicon.svg` and `/favicon.ico`. Every other route requires authentication.
+- The static UI is served at `/` and `/index.html`; locale JSON and the favicon are public assets. Every other API route requires authentication.
 
 ## Authentication
 
@@ -19,7 +19,7 @@ All API routes require the session token. The server writes it to `server.token`
 - Header: `X-OpenBox-Token: TOKEN` (preferred)
 - Query parameter: `?token=TOKEN` (can leak through history and logs)
 
-The check uses `secrets.compare_digest`, and unauthenticated requests to any route, known or unknown, return `403 {"error":"Unauthorized"}`.
+The check uses `secrets.compare_digest`, and unauthenticated requests to any protected route, known or unknown, return `403 {"error":"Unauthorized","code":"UNAUTHORIZED","request_id":"…"}`.
 
 ## Request lifecycle
 
@@ -77,7 +77,7 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 
 - **Frozen v1 Contract (`/api/v1/*`)**: Stable, frozen remote contract (enforced via `v1_contracts.json`, currently 60 routes; the contract pins path + methods, per-route params are manually verified).
 - **Base-only routes (`/api/*` without a `/api/v1/*` alias)**: local-workflow routes such as `GET /api/emulators/recommend`, `GET /api/plugins/catalog`, `POST /api/webhooks/test`, `POST /api/plugins/install|toggle|remove`, `/api/wine/*`, and `/api/faugus/*` are documented on the group pages as `/api/*` with no v1 alias. Treat them as local operations, not part of the frozen remote contract; v1 aliases are added only when a route becomes a stable remote dependency.
-- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through v1.9.0:
+- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through v1.10.0:
   - **Setup Center**: `POST /api/v2/setup/preview`, `GET /api/v2/setup/preview`, `GET /api/v2/setup/preview/items`, `POST /api/v2/setup/preview/decisions`, `POST /api/v2/setup/preview/revalidate`, `POST /api/v2/setup/commit`, `GET /api/v2/setup/summary`
   - **Launch Doctor**: `POST /api/v2/launch/preflight`, `POST /api/v2/launch/preflight/batch`
   - **Emulator Registry**: `GET /api/v2/emulators/registry` (with `?health=1` for BIOS/firmware/core status)
@@ -91,8 +91,9 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
   - **Constellation** (v1.9.0): `GET /api/v2/library/constellation` (capped deterministic nodes/edges)
   - **Wrapped + Timeline + Mastery** (v1.9.0): `GET /api/v2/insights/wrapped?year=YYYY`, `GET /api/v2/history/timeline?days=90`, `GET /api/v2/insights/mastery`
   - **Game Night** (v1.9.0): `POST /api/v2/party/queue`, `GET /api/v2/party/queue`, `POST /api/v2/party/next`
-  - **LaunchBox Migration** (v1.9.0): `POST /api/v2/import/launchbox/preview`, `POST /api/v2/import/launchbox/apply`
-  - **Library Sync + Manual Entries** (v1.9.0): `POST /api/v2/library/sync/publish`, `POST /api/v2/library/sync/pull`, `POST /api/v2/library/manual-entry`
+  - **LaunchBox Migration** (v1.10.0): `POST /api/v2/import/launchbox/preview`, `POST /api/v2/import/launchbox/apply`
+  - **Manual Entries** (v1.10.0): `POST /api/v2/library/manual-entry`, `POST /api/v2/library/manual-entry/update`, `POST /api/v2/library/manual-entry/convert`
+  - **Causal Catalog Sync** (v1.10.0): `POST /api/v2/library/sync/preview`, `POST /api/v2/library/sync/apply`, and `POST /api/v2/library/sync/publish` with `{"protocol":"v3"}`. Preview is read-only; apply requires the reviewed plan and creates a recovery backup; publish acknowledges the local outbox after a stale-state check. The old full-library publish payload and `POST /api/v2/library/sync/pull` return `503 LIBRARY_SYNC_UNAVAILABLE` before mutation.
   - **SQLite Search** (v1.9.0): `GET /api/v2/library/search?q=&limit=` (FTS5 or LIKE fallback; needs `OPENBOX_ENABLE_SQLITE_READ=1`)
 - **Locale files** (public, no auth): `GET /locales/{en,es,de,fr,pt}.json` — serves JSON locale files for the i18n system (v1.7.2)
 
@@ -106,7 +107,9 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 | `EMULATOR_REQUIRED` / `AMBIGUOUS_PLATFORM` / `MISSING_BIOS` | Launch Doctor preflight failure conditions |
 | `JOB_CONFLICT` / `JOB_NOT_FOUND` | Durable operation scheduling or state conflict |
 | `JOB_NOT_CANCELABLE` / `JOB_NOT_RETRYABLE` | Operation transition disallowed in current state |
-| `CLOUD_SYNC_CONFLICT` | Sync conflict detected on mounted cloud backup |
+| `LIBRARY_SYNC_UNAVAILABLE` | Legacy full-library publish/pull is disabled; use the v3 preview/apply/publish catalog transport |
+| `SYNC_NOT_ENABLED` | Library synchronization must be explicitly enabled before catalog operations |
+| `SYNC_INVALID` / `SYNC_PREVIEW_STALE` / `SYNC_PUBLISH_STALE` | Catalog event validation failed or the local state changed since preview/publication began |
 
 ## Limits that apply across routes
 

@@ -81,10 +81,10 @@ Storefront imports that mark a title owned-but-uninstalled (`store_installed: fa
 
 See [Import sources](/integrations/import-sources/) for source-specific paths and [Emulators and launching](/guides/emulators-and-launching/) for profiles.
 
-## LaunchBox XML migration (v1.9.0)
+## LaunchBox XML migration (v1.10.0)
 
 Moving from LaunchBox? Export your LaunchBox library XML, then preview the migration with `POST /api/v2/import/launchbox/preview` — it reports how games dedupe against your current library and which emulator mappings apply (mappings are reported, never silently applied). Apply with `POST /api/v2/import/launchbox/apply`.
 
-## Manual shelf entries (v1.9.0)
+## Manual shelf entries (v1.10.0)
 
-`POST /api/v2/library/manual-entry` adds games with no local file path — physical discs, cartridges, board games, console-only titles. Entries are marked `manual_entry: true` and live alongside your library without launch validation.
+`POST /api/v2/library/manual-entry` adds games with no local file path — physical discs, cartridges, board games, console-only titles. Entries are marked `manual_entry: true` and live alongside your library without launch validation. Use `POST /api/v2/library/manual-entry/update` to edit one while retaining its stable identity, and `POST /api/v2/library/manual-entry/convert` to attach a verified local file when it becomes playable.

@@ -50,7 +50,7 @@ Drop the file somewhere on disk and use **Import CSS theme** with its absolute p
 
 Themes apply to the single UI rendered in both the native window and the web fallback.
 
-## Adaptive cover theming (Mood Match, v1.9.0)
+## Adaptive cover theming (Mood Match, introduced in v1.9.0)
 
 Two **Settings → Appearance** toggles personalize the UI from your games' art:
 

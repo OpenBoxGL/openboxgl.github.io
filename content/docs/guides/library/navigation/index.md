@@ -3,7 +3,7 @@ title: Library navigation
 description: Keyboard and gamepad navigation across the library grid and list, hash routing for shareable links, and the screenshot lightbox.
 ---
 
-OpenBox 1.8.0 adds full keyboard and gamepad navigation across the library grid and list view, plus hash routing so any library view can be shared or bookmarked.
+Since OpenBox 1.8.0, the library grid and list view support full keyboard and gamepad navigation, plus hash routing so any library view can be shared or bookmarked.
 
 ## Keyboard navigation
 

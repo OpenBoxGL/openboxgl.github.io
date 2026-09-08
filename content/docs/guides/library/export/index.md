@@ -3,7 +3,7 @@ title: Library export
 description: Export your library, or a platform/playlist scope of it, to JSON or CSV with shareable-by-construction field projection.
 ---
 
-OpenBox 1.8.0 can export your library to JSON or CSV — for migrations between machines, auditing your collection in a spreadsheet, or sharing a view of it.
+OpenBox can export your library to JSON or CSV — for migrations between machines, auditing your collection in a spreadsheet, or sharing a view of it.
 
 ## Queue an export
 

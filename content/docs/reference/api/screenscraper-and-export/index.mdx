@@ -1,9 +1,9 @@
 ---
 title: API ScreenScraper and export
-description: The 1.8.0 additive v2 workflows — per-ROM-hash ScreenScraper scraping and library export.
+description: Additive v2 workflows for per-ROM-hash ScreenScraper scraping and library export.
 ---
 
-These are additive `/api/v2/*` routes introduced in 1.8.0. All require `X-OpenBox-Token: TOKEN`; POST bodies are JSON objects. Durable operations return `202` with a `job_id` you can track through `GET /api/v2/jobs` and cancel with `POST /api/v2/jobs/cancel`.
+These are current additive `/api/v2/*` routes, introduced in 1.8.0 and retained in 1.10.0. All require `X-OpenBox-Token: TOKEN`; POST bodies are JSON objects. Durable operations return `202` with a `job_id` you can track through `GET /api/v2/jobs` and cancel with `POST /api/v2/jobs/cancel`.
 
 ## ScreenScraper provider
 

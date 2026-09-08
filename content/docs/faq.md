@@ -20,7 +20,7 @@ OpenBox targets Linux desktops, laptops, Steam Deck systems, and handheld PCs on
 
 ## Is my data sent anywhere?
 
-No. Nothing leaves your machine unless you explicitly trigger an integration: a metadata sync, a media download, a webhook delivery, or statistics sync to a folder you choose. There is no telemetry, no crash reporting, and no OpenBox account. The server binds to loopback only.
+No. Nothing leaves your machine unless you explicitly trigger an integration: a metadata sync, a media download, a webhook delivery, statistics sync, or opt-in catalog sync to a folder you choose. There is no telemetry, no crash reporting, and no OpenBox account. The server binds to loopback only.
 
 ## Can I run it alongside Steam, Heroic, and Lutris?
 

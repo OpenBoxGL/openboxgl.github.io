@@ -8,11 +8,11 @@ description: A local-first game library and launcher for Linux.
 
 ## One library for Steam, ROMs, and emulators.
 
-OpenBoxGL brings mixed game collections into one searchable catalog. Keep library data on your machine, enrich it with artwork and metadata, then launch and track play from the same interface. No account, no cloud lock-in, no telemetry.
+OpenBoxGL brings mixed game collections into one searchable catalog. Keep library data on your machine, enrich it with artwork and metadata, then launch and track play from the same interface. No account, no vendor cloud lock-in, no telemetry.
 
 <ProductShot src="/openbox-screenshot.png" alt="The OpenBox native window: filter rail on the left, grouped cover grid in the center, and the selected game's detail pane on the right." caption="The native window: filter rail, grouped cover grid, and game detail pane in one workspace." />
 
-[**Install OpenBoxGL**](/install/) [**Read the quick start**](/getting-started/)
+[**Install OpenBoxGL 1.10.0**](/install/) [**Read the quick start**](/getting-started/) [**Read the release notes**](/changelog/)
 
 ## What OpenBoxGL is
 
@@ -38,7 +38,7 @@ OpenBoxGL is independent from the Openbox window manager and from LaunchBox and 
 ## How it works
 
 1. **Bring in your libraries.** Import Steam, Heroic, Lutris, Gameyfin, ROM folders, arcade sets, executables, and emulator collections. Imports scan local manifests or folders and add only entries that are not already present, so re-running an import never duplicates.
-2. **Organize and enrich them.** Search, filter, tag, rate, group, edit metadata, download media, and build playlists. Metadata syncing and media downloads are optional and can be limited per import so large libraries stay responsive.
+2. **Organize and enrich them.** Search, filter, tag, rate, group, edit metadata, download media, build playlists, and create pathless shelf entries. Metadata syncing and media downloads are optional and can be limited per import so large libraries stay responsive.
 3. **Launch and track play.** Use profiles and tokenized commands, then keep session history, saves, queue state, and backups together. Every launch records a session with duration and exit status, unless you disable session history in Settings.
 
 ## What it does at a glance
@@ -75,6 +75,7 @@ OpenBoxGL exists because LaunchBox is a mature, feature-rich Windows library man
 | Controller-friendly fullscreen | Big Box with Stage, Hybrid, and CoverFlow layouts, gamepad mapping, screensaver/attract mode, and gamescope guest support. |
 | Protect your saves | Save discovery across Steam Cloud, RetroArch, PCSX2, PPSSPP, RPCS3, Dolphin, and Cemu; versioned backups with restore guards; Ludusavi/Hoard hooks. |
 | Track play honestly | Per-session history with duration and exit code, progress automation, and mounted-folder statistics sync across machines. |
+| Move libraries safely | Review-first LaunchBox XML migration plus opt-in causal catalog sync with preview, conflict choices, recovery, and local launch configuration preserved. |
 | Automate locally | Play queue, tags, notifications, and HMAC-signed webhooks, all local, no account. |
 | No subscription | Every LaunchBox-Premium-equivalent workflow (custom fields, ESRB filters, list view, media packs, cloud statistics sync) ships free. |
 
@@ -120,11 +121,11 @@ No OpenBox account is required. Optional integrations may have their own account
 
 ### What operating systems are supported?
 
-OpenBoxGL targets Linux desktops, laptops, Steam Deck systems, and handheld PCs. Source installs require Python 3.10 or newer; the AppImage bundles its own Python runtime. The current requirements and package paths are listed in [Installation](/install/).
+OpenBoxGL targets Linux desktops, laptops, Steam Deck systems, and handheld PCs on x86_64 and aarch64. Source installs require Python 3.10 or newer; the AppImage bundles its own Python runtime. The current requirements and package paths are listed in [Installation](/install/).
 
 ### Is my data sent anywhere?
 
-No. Nothing leaves your machine unless you explicitly trigger an integration (a metadata sync, a media download, a webhook delivery). There is no telemetry, no crash reporting, and no OpenBox account. The server binds to loopback only.
+No. Nothing leaves your machine unless you explicitly trigger an integration (a metadata sync, a media download, a webhook delivery, statistics sync, or opt-in catalog sync to a folder you choose). There is no telemetry, no crash reporting, and no OpenBox account. The server binds to loopback only.
 
 ### Can I run it alongside Steam, Heroic, and Lutris?
 

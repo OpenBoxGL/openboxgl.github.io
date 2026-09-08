@@ -16,7 +16,7 @@ There is no OpenBox account, installer wizard, or license key. Downloading a rel
 | [Source](#source--system) | Development, testing, or patching | `git pull` and re-run |
 | [System install](#source--system) | Installing to `/usr/local` from source | `sudo make install` again |
 
-The fastest path is the [versioned release installer](#versioned-release-installer): `curl ... | bash` downloads the latest AppImage, pins the release public key, verifies its SHA-256 checksum and Ed25519 signature, and installs it to `~/.local/bin`.
+The fastest path is the [versioned release installer](#versioned-release-installer): download the tag-pinned script, inspect it, then run it. It selects the matching AppImage, pins the release public key, verifies its SHA-256 checksum and Ed25519 signature, and installs it to `~/.local/bin`.
 
 Only the AppImage receives the built-in updater. Flatpak, source, and system installs follow their own package or source workflow; see [Updating](/updating/).
 
@@ -52,7 +52,7 @@ The source install uses only the Python standard library, there is no `pip insta
  Download the installer from a specific signed release, inspect it, then run it. The installer verifies the release public-key pin, SHA-256 checksum, and Ed25519 signature before installing to `~/.local/bin`:
 
  ```bash
- VERSION=1.9.0
+ VERSION=1.10.0
  curl --proto '=https' --tlsv1.2 --fail --location \
    --output install.sh \
    "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -67,6 +67,8 @@ The source install uses only the Python standard library, there is no `pip insta
  ```
 
  Omit `OPENBOX_RELEASE_TAG` only when you intentionally want the latest stable release. Install to a different directory with `OPENBOX_INSTALL_DIR` (e.g. `OPENBOX_INSTALL_DIR="$HOME/Applications"`).
+
+ The installer detects `x86_64` or `aarch64` from `uname -m`. Packaging and emulation environments can select one explicitly with `OPENBOX_ARCH=x86_64` or `OPENBOX_ARCH=aarch64`.
 
  #### Manual download
 

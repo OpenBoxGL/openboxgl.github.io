@@ -27,10 +27,10 @@ The updater only recognizes an AppImage: it refuses to run when `APPIMAGE` is no
 When you click **Check for updates** in Settings, OpenBoxGL queries the GitHub releases API for the latest release of `vindeckyy/OpenBoxGL` and compares versions:
 
 1. **Version comparison.** The tag must be newer than the running version. Pre-release and build-suffixed tags (`-beta`, `+build`) are never offered as updates, even when their version number is higher.
-2. **Asset verification.** The update is only offered when the release ships the AppImage asset matching the running architecture — `OpenBox-x86_64.AppImage` or `OpenBox-aarch64.AppImage` (v1.8.0+) — from the trusted `https://github.com/vindeckyy/OpenBoxGL/releases/download/` prefix, a SHA-256 checksum is available (asset digest or `.sha256` file), and an Ed25519 release signature (the `.sig` asset) is present. A release missing any of the three is rejected with a clear error instead of an unsafe download.
+2. **Asset verification.** The update is only offered when the release ships the AppImage asset matching the running architecture — `OpenBox-x86_64.AppImage` or `OpenBox-aarch64.AppImage` — from the trusted `https://github.com/vindeckyy/OpenBoxGL/releases/download/` prefix, a SHA-256 checksum is available (asset digest or `.sha256` file), and an Ed25519 release signature (the `.sig` asset) is present. A release missing any of the three is rejected with a clear error instead of an unsafe download.
 3. **Signature verification.** Before anything is downloaded, the Ed25519 signature is verified against the pinned production public key (`openbox-release.pub`, shipped with the app). If the key is unavailable or still the placeholder, the update refuses to proceed with a loud warning.
 4. **Checksummed download.** The new AppImage downloads to a staging file beside the current one, streaming with a 2 GiB cap. The download fails if the computed SHA-256 does not match the release's checksum.
-5. **Atomic swap with rollback.** The current AppImage is renamed to `OpenBox-x86_64.previous.AppImage` (any older rollback file is removed first), then the new file is moved into place. If the move fails, the previous file is restored and the update reports the error.
+5. **Atomic swap with rollback.** The current AppImage is renamed to `<arch>.previous.AppImage` (for example, `OpenBox-x86_64.previous.AppImage`; any older rollback file is removed first), then the new file is moved into place. If the move fails, the previous file is restored and the update reports the error.
 
 That is why the Settings dialog says "The current AppImage will be retained as a backup" before you confirm: the `.previous.AppImage` file is the rollback copy, not a leftover.
 
@@ -44,7 +44,7 @@ That is why the Settings dialog says "The current AppImage will be retained as a
 
 <Callout type="tip" title="The rollback file is your safety net">
 
-Every successful AppImage update renames the current file to `OpenBox-x86_64.previous.AppImage` before swapping in the new one. If the new build will not start, you can always get back to a working launcher, the previous version is sitting right next to it. You never need to re-download to roll back.
+Every successful AppImage update renames the current file to an architecture-matched `.previous.AppImage` before swapping in the new one. If the new build will not start, you can always get back to a working launcher, the previous version is sitting right next to it. You never need to re-download to roll back.
 
 </Callout>
 
@@ -66,7 +66,7 @@ Restart OpenBoxGL. The new file only takes effect on the next launch. If it stil
 
 ### The new AppImage will not start
 
-The previous version is intact at `OpenBox-x86_64.previous.AppImage` in the same directory. Replace the new file with it:
+The previous version is intact at the architecture-matched `.previous.AppImage` in the same directory. For x86_64, replace the new file with it:
 
 ```bash
 mv OpenBox-x86_64.previous.AppImage OpenBox-x86_64.AppImage

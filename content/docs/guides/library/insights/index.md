@@ -3,7 +3,7 @@ title: Play Insights
 description: Local-first gameplay analytics, 366-day activity heatmap, streaks, and momentum tracking with zero telemetry.
 ---
 
-OpenBox includes a built-in, local-first **Play Insights** dashboard. It turns your recorded play sessions into meaningful analytics without external services, accounts, or telemetry.
+OpenBox 1.9.0 introduced the built-in, local-first **Play Insights** dashboard. It remains part of 1.10.0 and turns your recorded play sessions into meaningful analytics without external services, accounts, or telemetry.
 
 ## Features
 

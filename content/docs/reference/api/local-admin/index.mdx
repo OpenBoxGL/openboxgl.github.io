@@ -15,15 +15,15 @@ Check for a new release. Queries the GitHub releases API for `vindeckyy/OpenBoxG
 
 ```json
 {
- "current": "1.9.0",
- "latest": "1.9.0",
+ "current": "1.10.0",
+ "latest": "1.10.0",
  "available": false,
- "last_checked": 1756848000,
+ "last_checked": "<timestamp or empty>",
  "notes": "...",
  "appimage": "https://github.com/vindeckyy/OpenBoxGL/releases/download/.../OpenBox-x86_64.AppImage",
  "checksum": "sha256:...",
  "checksum_url": "...",
- "sig": "https://github.com/vindeckyy/OpenBoxGL/releases/download/.../OpenBox-x86_64.AppImage.sig",
+ "sig": true,
  "sig_url": "...",
  "page": "https://github.com/.../releases/tag/..."
 }
@@ -32,7 +32,8 @@ Check for a new release. Queries the GitHub releases API for `vindeckyy/OpenBoxG
 Rules:
 
 - Pre-release and build-suffixed tags are never `available`.
-- The AppImage asset must come from the trusted `https://github.com/vindeckyy/OpenBoxGL/releases/download/` prefix and a SHA-256 checksum must be present (asset digest or `.sha256` file); otherwise `400` with a clear reason.
+- The AppImage asset matching the running architecture (`OpenBox-x86_64.AppImage` or `OpenBox-aarch64.AppImage`) must come from the trusted `https://github.com/vindeckyy/OpenBoxGL/releases/download/` prefix and a SHA-256 checksum must be present (asset digest or `.sha256` file); otherwise `400` with a clear reason.
+- `sig` is a boolean indicating that a trusted `.sig` asset exists; `sig_url` contains its URL. A missing or untrusted signature makes an available update fail closed.
 - GitHub failures return `400` (`"GitHub releases request failed (...)"` / `"Could not reach GitHub releases: ..."`). Setting `GITHUB_TOKEN` (or `GH_TOKEN`) in `~/.env` authenticates the request for a higher rate limit.
 
 </ApiEndpoint>
@@ -212,7 +213,7 @@ See [Plugins](/reference/plugins/) for the manifest and hook contract.
 
 ```json
 {
-  "report": "{\"version\": \"1.9.0\", \"python\": \"3.12.3\", \"platform\": \"Linux-...\", \"data_dir\": \"~/.local/share/openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
+  "report": "{\"version\": \"1.10.0\", \"python\": \"3.12.3\", \"platform\": \"Linux-...\", \"data_dir\": \"~/.local/share/openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
 }
 ```
 

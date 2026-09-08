@@ -6,7 +6,7 @@ sidebar: false
 
 # Localization
 
-OpenBox ships with full internationalization support for **English, Spanish, German, French, and Brazilian Portuguese** as of v1.7.2. The locale selector is in **Settings > Interface language**; switching re-translates the entire UI without a page reload.
+OpenBox ships locale catalogs for **English, Spanish, German, French, and Brazilian Portuguese**. The locale selector is in **Settings > Interface language**; switching re-translates the keyed UI surfaces without a page reload. Some operational and browser fallback labels remain English.
 
 ## How it works
 

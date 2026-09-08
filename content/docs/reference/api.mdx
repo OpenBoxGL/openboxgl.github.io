@@ -45,7 +45,7 @@ Replace `GAME_ID` with a real `game-<hex>` id from `/api/library`. The token and
 
 ## Authentication
 
-Every route except the static UI page requires a token. Send it as a header:
+Every route except the static UI, locale JSON, and other explicitly public assets requires a token. Send it as a header:
 
 ```
 X-OpenBox-Token: TOKEN
@@ -55,7 +55,7 @@ The query parameter `token=TOKEN` is also accepted but can leak through browser 
 
 ## Response envelope
 
-All JSON responses use the shape `{"key": value, ...}`. Errors are always `{"error": "message"}` with a status code.
+Most API handlers return JSON objects. Structured errors include an `error`, stable `code`, and short `request_id`; public assets, media/download endpoints, and Server-Sent Events can return bytes or streams instead of JSON. The versioned route pages document the response shape for each operation.
 
 | Status | Meaning |
 | --- | --- |
@@ -84,7 +84,7 @@ Each group has its own reference page with per-endpoint cards.
   { href: '/reference/api/library-and-settings/', title: 'Library and settings', eyebrow: 'crud', description: 'Library, settings, profiles, running sessions, history, launch, playlists, filter presets.' },
   { href: '/reference/api/automation/', title: 'Automation', eyebrow: 'events', description: 'Queue, tags, notifications, webhooks, the launcher menu, and import exclusions.' },
   { href: '/reference/api/content-and-imports/', title: 'Content and imports', eyebrow: 'media', description: 'Imports, metadata, media, emulators, storefronts, Gameyfin, discovery, and the health audit.' },
-  { href: '/reference/api/saves-and-operations/', title: 'Saves and operations', eyebrow: 'protect', description: 'Save discovery/backup/restore, library backups, cloud sync, save tools, high scores, OBS.' },
+  { href: '/reference/api/saves-and-operations/', title: 'Saves and operations', eyebrow: 'protect', description: 'Save discovery/backup/restore, library backups, statistics sync, save tools, high scores, OBS, and links to catalog sync.' },
   { href: '/reference/api/local-admin/', title: 'Local administrator', eyebrow: 'admin', description: 'Updates, shutdown, state recovery, desktop integration, themes, plugins, premium read models.' },
  ]}
 />

@@ -55,6 +55,8 @@ The default data directory is `~/.local/share/openbox-game-launcher`. Everything
 
 The library file itself is schema-versioned JSON with stable game IDs derived from game identity, never from list position. That is why playtime, queue entries, and save links survive reordering or deleting other entries.
 
+When catalog synchronization is enabled, its immutable events live under `<cloud_folder>/openbox-library-v3/` in the mounted folder you selected; they are separate from local `library.json` and never copy launch paths, commands, credentials, statistics, saves, or media.
+
 ### Changing the data directory
 
 Set `OPENBOX_DATA_DIR` in the process environment before starting OpenBoxGL:
@@ -89,7 +91,7 @@ Supported variables are documented in `.env.example` and [Configuration](/refere
 - The server binds to loopback and requires the session token on every request. Prefer the `X-OpenBox-Token` header for API calls you write; a `token` query parameter can leak into browser history and server logs.
 - Tokens, passwords, API keys, and authorization headers are redacted in the diagnostic log.
 - Webhooks reject plain HTTP targets by default; `OPENBOX_ALLOW_HTTP_WEBHOOKS=1` enables them for trusted local tests only.
-- No OpenBox account exists and no library data leaves your machine except what an integration you explicitly trigger sends.
+- No OpenBox account exists and no library data leaves your machine except what an integration you explicitly trigger sends. Statistics and catalog synchronization use only the mounted folder you choose; catalog sync is opt-in and keeps launch paths, commands, credentials, statistics, saves, and media local.
 
 ## Backups and recovery
 

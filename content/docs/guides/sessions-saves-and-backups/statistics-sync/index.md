@@ -38,6 +38,8 @@ Deleted local games are **never resurrected**: games present only in the cloud f
 - [API saves and operations](/reference/api/saves-and-operations/), `POST /api/cloud/sync`
 - [Data and recovery](/reference/data-and-recovery/), where local state lives
 
-## Full library sync (v1.9.0)
+## Catalog sync (v1.10.0)
 
-Statistics sync above covers play stats only. **Full library sync** replicates the entire library (games, metadata, deletions) through the same mounted folder via `POST /api/v2/library/sync/publish` and `POST /api/v2/library/sync/pull`. Deletions propagate as tombstones and conflicts resolve last-writer-wins — this is OpenBox's own folder sync, not a LaunchBox account service.
+Statistics sync above covers play stats only. OpenBox 1.10.0 also includes an explicit, opt-in catalog transport for games and shared metadata. Enable **Library synchronization**, then use `POST /api/v2/library/sync/preview` to inspect incoming events and `POST /api/v2/library/sync/apply` to apply a reviewed plan. Publish local events with `POST /api/v2/library/sync/publish` and the JSON body `{"protocol":"v3"}`.
+
+The v3 transport stores immutable, content-addressed events under `openbox-library-v3`, tracks device identity and ancestry, propagates tombstones, preserves a recovery snapshot before apply, and lets you choose conflicts explicitly. Launch paths, commands, credentials, play statistics, installed files, saves, and media remain local to each device. The former whole-library `publish` payload and `POST /api/v2/library/sync/pull` return `503 LIBRARY_SYNC_UNAVAILABLE` before mutation; they do not perform last-writer-wins replacement.

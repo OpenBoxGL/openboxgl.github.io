@@ -210,7 +210,7 @@ The `:root` block in `static/app.css` currently defines 205 `--*` custom propert
 
 `scripts/check_tokens.py` enforces the contract in CI: raw hex outside `:root` must stay at the ratcheted baseline of 0. A new visual value means a new `:root` token plus its entry in each of the five theme files. For the full per-token table, read the `:root` block in `static/app.css` in the repository you are running — this page documents the palette groups, not every one of the 205 names.
 
-### Feature token families (v1.9.0)
+### Feature token families (introduced in v1.9.0)
 
 - **Mood Match**: `--mood-primary`, `--mood-ink`, `--mood-secondary` (aliases `--accent`), `--mood-glow` (aliases `--accent-ghost`), `--mood-tint`, `--mood-transition`. Driven live from the selected cover when `mood_match_enabled` / `mood_match_bigbox` are on.
 - **Constellation**: `--constellation-edge-series`, `--constellation-edge-developer`, `--constellation-edge-publisher`, `--constellation-edge-genre`, `--constellation-edge-platform_family`, `--constellation-edge-co_played`.

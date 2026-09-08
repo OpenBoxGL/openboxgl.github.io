@@ -1,9 +1,9 @@
 ---
 title: Releasing
-description: Cut and publish an OpenBoxGL AppImage release.
+description: Cut and publish an OpenBox release and its verified artifacts.
 ---
 
-This page is for maintainers publishing an AppImage release from `master`. The release is built in CI when a `v*` tag is pushed; the steps below prepare the version, changelog, and metadata before that tag.
+This page is for maintainers publishing a release from `master`. The AppImage and Flatpak artifacts are built in CI when a `v*` tag is pushed; the steps below prepare the version, changelog, and metadata before that tag.
 
 ## Before you tag
 
@@ -11,7 +11,7 @@ This page is for maintainers publishing an AppImage release from `master`. The r
 2. Bump `updates.py` `VERSION` to the new semver.
 3. Add a dated section to `docs/CHANGELOG.md` (Keep a Changelog format) and the comparison links, and update `RELEASE_NOTES.md` (CI publishes it as the release body).
 4. Prepend release metadata to `openbox.metainfo.xml`.
-5. Update the README release badge, `PARITY.md` latest-release text, the bug-report template's version field, and any branch/version references that should track the current release. Leave historical version references in old changelog/metainfo entries and completed specs unchanged.
+5. Update the README release badge, `PARITY.md` latest-release text, the bug-report template's version field, and any branch/version references that should track the current release. Review `SUPPORT.md`, the Flathub checklist, installer architecture examples, and this page. Leave historical version references in old changelog/metainfo entries and completed specs unchanged.
 6. Run the local gates:
   ```bash
   ./run_all_tests.sh
@@ -29,9 +29,14 @@ Prerequisites: `gcc`, `pkg-config`, and the WebKitGTK dev package (`libwebkit2gt
 bash build_appimage.sh
 ```
 
-`OPENBOX_ARCH` overrides architecture detection (`x86_64` or `aarch64`); the output is `OpenBox-$arch.AppImage` (default `OpenBox-x86_64.AppImage`).
+`OPENBOX_ARCH` overrides architecture detection (`x86_64` or `aarch64`); the output is `OpenBox-$arch.AppImage` (default `OpenBox-x86_64.AppImage`). Build each architecture separately when testing locally:
 
-The build produces `OpenBox-x86_64.AppImage` and `OpenBox-x86_64.AppImage.zsync`, but does not regenerate the `.sha256` sidecar. Regenerate it explicitly:
+```bash
+OPENBOX_ARCH=x86_64 ./build_appimage.sh OpenBox-x86_64.AppImage
+OPENBOX_ARCH=aarch64 ./build_appimage.sh OpenBox-aarch64.AppImage
+```
+
+The build produces the architecture-specific AppImage and `.zsync` pair, but does not regenerate the `.sha256` sidecar. Regenerate it explicitly:
 
 ```bash
 sha256sum OpenBox-x86_64.AppImage > OpenBox-x86_64.AppImage.sha256
@@ -51,21 +56,25 @@ Confirm the embedded version matches the release by extracting the AppImage and 
 
 ## What CI does
 
-Pushing a `v*` tag triggers `.github/workflows/release-appimage.yml`, which runs three jobs:
+Pushing a `v*` tag triggers the AppImage and Flatpak release workflows. The two publish jobs share a per-tag concurrency group because both update the same GitHub Release.
 
-**build** (contents read): validates the tag against `updates.py` `VERSION`, compiles the native host, runs the full test suite, builds the AppImage, writes `OpenBox-x86_64.AppImage.sha256`, generates the CycloneDX SBOM, and verifies the zsync metadata. It uploads the unsigned build outputs as a workflow artifact.
+**AppImage build** (contents read): validates the tag against `updates.py` `VERSION`, compiles the native host, runs the full test suite, and builds both `OpenBox-x86_64.AppImage` and `OpenBox-aarch64.AppImage` on architecture-matched runners. Each build gets a `.zsync`, `.sha256`, and architecture-appropriate CycloneDX SBOM, then uploads unsigned outputs as workflow artifacts.
 
-**attest** (id-token and attestations write): downloads the build output and attests build provenance for the AppImage.
+**AppImage attest** (id-token and attestations write): downloads each build output and attests provenance for both AppImages.
 
-**publish** (requires the `release` environment, contents write): checks out the exact tagged commit, confirms the annotated tag points at the build commit, then signs and verifies the release. It writes the `OPENBOX_SIGNING_KEY` secret to a mode-0600 temp file, runs `scripts/sign_release.py` to produce `OpenBox-x86_64.AppImage.sig`, compares the derived public key against the committed `openbox-release.pub`, re-checks the SHA-256, and verifies the signature with `scripts/verify_release.py`. If `OPENBOX_SIGNING_KEY` is missing or the derived key does not match, the job fails before anything is published. Finally it copies `scripts/install.sh` and creates the release via `softprops/action-gh-release@v3` with `overwrite_files: false`, uploading the AppImage, `.zsync`, `.sha256`, `.sig`, `openbox-release.pub`, `install.sh`, and the SBOM. A tag containing `-` is marked prerelease.
+**AppImage publish** (requires the `release` environment, contents write): checks out the exact tagged commit, confirms the annotated tag points at the build commit, signs and verifies both AppImages, compares the derived public key against the committed `openbox-release.pub`, re-checks each SHA-256, and verifies each signature. If `OPENBOX_SIGNING_KEY` is missing or the derived key does not match, the job fails before anything is published. It then copies `scripts/install.sh` and uploads both signed AppImages, their `.zsync`, `.sha256`, `.sig`, the release key, architecture-specific SBOMs, and the installer. A tag containing `-` is marked prerelease.
+
+**Flatpak build**: validates packaging metadata, compiles the native host, runs packaging tests, installs the GNOME 49 runtime/SDK, and creates `OpenBox-x86_64.flatpak`.
+
+**Flatpak publish** (requires the `release` environment, contents write): uploads the x86_64 Flatpak to the same release and uses the same `docs/RELEASE_NOTES.md` body. Its publish job is serialized with the AppImage publish job for that tag.
 
 The release body is `RELEASE_NOTES.md`, so update it before tagging; GitHub does not generate the notes.
 
 ## Verify after publishing
 
-- Confirm GitHub's latest-release API returns the new version and all seven assets: the AppImage, `.zsync`, `.sha256`, `.sig`, `openbox-release.pub`, `install.sh`, and the SBOM.
-- Download the AppImage and `.sha256` remotely and run `sha256sum -c`.
-- Verify the signature with `scripts/verify_release.py --key openbox-release.pub OpenBox-x86_64.AppImage OpenBox-x86_64.AppImage.sig`.
+- Confirm GitHub's latest-release API returns the new version and the architecture matrix: x86_64 and aarch64 AppImages with `.zsync`, `.sha256`, and `.sig`, the release key, architecture-specific SBOMs, `install.sh`, and `OpenBox-x86_64.flatpak`.
+- Download each AppImage and its `.sha256` remotely and run `sha256sum -c`.
+- Verify both signatures with `scripts/verify_release.py --key openbox-release.pub OpenBox-x86_64.AppImage OpenBox-x86_64.AppImage.sig` and the matching aarch64 paths.
 - Start the AppImage and confirm the updater reports the new version as current with no update available.
 
 ## Pitfalls

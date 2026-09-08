@@ -17,6 +17,8 @@ Inside the data directory (default `~/.local/share/openbox-game-launcher`, or `O
 | `.library.json.lock` | Cross-process `flock` lock coordinating concurrent writers |
 | `server.token`, `server.port` | Per-launch credentials for the running Web UI; deleted on exit |
 
+Catalog synchronization is separate from this local state directory. When enabled, immutable events live under `<cloud_folder>/openbox-library-v3/` in the mounted folder selected in Settings. The v3 transport does not copy launch paths, commands, credentials, statistics, saves, or media.
+
 ## Write path
 
 `JsonStateStore` (`state_store.py`) commits like this:
