@@ -4,7 +4,7 @@ Antislop During guided the removal of the first pass's oversized orange panels, 
 
 ## Verified
 
-- Production build: `bun run test` passes compilation, TypeScript, static export, and checks for 111 HTML pages and 111 routes.
+- Production build: `bun run test` passed compilation, TypeScript, static export, and route checks at the time of this pass (111 HTML pages / 111 routes — a point-in-time count; the build prints the current total and grows as docs are added).
 - Responsive homepage: Chromium screenshots and page-width checks at 1440, 768, 375, and 320px. No horizontal document overflow. Intentionally clipped covers remain inside their visual stage. The toolkit tabs reflow above the panel on phones.
 - Shelf: next control and arrow-key selection change the active cover and caption. The selected case is the single tab stop; direct clicks and touch handlers are present. Ambient color follows selection.
 - Product viewer: view tabs change the screenshot and copy; the screenshot opens a native dialog; Escape closes it.

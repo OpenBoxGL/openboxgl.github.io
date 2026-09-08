@@ -156,7 +156,7 @@ sidebar: false
 ### Packaging & Scale
 
 - Formal performance support target of **20,000** games.
-- AppImage release built on Ubuntu 22.04 LTS (x86_64); Flatpak targets runtime 25.08 (`org.gnome.Platform`).
+- AppImage release built on Ubuntu 22.04 LTS (x86_64); Flatpak targets runtime 25.08 (`org.gnome.Platform`) — superseded: current builds target runtime 49 (see 1.8.0).
 
 ## 1.6.0 (2026-08-23)
 

@@ -91,6 +91,7 @@ export function buildSidebar(): DocNode[] {
             [`${item}/saves`]: 2,
             [`${item}/library-backups`]: 3,
             [`${item}/statistics-sync`]: 4,
+            [`${item}/library-sync`]: 5,
           }
           return (order[a] ?? 100) - (order[b] ?? 100) || a.localeCompare(b)
         })

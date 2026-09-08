@@ -181,7 +181,7 @@ All library data, media, backups, themes, and logs live in `~/.local/share/openb
 | Problem | Cause / fix |
 | --- | --- |
 | `Permission denied` on the AppImage | The file is not executable: `chmod +x OpenBox-x86_64.AppImage`. |
-| AppImage will not mount | FUSE is missing on the host. Install `fuse` (or `fuse2` on newer distros). |
+| AppImage will not mount | The FUSE 2 library is missing on the host. Install `libfuse2` on Debian/Ubuntu (`libfuse2t64` on Ubuntu 24.04+), `fuse-libs` on Fedora, or `fuse2` on Arch — or run the AppImage with `--appimage-extract-and-run` to skip FUSE entirely. |
 | Window does not open | Run from a terminal and read the printed error. In `--web` mode, open the printed `http://127.0.0.1:PORT/?token=...` URL yourself. |
 | Source: `python3: command not found` or `ModuleNotFoundError` | Python 3.10+ is required and must be `python3`. On some distros install `python3` and use `python3 web_app.py`. |
 | Flatpak can't read Steam/ROMs | Keep folders under your home directory; the manifest grants `--filesystem=home`. |

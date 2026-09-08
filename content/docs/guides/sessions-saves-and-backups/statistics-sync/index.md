@@ -34,6 +34,7 @@ Deleted local games are **never resurrected**: games present only in the cloud f
 
 ## See also
 
+- [Library catalog sync](/guides/sessions-saves-and-backups/library-sync/), opt-in catalog metadata sync (v1.10.0)
 - [Sessions, saves, and backups](/guides/sessions-saves-and-backups/), session recording and history
 - [API saves and operations](/reference/api/saves-and-operations/), `POST /api/cloud/sync`
 - [Data and recovery](/reference/data-and-recovery/), where local state lives

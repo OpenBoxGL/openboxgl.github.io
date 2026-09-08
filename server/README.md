@@ -6,7 +6,7 @@ Serves the static export in `out/` and a small dependency-free API (Node 18+ or 
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| GET | `/api/health` | Liveness + version + uptime |
+| GET | `/api/health` | Liveness + site-server version (`SITE_VERSION`, not the OpenBox app release) + uptime |
 | GET | `/api/search?q=...` | Ranked docs search over `public/docs-index.json` |
 | GET | `/api/release` | Latest GitHub release (cached 15 min): version, notes, AppImage URL, checksum |
 | GET | `/api/stats` | GitHub stars, forks, downloads (cached 1h) |
