@@ -1,13 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+<svg xmlns="http://www.w3.org/2000/svg" width="494" height="517" viewBox="0 0 494 517">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#ffc23a"/>
-      <stop offset="1" stop-color="#f06b24"/>
+    <linearGradient id="obTop" x1="6" y1="142" x2="490" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f95f00"/>
+      <stop offset="1" stop-color="#ffa114"/>
     </linearGradient>
+    <linearGradient id="obLeft" x1="4" y1="142" x2="243" y2="508" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f64600"/>
+      <stop offset="1" stop-color="#ff7200"/>
+    </linearGradient>
+    <linearGradient id="obRight" x1="252" y1="480" x2="490" y2="134" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fe6800"/>
+      <stop offset="1" stop-color="#ffb416"/>
+    </linearGradient>
+    <clipPath id="obClipTop"><polygon points="247,0 494,130 247,260 0,130"/></clipPath>
+    <clipPath id="obClipLeft"><polygon points="0,130 247,260 247,516 0,386"/></clipPath>
+    <clipPath id="obClipRight"><polygon points="247,260 494,130 494,386 247,516"/></clipPath>
   </defs>
-  <rect width="256" height="256" rx="54" fill="#111521"/>
-  <rect x="28" y="28" width="200" height="200" rx="42" fill="url(#g)"/>
-  <path d="M75 79h106v98H75z" fill="#111521"/>
-  <path d="M96 99h64v58H96z" fill="url(#g)"/>
-  <path d="M112 113h32v30h-32z" fill="#111521"/>
+  <polygon points="247,0 494,130 247,260 0,130" fill="url(#obTop)"/>
+  <polygon points="0,130 247,260 247,516 0,386" fill="url(#obLeft)"/>
+  <polygon points="247,260 494,130 494,386 247,516" fill="url(#obRight)"/>
+  <g clip-path="url(#obClipTop)">
+    <path fill="#000" transform="matrix(-247,130,247,130,247,0)" d="M0,0.341 L0,0.555 L0.657,0.567 L0.657,0.735 L0.203,0.733 L0.203,0.866 L0.869,0.869 L0.869,0.205 L0.186,0.197 L0.186,0.341 L0.657,0.343 L0.657,0.53 L0.19,0.525 C0.092,0.487 0.05,0.447 0,0.341 Z"/>
+  </g>
+  <g clip-path="url(#obClipLeft)">
+    <path fill="#000" transform="matrix(247,130,0,256,0,130)" d="M0.145,0.128 L1,0.128 L1,1 L0.96,1 L0.96,0.2 L0.79,0.2 L0.79,0.808 L0.664,0.808 L0.534,1 L0.445,1 L0.567,0.81 L0.145,0.81 Z"/>
+  </g>
+  <g clip-path="url(#obClipRight)">
+    <path fill="#000" transform="matrix(247,-130,0,256,247,260)" d="M0,0.02 L0.836,0.02 L0.836,0.76 L1,0.76 L1,0.82 L0.68,0.82 L0.68,0.393 L0.338,0.393 L0.338,0.53 L0.515,0.53 L0.515,0.975 L0.465,0.975 L0.465,0.731 L0.21,0.731 L0.21,0.31 L0.68,0.31 L0.68,0.133 L0.033,0.133 L0.033,0.97 L0,0.97 Z"/>
+  </g>
 </svg>

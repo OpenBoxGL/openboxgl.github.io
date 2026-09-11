@@ -1,26 +1,31 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    @media (prefers-color-scheme: light) {
-      .background { fill: black; }
-      .foreground { fill: white; }
-    }
-    @media (prefers-color-scheme: dark) {
-      .background { fill: white; }
-      .foreground { fill: black; }
-    }
-  </style>
-  <g clip-path="url(#clip0_7960_43945)">
-    <rect class="background" width="180" height="180" rx="37" />
-    <g style="transform: scale(95%); transform-origin: center">
-      <path class="foreground"
-        d="M101.141 53H136.632C151.023 53 162.689 64.6662 162.689 79.0573V112.904H148.112V79.0573C148.112 78.7105 148.098 78.3662 148.072 78.0251L112.581 112.898C112.701 112.902 112.821 112.904 112.941 112.904H148.112V126.672H112.941C98.5504 126.672 86.5638 114.891 86.5638 100.5V66.7434H101.141V100.5C101.141 101.15 101.191 101.792 101.289 102.422L137.56 66.7816C137.255 66.7563 136.945 66.7434 136.632 66.7434H101.141V53Z" />
-      <path class="foreground"
-        d="M65.2926 124.136L14 66.7372H34.6355L64.7495 100.436V66.7372H80.1365V118.47C80.1365 126.278 70.4953 129.958 65.2926 124.136Z" />
-    </g>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="494" height="517" viewBox="0 0 494 517">
   <defs>
-    <clipPath id="clip0_7960_43945">
-      <rect width="180" height="180" fill="white" />
-    </clipPath>
+    <linearGradient id="obTop" x1="6" y1="142" x2="490" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f95f00"/>
+      <stop offset="1" stop-color="#ffa114"/>
+    </linearGradient>
+    <linearGradient id="obLeft" x1="4" y1="142" x2="243" y2="508" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f64600"/>
+      <stop offset="1" stop-color="#ff7200"/>
+    </linearGradient>
+    <linearGradient id="obRight" x1="252" y1="480" x2="490" y2="134" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fe6800"/>
+      <stop offset="1" stop-color="#ffb416"/>
+    </linearGradient>
+    <clipPath id="obClipTop"><polygon points="247,0 494,130 247,260 0,130"/></clipPath>
+    <clipPath id="obClipLeft"><polygon points="0,130 247,260 247,516 0,386"/></clipPath>
+    <clipPath id="obClipRight"><polygon points="247,260 494,130 494,386 247,516"/></clipPath>
   </defs>
+  <polygon points="247,0 494,130 247,260 0,130" fill="url(#obTop)"/>
+  <polygon points="0,130 247,260 247,516 0,386" fill="url(#obLeft)"/>
+  <polygon points="247,260 494,130 494,386 247,516" fill="url(#obRight)"/>
+  <g clip-path="url(#obClipTop)">
+    <path fill="#000" transform="matrix(-247,130,247,130,247,0)" d="M0,0.341 L0,0.555 L0.657,0.567 L0.657,0.735 L0.203,0.733 L0.203,0.866 L0.869,0.869 L0.869,0.205 L0.186,0.197 L0.186,0.341 L0.657,0.343 L0.657,0.53 L0.19,0.525 C0.092,0.487 0.05,0.447 0,0.341 Z"/>
+  </g>
+  <g clip-path="url(#obClipLeft)">
+    <path fill="#000" transform="matrix(247,130,0,256,0,130)" d="M0.145,0.128 L1,0.128 L1,1 L0.96,1 L0.96,0.2 L0.79,0.2 L0.79,0.808 L0.664,0.808 L0.534,1 L0.445,1 L0.567,0.81 L0.145,0.81 Z"/>
+  </g>
+  <g clip-path="url(#obClipRight)">
+    <path fill="#000" transform="matrix(247,-130,0,256,247,260)" d="M0,0.02 L0.836,0.02 L0.836,0.76 L1,0.76 L1,0.82 L0.68,0.82 L0.68,0.393 L0.338,0.393 L0.338,0.53 L0.515,0.53 L0.515,0.975 L0.465,0.975 L0.465,0.731 L0.21,0.731 L0.21,0.31 L0.68,0.31 L0.68,0.133 L0.033,0.133 L0.033,0.97 L0,0.97 Z"/>
+  </g>
 </svg>
