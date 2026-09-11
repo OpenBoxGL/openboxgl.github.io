@@ -7,14 +7,16 @@ OpenBox provides native integration with **Faugus Launcher**, the lightweight Li
 
 ## Overview
 
-When Faugus Launcher is installed (either natively or as a Flatpak via `io.github.Foldex.FaugusLauncher`), OpenBox can scan installed games, read their custom prefix configurations, and import them into your unified library.
+When Faugus Launcher is installed, OpenBox can scan its data directories, read each game's prefix configuration, and import the titles into your unified library. OpenBox looks for Faugus data in `~/.config/faugus-launcher`, `~/.local/share/faugus-launcher`, `~/Faugus`, the matching `XDG_CONFIG_HOME`/`XDG_DATA_HOME` locations, and prefix directories containing `drive_c`.
 
 ## How to Import from Faugus
 
-1. Open **Settings** (<kbd>Ctrl</kbd> + <kbd>,</kbd>) or the **Import** dialog.
-2. Under **Launchers & Stores**, locate **Faugus Launcher**.
-3. Click **Scan Faugus Games**. OpenBox will detect all titles defined in Faugus manifests.
-4. Click **Import Scanned Games**.
+1. Open the **Library Setup Center** (**Set up library** in the top bar).
+2. On the **Sources** step, add the **Faugus** source.
+3. Continue to the scan: OpenBox detects all titles defined in Faugus manifests and prefix directories as preview candidates.
+4. Review and commit the preview as usual.
+
+You can also drive the scan entirely through the REST API (below).
 
 Each imported title automatically receives:
 - Canonical identity deduplication (matching against existing Steam, GOG, or ROM titles)
@@ -32,8 +34,8 @@ Automate Faugus scans or integrate with scripts:
 
 ```bash
 # Check Faugus installation status
-curl -s http://127.0.0.1:47990/api/faugus/status
+curl -s -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:$PORT/api/faugus/status
 
 # Scan for installed titles
-curl -s http://127.0.0.1:47990/api/faugus/scan
+curl -s -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:$PORT/api/faugus/scan
 ```

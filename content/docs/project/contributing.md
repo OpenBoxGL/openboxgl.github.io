@@ -39,7 +39,7 @@ Each `test_*.py` is a standalone contract test (plain asserts or unittest) run d
 
 ## Plugins
 
-Plugins require a manifest (`plugin.json` with `id`, `name`, `version`, optional `entry`, `hooks`) and an entry Python module that reads JSON from stdin and writes JSON to stdout. Supported hooks: `library`, `before_launch`, `after_session`. See [Plugins](/reference/plugins/) for the full contract.
+Plugins require a manifest (`plugin.json` with `id`, `name`, `version`, optional `entry`, `hooks`) and an entry Python module that exports one function per declared hook (each takes the decoded JSON payload and returns a dict; the runner handles stdin/stdout). Supported hooks: `library`, `before_launch`, `after_session`. See [Plugins](/reference/plugins/) for the full contract.
 
 ## Documentation site
 

@@ -20,12 +20,10 @@ const ENDPOINTS: EndpointDef[] = [
     title: "Library Collection",
     description: "Fetch all games, metadata, launch profiles, and session statistics.",
     mockResponse: {
-      total_count: 2,
-      offset: 0,
-      limit: 500,
       games: [
         {
-          id: "game-01",
+          id: 0,
+          game_id: "game-a1b2c3d4e5f6",
           name: "The Legend of Zelda: Ocarina of Time",
           platform: "Nintendo 64",
           year: 1998,
@@ -33,11 +31,12 @@ const ENDPOINTS: EndpointDef[] = [
           genre: "Action-Adventure",
           playtime_seconds: 14200,
           play_count: 18,
-          progress: "completed",
+          progress: "Completed",
           favorite: true,
         },
         {
-          id: "game-02",
+          id: 1,
+          game_id: "game-9f8e7d6c5b4a",
           name: "Cyberpunk 2077",
           platform: "PC",
           year: 2020,
@@ -48,6 +47,11 @@ const ENDPOINTS: EndpointDef[] = [
           wine_prefix: "/home/deck/.local/share/bottles/prefixes/gaming",
         },
       ],
+      playlists: [],
+      filter_presets: [],
+      ra_configured: false,
+      discovery: {},
+      media_epoch: 3,
     },
   },
   {
@@ -61,15 +65,13 @@ const ENDPOINTS: EndpointDef[] = [
       prefixes: [
         {
           path: "/home/deck/.local/share/bottles/prefixes/gaming",
-          source: "Bottles",
-          version: "caffe-9.2",
-          wine_arch: "win64",
+          has_drive_c: true,
+          name: "gaming",
         },
         {
-          path: "/home/deck/.var/app/com.heroicgameslauncher.hgl/data/prefixes/Cyberpunk",
-          source: "Heroic",
-          version: "Proton-GE-Latest",
-          wine_arch: "win64",
+          path: "/home/deck/.wine",
+          has_drive_c: true,
+          name: ".wine",
         },
       ],
     },
@@ -81,15 +83,17 @@ const ENDPOINTS: EndpointDef[] = [
     title: "Faugus Launcher Scan",
     description: "Scans local Faugus launcher data directories and manifests.",
     mockResponse: {
-      count: 2,
-      installed: true,
+      count: 1,
       games: [
         {
-          faugus_id: "fg-104",
+          source: "Faugus",
+          source_identity: "faugus:kcd",
+          faugus_id: "kcd",
           name: "Kingdom Come: Deliverance",
-          path: "/home/deck/Games/Faugus/KCD/bin/Win64/KingdomCome.exe",
-          wine_prefix: "/home/deck/.local/share/faugus/prefixes/kcd",
-          launch_command: "umu-run {path}",
+          path: "/home/deck/Faugus/kcd/drive_c/GOG Games/KingdomCome.exe",
+          prefix: "/home/deck/Faugus/kcd",
+          runner: "GE-Proton",
+          config_path: "/home/deck/.config/faugus-launcher/games/kcd.json",
         },
       ],
     },
@@ -104,7 +108,7 @@ const ENDPOINTS: EndpointDef[] = [
       jobs: {
         "metadata-sync": {
           job_id: "job-metadata-sync-941",
-          state: "completed",
+          state: "done",
           progress: 100,
           elapsed_seconds: 14.2,
           records_processed: 4850,
@@ -178,7 +182,7 @@ const ENDPOINTS: EndpointDef[] = [
     id: "insights",
     method: "GET",
     path: "/api/v2/insights/summary",
-    title: "Play Insights Summary (v1.7.1)",
+    title: "Play Insights Summary (v1.9.0)",
     description: "Local-first playtime analytics: streaks, momentum, top platforms and genres.",
     mockResponse: {
       total_playtime_seconds: 540000,
@@ -271,7 +275,10 @@ export function ApiExplorer() {
   const [copied, setCopied] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const curlSnippet = `curl -s http://127.0.0.1:47990${selectedEndpoint.path}`
+  const isPublic = selectedEndpoint.path.startsWith("/locales/")
+  const curlSnippet = `curl -s ${selectedEndpoint.method === "POST" ? "-X POST " : ""}${
+    isPublic ? "" : '-H "X-OpenBox-Token: $TOKEN" '
+  }http://127.0.0.1:47990${selectedEndpoint.path}`
 
   const copyCurl = async () => {
     try {

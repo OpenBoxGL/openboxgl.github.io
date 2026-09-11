@@ -299,7 +299,7 @@ export function ThemePreviewer() {
                     border: `1px solid ${customBorder}`,
                   }}
                 >
-                  v1.8.0
+                  v1.10.0
                 </span>
               </div>
               <div className="flex items-center gap-2">

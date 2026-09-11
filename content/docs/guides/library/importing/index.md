@@ -51,7 +51,7 @@ Click **Import Lutris**. OpenBoxGL runs `lutris --list-games --installed --json`
 
 ## Faugus Launcher
 
-OpenBox integrates with **Faugus Launcher** (`/api/faugus/*`), scanning native or Flatpak manifests from `~/.config/faugus` or `~/.var/app/io.github.Faugus.Launcher`. It reads installed Wine/Proton games, detects UMU prefix identifiers, and launches via Faugus runners.
+OpenBox integrates with **Faugus Launcher** (`/api/faugus/*`), scanning manifests and prefix directories under `~/.config/faugus-launcher`, `~/.local/share/faugus-launcher`, and `~/Faugus` (plus the matching `XDG_CONFIG_HOME`/`XDG_DATA_HOME` locations). It reads installed Wine/Proton games, detects UMU prefix identifiers, and launches via `umu-run`. Faugus is also available as a source in the Library Setup Center.
 
 ## Arcade sets
 
