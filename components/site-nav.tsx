@@ -32,7 +32,7 @@ export function SiteNav() {
     <header className="ob-nav">
       <nav className="ob-shell ob-nav-inner" aria-label="Primary navigation">
         <a href={pathname === "/" ? "#top" : "/"} className="ob-brand" onClick={() => setOpen(false)} aria-label="OpenBox home">
-          <Image src="/openbox-icon.png" alt="OpenBox cube" width={40} height={40} priority />
+          <Image src="/OpenBoxLogo.svg" alt="OpenBox GL logo" width={40} height={40} priority />
           <span>OpenBox<span className="ob-brand-dot">.</span></span>
         </a>
         <div className="ob-nav-links">

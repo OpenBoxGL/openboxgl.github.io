@@ -19,7 +19,7 @@ export function CtaFooter() {
       <div className="ob-shell">
         <div className="ob-footer-main" data-reveal>
           <div className="ob-footer-mark">
-            <Image src="/openbox-icon.png" alt="OpenBox" width={220} height={220} />
+            <Image src="/OpenBoxLogo.svg" alt="OpenBox GL logo" width={220} height={220} />
           </div>
           <div className="ob-footer-copy">
             <p className="ob-index">You’ve collected enough launchers</p>

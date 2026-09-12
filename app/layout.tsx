@@ -31,6 +31,15 @@ export const metadata: Metadata = {
     "Big Box",
     "local-first",
   ],
+  icons: {
+    icon: [
+      { url: "/OpenBoxLogo.svg", type: "image/svg+xml" },
+      { url: "/icon-dark-32x32.png", media: "(prefers-color-scheme: dark)", type: "image/png" },
+      { url: "/icon-light-32x32.png", media: "(prefers-color-scheme: light)", type: "image/png" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/apple-icon.png",
+  },
   openGraph: {
     title: "OpenBox | Every game. One box.",
     description:
