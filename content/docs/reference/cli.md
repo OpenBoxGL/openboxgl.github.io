@@ -25,6 +25,7 @@ The native window renders the same UI as the web fallback; both serve `index.htm
 | `-h`, `--help` | Show command-line options and usage summary, then exit. |
 | `--no-browser` | Start the server without opening a window. Useful for remote or scripted starts; the printed URL still works. |
 | `--game-mode` | Force gamescope guest behavior (Steam Deck / Bazzite Game Mode). On the web entry point this opens Big Box fullscreen in a kiosk browser; the native window detects gamescope guests from the environment and needs no flag. |
+| `--play <id>` | Launch a game by stable `game_id` or numeric library id, using the authenticated local launch route. This is the command used by Steam Bridge shortcuts. |
 | `--uri <openbox://...>` | Dispatch a deep link against a running instance (or start one) and exit. You can also pass a bare `openbox://...` URI directly as a positional argument. |
 | `--launcher` | Open the rofi/wofi/dmenu keyboard launcher against the running instance and exit. |
 | `--backup [--items a,b] [--keep N]` | Create a library backup from the command line. Default items are `library,settings`. Prints the archive path. |
@@ -46,19 +47,27 @@ The native window renders the same UI as the web fallback; both serve `index.htm
 | --- | --- |
 | `openbox://start` | Open the running UI in the browser. A no-op if the server is already up. |
 | `openbox://search/<query>` | Open the UI with the search field prefilled for `<query>`. |
-| `openbox://showgame/<id>` (alias `game`) | Open the detail pane for a game by numeric library id. |
-| `openbox://launch/<id>` | Launch a game by numeric library id. |
+| `openbox://showgame/<id>` (alias `game`) | Open the detail pane for a game by numeric or stable id. |
+| `openbox://launch/<id>` | Launch a game by numeric or stable id. `openbox --play <id>` uses this launch action. |
+| `openbox://resume/<id>` | Resume a stored Quick Resume state for a game by numeric or stable id. The adapter must expose a compatible state and the stored state must not be stale unless the caller explicitly allows it through the API. |
+| `openbox://moment/<id>` | Open a Moment deep link for its id in the running UI. |
+| `openbox://clip/<id>` | Open a Record That clip deep link for its id in the running UI. |
 | `openbox://bigbox` (alias `fullscreen`) | Switch the running UI to Big Box mode. |
 | `openbox://settings[/<panel>]` | Open Settings. A panel segment is parsed but not currently routed to a specific settings tab. |
+
+Arcade Room is opened from **Tools → Arcade Room** or the Ctrl/Cmd-K command palette. The current URI parser and SPA do not register an `openbox://arcade` action, so do not substitute an unregistered URI for that UI entry point.
 
 Usage:
 
 ```bash
 openbox --uri "openbox://search/chrono"
-openbox --uri "openbox://launch/1234"
+openbox --play "GAME_ID"
+openbox --uri "openbox://resume/GAME_ID"
+openbox --uri "openbox://moment/MOMENT_ID"
+openbox --uri "openbox://clip/CLIP_ID"
 ```
 
-`--uri` dispatches against the running server using the token and port files, or boots a server if none is running. The same actions exist as `?deeplink=` query parameters on the UI URL (`?deeplink=bigbox`, `?deeplink=search&q=chrono`).
+`--uri` dispatches against the running server using the token and port files, or boots a server if none is running. The browser-facing actions currently wired by the SPA include `?deeplink=bigbox`, `?deeplink=search&q=chrono`, `?deeplink=showgame&id=GAME_ID`, `?deeplink=moment&id=MOMENT_ID`, and `?deeplink=clip&id=CLIP_ID`. Resume is dispatched by the URI/CLI path to the authenticated API; Arcade Room remains a Tools/palette action.
 
 ## Keyboard launcher
 

@@ -1,9 +1,9 @@
 ---
 title: Frontend modules
-description: Inventory of the 20 static/ JS modules, entry wiring, and the search worker contract.
+description: Inventory of the 35 static/ JS modules, entry wiring, and the search worker contract.
 ---
 
-The web UI ships as `index.html` plus 20 ES modules in `static/` (18 domain modules plus `app.js` and `worker.search.js`), served from `/static/*` with cache headers. `app.js` is the entry point; every other main-thread module imports shared state and helpers from `state.js` / `util.js`.
+The web UI ships as `index.html` plus 35 ES modules in `static/` (33 domain modules plus `app.js` and `worker.search.js`), served from `/static/*` with cache headers. `app.js` is the entry point; every other main-thread module imports shared state and helpers from `state.js` / `util.js`.
 
 ## Module inventory
 
@@ -24,8 +24,23 @@ The web UI ships as `index.html` plus 20 ES modules in `static/` (18 domain modu
 | `insights.js` | Play Insights dashboard (heatmap, streaks, rankings; lazy-loaded) |
 | `activity.js` | Activity Center (durable operations, jobs, SSE progress) |
 | `sessions.js` | Sessions and play-history UI |
+| `recap.js` | Session recap card and post-session actions |
+| `moments.js` | Moments capture, timeline, and resume-from-moment UI |
+| `clips.js` | Record That clip gallery and reel actions |
 | `bigbox.js` | Big Box kiosk UI (stage/hybrid/coverflow, gamepad, screensaver) |
+| `arcaderoom.js` | Controller-friendly Arcade Room and Museum canvas surface |
+| `party.js` | Game Night queue, wheel, and round controls |
+| `household.js` | Household members, challenges, shares, and leaderboard UI |
 | `storefront.js` | Storefront manager (Gameyfin install/download, owned-vs-installed) |
+| `constellation.js` | Library relationship graph |
+| `picker.js` | “What should I play?” recommendation picker |
+| `mood.js` | Adaptive cover theming |
+| `mastery.js` | Mastery completion dashboard |
+| `wrapped.js` | Printable Year in Games report |
+| `timeline.js` | History timeline view |
+| `timemachine.js` | Journal timeline, as-of view, and revert preview UI |
+| `palette.js` | Ctrl/Cmd-K command palette and shortcut help |
+| `whatsnew.js` | What's New panel and local tips |
 | `reader.js` | Document/manual reader |
 | `i18n.js` | Internationalization (`t(key, params)`, `data-i18n` attributes, locale loading) |
 | `worker.search.js` | Off-main-thread trigram search worker (see contract below) |

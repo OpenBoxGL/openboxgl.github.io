@@ -9,7 +9,7 @@ OpenBoxGL exists because LaunchBox is Windows first and gates useful workflows b
 
 ## At a glance
 
-| Topic | OpenBox 1.10.0 | LaunchBox on Linux |
+| Topic | OpenBox 1.11.0 | LaunchBox on Linux |
 | --- | --- | --- |
 | License | AGPL-3.0, full source on GitHub | Proprietary, no Linux build |
 | Cost | Free, no subscription | Premium paywall for advanced workflows |
@@ -38,6 +38,6 @@ Every LaunchBox Premium equivalent ships without a subscription in OpenBoxGL: cu
 
 ## How to verify
 
-- Check the current release tag at [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest), currently v1.10.0.
+- Check the current release tag at [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest), currently v1.11.0.
 - Open PARITY.md in the application repository and confirm the acceptance check for any row before relying on it.
 - For pricing, LaunchBox Premium pricing is published by Unbroken Software. OpenBox cost is zero and source is AGPL-3.0 at [LICENSE](https://github.com/vindeckyy/OpenBoxGL/blob/master/LICENSE).

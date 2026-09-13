@@ -54,7 +54,7 @@ const entries = files
       .replace(/[#*`>|]/g, " ")
       .replace(/\s+/g, " ")
       .trim()
-    return { slug: f.slug, title, description, body: body.slice(0, 3000) }
+    return { slug: f.slug === "" ? "docs" : f.slug, title, description, body: body.slice(0, 3000) }
   })
   .filter((e) => e.title)
 

@@ -5,7 +5,7 @@ description: Every way to install OpenBoxGL, with verification steps per method.
 
 # Downloads
 
-One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBox application, currently **v1.10.0**.
+One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBox application, currently **v1.11.0**.
 
 | Method | Best for | Updates | Verify |
 | --- | --- | --- | --- |
@@ -20,7 +20,7 @@ One table for every install method. Pick the row that matches your system, then 
 The installer pins the release public key, verifies the SHA-256 checksum, and verifies the Ed25519 signature before installing to `~/.local/bin`.
 
 ```bash
-VERSION=1.10.0
+VERSION=1.11.0
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output install.sh \
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -85,4 +85,4 @@ openbox --web    # loopback web UI
 | FUSE to mount AppImages | Required | Not needed | Not needed |
 | bubblewrap bwrap | Optional, plugins sandboxed when present | Bundled check | Optional |
 
-See [Installation](/install/) for prerequisites in detail, [Updating](/updating/) for the update flow and architecture-matched rollback, and [Getting started](/getting-started/) for the first import. v1.10.0 publishes signed x86_64 and aarch64 AppImages plus an x86_64 Flatpak bundle.
+See [Installation](/install/) for prerequisites in detail, [Updating](/updating/) for the update flow and architecture-matched rollback, and [Getting started](/getting-started/) for the first import. v1.11.0 publishes signed x86_64 and aarch64 AppImages plus an x86_64 Flatpak bundle.

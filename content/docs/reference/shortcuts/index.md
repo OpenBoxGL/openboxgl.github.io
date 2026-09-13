@@ -12,8 +12,11 @@ OpenBox is designed for seamless navigation whether you are sitting at a desktop
 | Shortcut | Action | Description |
 | --- | --- | --- |
 | <kbd>Ctrl</kbd> + <kbd>,</kbd> | **Settings** | Opens the global settings dialog (scrapers, integrations, backups, themes). |
+| <kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>K</kbd> | **Command palette** | Searches games and opens actions, settings, and What's New discovery. |
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Q</kbd> | **Random Game** | Picks a random title from the active collection and focuses it. |
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>R</kbd> | **Random Game (Alt)** | Alternative hotkey for random game picker. |
+| <kbd>M</kbd> | **Capture Moment** | Captures a note/screenshot for the running or selected game; state capture is added only when the adapter supports Quick Resume. |
+| <kbd>F</kbd> | **Favorite** | Toggles the focused game's Favorite flag in the library grid or list. |
 | <kbd>F11</kbd> | **Fullscreen** | Toggles borderless fullscreen window mode. |
 | <kbd>Escape</kbd> | **Dismiss** | Closes active dialog, tools menu, or context popup. |
 
@@ -37,6 +40,10 @@ OpenBox is designed for seamless navigation whether you are sitting at a desktop
 | <kbd>R</kbd> | **Shuffle** | Jumps to a random title in the current list. |
 | <kbd>F</kbd> | **Favorite** | Toggles the Favorite flag on the active title. |
 | <kbd>Escape</kbd> / <kbd>Backspace</kbd> | **Back / Exit** | Exits Big Box mode or returns from submenus. |
+
+## 1.11 deep-link shortcuts
+
+The CLI can dispatch `openbox://resume/<id>`, `openbox://moment/<id>`, and `openbox://clip/<id>` for the current release; `openbox://launch/<id>` is also available for direct play. Arcade Room has no registered URI action: open it from Tools or the Ctrl/Cmd-K palette. See [Command line and deep links](/reference/cli/) for token, server, and stable-id details.
 
 ## Big Box Gamepad Bindings
 

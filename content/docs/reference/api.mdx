@@ -51,7 +51,7 @@ Every route except the static UI, locale JSON, and other explicitly public asset
 X-OpenBox-Token: TOKEN
 ```
 
-The query parameter `token=TOKEN` is also accepted but can leak through browser history, referrer logs, and proxy logs. Prefer the header in anything you write. The app scrubs `?token=` from history immediately (`history.replaceState`) and never logs the token-bearing URL; logs use the token-free `http://127.0.0.1:PORT/`. The token is compared with a constant-time comparison (`secrets.compare_digest`). A missing or wrong token returns `403 {"error":"Unauthorized"}` for every route, including unknown ones, so the route surface is not discoverable without the token. Ten failures in 60 seconds per IP return `429 {"error":"Too many authentication failures. Try again later.", "code":"RATE_LIMITED", "retry_after": 60}` with `Retry-After` (correct token still succeeds and clears the bucket).
+The query parameter `token=TOKEN` is also accepted but can leak through browser history, referrer logs, and proxy logs. Prefer the header in anything you write. The app scrubs `?token=` from history immediately (`history.replaceState`) and never logs the token-bearing URL; logs use the token-free `http://127.0.0.1:PORT/`. The token is compared with a constant-time comparison (`secrets.compare_digest`). Known protected routes check the token after route resolution, so an unknown route can return `404` before authentication. A missing or wrong token on a known protected route returns `403 {"error":"Unauthorized"}`. Ten failures in 60 seconds per IP return `429 {"error":"Too many authentication failures. Try again later.", "code":"RATE_LIMITED", "retry_after": 60}` with `Retry-After` (correct token still succeeds and clears the bucket).
 
 ## Response envelope
 
@@ -63,9 +63,9 @@ Most API handlers return JSON objects. Structured errors include an `error`, sta
 | `202` | Accepted; a background job was started (metadata sync, media bulk, emulator install/update, Gameyfin install) |
 | `304` | Not modified (conditional media and theme requests) |
 | `400` | Validation error; the `error` field names the exact problem (absolute paths are sanitized: the server log keeps the full path, the client receives the prefix before the path) |
-| `403` | `{"error":"Unauthorized"}`; missing or wrong token |
+| `403` | `{"error":"Unauthorized"}`; missing or wrong token on a known protected route |
 | `429` | `{"error":"Too many authentication failures. Try again later.", "code":"RATE_LIMITED"}`; 10 auth failures in 60 seconds per IP, with `Retry-After` |
-| `404` | `{"error":"Not found"}` for unknown routes or missing games/media/documents |
+| `404` | `{"error":"Not found"}` or a route-specific error for unknown routes or missing games/media/documents; route lookup can happen before authentication |
 | `409` | Required local prerequisite is missing (for example, the metadata database has not been downloaded) |
 | `416` | Invalid byte range on media |
 | `503` | `{"error":"OpenBox library data needs recovery before this operation can continue."}` when the state file is corrupt |
@@ -85,6 +85,7 @@ Each group has its own reference page with per-endpoint cards.
   { href: '/reference/api/automation/', title: 'Automation', eyebrow: 'events', description: 'Queue, tags, notifications, webhooks, the launcher menu, and import exclusions.' },
   { href: '/reference/api/content-and-imports/', title: 'Content and imports', eyebrow: 'media', description: 'Imports, metadata, media, emulators, storefronts, Gameyfin, discovery, and the health audit.' },
   { href: '/reference/api/saves-and-operations/', title: 'Saves and operations', eyebrow: 'protect', description: 'Save discovery/backup/restore, library backups, statistics sync, save tools, high scores, OBS, and links to catalog sync.' },
+  { href: '/reference/api/one-eleven/', title: 'API 1.11 additions', eyebrow: 'release', description: 'Quick Resume, Moments, clips, Time Machine, Backlog Radio, Household, Arcade kiosk, Steam Bridge, ES-DE, SteamGridDB, and trophies.' },
   { href: '/reference/api/local-admin/', title: 'Local administrator', eyebrow: 'admin', description: 'Updates, shutdown, state recovery, desktop integration, themes, plugins, premium read models.' },
  ]}
 />
@@ -100,7 +101,7 @@ Each group has its own reference page with per-endpoint cards.
 List the library with the header token:
 
 ```bash
-curl -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:8787/api/library
+curl -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:$PORT/api/library
 ```
 
 Launch a game by stable id:
@@ -109,7 +110,7 @@ Launch a game by stable id:
 curl -X POST -H "X-OpenBox-Token: $TOKEN" \
  -H "Content-Type: application/json" \
  -d '{"game_id": "GAME_ID"}' \
- http://127.0.0.1:8787/api/launch
+ http://127.0.0.1:$PORT/api/launch
 ```
 
 Where `$TOKEN` and the port come from the running server (`cat ~/.local/share/openbox-game-launcher/server.token`). See [Configuration](/reference/configuration/) for the data directory and [the application repository](https://github.com/vindeckyy/OpenBoxGL) for the current route contract (`routes.py`).

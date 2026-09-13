@@ -5,6 +5,11 @@ import Link from "next/link"
 import { Search, X } from "lucide-react"
 import type { SearchEntry } from "@/lib/search"
 
+function docHref(slug: string): string {
+  const normalized = slug.replace(/^\/+|\/+$/g, "")
+  return normalized === "" || normalized === "index" || normalized === "docs" ? "/docs/" : `/${normalized}/`
+}
+
 export function SearchPage({ entries }: { entries: SearchEntry[] }) {
   const [query, setQuery] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
@@ -59,7 +64,7 @@ export function SearchPage({ entries }: { entries: SearchEntry[] }) {
         {results.map((r) => (
           <Link
             key={r.slug}
-            href={`/${r.slug}/`}
+            href={docHref(r.slug)}
             className="block rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
           >
             <span className="font-mono text-[11px] uppercase tracking-widest text-primary">{r.slug}</span>

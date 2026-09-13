@@ -72,14 +72,22 @@ export function buildSidebar(): DocNode[] {
   const slugs = getAllSlugs()
   const sections: DocNode[] = []
   const bySlug = new Map(slugs.map((s) => [s, readDoc(s)]))
+  const isSidebarVisible = (slug: string) => {
+    const parts = slug.split("/")
+    return parts.every((_part, index) => {
+      const ancestor = bySlug.get(parts.slice(0, index + 1).join("/"))
+      return ancestor?.frontmatter.sidebar !== false
+    })
+  }
 
   const section = (label: string, items: string[]) => {
     const nodes: DocNode[] = []
     for (const item of items) {
       if (!bySlug.has(item)) continue
       const doc = bySlug.get(item)!
+      if (!isSidebarVisible(item)) continue
       const children = slugs
-        .filter((s) => s.startsWith(`${item}/`))
+        .filter((s) => s.startsWith(`${item}/`) && isSidebarVisible(s))
         .sort((a, b) => {
           const order: Record<string, number> = {
             [`${item}/setup-center`]: 1,
@@ -183,7 +191,9 @@ export function buildSidebar(): DocNode[] {
       s.children.flatMap((c) => [c.slug, ...slugs.filter((slug) => slug.startsWith(`${c.slug}/`))]),
     ),
   )
-  const orphan = slugs.filter((s) => !covered.has(s) && s !== "" && s !== "index" && s !== "404")
+  const orphan = slugs.filter(
+    (s) => !covered.has(s) && isSidebarVisible(s) && s !== "" && s !== "index" && s !== "404",
+  )
   if (orphan.length) {
     sections[0].children.push(
       ...orphan.map((slug) => {

@@ -88,7 +88,7 @@ The base stack is `ui-sans-serif, system-ui, sans-serif` (no bundled webfont in 
 
 The lifecycle overlay uses a hardcoded `clamp(34px,6vw,78px)` rather than a `--font-*` variable.
 
-Stock themes may replace the entire stack: Midnight Circuit uses Syne + Manrope, Phosphor Terminal uses IBM Plex Mono + Share Tech Mono, Harbor Light uses Sora + Literata, Cinema Marquee uses Bebas Neue + Source Sans 3, and Nordic Mist uses Outfit + Fraunces.
+Stock themes override the design tokens in their own `:root` blocks. Do not assume a bundled webfont or a theme-specific font family; the base stylesheet's available system stack remains the typography fallback unless the running source explicitly declares another stack.
 
 ## Spacing
 
@@ -200,7 +200,7 @@ Harbor Light is the only bundled light theme. It overrides `--bg`, `--panel`, `-
 
 ## Token contract
 
-The `:root` block in `static/app.css` currently defines 203 `--*` custom properties — that block is the theme contract. Every stock theme overrides `:root` and (almost) nothing else:
+The `:root` block in `static/app.css` is the theme contract. Every stock theme overrides `:root` and (almost) nothing else:
 
 - `themes/Cinema Marquee.css`
 - `themes/Harbor Light.css` (the only bundled light theme)
@@ -208,7 +208,7 @@ The `:root` block in `static/app.css` currently defines 203 `--*` custom propert
 - `themes/Nordic Mist.css`
 - `themes/Phosphor Terminal.css`
 
-`scripts/check_tokens.py` enforces the contract in CI: raw hex outside `:root` must stay at the ratcheted baseline of 0. A new visual value means a new `:root` token plus its entry in each of the five theme files. For the full per-token table, read the `:root` block in `static/app.css` in the repository you are running — this page documents the palette groups, not every one of the 203 names.
+`scripts/check_tokens.py` enforces the contract in CI: raw hex outside `:root` must stay at the ratcheted baseline of 0. A new visual value means a new `:root` token plus its entry in each of the five theme files. For the full per-token table, read the `:root` block in `static/app.css` in the repository you are running — this page documents the palette groups, not a frozen count of names.
 
 ### Feature token families (introduced in v1.9.0)
 

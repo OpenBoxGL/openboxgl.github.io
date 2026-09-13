@@ -27,7 +27,7 @@ Every AppImage release is signed with Ed25519. The installer selects the matchin
 | `OpenBox-x86_64.flatpak` | x86_64 Flatpak bundle | Same release assets |
 | `install.sh` | Cryptographically verified installer | Same release assets |
 
-Verify path: download the AppImage matching your architecture, its `.sig` and `.sha256`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.10.0"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. See [Updating](/updating/) for architecture-matched rollback.
+Verify path: download the AppImage matching your architecture, its `.sig` and `.sha256`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.11.0"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. See [Updating](/updating/) for architecture-matched rollback.
 
 ## Build and CI
 

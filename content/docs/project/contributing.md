@@ -21,8 +21,8 @@ Optional local configuration loads from an explicit `OPENBOX_ENV_FILE`, the data
 Run the full suite before submitting a pull request:
 
 ```bash
-./run_all_tests.sh  # 107 files, 0 failures (see `scripts/check_tests.py` for 72.0% total + 54.0% web_app.py + 95% changed-line + 85% new-module floors)
-make check      # scripts/check_tests.py: ruff, runtime_modules, v1 contract, version_sync, frontend, i18n, compile, tests, coverage floors, changed-line, new-module, tokens; also `make version-check` for updates.py sync
+./run_all_tests.sh
+make check      # scripts/check_tests.py runs the repository's current lint, contract, compile, test, coverage, module, and token gates; also `make version-check` for updates.py sync
 ```
 
 Each `test_*.py` is a standalone contract test (plain asserts or unittest) run directly with `python3 -B <file>`. Iterate on one module with `python3 -B tests/test_catalog.py`. Packaging checks use `./build_appimage.sh` and `python3 -B tests/test_packaging.py`. All tests must pass on CI before a PR merges.
@@ -48,3 +48,7 @@ Documentation changes live in the [OpenBoxGL Pages repository](https://github.co
 ## Licensing and security
 
 Contributions are licensed under AGPL-3.0. Security issues must use the private [security advisory](https://github.com/vindeckyy/OpenBoxGL/security/advisories/new) route, never a public issue.
+
+## Developer Certificate of Origin
+
+OpenBox uses the [Developer Certificate of Origin](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/CONTRIBUTING.md#developer-certificate-of-origin). Sign commits with `git commit -s` to record that you have the right to submit the work under the project license.

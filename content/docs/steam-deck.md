@@ -10,10 +10,10 @@ OpenBox targets Steam Deck, Bazzite, and other Linux handheld PCs. On the deskto
 
 ## Install
 
-Prefer the signed AppImage on SteamOS, Bazzite, and other immutable images. The AppImage bundles its own Python runtime, works without installing anything system-wide, and receives the built-in verified updater. For a reproducible install, download the v1.10.0 script, inspect it, then run it:
+Prefer the signed AppImage on SteamOS, Bazzite, and other immutable images. The AppImage bundles its own Python runtime, works without installing anything system-wide, and receives the built-in verified updater. For a reproducible install, download the v1.11.0 script, inspect it, then run it:
 
 ```bash
-VERSION=1.10.0
+VERSION=1.11.0
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output install.sh \
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"

@@ -5,11 +5,11 @@ description: Choose stock themes or import a local CSS theme.
 
 Themes are plain CSS files with live reload: changing the active theme re-applies instantly without restarting. Five stock themes ship with OpenBoxGL and are installed into the user themes folder automatically at startup:
 
-- **Midnight Circuit**: dark blue-black, Syne/Manrope type, cyan accents.
-- **Phosphor Terminal**: dark green terminal look, IBM Plex Mono / Share Tech Mono.
-- **Harbor Light**: light theme, Sora/Literata type, blue and coral accents.
-- **Cinema Marquee**: dark cinema look, Bebas Neue / Source Sans 3, gold accents.
-- **Nordic Mist**: dark slate, Outfit/Fraunces type, muted teal accents.
+- **Midnight Circuit**: dark blue-black palette with cyan accents.
+- **Phosphor Terminal**: dark green terminal palette.
+- **Harbor Light**: light paper-toned palette with blue and coral accents.
+- **Cinema Marquee**: dark cinema palette with gold accents.
+- **Nordic Mist**: dark slate palette with muted teal accents.
 
 <ThemePreviewer />
 
@@ -25,7 +25,7 @@ Stock themes carry a `/* OpenBox Stock Theme:` marker. On startup, missing stock
 
 ## Authoring guidance
 
-The public design tokens live in the [Design system](/project/design-system/) page. In short: the default look is dark, warm surfaces, off-white text, and a brand orange (`#f06000`) focus/selection signal with orange-gold (`#e08a3c`) launch actions. Themes may change palette, typography, and surface treatment while preserving the interaction structure. Keep readable contrast on both light and dark surfaces, visible focus states (the base stylesheet outlines focused controls), and legible controls; avoid permanent glow, deep shadows on every component, and low-contrast text. The base CSS defines variables such as `--bg`, `--panel`, `--text`, `--muted`, `--focus`, `--active`, `--action`, `--action-ink`, `--danger`, `--surface-card`, `--surface-field`, and `--border-card`; themes that override these variables inherit consistent behavior across dialogs and Big Box. `--accent` is defined by the base stylesheet as an alias of `--active` (`--accent: var(--active)`) and is consumed for focus rings, skeleton shimmer, and `--mood-secondary`; themes may override it directly.
+The public design tokens live in the [Design system](/project/design-system/) page. In short: the default look is dark, warm surfaces, off-white text, and a brand orange (`#f06000`) focus/selection signal with orange-gold (`#e08a3c`) launch actions. Themes may change palette and surface treatment while preserving the interaction structure; do not rely on undocumented theme-specific font-family claims. Keep readable contrast on both light and dark surfaces, visible focus states (the base stylesheet outlines focused controls), and legible controls; avoid permanent glow, deep shadows on every component, and low-contrast text. The base CSS defines variables such as `--bg`, `--panel`, `--text`, `--muted`, `--focus`, `--active`, `--action`, `--action-ink`, `--danger`, `--surface-card`, `--surface-field`, and `--border-card`; themes that override these variables inherit consistent behavior across dialogs and Big Box. `--accent` is defined by the base stylesheet as an alias of `--active` (`--accent: var(--active)`) and is consumed for focus rings, skeleton shimmer, and `--mood-secondary`; themes may override it directly.
 
 <Callout type="tip" title="Author your first theme">
 

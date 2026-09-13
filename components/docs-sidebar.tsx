@@ -7,6 +7,20 @@ import { BookOpen, ChevronDown, Menu, Search, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { DocNode } from "@/lib/docs"
 
+// Only authored routes are valid breadcrumb parents. Directory names such as
+// `/guides/`, `/integrations/`, `/policies/`, `/project/`, and `/reference/`
+// are organization-only prefixes, not pages in the static export.
+const authoredBreadcrumbRoutes = new Set([
+  "guides/library",
+  "guides/big-box-and-handhelds",
+  "guides/sessions-saves-and-backups",
+  "guides/plugins",
+  "guides/troubleshooting",
+  "reference/api",
+  "reference/architecture",
+  "reference/plugins",
+])
+
 function Tree({
   nodes,
   pathname,
@@ -129,23 +143,33 @@ export function DocsSidebar({ tree }: { tree: DocNode[] }) {
   )
 }
 
-export function DocsBreadcrumbs({ slug }: { slug: string }) {
-  const parts = slug.split("/")
+export function DocsBreadcrumbs({
+  slug,
+  authoredSlugs,
+}: {
+  slug: string
+  authoredSlugs?: readonly string[]
+}) {
+  const parts = slug === "docs" ? [] : slug.split("/")
+  const authored = authoredSlugs ? new Set(authoredSlugs) : authoredBreadcrumbRoutes
   return (
     <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
       <Link href="/" className="transition-colors hover:text-primary">OpenBox</Link>
       <span className="text-border">/</span>
-      <Link href="/" className="transition-colors hover:text-primary">Docs</Link>
+      <Link href="/docs/" className="transition-colors hover:text-primary">Docs</Link>
       {parts.map((part, i) => {
-        const href = `/${parts.slice(0, i + 1).join("/")}/`
+        const prefix = parts.slice(0, i + 1).join("/")
+        const href = `/${prefix}/`
         const label = part.split("-").map((w) => w[0]?.toUpperCase() + w.slice(1)).join(" ")
         return (
-          <span key={href} className="flex items-center gap-2">
+          <span key={prefix} className="flex items-center gap-2">
             <span className="text-border">/</span>
             {i === parts.length - 1 ? (
               <span className="text-foreground">{label}</span>
-            ) : (
+            ) : authored.has(prefix) ? (
               <Link href={href} className="transition-colors hover:text-primary">{label}</Link>
+            ) : (
+              <span>{label}</span>
             )}
           </span>
         )

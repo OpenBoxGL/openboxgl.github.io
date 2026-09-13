@@ -59,7 +59,8 @@ const systems = [
       "Signed webhooks validate destinations before delivery.",
       "Safe mode can disable every plugin when a bad extension blocks startup.",
     ],
-    code: "http://127.0.0.1:47990/api/v2/library/search",
+    code: 'DATA_DIR="${OPENBOX_DATA_DIR:-$HOME/.local/share/openbox-game-launcher}"; PORT="$(cat "$DATA_DIR/server.port")"; TOKEN="$(cat "$DATA_DIR/server.token")"; curl -s -H "X-OpenBox-Token: $TOKEN" "http://127.0.0.1:${PORT}/api/v2/library/search"',
+    codeNote: "PORT and TOKEN are read from server.port and server.token in OPENBOX_DATA_DIR.",
     href: "/reference/api/",
     link: "Read the API reference",
   },
@@ -130,6 +131,7 @@ export function SystemsSection() {
               {system.details.map((detail) => <li key={detail}>{detail}</li>)}
             </ul>
             <code>{system.code}</code>
+            {system.codeNote && <p>{system.codeNote}</p>}
             <a href={system.href}>{system.link}</a>
           </article>
         </div>

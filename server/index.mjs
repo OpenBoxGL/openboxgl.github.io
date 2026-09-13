@@ -3,7 +3,8 @@
 // Serves the static export in out/ and a small API:
 //   GET  /api/health            liveness + version
 //   GET  /api/search?q=...      ranked docs search over public/docs-index.json
-//   GET  /api/release           cached GitHub latest release (version, notes, AppImage, checksum)
+//   GET  /api/release[?arch=x86_64|aarch64]
+//                               cached GitHub latest release and AppImages
 //   GET  /api/stats             cached GitHub repo stats (stars, downloads)
 //   GET  /api/changelog.rss     RSS feed generated from content/docs/changelog.md
 //   POST /api/feedback          feedback form -> data/feedback.jsonl (rate limited)
@@ -18,6 +19,7 @@ import { createReadStream } from "node:fs"
 import { extname, join, normalize, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 import { setTimeout as delay } from "node:timers/promises"
+import { APPIMAGE_ARCHITECTURES, normalizeArchitecture, releaseAppimageAssets } from "./release-assets.mjs"
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url))
 const ROOT = join(__dirname, "..")
@@ -161,20 +163,20 @@ async function githubJson(pathname, opts = {}) {
   }
 }
 
-async function loadRelease() {
+async function loadRelease(requestedArch = null) {
   const release = await githubJson("/repos/vindeckyy/OpenBoxGL/releases/latest")
-  const appimage = release.assets?.find((a) => a.name === "OpenBox-x86_64.AppImage")
-  const checksumAsset = release.assets?.find((a) => /\.sha256$/i.test(a.name))
+  const appimages = releaseAppimageAssets(release)
+  const selected = requestedArch ? appimages[requestedArch] : null
   return {
     tag: release.tag_name || "",
     name: release.name || release.tag_name || "",
     published_at: release.published_at || "",
     body: (release.body || "").slice(0, 8000),
     html_url: release.html_url || "",
-    appimage: appimage
-      ? { url: appimage.browser_download_url, size: appimage.size, downloads: appimage.download_count }
-      : null,
-    checksum_url: checksumAsset?.browser_download_url || null,
+    architecture: requestedArch,
+    appimage: selected,
+    checksum_url: selected?.checksum_url || null,
+    appimages,
   }
 }
 
@@ -183,14 +185,18 @@ async function loadStats() {
     githubJson("/repos/vindeckyy/OpenBoxGL"),
     githubJson("/repos/vindeckyy/OpenBoxGL/releases/latest"),
   ])
-  const appimage = release.assets?.find((a) => a.name === "OpenBox-x86_64.AppImage")
+  const appimages = releaseAppimageAssets(release)
+  const appimageDownloadsByArch = Object.fromEntries(
+    APPIMAGE_ARCHITECTURES.map((architecture) => [architecture, appimages[architecture]?.downloads ?? 0]),
+  )
   return {
     stars: repo.stargazers_count ?? 0,
     forks: repo.forks_count ?? 0,
     open_issues: repo.open_issues_count ?? 0,
     license: repo.license?.spdx_id || null,
     latest_release: release.tag_name || null,
-    appimage_downloads: appimage?.download_count ?? 0,
+    appimage_downloads: Object.values(appimageDownloadsByArch).reduce((total, count) => total + count, 0),
+    appimage_downloads_by_arch: appimageDownloadsByArch,
   }
 }
 
@@ -288,6 +294,7 @@ async function serveStatic(res, pathname) {
     return
   }
   let st
+  let status = 200
   try {
     st = await stat(file)
   } catch {
@@ -296,6 +303,7 @@ async function serveStatic(res, pathname) {
     try {
       st = await stat(notFound)
       file = notFound
+      status = 404
     } catch {
       res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("not found")
       return
@@ -311,7 +319,7 @@ async function serveStatic(res, pathname) {
   } else {
     headers["Cache-Control"] = "public, max-age=3600"
   }
-  res.writeHead(200, headers)
+  res.writeHead(status, headers)
   createReadStream(file).pipe(res)
 }
 
@@ -343,8 +351,18 @@ const server = createServer(async (req, res) => {
     }
 
     if (pathname === "/api/release" && req.method === "GET") {
+      const archParam = url.searchParams.get("arch")
+      const requestedArch = archParam === null ? null : normalizeArchitecture(archParam)
+      if (archParam !== null && !requestedArch) {
+        sendJson(res, 400, {
+          error: "unsupported architecture",
+          supported_architectures: APPIMAGE_ARCHITECTURES,
+        })
+        return
+      }
       try {
-        const release = await cached("release", 15 * 60 * 1000, loadRelease)
+        const cacheKey = `release:${requestedArch || "all"}`
+        const release = await cached(cacheKey, 15 * 60 * 1000, () => loadRelease(requestedArch))
         sendJson(res, 200, release)
       } catch (e) {
         sendJson(res, 502, { error: "release unavailable", detail: String(e.message || e) })

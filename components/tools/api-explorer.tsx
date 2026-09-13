@@ -276,9 +276,15 @@ export function ApiExplorer() {
   const [isLoading, setIsLoading] = useState(false)
 
   const isPublic = selectedEndpoint.path.startsWith("/locales/")
-  const curlSnippet = `curl -s ${selectedEndpoint.method === "POST" ? "-X POST " : ""}${
-    isPublic ? "" : '-H "X-OpenBox-Token: $TOKEN" '
-  }http://127.0.0.1:47990${selectedEndpoint.path}`
+  const curlSnippet = [
+    'DATA_DIR="${OPENBOX_DATA_DIR:-$HOME/.local/share/openbox-game-launcher}"',
+    'PORT="$(cat "$DATA_DIR/server.port")"',
+    ...(isPublic ? [] : ['TOKEN="$(cat "$DATA_DIR/server.token")"']),
+    `curl -s ${selectedEndpoint.method === "GET" ? "" : `-X ${selectedEndpoint.method} `}${
+      isPublic ? "" : '-H "X-OpenBox-Token: $TOKEN" '
+    }"http://127.0.0.1:\${PORT}${selectedEndpoint.path}"`,
+  ].join("\n")
+  const endpointUrl = `http://127.0.0.1:\${PORT}${selectedEndpoint.path}`
 
   const copyCurl = async () => {
     try {
@@ -312,11 +318,15 @@ export function ApiExplorer() {
         </div>
         <div className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
           <Shield className="h-3.5 w-3.5 text-lime" />
-          <span>Local loopback only (127.0.0.1:47990)</span>
+          <span>Local loopback only (127.0.0.1:{"${PORT}"})</span>
         </div>
       </div>
 
       <div className="space-y-5 p-5">
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          OpenBox chooses a random loopback port. The copied command reads <code>server.port</code> (and <code>server.token</code> for protected routes) from <code>OPENBOX_DATA_DIR</code>.
+        </p>
+
         {/* Endpoint Selector Buttons */}
         <div className="flex flex-wrap gap-2">
           {ENDPOINTS.map((ep) => (
@@ -347,7 +357,7 @@ export function ApiExplorer() {
                 {selectedEndpoint.method}
               </span>
               <code className="font-mono text-xs font-bold text-foreground">
-                http://127.0.0.1:47990{selectedEndpoint.path}
+                {endpointUrl}
               </code>
             </div>
             <div className="flex items-center gap-2">

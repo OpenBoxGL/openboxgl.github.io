@@ -8,7 +8,8 @@ Serves the static export in `out/` and a small dependency-free API (Node 18+ or 
 | --- | --- | --- |
 | GET | `/api/health` | Liveness + site-server version (`SITE_VERSION`, not the OpenBox app release) + uptime |
 | GET | `/api/search?q=...` | Ranked docs search over `public/docs-index.json` |
-| GET | `/api/release` | Latest GitHub release (cached 15 min): version, notes, AppImage URL, checksum |
+| GET | `/api/release` | Latest GitHub release (cached 15 min), including an `appimages` entry for each supported architecture |
+| GET | `/api/release?arch=x86_64` | Same release with the selected architecture also exposed in the legacy `appimage` and `checksum_url` fields; accepts `aarch64` (and `arm64`) too |
 | GET | `/api/stats` | GitHub stars, forks, downloads (cached 1h) |
 | GET | `/api/changelog.rss` | RSS feed generated from `content/docs/changelog.md` |
 | POST | `/api/feedback` | Feedback form to `data/feedback.jsonl` (rate limited, honeypot) |
@@ -21,6 +22,8 @@ bun run serve        # node server/index.mjs, PORT/HOST env
 ```
 
 Defaults: `PORT=3000`, `HOST=127.0.0.1`. Set `GITHUB_TOKEN` in the environment to raise the GitHub API rate limit for `/api/release` and `/api/stats`; the server reads it and sends it as a Bearer token on GitHub requests only.
+
+The unqualified release response is visitor-neutral: it returns both `x86_64` and `aarch64` entries under `appimages` and leaves the legacy single-asset fields null. Clients that need those fields can pass `?arch=` explicitly. The server never selects an artifact from `process.arch`, because a shared site host's CPU is not the visitor's CPU. `/api/stats` reports combined AppImage downloads plus per-architecture counts.
 
 `OPENBOX_SITE_DATA` overrides where `feedback.jsonl` is written (default `./data`).
 

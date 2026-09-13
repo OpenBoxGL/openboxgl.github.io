@@ -15,12 +15,12 @@ Every workflow in `PARITY.md` is marked `done`, or carries a decision status for
 
 ## Capability status
 
-The source matrix lists 111 LaunchBox-aligned capabilities as <StatusBadge status="done" /> (including Localization with 5 languages: English, Spanish, German, French, and Portuguese), including the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), all without a subscription. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
+The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0 features below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
 
 | Area | Status | Notes |
 | --- | --- | --- |
 | Mixed-library management | <StatusBadge status="done" /> | One catalog for Steam, ROMs, arcades, executables |
-| Imports | <StatusBadge status="done" /> | Steam, Heroic, Lutris, Faugus, Gameyfin, ROM folders, arcade DATs, ScummVM, RPCS3, Vita3K |
+| Imports | <StatusBadge status="done" /> | Steam, Heroic, Lutris, Faugus, Gameyfin, ROM folders, arcade DATs, ScummVM, RPCS3, Vita3K, Xenia |
 | Metadata | <StatusBadge status="done" /> | LaunchBox Games Database daily sync + IGDB + Steam/GOG |
 | Media | <StatusBadge status="done" /> | Bulk media jobs, duplicate cleanup, EmuMovies, Bezel Project |
 | Launch profiles | <StatusBadge status="done" /> | Tokenized commands, per-game overrides, archive extraction, dependency checks, Eden Switch |
@@ -35,6 +35,13 @@ The source matrix lists 111 LaunchBox-aligned capabilities as <StatusBadge statu
 | Insights (shipped in v1.9.0) | <StatusBadge status="done" /> | Wrapped year-in-review, Mastery Map, history timeline |
 | Party & personalization (shipped in v1.9.0) | <StatusBadge status="done" /> | Game Night party mode, Big Box video snaps, Mood Match adaptive theming |
 | Migration & sync (v1.10.0) | <StatusBadge status="done" /> | Review-first LaunchBox XML import, opt-in causal catalog sync with preview/apply/publish, and manual shelf entries; legacy full-library routes fail closed before mutation |
+| Quick Resume, Moments, and Record That (v1.11.0) | <StatusBadge status="done" /> | Capability-aware resume, session recaps, Moments captures/timeline, replay-buffer or screenshot clips, and bounded reels |
+| Time Machine (v1.11.0) | <StatusBadge status="done" /> | Journal-backed event timeline, bounded as-of inspection, and safe revert previews |
+| Backlog Radio and natural query (v1.11.0) | <StatusBadge status="done" /> | Local habit-aware recommendations, editable interpretation chips, and the Ctrl/Cmd-K command palette |
+| Arcade Room and Museum (v1.11.0) | <StatusBadge status="done" /> | Controller-friendly platform showroom, real fact cards, reduced-motion presentation, and optional local kiosk convenience boundary |
+| Household (v1.11.0) | <StatusBadge status="partial" /> | Opt-in members, challenges, shares, results, and leaderboard projections over a mounted sync folder; no hosted multiplayer service |
+| Steam Bridge and ES-DE (v1.11.0) | <StatusBadge status="done" /> | Reviewed `shortcuts.vdf` preview/apply/remove, `openbox --play <id>`, and stale-safe `gamelist.xml` import |
+| SteamGridDB and launcher trophies (v1.11.0) | <StatusBadge status="done" /> | Optional cached artwork provider and deterministic local trophy case, separate from RetroAchievements |
 
 ## Intentionally not replicated on Linux
 
@@ -62,7 +69,7 @@ When behavior changes, `PARITY.md` is updated in the application repository and 
 
 ## Parity internals
 
-The capability rows above are implemented by 32 modules in `pkg/parity/` (application repository). Root `parity_*.py` compatibility shims were removed in v1.9.0; `pkg/parity/__init__.py` now registers `_ParityFlatFinder` so legacy flat imports resolve to the canonical package modules. This is an inventory, not a second status matrix — status still lives in the table above.
+The capability rows above are implemented by the current modules in `pkg/parity/` (application repository). Root `parity_*.py` compatibility shims were removed in v1.9.0; `pkg/parity/__init__.py` now registers `_ParityFlatFinder` so legacy flat imports resolve to the canonical package modules. This is an inventory, not a second status matrix — status still lives in the table above.
 
 | Module | Area |
 | --- | --- |
@@ -71,11 +78,13 @@ The capability rows above are implemented by 32 modules in `pkg/parity/` (applic
 | `parity_deeplinks.py` | Deep links |
 | `parity_discovery.py` | Discovery queue |
 | `parity_emulator_defs.py` | Emulator-def registry |
+| `parity_esde_import.py` | ES-DE gamelist import |
 | `parity_export.py` | Library export |
 | `parity_faugus.py` | Faugus integration |
 | `parity_filter_presets.py` | Filter presets |
 | `parity_gamescope.py` | Gamescope guest |
 | `parity_gameyfin.py` | Gameyfin storefront |
+| `parity_household.py` | Household records and sync |
 | `parity_identity.py` | Identity / instance |
 | `parity_igdb.py` | IGDB metadata |
 | `parity_import.py` | Imports |
@@ -86,15 +95,24 @@ The capability rows above are implemented by 32 modules in `pkg/parity/` (applic
 | `parity_launchbox_import.py` | LaunchBox XML migration |
 | `parity_library_sync.py` | Causal catalog synchronization |
 | `parity_media.py` | Media jobs |
+| `parity_memories.py` | Memory-root import and gallery |
+| `parity_obs_bridge.py` | OBS replay-buffer bridge |
 | `parity_perf.py` | Performance projections |
 | `parity_party.py` | Big Box party mode |
 | `parity_picker.py` | Play picker recommendations |
 | `parity_premium.py` | Premium-equivalent workflows |
+| `parity_query.py` | Natural-language library query grammar |
 | `parity_redact.py` | Log redaction |
+| `parity_reels.py` | Deterministic clip/reel manifests |
+| `parity_resume.py` | Quick Resume state capability and storage |
 | `parity_saves.py` | Saves |
 | `parity_save_tools.py` | Save tools (Ludusavi/Hoard) |
 | `parity_screenscraper.py` | ScreenScraper matching |
 | `parity_setup_preview.py` | Setup Center preview |
 | `parity_storefront.py` | Storefront imports |
+| `parity_steam_bridge.py` | Steam shortcuts.vdf bridge |
+| `parity_steamgrid.py` | SteamGridDB artwork provider |
 | `parity_tracking.py` | Play tracking |
+| `parity_time_machine.py` | Journal timeline and revert planning |
+| `parity_trophies.py` | Local launcher trophies |
 | `parity_wine.py` | Wine/Proton prefix management |

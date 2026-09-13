@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/generate-redirects.mjs && node scripts/generate-sitemap.mjs",
+    "build": "node scripts/test-release-assets.mjs && next build && node scripts/generate-redirects.mjs && node scripts/generate-sitemap.mjs && node scripts/check-built-site.mjs",
     "start": "next start",
     "lint": "tsc --noEmit",
     "docs:index": "node scripts/build-docs-index.mjs",
-    "test": "node scripts/build-docs-index.mjs && next build && node scripts/generate-redirects.mjs && node scripts/generate-sitemap.mjs && node scripts/check-built-site.mjs",
+    "test": "node scripts/test-release-assets.mjs && node scripts/build-docs-index.mjs && next build && node scripts/generate-redirects.mjs && node scripts/generate-sitemap.mjs && node scripts/check-built-site.mjs",
     "serve": "node server/index.mjs",
     "serve:dev": "bun --watch server/index.mjs",
     "docker": "docker compose up --build"

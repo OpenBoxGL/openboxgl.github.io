@@ -19,21 +19,25 @@ All API routes require the session token. The server writes it to `server.token`
 - Header: `X-OpenBox-Token: TOKEN` (preferred)
 - Query parameter: `?token=TOKEN` (can leak through history and logs)
 
-The check uses `secrets.compare_digest`, and unauthenticated requests to any protected route, known or unknown, return `403 {"error":"Unauthorized","code":"UNAUTHORIZED","request_id":"…"}`.
+The check uses `secrets.compare_digest`. Known protected routes are checked after route resolution; an unknown route can therefore return `404` before authentication. A missing or wrong token on a known protected route returns `403 {"error":"Unauthorized"}`. Repeated failures can return `429` with `code: "RATE_LIMITED"`, `retry_after`, and a `Retry-After` header.
 
 ## Request lifecycle
 
 A request flows through a fixed set of stages. Knowing the order tells you which status code you will get and why:
 
 ```text
-authenticate (secrets.compare_digest)
- └─ wrong/missing token? → 403 UNAUTHORIZED
-parse + route
+GET: resolve public/static/known route
  └─ unknown route? → 404 ROUTE_NOT_FOUND
-read body (Content-Length, ≤ 65536 bytes, valid JSON object)
+ └─ protected route with wrong/missing token? → 403 Unauthorized
+ └─ dispatch to handler
+
+POST: read body (Content-Length, ≤ 65536 bytes, valid JSON object)
  ├─ too large → 400 "Request is too large."
  ├─ truncated → 400 "Request body was truncated."
  └─ not a JSON object → 400
+resolve known route
+ └─ unknown route? → 404 ROUTE_NOT_FOUND
+protected route with wrong/missing token? → 403 Unauthorized
 dispatch to handler (routes.py → Handler.<method>)
  ├─ state corrupt? → 503 STATE_UNAVAILABLE "OpenBox library data needs recovery…"
  ├─ handler raises ApiError → its status + code (GAME_NOT_FOUND, MEDIA_NOT_FOUND, …)
@@ -42,7 +46,7 @@ dispatch to handler (routes.py → Handler.<method>)
 send JSON response (nosniff, CSP, Referrer-Policy: no-referrer)
 ```
 
-Every error response carries a stable `code` and a `request_id`. The request id is a short per-request token that also appears in the diagnostic log, so a screenshot of an error banner can be correlated with the log line.
+Most structured error responses carry a stable `code` and a `request_id`. The request id is a short per-request token that also appears in the diagnostic log, so a screenshot of an error banner can be correlated with the log line. The direct unauthorized response is intentionally the smaller `{"error":"Unauthorized"}` envelope; rate-limit and outer-handler errors include their additional fields.
 
 POST handlers re-raise `ApiError` unchanged and convert `ValueError`, `OSError`, `TypeError`, `AttributeError`, `KeyError`, `IndexError`, `json.JSONDecodeError`, `GameyfinError`, `FileNotFoundError`, `RuntimeError`, and `subprocess.SubprocessError` into `400 BAD_REQUEST` with the message in `error`. State-corruption errors become `503` before handler dispatch. Everything else is logged and returned as `500`.
 
@@ -62,12 +66,11 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 
 | Status | Envelope | When |
 | --- | --- | --- |
-| 401 | `{"error":"unauthorized"}` | Native host routes (`/api/native/*`) without a valid token |
-| 403 | `{"error":"Unauthorized","code":"UNAUTHORIZED","request_id":"…"}` | Missing or wrong token on general API routes |
+| 403 | `{"error":"Unauthorized"}` | Missing or wrong token on any known protected route, including `/api/native/*` |
 | 403 | `{"error":"Request host is not allowed.","code":"BAD_HOST","request_id":"…"}` | Host header mismatch or foreign network host rejected |
 | 429 | `{"error":"Too many authentication failures. Try again later.","code":"RATE_LIMITED","retry_after":n}` | Rate limited after repeated auth failures (`Retry-After` header sent) |
 | 400 | `{"error": "<message>", "code": "BAD_REQUEST", "request_id": "…"}` | Validation failures, missing prerequisites surfaced by handlers, provider errors, unknown queue/notification actions, malformed payloads |
-| 404 | `{"code": "ROUTE_NOT_FOUND"}` | Unknown route |
+| 404 | `{"error":"Not found","code":"ROUTE_NOT_FOUND","request_id":"…"}` | Unknown route after the request body has been accepted (for POST) |
 | 404 | `GAME_NOT_FOUND` / `MEDIA_NOT_FOUND` / `DOCUMENT_NOT_FOUND` / `PLATFORM_DOCUMENT_NOT_FOUND` / `BADGE_NOT_FOUND` | Lookups that miss |
 | 409 | `{"error":"Download the LaunchBox metadata database first."}` | Metadata routes before the database exists |
 | 503 | `{"error":"OpenBox library data needs recovery before this operation can continue.","code":"STATE_UNAVAILABLE"}` | Corrupt state file |
@@ -77,7 +80,7 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 
 - **Frozen v1 Contract (`/api/v1/*`)**: Stable, frozen remote contract (enforced via `v1_contracts.json`, currently 60 routes; the contract pins path + methods, per-route params are manually verified).
 - **Base-only routes (`/api/*` without a `/api/v1/*` alias)**: local-workflow routes such as `GET /api/emulators/recommend`, `GET /api/plugins/catalog`, `POST /api/webhooks/test`, `POST /api/plugins/install|toggle|remove`, `/api/wine/*`, and `/api/faugus/*` are documented on the group pages as `/api/*` with no v1 alias. Treat them as local operations, not part of the frozen remote contract; v1 aliases are added only when a route becomes a stable remote dependency.
-- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through v1.10.0:
+- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through v1.11.0:
   - **Setup Center**: `POST /api/v2/setup/preview`, `GET /api/v2/setup/preview`, `GET /api/v2/setup/preview/items`, `POST /api/v2/setup/preview/decisions`, `POST /api/v2/setup/preview/revalidate`, `POST /api/v2/setup/commit`, `GET /api/v2/setup/summary`
   - **Launch Doctor**: `POST /api/v2/launch/preflight`, `POST /api/v2/launch/preflight/batch`
   - **Emulator Registry**: `GET /api/v2/emulators/registry` (with `?health=1` for BIOS/firmware/core status)
@@ -95,6 +98,17 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
   - **Manual Entries** (v1.10.0): `POST /api/v2/library/manual-entry`, `POST /api/v2/library/manual-entry/update`, `POST /api/v2/library/manual-entry/convert`
   - **Causal Catalog Sync** (v1.10.0): `POST /api/v2/library/sync/preview`, `POST /api/v2/library/sync/apply`, and `POST /api/v2/library/sync/publish` with `{"protocol":"v3"}`. Preview is read-only; apply requires the reviewed plan and creates a recovery backup; publish acknowledges the local outbox after a stale-state check. The old full-library publish payload and `POST /api/v2/library/sync/pull` return `503 LIBRARY_SYNC_UNAVAILABLE` before mutation.
   - **SQLite Search** (v1.9.0): `GET /api/v2/library/search?q=&limit=` (FTS5 or LIKE fallback; needs `OPENBOX_ENABLE_SQLITE_READ=1`)
+  - **Quick Resume, Moments, and session context** (v1.11.0): `GET /api/v2/resume/status`, `POST /api/v2/resume`, `POST /api/v2/resume/discard`, `GET /api/v2/moments`, `POST /api/v2/moments`, `POST /api/v2/moments/resume`, `POST /api/v2/moments/update`, `POST /api/v2/moments/delete`, `GET /api/v2/sessions/recap`, `GET /api/v2/clips`, `POST /api/v2/clips/capture`, `GET /api/v2/reels`, and `POST /api/v2/reels/create`. Resume is adapter-capability and state-fingerprint aware; clips use an optional OBS replay buffer with a local screenshot fallback; reel creation is a durable local operation.
+  - **Memory gallery** (v1.11.0): `GET /api/v2/memories`, `GET /api/v2/memories/status`, `GET /api/v2/memories/media`, and `POST /api/v2/memories/import`. Import is opt-in and queued; the read routes never scan configured folders themselves.
+  - **Time Machine and query grammar** (v1.11.0): `GET /api/v2/library/time-machine/events`, `GET /api/v2/library/time-machine/as-of`, `POST /api/v2/library/time-machine/revert`, and `POST /api/v2/library/query/parse`. Time Machine is journal-backed and bounded; revert previews must be reviewed and applied with a current `base_token`. Query parsing is read-only and deterministic.
+  - **Backlog Radio** (v1.11.0): `GET /api/v2/insights/radio`, `POST /api/v2/insights/radio/refresh`, `GET /api/v2/insights/radar`, and `POST /api/v2/insights/radar/park`. Recommendations use local history and return explanations; there is no remote recommendation service.
+  - **Arcade Room kiosk boundary** (v1.11.0): `GET /api/v2/arcade/kiosk/status`, `POST /api/v2/arcade/kiosk/pin`, and `POST /api/v2/arcade/kiosk/verify`. The salted PIN is a local Museum convenience boundary, not API authentication or security.
+  - **Household** (v1.11.0): `GET /api/v2/household`, `GET /api/v2/household/leaderboard`, `POST /api/v2/household/member`, `POST /api/v2/household/challenge`, `POST /api/v2/household/challenge/result`, `POST /api/v2/household/share`, `POST /api/v2/household/merge`, `POST /api/v2/household/record`, `POST /api/v2/household/sync/publish`, and `POST /api/v2/household/sync/pull`. Records are local-first and sync only through a configured mounted folder; stats sharing is opt-in.
+  - **Steam Bridge and ES-DE migration** (v1.11.0): `GET /api/v2/steambridge/status`, `POST /api/v2/steambridge/preview`, `POST /api/v2/steambridge/apply`, `POST /api/v2/steambridge/remove/preview`, `POST /api/v2/steambridge/remove`, `POST /api/v2/import/esde/preview`, and `POST /api/v2/import/esde/apply`. Both workflows are preview/apply based and reject stale source or reviewed plans before mutation.
+  - **SteamGridDB artwork** (v1.11.0): `GET /api/v2/steamgrid/status`, `GET /api/v2/steamgrid/search`, `POST /api/v2/steamgrid/test`, `POST /api/v2/steamgrid/info`, `POST /api/v2/steamgrid/apply`, and `POST /api/v2/steamgrid/match`. The provider requires `STEAMGRIDDB_API_KEY`, is optional, and returns durable job IDs for apply and bulk match.
+  - **OpenBox launcher trophies** (v1.11.0): `GET /api/v2/insights/trophies` and `POST /api/v2/insights/trophies/evaluate`. Awards are deterministic over local library/history data and are separate from RetroAchievements.
+
+See [API 1.11 additions](/reference/api/one-eleven/) for request bodies, response examples, optional-tool caveats, and stale-plan handling.
 - **Locale files** (public, no auth): `GET /locales/{en,es,de,fr,pt}.json` — serves JSON locale files for the i18n system (v1.7.2)
 
 ### Machine-Readable Error Codes

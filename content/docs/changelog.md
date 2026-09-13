@@ -4,6 +4,42 @@ description: Release notes for OpenBox, from the latest AppImage back to the fir
 sidebar: false
 ---
 
+## 1.11.0 (2026-09-12) — Every Second Counts
+
+### Never lose your place
+
+- **Quick Resume** stores progress-aware session state when the selected emulator adapter exposes a safe state path. Session recaps and a per-game **Moments** timeline keep recent activity, notes, screenshots, and resumable snapshots together. Resume is capability-based: adapters without a state definition still support notes and screenshots, but do not claim resume support.
+- **Record That** captures the replay buffer through OBS when the optional local replay integration is enabled. If OBS is unavailable, it falls back to a local screenshot; if neither capture path is available, the action reports an error. Clips stay in approved local media directories, and bounded deterministic reels can be queued when the local tooling is present.
+
+### A library you can ask
+
+- **Backlog Radio** builds up to five explainable recommendations from local play history and library data. It is deterministic and local; a new install without enough history uses a transparent fallback instead of inventing habits.
+- The library query bar understands a small deterministic grammar such as `short unplayed rpg`. Interpretation is shown as editable, removable chips; unknown words remain ordinary text rather than becoming guessed filters.
+- **Ctrl/Cmd-K** opens the command palette for games, actions, settings, and What's New discovery. The palette is a UI action, not a separate network service.
+
+### Time Machine
+
+- The journal-backed **Time Machine** exposes a bounded event timeline, read-only as-of inspection, and reviewable revert previews. The canonical state remains transactional; malformed or stale plans stop before mutation. The journal records catalog metadata and history, not media binaries, so it is not a media restore mechanism.
+
+### Arcade Room and Household
+
+- **Arcade Room** is a controller-friendly canvas showroom organized by platform. **Museum mode** turns it into a self-guided exhibit using real library facts, and reduced-motion settings use a static presentation.
+- An optional salted Museum kiosk PIN is a local convenience boundary for browsing. It is not an account, network authentication, or security boundary.
+- **Household** adds opt-in local members, challenges, results, shares, and leaderboard projections over the existing mounted sync folder. No account or hosted service is involved, and statistics remain off until a device opts in. Household is intentionally marked partial in the parity matrix because it does not provide hosted multiplayer.
+
+### Handheld migration and artwork
+
+- **Steam Bridge** previews, applies, and removes OpenBox entries in Steam's `shortcuts.vdf`, preserving unrelated records and rejecting stale reviewed plans. `openbox --play <id>` dispatches the same authenticated launch path for Steam Game Mode.
+- **ES-DE** imports `gamelist.xml` through a bounded, explicit-identity preview/apply workflow with source digests, stale-plan rejection, and transactional application.
+- The optional **SteamGridDB** provider can search, preview, apply, and bulk-match covers, backgrounds, clear logos, icons, and banners. It requires `STEAMGRIDDB_API_KEY` and can be disabled in Settings; results are cached locally and provider media is constrained to HTTPS.
+- **OpenBox launcher trophies** are deterministic local awards evaluated from library and play-history data and persisted in a local trophy case. They are separate from the optional RetroAchievements account integration.
+
+### Polish
+
+- What's New and tips discovery, localized UI coverage across the five stock locales, detail-pane Moments and Clips tabs, quick query chips, kiosk settings, and the final release polish sweep round out 1.11.0.
+
+[Full OpenBox 1.11.0 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.11.0) · [Compare v1.10.0...v1.11.0](https://github.com/vindeckyy/OpenBoxGL/compare/v1.10.0...v1.11.0) · [1.11 API reference](/reference/api/one-eleven/)
+
 ## 1.10.0 (2026-09-08) — Safer migrations and synchronization
 
 - **Causal catalog sync**: opt-in, content-addressed events carry device identity, ancestry, tombstones, recovery snapshots, and acknowledged outboxes. Preview incoming changes, resolve conflicts by field, and apply the reviewed plan transactionally; launch paths, commands, credentials, statistics, and media remain local.

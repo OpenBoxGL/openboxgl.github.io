@@ -63,8 +63,10 @@ def before_launch(payload):
     # Log to stderr (last 400 bytes are captured in the diagnostic log on failure)
     game = payload.get("game", {})
     print(f"[Notifier] Starting game: {game.get('name')}", file=sys.stderr)
-    # Optionally rewrite the launch argv (args[0] must stay the same executable)
-    payload["args"].append("--fullscreen")
+    # Optionally rewrite the launch argv (args[0] must stay the same executable).
+    # Use an option supported by the launched game or emulator, not an OpenBox
+    # window flag.
+    payload["args"].append("--game-specific-option")
     return payload
 
 

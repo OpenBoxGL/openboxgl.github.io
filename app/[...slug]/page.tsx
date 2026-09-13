@@ -42,10 +42,11 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
   const idx = flat.findIndex((n) => n.slug === slugStr)
   const prev = idx > 0 ? flat[idx - 1] : null
   const next = idx >= 0 && idx < flat.length - 1 ? flat[idx + 1] : null
+  const authoredSlugs = allDocSlugs()
 
   return (
     <article>
-      <DocsBreadcrumbs slug={slugStr} />
+      <DocsBreadcrumbs slug={slugStr} authoredSlugs={authoredSlugs} />
       <div className="mb-10 border-b border-border pb-8">
         <p className="mb-3 font-mono text-xs uppercase tracking-[0.25em] text-primary">// OPENBOX DOCS</p>
         <h1 className="max-w-3xl text-balance text-3xl font-bold leading-tight tracking-tight md:text-4xl">

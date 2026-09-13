@@ -36,6 +36,53 @@ const components = {
   ApiExplorer,
 }
 
+type HastNode = {
+  type?: string
+  tagName?: string
+  value?: string
+  children?: HastNode[]
+  properties?: Record<string, unknown>
+}
+
+/**
+ * Match the slug shape used by the fragment links in the authored docs.
+ * Punctuation is removed while whitespace is retained as hyphens, so a
+ * heading such as "Source / system" keeps its existing `source--system`
+ * fragment.
+ */
+function slugifyHeading(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/\s/g, "-")
+}
+
+function headingText(node: HastNode): string {
+  if (node.type === "text") return node.value ?? ""
+  return (node.children ?? []).map(headingText).join("")
+}
+
+/** Add deterministic, unique fragment IDs to Markdown/MDX headings. */
+function rehypeHeadingIds() {
+  return (tree: HastNode) => {
+    const counts = new Map<string, number>()
+
+    const visit = (node: HastNode) => {
+      if (node.type === "element" && /^h[1-6]$/.test(node.tagName ?? "")) {
+        const existingId = typeof node.properties?.id === "string" ? node.properties.id : ""
+        const base = existingId || slugifyHeading(headingText(node)) || "section"
+        const count = counts.get(base) ?? 0
+        counts.set(base, count + 1)
+        node.properties = { ...node.properties, id: count === 0 ? base : `${base}-${count}` }
+      }
+      for (const child of node.children ?? []) visit(child)
+    }
+
+    visit(tree)
+  }
+}
+
 /** Strip Astro frontmatter and import lines, keep the body. */
 function stripAstro(source: string): string {
   let s = source.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "")
@@ -89,6 +136,7 @@ export function renderMdx(source: string) {
         mdxOptions: {
           format: "mdx",
           remarkPlugins: [remarkGfm],
+          rehypePlugins: [rehypeHeadingIds],
         },
       }}
     />
