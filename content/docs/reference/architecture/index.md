@@ -43,9 +43,9 @@ OpenBox is engineered with a strict **local-first, dependency-free runtime** arc
 ## 1. Zero-Dependency Loopback Core
 
 The runtime engine uses Python 3's built-in standard library (`http.server`, `urllib`, `sqlite3`, `json`, `concurrent.futures`, `hashlib`, `gzip`). 
-- Runs locally bound to ephemeral loopback ports (or configured host/port) with strict Host and Origin validation.
+- Runs bound to `127.0.0.1` on an ephemeral port chosen at startup, with strict Host and Origin validation; the host address is not configurable by design.
 - No third-party Python packages are bundled or required at runtime.
-- Fast cold start under 120ms.
+- Fast cold start: native-host launch to server-ready measured at ~242ms on the reference machine (see `docs/development/PERF.md`).
 
 <ApiExplorer />
 
@@ -54,7 +54,7 @@ The runtime engine uses Python 3's built-in standard library (`http.server`, `ur
 When launched via native binary or AppImage, OpenBox spawns a native C/WebKitGTK host process:
 - Hardware-accelerated WebGL and 2D canvas rendering
 - Native window management, borderless fullscreen, and Wayland/X11 display protocol compatibility
-- SDL2 controller input polling with sub-frame response latency
+- Controller input uses the browser's Web Gamepad API inside the WebKitGTK view (the injected `onGamepad` bridge is a deliberate no-op stub; see `docs/native-host-contract.md`)
 
 ## 3. Atomic State Store & Recovery
 

@@ -52,6 +52,14 @@ The response includes the parsed rules/clauses/chips, leftovers/hint, `match_cou
 
 ## Command palette
 
-Press **Ctrl-K** on Windows/Linux or **Cmd-K** on macOS. The palette searches games and exposes actions, settings, and What's New discovery. Its `?` view repeats the current shortcut table, so it is the quickest way to check controls without leaving the app. The palette is local UI over the existing API; it does not create a second search service.
+Press **Ctrl-K** on Windows/Linux or **Cmd-K** on macOS. The palette searches games and exposes actions, settings, and What's New discovery. Its `?` view repeats the current shortcut table, so it is the quickest way to check controls without leaving the app. The palette is local UI over the existing API; it does not create a second search service. Since 1.12 it also ranks recently chosen games and actions first, from local usage counts — no telemetry.
+
+## Save a query as a collection (v1.12.0)
+
+A parsed query can be pinned: the query bar's **Save as collection** chip stores the *interpretation* — the query text itself — as a named sidebar shelf. A collection re-evaluates through the canonical search path at read time, so "under 5 hours, never played" stays correct as your library and play history change. It stores the question, not the answer.
+
+- Collections live in the sidebar **Collections** section, at most 50 named shelves.
+- Rename by saving again with the new name; delete from the collection row. Games are never touched.
+- The routes are `GET/POST /api/v2/collections` and `POST /api/v2/collections/delete`; an unparsable saved query evaluates to zero matches, never an error. See [API 1.12 additions](/reference/api/one-twelve/).
 
 See [Discovery](/guides/discovery/), [Keyboard & Controller Shortcuts](/reference/shortcuts/), and [API 1.11 additions](/reference/api/one-eleven/) for the surrounding UI and route contracts.

@@ -15,7 +15,7 @@ Every workflow in `PARITY.md` is marked `done`, or carries a decision status for
 
 ## Capability status
 
-The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0 features below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
+The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0/1.12.0 features below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
 
 | Area | Status | Notes |
 | --- | --- | --- |
@@ -42,6 +42,10 @@ The source matrix tracks the current LaunchBox-aligned capabilities, including L
 | Household (v1.11.0) | <StatusBadge status="partial" /> | Opt-in members, challenges, shares, results, and leaderboard projections over a mounted sync folder; no hosted multiplayer service |
 | Steam Bridge and ES-DE (v1.11.0) | <StatusBadge status="done" /> | Reviewed `shortcuts.vdf` preview/apply/remove, `openbox --play <id>`, and stale-safe `gamelist.xml` import |
 | SteamGridDB and launcher trophies (v1.11.0) | <StatusBadge status="done" /> | Optional cached artwork provider and deterministic local trophy case, separate from RetroAchievements |
+| Smart collections (v1.12.0) | <StatusBadge status="done" /> | Named query shelves saved from the query bar re-evaluate live via `/api/v2/collections` routes |
+| Game Story (v1.12.0) | <StatusBadge status="done" /> | Per-game deterministic narrative tab via `GET /api/v2/story` over the session journal and Moments |
+| Per-game launch environment (v1.12.0) | <StatusBadge status="done" /> | `launch_env` KEY=value overrides and `launch_confirm` per game; merge order game > platform > global |
+| Scheduled backups and SQLite default (v1.12.0) | <StatusBadge status="done" /> | Opt-in weekly automatic library backups with retention; FTS read model self-enables at 5,000+ games with env opt-out |
 
 ## Intentionally not replicated on Linux
 

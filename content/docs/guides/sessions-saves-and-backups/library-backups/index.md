@@ -20,6 +20,10 @@ python3 web_app.py --backup --items library,settings,media --keep 7
 
 The archive is written via a temp file and `os.replace`, then the directory is fsynced.
 
+### Scheduled automatic backups (v1.12.0)
+
+Settings can run the same engine on a weekly schedule: enable **automatic backups**, pick a retention of 1-52 archives (default 4), and an hourly daemon tick fires `auto_backup_due()` once seven days have passed since `last_auto_backup` — a missing or unparsable stamp counts as due. Automatic archives are byte-identical to manual ones, so the restore path below applies unchanged.
+
 ## Restore a backup
 
 Restore is guarded at every step:

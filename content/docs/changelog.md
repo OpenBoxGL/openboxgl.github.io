@@ -4,6 +4,20 @@ description: Release notes for OpenBox, from the latest AppImage back to the fir
 sidebar: false
 ---
 
+## 1.12.0 (2026-09-14) — Living Library
+
+Searches you pinned become shelves that stay correct on their own, every game gets a story worth scrolling, and the launch-options sheet is complete down to environment variables.
+
+- **Smart collections:** "Save as collection" turns the active query-bar interpretation into a named sidebar shelf (`GET/POST /api/v2/collections`, `POST /api/v2/collections/delete`). A collection stores the query — not a snapshot — so membership stays correct as the library changes.
+- **Game Story:** a per-game Story tab in the detail pane (`GET /api/v2/story?game_id=`) narrates added date, first played, longest session, playtime milestones, progress, and captured Moments — a deterministic projection over the session journal, so it can never go stale.
+- **Per-game environment overrides:** Edit game → Launch gains a `launch_env` field (`KEY=value` lines, validated at save) merged over the launch environment, plus an "Always confirm before launch" per-game flag.
+- **Weekly automatic backups:** Settings gains an opt-in weekly library backup with retention and a "last automatic backup" line; the scheduler reuses the existing backup engine (`auto_backup_due()`).
+- **SQLite self-enables for large libraries:** at 5,000+ games the FTS read model turns itself on; an explicit `OPENBOX_ENABLE_SQLITE_READ=0` opt-out is honored and small libraries see identical behavior.
+- **Command palette learns:** recently chosen games and actions rank first, from local usage counts — no telemetry.
+- **Fixed:** the per-game gamescope preset override now round-trips to the Edit game select, plus the full 1.11.1 hardening sweep — complete large-media responses, document-reader framing, scroll-stable grid virtualization, and focus restoration.
+
+[Full OpenBox 1.12.0 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.12.0) · [Compare v1.11.0...v1.12.0](https://github.com/vindeckyy/OpenBoxGL/compare/v1.11.0...v1.12.0) · [1.12 API reference](/reference/api/one-twelve/)
+
 ## 1.11.0 (2026-09-12) — Every Second Counts
 
 ### Never lose your place

@@ -11,7 +11,7 @@ Launch commands are tokenized strings: OpenBoxGL substitutes exact placeholders 
 
 | Token | Value | Example |
 | --- | --- | --- |
-| `{path}` (alias `{ImagePath}`) | Absolute path to the game file, ROM, or extracted archive member | `/home/you/roms/zelda.nes` |
+| `{path}` (aliases `{Path}`, `{ImagePath}`) | Absolute path to the game file, ROM, or extracted archive member | `/home/you/roms/zelda.nes` |
 | `{dir}` (alias `{Dir}`) | Parent directory containing the game file or ROM | `/home/you/roms` |
 | `{file}` (alias `{File}`) | Filename with extension | `zelda.nes` |
 | `{stem}` (alias `{FileNameWithoutExtension}`) | Filename without extension | `zelda` |
@@ -23,6 +23,17 @@ Launch commands are tokenized strings: OpenBoxGL substitutes exact placeholders 
 | `{lutris_id}` | Lutris game identifier (`lutris_id` field) | `1` |
 | `{EmulatorDir}` | Parent directory of the resolved emulator executable | `/usr/bin` |
 | `{DataDir}` | OpenBox user data directory | `/home/you/.local/share/openbox-game-launcher` |
+
+### Quick Resume state tokens (v1.11.0+)
+
+Emulator-def `state:` templates can use these additional tokens, resolved per game when a Quick Resume state is saved or restored. They are meaningless in an ordinary launch command and substitute empty there:
+
+| Token | Value | Example consumer |
+| --- | --- | --- |
+| `{state_path}` | Absolute path of the emulator state file OpenBox manages for the game | Dolphin `--save_state={state_path}`, PPSSPP `--state={state_path}` |
+| `{state_dir}` | Per-game directory OpenBox manages for state files | MAME `-state_directory {state_dir}` |
+| `{state_name}` | State name OpenBox assigns inside the state directory | MAME `-state {state_name}` |
+| `{state_config}` | Path to the generated adapter config fragment (RetroArch auto-save into `state_dir`, command net enabled) | RetroArch `--appendconfig {state_config}` |
 
 When a game has no per-game `launch` command, the platform profile from `profiles` is used; the emulator definition packs and `discover_profiles` provide defaults such as `dosbox {path}`, `dolphin-emu -b -e {path}`, and `pcsx2-qt {path}`. Per-game `launch_profile` overrides select a different named profile for that game only.
 

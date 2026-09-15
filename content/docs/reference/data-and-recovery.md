@@ -56,6 +56,7 @@ Unknown fields survive migration; only known collections are normalized. A schem
 - Per-game `tags`: 50 tags, 64 characters each (see [API automation](/reference/api/automation/)).
 - `save_paths`: at most 50 entries per game; `screenshots`: at most 100; `alternate_names`: at most 20; `applications`/`versions`/`documents`: at most 100 entries each (extra `name` defaults to the path stem).
 - `custom_fields`: capped per `custom_field_defs` (up to 20 defs); `list_columns`: at most 12; `hidden_sidebar_sections`: at most 20.
+- `smart_collections`: at most 50 named `{name, query}` shelves at write time (v1.12.0); names cap at 80 characters, queries at 500.
 
 ## Corruption and recovery
 

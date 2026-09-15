@@ -10,16 +10,15 @@ OpenBox is maintained by one person in the open, so the roadmap is short and hon
 
 ## In the current release
 
-The [changelog](/changelog/) is the accurate record. The current release is **1.11.0 — Every Second Counts**:
+The [changelog](/changelog/) is the accurate record. The current release is **1.12.0 — Living Library**:
 
-- Quick Resume, session recaps, Moments, and Record That clips/reels keep play context close to the game, with capability-aware resume and local capture fallbacks.
-- Time Machine adds bounded journal browsing, as-of inspection, and reviewable catalog reverts.
-- Backlog Radio, deterministic query grammar with editable chips, and the Ctrl/Cmd-K command palette make the local collection easier to ask.
-- Arcade Room, Museum mode, reduced-motion presentation, and an optional kiosk convenience PIN add a controller-friendly showroom; Household adds opt-in local challenges, shares, results, and leaderboards over the mounted sync folder.
-- Steam Bridge and `openbox --play <id>` support reviewed Steam Game Mode shortcuts; ES-DE adds reviewable, stale-safe `gamelist.xml` import.
-- SteamGridDB artwork, local launcher trophies, What's New/tips, localized UI, and detail-pane Moments/Clips surfaces round out the release.
+- Smart collections pin a Backlog Radio query as a named sidebar shelf that re-evaluates live — the collection stores the query, not a snapshot.
+- Game Story gives every game a deterministic narrative tab: added, first played, longest session, milestones, progress, and captured Moments.
+- Per-game launch options finish the sheet: `launch_env` KEY=value environment overrides and an "Always confirm before launch" flag.
+- Weekly automatic backups keep a bounded archive history with a last-run line in Settings.
+- The SQLite read model self-enables at 5,000+ games (env opt-out honored), and the command palette ranks recently used games and actions first.
 
-Earlier milestones include 1.10.0 (review-first LaunchBox XML migration, manual shelf entries, causal catalog sync, indexed search, and launch hardening), 1.9.0 (picker, Constellation, Wrapped, Timeline, Mastery, Game Night, video snaps, and Mood Match), 1.8.0 (keyboard/gamepad navigation, ScreenScraper, custom gamescope presets, library export, and ARM64 packaging), 1.7.2 (internationalization, the optional SQLite read model, MangoHud, BIOS SHA1 drift detection, backup diff, and visual chip builder), 1.7.1 (Play Insights analytics, spacer-window grid virtualization, background search worker, FacetCache LRU, write coalescing, and Launch Doctor fixes), 1.7.0 (Library Setup Center, durable Activity Center operations, Launch Doctor preflight, additive v2 API, and Flatpak packaging), 1.6.0 (modular state architecture, centralized launch tokens, accessible tools menu, dialog focus traps, and CSP hardening), 1.5.1 (large-library write optimizations), 1.5.0 (Proton/Wine prefix management, Faugus Launcher, and Eden Switch), and 1.0.0 (native WebKitGTK window, Server-Sent Events, and the frozen v1 contract).
+Earlier milestones include 1.11.0 (Quick Resume, Moments and Record That clips, Time Machine, Backlog Radio, the command palette, Arcade Room and Museum kiosk mode, Household, Steam Bridge, ES-DE import, SteamGridDB artwork, and local launcher trophies), 1.10.0 (review-first LaunchBox XML migration, manual shelf entries, causal catalog sync, indexed search, and launch hardening), 1.9.0 (picker, Constellation, Wrapped, Timeline, Mastery, Game Night, video snaps, and Mood Match), 1.8.0 (keyboard/gamepad navigation, ScreenScraper, custom gamescope presets, library export, and ARM64 packaging), 1.7.2 (internationalization, the optional SQLite read model, MangoHud, BIOS SHA1 drift detection, backup diff, and visual chip builder), 1.7.1 (Play Insights analytics, spacer-window grid virtualization, background search worker, FacetCache LRU, write coalescing, and Launch Doctor fixes), 1.7.0 (Library Setup Center, durable Activity Center operations, Launch Doctor preflight, additive v2 API, and Flatpak packaging), 1.6.0 (modular state architecture, centralized launch tokens, accessible tools menu, dialog focus traps, and CSP hardening), 1.5.1 (large-library write optimizations), 1.5.0 (Proton/Wine prefix management, Faugus Launcher, and Eden Switch), and 1.0.0 (native WebKitGTK window, Server-Sent Events, and the frozen v1 contract).
 
 ## In progress
 

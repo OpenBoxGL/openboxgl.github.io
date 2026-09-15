@@ -85,6 +85,10 @@ Each `emulator_defs/*.yaml` file uses these fields (example: `emulator_defs/dolp
 | `recommended` | Whether this adapter is the recommended default |
 | `priority` | Precedence when several adapters match (higher wins) |
 | `executable_patterns` | Binary names detected as native installs |
+| `bios_path` | Expected BIOS file or directory checked by Launch Doctor (with optional SHA1 drift detection), e.g. `~/.config/PCSX2/bios` |
+| `firmware_path` | Expected firmware directory checked by Launch Doctor, e.g. `~/.config/rpcs3/dev_flash` |
+| `core_path` | libretro core path for RetroArch-family adapters, e.g. `/usr/lib/libretro/fceumm_libretro.so` |
+| `state` | Quick Resume block (`kind`, `template`, `capture`, `glob`) declaring how the adapter saves/restores state files; `template`/`capture` may use the `{state_path}`, `{state_dir}`, `{state_name}`, and `{state_config}` tokens (v1.11.0+) |
 
 ## Archive extraction
 

@@ -45,7 +45,8 @@ The default data directory is `~/.local/share/openbox-game-launcher`. Everything
 | `native-host.lock`, `window-geometry`, `native-host-flags` | Native host single-instance lock, last window geometry, and tray flags |
 | `backups/` | Library backup archives (`OpenBoxBackup-*.zip`) |
 | `save-backups/` | Versioned per-game save backups with retention limits |
-| `media/` | Downloaded artwork, screenshots, video, and metadata media, grouped by source |
+| `media/` | Downloaded artwork, screenshots, video, and metadata media, grouped by source (`media/memories/` holds imported Memories gallery items, `media/clips/` holds Record That captures) |
+| `exports/` | Library export files (JSON/CSV); the newest 10 are kept (v1.8.0+) |
 | `themes/` | Stock themes plus locally imported CSS themes |
 | `plugins/` | Installed local plugin packages |
 | `metadata/` | The synced LaunchBox Games Database file |

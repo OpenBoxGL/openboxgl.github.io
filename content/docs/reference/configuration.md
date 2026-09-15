@@ -47,10 +47,14 @@ Values already in the environment are never overridden by `.env`. The template l
 | `OPENBOX_WEBKIT_HARDWARE_ACCELERATION` | WebKitGTK hardware acceleration policy in native window (`always` or `on-demand`; default is `on-demand`). |
 | `OPENBOX_SNAPSHOT_DEBOUNCE` | Debounce delay in seconds (float) for background library state snapshot writes (defaults to `0.0`). |
 | `OPENBOX_INSTALL_DIR` | Custom installation directory used by `install.sh` (defaults to `~/.local/bin`). |
-| `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v1.11.0`) during `install.sh` execution. |
+| `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v1.12.0`) during `install.sh` execution. |
 | `OPENBOX_PYTHON` | Path to the Python interpreter invoked by the native host (defaults to `python3`). |
 | `OPENBOX_WEB_APP` | Path to `web_app.py` invoked by the native host. |
-| `OPENBOX_ENABLE_SQLITE_READ` | Set to `1` to enable the optional SQLite read model (`pkg/state/sqlite_readmodel.py`) for accelerated search and facets on large libraries. It uses stdlib `sqlite3` with FTS5 full-text search (LIKE fallback if FTS5 is unavailable). JSON remains the source of truth; SQLite is a read-only projection. Release evidence covers 10k and 20k libraries; larger collections are exploratory. Disabled by default. (v1.7.2+) |
+| `OPENBOX_NATIVE_HOST` | Path override for the native host binary used by `openbox-native.sh` (defaults to `native_host` beside the app). |
+| `OPENBOX_BUNDLED_LIB_PATH` | `LD_LIBRARY_PATH` value used by the AppImage wrapper for bundled libraries. |
+| `OPENBOX_ARCH` | Overrides `uname -m` architecture detection in `install.sh` and `build_appimage.sh` (`x86_64` or `aarch64`). |
+| `OPENBOX_UPDATE_INFORMATION` | zsync update-metadata line embedded by `build_appimage.sh` for the verified updater (packaging-time, not user-facing). |
+| `OPENBOX_ENABLE_SQLITE_READ` | Set to `1` to enable the SQLite read model (`pkg/state/sqlite_readmodel.py`) for accelerated search and facets on large libraries. It uses stdlib `sqlite3` with FTS5 full-text search (LIKE fallback if FTS5 is unavailable). JSON remains the source of truth; SQLite is a read-only projection. Release evidence covers 10k and 20k libraries; larger collections are exploratory. Since v1.12.0 the read model also self-enables at 5,000+ games (`should_auto_enable()`, latched per process); an explicit `0`/`false`/`no` opt-out is never overridden. (v1.7.2+) |
 
 ### Credentials (all optional)
 
@@ -63,6 +67,11 @@ Values already in the environment are never overridden by `.env`. The template l
 | `GITHUB_TOKEN` | GitHub release API rate limit for update checks (`GITHUB_TOKEN`, `GH_TOKEN`, `OPENBOX_GITHUB_TOKEN` all accepted) | `GH_TOKEN`, `OPENBOX_GITHUB_TOKEN` |
 | `IGDB_CLIENT_ID` | IGDB metadata provider (Twitch developer app) |, |
 | `IGDB_CLIENT_SECRET` | IGDB metadata provider (Twitch developer app) |, |
+| `STEAMGRIDDB_API_KEY` | SteamGridDB artwork provider: search, apply, and bulk matching | `OPENBOX_STEAMGRIDDB_API_KEY` |
+| `SCREENSCRAPER_USER` | ScreenScraper per-ROM-hash scraping (required for that provider) | `OPENBOX_SCREENSCRAPER_USER` |
+| `SCREENSCRAPER_PASSWORD` | ScreenScraper per-ROM-hash scraping (required for that provider) | `OPENBOX_SCREENSCRAPER_PASSWORD` |
+| `SCREENSCRAPER_DEV_ID` | ScreenScraper developer credentials (optional) | `OPENBOX_SCREENSCRAPER_DEV_ID` |
+| `SCREENSCRAPER_DEV_PASSWORD` | ScreenScraper developer credentials (optional) | `OPENBOX_SCREENSCRAPER_DEV_PASSWORD` |
 
 Each credential lookup checks the aliases in order using `env_value()` from `env_config.py`, it iterates through the listed names for a variable and uses the first non-empty value found. If an empty string is returned for any required variable, the route returns a specific `400` error naming exactly which variable is missing. For example, IGDB requires both `IGDB_CLIENT_ID` **and** `IGDB_CLIENT_SECRET`; without either the IGDB routes return `400 {"error":"Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET in ~/.env to use IGDB."}`. Without RetroAchievements credentials, the `/api/ra/*` routes return `400 {"error":"Configure RetroAchievements first."}`.
 
@@ -115,6 +124,26 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `track_session_history` | `true` | Boolean, when false, sessions still track but history isn't recorded |
 | `backup_on_close` | `false` | Boolean, creates save backups when session ends |
 | `save_backup_limit` | 10 | 0 to 500, oldest archives trimmed after each backup |
+| `backup_auto_enabled` | `false` | Boolean; opt-in weekly automatic library backup, checked on an hourly tick (`auto_backup_due()`) (v1.12.0+) |
+| `backup_auto_keep` | 4 | 1 to 52 automatic backup archives retained (v1.12.0+) |
+| `last_auto_backup` | `""` | Internal timestamp of the last automatic backup; missing or unparsable counts as due — do not edit (v1.12.0+) |
+| `quick_resume_enabled` | `true` | Boolean; enables Quick Resume state capture and restore on state-capable adapters (v1.11.0+) |
+| `session_recap_enabled` | `true` | Boolean; shows the session recap card after a session ends (v1.11.0+) |
+| `moments_autocapture` | `true` | Boolean; automatic Moment capture on qualifying session events (v1.11.0+) |
+| `state_retention` | 1 | 1 to 20 Quick Resume states kept per game (v1.11.0+) |
+| `memories_import_enabled` | `false` | Boolean; opt-in import of external media into the Memories gallery (v1.11.0+) |
+| `memories_import_roots` | `[]` | At most 32 absolute, existing directories allowed as Memories import sources (v1.11.0+) |
+| `steamgrid_enabled` | `true` | Boolean; enables the SteamGridDB artwork provider (still requires `STEAMGRIDDB_API_KEY`) (v1.11.0+) |
+| `obs_replay_enabled` | `false` | Boolean; enables Record That clip capture via the OBS replay buffer (v1.11.0+) |
+| `obs_websocket_url` | `""` | OBS WebSocket endpoint for replay-buffer capture (v1.11.0+) |
+| `obs_websocket_timeout` | 5.0 | 0.1 to 30 seconds for OBS WebSocket calls (v1.11.0+) |
+| `obs_websocket_password` | `""` | OBS WebSocket password; empty leaves the stored value unchanged (v1.11.0+) |
+| `museum_kiosk_enabled` | `false` | Boolean; Museum/kiosk mode with reduced interaction (v1.11.0+) |
+| `museum_kiosk_pin_hash` | `""` | Salted PIN hash for the kiosk convenience boundary — not API authentication (v1.11.0+) |
+| `household_stats_sharing` | `false` | Boolean; opt-in sharing of play statistics with Household members (v1.11.0+) |
+| `party_queue` | `[]` | Game Night queue of up to 50 unique game ids (v1.9.0+) |
+| `party_players` | 2 | 2 to 8 Game Night players (v1.9.0+) |
+| `party_index` | 0 | Current position in the Game Night queue (v1.9.0+) |
 | `tracking_mode` | "default" | One of default, process, original_process, folder, process_name |
 | `tracking_delay` | 0 | 0 to 600 seconds before tracking starts after spawn |
 | `tracking_frequency` | 2.0 | 0.5 to 60 seconds between poll checks |
