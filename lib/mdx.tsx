@@ -17,9 +17,11 @@ import {
   ApiExplorer,
   DocTable,
 } from "@/components/docs"
+import { MdxPre } from "@/components/mermaid"
 
 const components = {
   table: DocTable,
+  pre: MdxPre,
   ApiEndpoint,
   Callout,
   FeatureGrid,

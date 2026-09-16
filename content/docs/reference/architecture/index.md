@@ -7,37 +7,30 @@ OpenBox is engineered with a strict **local-first, dependency-free runtime** arc
 
 ## Core Architectural Layers
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    User Interface Layer                     │
-│  ┌─────────────────────────┐   ┌─────────────────────────┐  │
-│  │   Desktop Web App       │   │    Big Box Kiosk UI     │  │
-│  │   (Vanilla JS + CSS)    │   │  (Gamepad / CoverFlow)  │  │
-│  └────────────┬────────────┘   └────────────┬────────────┘  │
-│               │                             │               │
-│               └──────────────┬──────────────┘               │
-│                              │                              │
-│                    WebKitGTK Native Host                    │
-│                 (Hardware-accelerated View)                 │
-└──────────────────────────────┼──────────────────────────────┘
-                               │ Local HTTP / JSON REST
-┌──────────────────────────────┴──────────────────────────────┐
-│                    Python Core Engine                       │
-│  ┌───────────────────────┐       ┌───────────────────────┐  │
-│  │   HTTP Request Router │       │   Job Manager Worker  │  │
-│  │   (Zero-dependency)   │       │   (ThreadPool Engine) │  │
-│  └───────────┬───────────┘       └───────────┬───────────┘  │
-│              │                               │              │
-│  ┌───────────┴───────────┐       ┌───────────┴───────────┐  │
-│  │   Subsystems & Parity │       │  Save & Backup Engine │  │
-│  │   (Steam/Wine/Stores) │       │  (Content-Addressed)  │  │
-│  └───────────┬───────────┘       └───────────┬───────────┘  │
-│              │                               │              │
-│              └───────────────┬───────────────┘              │
-│                              │                              │
-│                    Atomic State Store                       │
-│    (library.json + Atomic Writes + Rotating Snapshots)      │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph UI["User Interface Layer"]
+        WebApp["Desktop Web App<br/>Vanilla JS and CSS, 35 modules"]
+        BigBox["Big Box Kiosk UI<br/>Gamepad, Stage and CoverFlow"]
+    end
+    NativeHost["WebKitGTK Native Host<br/>C host, hardware-accelerated view"]
+    WebApp --> NativeHost
+    BigBox --> NativeHost
+    NativeHost <-->|Local HTTP and JSON REST<br/>127.0.0.1, token auth| Core
+    subgraph Core["Python Core Engine — web_app.py, zero-dependency"]
+        Router["Route tables plus @route registry<br/>frozen v1, additive v2"]
+        Handlers["handlers/*<br/>one module per domain"]
+        Jobs["JobManager<br/>background worker threads"]
+        Parity["pkg/parity/* — 46 feature modules<br/>imports, media, saves, emulators"]
+        StatePkg["pkg/state<br/>cache, operations, SSE bus, SQLite read model"]
+        Store["Atomic State Store<br/>library.json, atomic writes, snapshots"]
+        Router --> Handlers
+        Handlers --> Parity
+        Handlers --> Jobs
+        Handlers --> StatePkg
+        Parity --> StatePkg
+        StatePkg --> Store
+    end
 ```
 
 ## 1. Zero-Dependency Loopback Core
