@@ -10,7 +10,7 @@ OpenBox is maintained by one person in the open, so the roadmap is short and hon
 
 ## In the current release
 
-The [changelog](/changelog/) is the accurate record. The current release is **1.12.0 — Living Library**:
+The [changelog](/changelog/) is the accurate record. The current release is **1.12.1 — Living Library**:
 
 - Smart collections pin a Backlog Radio query as a named sidebar shelf that re-evaluates live — the collection stores the query, not a snapshot.
 - Game Story gives every game a deterministic narrative tab: added, first played, longest session, milestones, progress, and captured Moments.

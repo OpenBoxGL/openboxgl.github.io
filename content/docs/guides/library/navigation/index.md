@@ -17,15 +17,19 @@ Gamepad input runs through a configurable controller map (Settings → Controlle
 
 ## Hash routing
 
-The library view is encoded in the URL as `#/key/value` hash fragments — platform, playlist, gamescope preset, search query, selection, and sort state. Refreshing restores exactly where you were, and copying the address bar gives someone a link that opens the same view. No server round-trip is involved; the fragments are read and written locally.
+The library view is encoded in the URL as `#/key/value` hash fragments — platform, category, playlist, filter preset, search query (`q`), selected game, and sort state. Refreshing restores exactly where you were, and copying the address bar gives someone a link that opens the same view. No server round-trip is involved; the fragments are read and written locally.
 
 ## Sortable list columns
 
-In list view, click a column header (Title, Platform, Genre, ESRB, Progress, Plays, Rating) to cycle the sort direction. The choice persists via the `list_sort` and `list_sort_dir` settings.
+In list view, click a column header (Title, Platform, Genre, Rating) to cycle the sort direction. ESRB, Progress, and Plays are static display columns. The choice persists via the `list_sort` and `list_sort_dir` settings.
 
 ## Screenshot lightbox
 
 Open a game's screenshots to view them in a lightbox with previous/next navigation, zoom, and a position counter. Cover art shows a skeleton shimmer while loading.
+
+## Mood Match adaptive theming (v1.9.0)
+
+When `mood_match_enabled` is on, selecting a game tints the surrounding UI from its cover palette (`applyMoodForGame` in `static/mood.js:172`); Big Box follows only when its own mood toggle is also on. Without a cover — or with the toggle off — the theme stays neutral. See [Discovery](/guides/discovery/) for the picker surfaces that pair with it.
 
 ## See also
 

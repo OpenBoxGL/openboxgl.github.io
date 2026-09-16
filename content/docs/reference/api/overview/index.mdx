@@ -118,12 +118,13 @@ See [API 1.11 additions](/reference/api/one-eleven/) and [API 1.12 additions](/r
 
 | Code | Meaning |
 | --- | --- |
-| `PREVIEW_NOT_FOUND` / `PREVIEW_STALE` | Setup preview session expired or stale |
+| `PREVIEW_NOT_FOUND` / `PREVIEW_STALE` / `PREVIEW_EXPIRED` / `PREVIEW_LIBRARY_CHANGED` | Setup preview session expired, stale, or invalidated by a library change |
+| `PREVIEW_LIMIT_EXCEEDED` / `PREVIEW_ENTRY_LIMIT_EXCEEDED` | Preview exceeds the entry or payload limit |
 | `UNRESOLVED_CANDIDATES` | Commit attempted while ambiguous candidates remain unresolved |
 | `INVALID_DECISION` | Invalid platform or emulator assignment submitted |
 | `EMULATOR_REQUIRED` / `AMBIGUOUS_PLATFORM` / `MISSING_BIOS` | Launch Doctor preflight failure conditions |
-| `JOB_CONFLICT` / `JOB_NOT_FOUND` | Durable operation scheduling or state conflict |
-| `JOB_NOT_CANCELABLE` / `JOB_NOT_RETRYABLE` | Operation transition disallowed in current state |
+| `JOB_STATE_CONFLICT` | Durable operation scheduling or state conflict |
+| `JOB_NOT_CANCELLABLE` / `JOB_NOT_RESUMABLE` | Operation transition disallowed in current state |
 | `LIBRARY_SYNC_UNAVAILABLE` | Legacy full-library publish/pull is disabled; use the v3 preview/apply/publish catalog transport |
 | `SYNC_NOT_ENABLED` | Library synchronization must be explicitly enabled before catalog operations |
 | `SYNC_INVALID` / `SYNC_PREVIEW_STALE` / `SYNC_PUBLISH_STALE` | Catalog event validation failed or the local state changed since preview/publication began |

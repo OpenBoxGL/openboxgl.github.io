@@ -11,7 +11,7 @@ RetroAchievements, IGDB, EmuMovies, and Bezel Project integrations are optional.
 - **Setup**: Tools → Achievements with your username and web API key, or environment variables:
  - `RETROACHIEVEMENTS_USERNAME` (aliases `RA_USERNAME`, `OPENBOX_RA_USERNAME`)
  - `RETROACHIEVEMENTS_API_KEY` (aliases `RA_API_KEY`, `RETROACHIEVEMENTS_KEY`, `OPENBOX_RA_API_KEY`)
-- Credentials are validated against `API_GetUserProfile.php` before saving and stored in `retroachievements.json` (mode `0o600`).
+- Credentials are validated against `API_GetUserProfile.php` before saving and stored in `retroachievements.json` (mode `0o600`). Rejected credentials (HTTP `401`/`403` or a profile without a `User`) surface as `400 "RetroAchievements rejected those credentials."`
 - Hashing supports NES, SNES, N64 (byte-swapped `.v64`/`.n64`), Game Boy/Color/Advance, Sega Genesis/Mega Drive, Master System, Game Gear, Atari 2600/7800, Lynx, PC Engine, and Arcade (by set name), including ROMs inside ZIP and 7z archives. Other platforms require entering a RetroAchievements Game ID manually.
 - System/game lists are cached for 7 days under `cache/retroachievements/`.
 

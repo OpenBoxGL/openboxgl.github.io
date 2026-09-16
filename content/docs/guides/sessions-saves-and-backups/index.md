@@ -43,7 +43,7 @@ Ludusavi and Hoard are optional command-line tools found on PATH; **Ludusavi bac
 
 ## Library backups
 
-The **Backup** dialog creates a ZIP under `<data-dir>/backups/` named `OpenBoxBackup-<timestamp>.zip` containing a manifest plus any of: settings, library, media, plugins, themes, and extension data. The dialog's Create backup uses library, settings, media, plugins, and themes with a rotation of 7. Rotation keeps the newest N archives (`keep`), deleting older ones.
+The **Backup** dialog creates a ZIP under `<data-dir>/backups/` named `OpenBoxBackup-<timestamp>.zip` containing a manifest plus any of: settings, library, media, plugins, themes, and extension data. The dialog defaults to library + settings with optional media/plugins/themes (extension data is opt-in); the UI's **Create backup** uses a rotation of 7. The opt-in weekly automatic backup covers library, settings, media, plugins, and themes (no extension data). Rotation keeps the newest N archives (`keep`), deleting older ones.
 
 Restore is guarded:
 

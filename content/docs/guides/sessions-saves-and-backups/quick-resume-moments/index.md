@@ -28,7 +28,7 @@ Press **M** in the desktop library, use the capture action in the pause/recap su
 - a screenshot captured by the first available local screenshot tool, or a supplied approved media path; and
 - an immutable resume snapshot only when Quick Resume is enabled, available, non-stale, and supported by the adapter.
 
-Automatic Moments (first boot, RetroAchievements unlock, progress, and milestones) are controlled by **Moments autocapture**. Screenshot capture is best effort: the note and trigger may still be useful when the host has no screenshot utility. Moment snapshots are copies, not references to the mutable current resume file.
+Automatic Moments (first boot, RetroAchievements unlock, progress, and milestones) are controlled by **Moments autocapture** (`moments_autocapture`, default on): when it is off, automatic triggers are skipped while manual captures still work (`handlers/moments.py:265`). A game keeps at most **500 Moments** (`MAX_MOMENTS_PER_GAME` in `handlers/moments.py:46`) and **100 clips** of at most **2 GiB each** (`MAX_CLIPS_PER_GAME`, `MAX_CLIP_BYTES` in `handlers/clips.py:21-22`); older entries trim first. Screenshot capture is best effort: the note and trigger may still be useful when the host has no screenshot utility. Moment snapshots are copies, not references to the mutable current resume file.
 
 The per-game detail pane's **Moments** tab lists the timeline. Selecting a Moment can resume from that immutable snapshot when its adapter fingerprint and file checks still match. Editing a title or note does not rewrite the captured media.
 

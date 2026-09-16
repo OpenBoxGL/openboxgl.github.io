@@ -3,7 +3,7 @@ title: Themes
 description: Choose stock themes or import a local CSS theme.
 ---
 
-Themes are plain CSS files with live reload: changing the active theme re-applies instantly without restarting. Five stock themes ship with OpenBoxGL and are installed into the user themes folder automatically at startup:
+Themes are plain CSS files with instant apply: changing the active theme re-applies instantly without restarting. Five stock themes ship with OpenBoxGL and are installed into the user themes folder automatically at startup:
 
 - **Midnight Circuit**: dark blue-black palette with cyan accents.
 - **Phosphor Terminal**: dark green terminal palette.

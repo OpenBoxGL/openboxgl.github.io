@@ -83,7 +83,13 @@ See [Import sources](/integrations/import-sources/) for source-specific paths an
 
 ## LaunchBox XML migration (v1.10.0)
 
-Moving from LaunchBox? Export your LaunchBox library XML, then preview the migration with `POST /api/v2/import/launchbox/preview` — it reports how games dedupe against your current library and which emulator mappings apply (mappings are reported, never silently applied). Apply with `POST /api/v2/import/launchbox/apply`.
+Moving from LaunchBox? Export your LaunchBox library XML, then preview the migration with `POST /api/v2/import/launchbox/preview` — it reports how games dedupe against your current library and which emulator mappings apply (mappings are reported, never silently applied). The preview returns a `preview_token` and `source_digest`; apply with `POST /api/v2/import/launchbox/apply` sending the reviewed plan back. If the XML (`source_digest`) or the library changed since the preview, or the token mismatches, the apply stops with `StaleImportPlan` (`handlers/imports.py:153-162`, `pkg/parity/parity_launchbox_import.py:486,527-546`) — preview again instead of forcing it.
+
+## ES-DE gamelist migration (v1.11.0)
+
+ES-DE `gamelist.xml` imports follow the same review-first pattern with stale-plan guards (`StaleESDEPlan` in `pkg/parity/parity_esde_import.py:28`): `POST /api/v2/import/esde/preview` parses the gamelist into normalized rows, `POST /api/v2/import/esde/apply` applies the reviewed plan after a source-digest check. See [API 1.11 additions](/reference/api/one-eleven/) and [Handheld migration](/guides/emulators-and-launching/steam-bridge-esde/) for the exact bodies.
+
+Eden (Nintendo Switch) is emulator-only: `emulator_defs/eden-switch.yaml` declares `state: none` and a `{path}` startup template, so it provides a launch profile — not an import source. Switch ROMs (`.xci`/`.nsp`) import through folder import above.
 
 ## Manual shelf entries (v1.10.0)
 

@@ -210,7 +210,7 @@ Save a playlist: `{"name", "type": "filter"|"manual", "rules": {...}, "members"|
 <ApiEndpoint method="POST" path="/api/playlists/delete">
 
 
-`{"name": "..."}` removes the playlist. Returns `{"deleted": "<name>"}`.
+`{"name": "..."}` removes the playlist. Returns `{"deleted": "<name>"}`. Deleting a playlist that does not exist returns `404 "Playlist not found: <name>"` instead of a false success. Scoped library exports against an unknown playlist fail with the same `"Playlist not found: <name>"` string (as the export job error).
 
 </ApiEndpoint>
 

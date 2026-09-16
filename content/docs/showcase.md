@@ -23,6 +23,8 @@ Real screenshots from the repository, not renders. Regenerate them with `python3
 
 <ProductShot src="/openbox-game-night.png" alt="Game Night party mode with the multiplayer spin wheel and up-next queue" caption="Game Night builds a multiplayer queue from your library and spins the wheel for the next round." />
 
+<ProductShot src="/openbox-screenshot.png" alt="Living Library: smart collections, Game Story, per-game launch options, scheduled backups, and SQLite-backed search" caption="Living Library (1.12): smart collections, Game Story timelines, per-game launch_env, weekly backups, SQLite at 5,000+ games, and palette recents." />
+
 ## Add your setup
 
 Open a pull request that adds one image under the repository's root `public/` asset directory (alongside the existing `openbox-*.png` files) and a row here with hardware, distribution, and platform count. Reference it from the page as `/your-file.png`. Keep the image under 2 MB and include no personal paths. Sign the commit under the [Developer Certificate of Origin](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/CONTRIBUTING.md#developer-certificate-of-origin) and see [Project and policies](/project/contributing/) for contribution guidance.

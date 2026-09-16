@@ -13,6 +13,10 @@ Check that one of `~/.local/share/Steam`, `~/.steam/steam`, or the Flatpak path 
 "Steam, Flatpak, or xdg-open is required to launch imported Steam games."
 ```
 
+`POST /api/import/steam` returns `{"added", "found", "errors"}`: unreadable libraries are reported, not skipped silently. Each `errors` entry names the path and the OS error (`"<steamapps path>: <strerror>"`). A library on a read-only mount shows up here (for example `"<steamapps>: Read-only file system"`) instead of importing zero games with no explanation. `POST /api/import/watch` reports per-folder errors the same way.
+
+Non-UTF8 file names survive the scan: folder scanners and Steam shortcut parsing decode with `surrogateescape`, so a foreign byte sequence never crashes the import — the entry imports under its surrogate-escaped name.
+
 ## Heroic
 
 Manifests live under `~/.config/heroic` (`legendaryConfig`, `gog_store`, `nile_config`) or the Flatpak path, plus standalone `~/.config/legendary`. Launching requires `xdg-open`:

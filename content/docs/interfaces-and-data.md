@@ -24,6 +24,16 @@ Starting `openbox` (or `openbox-native`) does three things in order:
 
 On window close the host shuts the server down cleanly. When WebKitGTK is missing, the launcher prints an install hint and falls back to the system-browser app window, so no install bricks.
 
+The bridge surface is `window.openboxNative` (`native_host.c:1211-1541`):
+
+| Member | Purpose |
+| --- | --- |
+| `dialog(kind, opts)` | Native file open/save dialogs (C `handle_dialog`) |
+| `reveal(path)` | Reveal a data/home-contained path in the file manager (containing folder only; never launches it) |
+| `openExternal(target)` | Open an approved external URL in the system handler |
+| `windowAction(action)` | Native window chrome actions (minimize, focus, geometry) |
+| `onGamepad(callback)` | Gamepad-input hook (no-op stub in the current host) |
+
 ### Web UI
 
 Running `python3 web_app.py` starts the loopback server directly and opens the same UI in a chrome-less app window (falling back to the default browser). Pass `--no-browser` to drive the API yourself.

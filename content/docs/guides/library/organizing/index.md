@@ -29,6 +29,14 @@ Open the **Playlists** dialog for **New manual playlist** and **New filter playl
 
 The query bar's **Save as collection** chip pins a Backlog Radio query as a named sidebar shelf. Unlike a manual playlist — a fixed member list — a smart collection stores only the query and re-evaluates it at read time, so membership stays correct as games are added, played, or re-tagged. Collections live in the sidebar **Collections** section (at most 50 names), are backed by `GET/POST /api/v2/collections` and `POST /api/v2/collections/delete`, and an unparsable saved query evaluates to zero matches rather than an error. See [Backlog Radio](/guides/discovery/backlog-radio/) for the grammar they store.
 
+## Game Story timelines (v1.12.0)
+
+The detail pane **Story** tab narrates one game's deterministic timeline via `GET /api/v2/story` — a pure read projection over the game record, the session journal, and captured Moments, so it can never go stale. Event kinds are `added`, `first_played`, `session` (longest only), `milestone`, `progress`, and `moment` (`parity_story.py:17`). Playtime milestones fire at **1h, 5h, 10h, 25h, 50h, and 100h** (`MILESTONE_SECONDS`). See [Library overview](/guides/library/) for where the tab lives.
+
+## Large libraries and automatic backups (v1.12.0)
+
+Collections and search run through the same read path documented in [API 1.12 additions](/reference/api/one-twelve/): the SQLite FTS read model **self-enables at 5,000+ games** (`SQLITE_AUTO_THRESHOLD` in `pkg/state/sqlite_readmodel.py:30-34`); set `OPENBOX_ENABLE_SQLITE_READ=0` to opt out — the opt-out is never overridden. JSON remains the source of truth either way. Whole-library protection is the opt-in **weekly automatic backup** (`AUTO_BACKUP_DAYS = 7`, `AUTO_BACKUP_KEEP = 4` in `pkg/parity/parity_backup.py:27-28`, `last_auto_backup` stamp; missing or unparsable counts as due). See [Library backups](/guides/sessions-saves-and-backups/library-backups/) for the manual engine the schedule reuses.
+
 ## Fields, badges, and bulk edits
 
 The **Edit metadata** dialog covers name, platform, genre, year, developer, publisher, series, region, play mode, sort title, progress, ESRB, rating (0 to 5, step 0.5), max players, Wikipedia and video URLs, alternate names, video snap/theme/trailer/recording paths, game path, cover/background/video/music paths, controller support, disc count, extended artwork (clear logo, fanart, banner, icon, box back, box spine, 3D box, title screen), screenshots, RetroAchievements Game ID, launch command override, launch profile override, gamescope preset override, per-game `launch_env` environment overrides (`KEY=value` lines) and the `launch_confirm` confirm-before-launch flag (v1.12.0), archive extraction, Big Box hide, hidden, broken, portable, archive member, applications, alternate versions, documents, save paths, description, and private notes.

@@ -11,11 +11,15 @@ The application repository's `PARITY.md` is the maintenance source for capabilit
 Every workflow in `PARITY.md` is marked `done`, or carries a decision status for workflows without a Linux equivalent:
 
 - <StatusBadge status="done" /> means the workflow is usable end to end on Linux.
+- <StatusBadge status="partial" /> means a deliberate Linux equivalent exists but the Windows/premium surface is broader or unavailable.
+- <StatusBadge status="missing" /> means no usable equivalent yet.
 - Decision rows ("Not applicable", "Replaced by ...", "Use ... instead") mark Windows-only workflows with no Linux equivalent; they are documented as boundaries rather than implied support.
+
+Verified against **v1.12.1** (application `docs/PARITY.md`).
 
 ## Capability status
 
-The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0/1.12.0 features below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
+The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Brazilian Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0/1.12.0 features below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
 
 | Area | Status | Notes |
 | --- | --- | --- |
@@ -78,6 +82,8 @@ The capability rows above are implemented by the current modules in `pkg/parity/
 | Module | Area |
 | --- | --- |
 | `parity_backup.py` | Library backups |
+| `parity_collections.py` | Smart collections (named query shelves) |
+| `parity_radio.py` | Backlog Radio recommendations |
 | `parity_constellation.py` | Constellation relationship graph |
 | `parity_deeplinks.py` | Deep links |
 | `parity_discovery.py` | Discovery queue |
@@ -113,6 +119,7 @@ The capability rows above are implemented by the current modules in `pkg/parity/
 | `parity_save_tools.py` | Save tools (Ludusavi/Hoard) |
 | `parity_screenscraper.py` | ScreenScraper matching |
 | `parity_setup_preview.py` | Setup Center preview |
+| `parity_story.py` | Per-game Story timeline projection |
 | `parity_storefront.py` | Storefront imports |
 | `parity_steam_bridge.py` | Steam shortcuts.vdf bridge |
 | `parity_steamgrid.py` | SteamGridDB artwork provider |

@@ -92,11 +92,11 @@ Stock themes override the design tokens in their own `:root` blocks. Do not assu
 
 ## Spacing
 
-The base stylesheet does not expose `--sp-*` variables; spacing is hardcoded in each rule. Common values: `2px` for hairline gaps, `6px` for checkbox margins, `8px` for input padding, `12px` for card padding, `16px` for column gaps, and `25px` for wide form grids. When you add custom CSS, derive spacing from the nearest value already used in `static/app.css` rather than inventing new units.
+The base `:root` exposes a spacing scale — `--space-*` (`--space-3xs` through `--space-2xl`), `--gap-*` (`--gap-micro`, `--gap-tight`, `--gap-default`, `--gap-loose`, `--gap-spacious`), `--stack-*` (`--stack-xs/sm/md`), and `--leading-*` (`--leading-tight/normal/relaxed`) — plus `--inset-*` and `--measure-*`. Rules consume these tokens (e.g. `padding: var(--space-2xs) var(--space-xs)`); when you add custom CSS, derive spacing from these scale tokens rather than inventing new units.
 
 ## Rounded corners
 
-Only four radius variables exist. Other radii are hardcoded in the rules that use them.
+Four `--radius-*` base tokens exist, alongside `*-radius` component tokens (e.g. `--moments-radius`, which aliases `--radius-cover`). Other radii are hardcoded in the rules that use them.
 
 | Token | Value | Applies to |
 | --- | --- | --- |
@@ -167,7 +167,7 @@ Hover shifts secondary toward a lighter raised surface. Focused controls gain a 
 
 ### Chips and badges
 
-Rating, status, and ESRB chips use muted text on card surfaces. Achievement signals use `--achievement` (`#e8ba55`). Badges stay subordinate to cover art and the launch action.
+Rating, status, and ESRB chips use muted text on card surfaces. Achievement signals use `--achievement` (`#eaa54f`). Badges stay subordinate to cover art and the launch action.
 
 ### Cards
 
@@ -196,7 +196,7 @@ Big Box reuses the palette and typography tokens, then scales them:
 
 ## Light theme note
 
-Harbor Light is the only bundled light theme. It overrides `--bg`, `--panel`, `--line`, `--text`, `--muted`, `--cyan`, `--accent`, and `--danger` with paper tones and additionally defines theme-local names like `--panel2` and `--green` that are not part of the base `:root` contract. Note `--accent` *is* part of the base contract: it defaults to `var(--active)` and is consumed for focus rings, skeleton shimmer, and `--mood-secondary`. If you author a light theme, ensure `--focus`, `--active`, `--action`, and `--action-ink` remain legible against your light surfaces and that text contrast stays at least 4.5:1.
+Harbor Light is the only bundled light theme. It overrides `--bg`, `--panel`, `--line`, `--text`, `--muted`, `--cyan`, `--accent`, and `--danger` with paper tones and additionally defines theme-local names like `--green` that are not part of the base `:root` contract. Note `--accent` *is* part of the base contract: it defaults to `var(--active)` and is consumed for focus rings, skeleton shimmer, and `--mood-secondary`. If you author a light theme, ensure `--focus`, `--active`, `--action`, and `--action-ink` remain legible against your light surfaces and that text contrast stays at least 4.5:1.
 
 ## Token contract
 
@@ -208,7 +208,7 @@ The `:root` block in `static/app.css` is the theme contract. Every stock theme o
 - `themes/Nordic Mist.css`
 - `themes/Phosphor Terminal.css`
 
-`scripts/check_tokens.py` enforces the contract in CI: raw hex outside `:root` must stay at the ratcheted baseline of 0. A new visual value means a new `:root` token plus its entry in each of the five theme files. For the full per-token table, read the `:root` block in `static/app.css` in the repository you are running — this page documents the palette groups, not a frozen count of names.
+`scripts/check_tokens.py` enforces the contract in CI: raw hex outside `:root` must stay at the ratcheted baseline of 0. A new visual value means a new `:root` token plus its entry in each of the five theme files (each stock theme carries 281 `:root` tokens). For the full per-token table, read the `:root` block in `static/app.css` in the repository you are running — this page documents the palette groups, not a frozen count of names.
 
 ### Feature token families (introduced in v1.9.0)
 

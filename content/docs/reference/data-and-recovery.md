@@ -36,11 +36,11 @@ The current schema is version 6 (`STATE_SCHEMA_VERSION`). Older files migrate in
 
 | From | Migration |
 | --- | --- |
-| v1 (bare game list) | Wrapped into a state object, gains `profiles`, `history`, `settings`, `playlists` |
-| v2 | Index-suffixed IDs (`game-<24 hex>-<n>`) are replaced by stable IDs; the old ID moves into `legacy_game_ids` as an alias |
-| v3 | Gains `queue` and `notifications`, capped at 500 and 200 entries; non-list game `tags` become `[]` |
-| v4 | Gains the host-owned `ui_state` block (window geometry and native-host preferences); games, settings, playlists, and history are unchanged |
-| v5 | Gains the `active_sessions` collection used to reconcile running sessions across restart |
+| v1→v2 | Wrapped into a state object, gains `profiles`, `history`, `settings`, `playlists` |
+| v2→v3 | Index-suffixed IDs (`game-<24 hex>-<n>`) are replaced by stable IDs; the old ID moves into `legacy_game_ids` as an alias |
+| v3→v4 | Gains `queue` and `notifications`, capped at 500 and 200 entries; non-list game `tags` become `[]` |
+| v4→v5 | Gains the host-owned `ui_state` block; games, settings, playlists, and history are unchanged |
+| v5→v6 | Gains the `active_sessions` collection used to reconcile running sessions across restart |
 
 Unknown fields survive migration; only known collections are normalized. A schema version above 6, below 1, or with no migration available raises `StateCorruptError` instead of guessing. A complete v6 object takes a fast path without normalization.
 

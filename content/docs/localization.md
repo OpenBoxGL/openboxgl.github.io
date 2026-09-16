@@ -24,6 +24,7 @@ The locale is loaded via `fetch('/locales/{locale}.json')` on page load, with `e
 
 - All 5 locale files have 100% key coverage (no missing keys in any locale).
 - All `data-i18n` and `t()` references in the codebase have corresponding keys in `en.json`.
+- No locale file carries extra keys outside `en.json` (`check_i18n.py:7-13`): an extra key fails the gate the same way a missing key does.
 
 A locale file with missing keys will fail CI. This prevents shipping partial translations.
 

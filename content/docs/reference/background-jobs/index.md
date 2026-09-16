@@ -12,7 +12,7 @@ Every submitted operation is recorded with these fields:
 | Key | Meaning |
 | --- | --- |
 | `operation_id` | Unique hex identifier |
-| `kind` | Operation type (e.g. `import_scan`, `metadata_sync`, `media_download`, `emulator_install`, `backup_create`) |
+| `type` | Dotted operation type (see supported types below) |
 | `state` | `queued`, `running`, `cancelling`, `done`, `partial`, `error`, `cancelled`, or `interrupted` |
 | `created_at` | UTC ISO timestamp |
 | `started_at` | Start timestamp |
@@ -20,6 +20,10 @@ Every submitted operation is recorded with these fields:
 | `progress` | Current progress object (`current`, `total`, `unit`, `message`) |
 | `error` | Error message on failure |
 | `metadata` | Context-specific parameters and batch identifiers |
+
+## Supported operation types
+
+Jobs carry a dotted `type`, not a legacy queue name: `setup.scan`, `setup.revalidate`, `setup.commit`, `metadata.db_sync`, `metadata.match_preview`, `metadata.apply`, `media.bulk_download`, `media.cleanup`, `media.memories_import`, `emulator.install`, `emulator.update`, `gameyfin.install`, `saves.scan`, `saves.backup`, `library.backup`, `library.restore`, `library.export`, `screenscraper.match`, `screenscraper.apply`, `steamgrid.match`, `steamgrid.apply`, `storefront.auto_import`, `clips.reel`, `cloud.sync`, `updater.install`. Legacy job names (for example `library-export`, `screenscraper-match`, `auto-import`) map to these types with the matching retry policy, so export, SteamGridDB, ScreenScraper, auto-import, and reel jobs no longer masquerade as `setup.scan`. At most `MAX_OPERATIONS=100` operations are retained (plus 30-day retention for finished runs).
 
 Workers execute on a managed `ThreadPoolExecutor` with 4 concurrent slots (`openbox-job-*`). Live status and incremental events stream to the frontend over Server-Sent Events (SSE) via `/api/events`.
 

@@ -12,7 +12,7 @@ This page is a project guideline, not legal advice. It does not determine whethe
 ## What the project distributes
 
 - Source code and documentation under AGPL-3.0, with no games, ROMs, ISOs, BIOS images, firmware, decryption keys, or DRM circumvention tools.
-- Release artifacts are an AppImage, a Flatpak manifest, and source archives. No cover art or game files are vendored.
+- Release artifacts are signed **x86_64 and aarch64 AppImages**, an **x86_64 Flatpak bundle**, per-artifact **SBOMs**, and the `install.sh` installer — plus source archives. No cover art or game files are vendored.
 - Showcase and home images are user supplied captures of user supplied games. Metadata and artwork fetched through the app, such as LaunchBox Games Database results, remain the property of their respective owners and are stored locally on the user's machine with the user's consent.
 
 ## What the project does not host

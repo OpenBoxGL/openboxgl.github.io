@@ -24,6 +24,8 @@ Each imported title automatically receives:
 - Dedicated Wine prefix path
 - Pre-configured launch command (`umu-run {path}`)
 
+Prefix-only rows (a prefix directory with no manifest entry, `pkg/parity/parity_faugus.py:151-159`) import as **unlaunchable stubs**: they carry an empty path, a derived display name, and the prefix/runner metadata, so they are visible for review but cannot launch until a real executable is attached.
+
 ## REST Endpoints
 
 Automate Faugus scans or integrate with scripts:

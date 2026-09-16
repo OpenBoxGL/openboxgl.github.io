@@ -35,6 +35,10 @@ Because `auto` gates on battery or gamescope, a desktop session never applies or
 
 Missing `ryzenadj` on PATH, a permission failure, a non-Ryzen CPU, or a malformed TDP value are logged as warnings and do not block the game launch. The apply and restore helpers never raise; the profile resolution falls back from a per-game `launch_profile` override to the game's platform when the override does not name an existing profile.
 
+## Library scale and test gates
+
+Blocking performance gates cover **10k and 20k** libraries (`perf-20k` in CI; `docs/development/PERF.md`), and `scripts/check_tests.py` enforces **83.0% total** and **58.0% `web_app.py`** coverage floors. The optional SQLite FTS read model self-enables at **5,000+ games** (`OPENBOX_ENABLE_SQLITE_READ=0` opts out) for indexed search and facets on large libraries; JSON remains canonical. See [API 1.12 additions](/reference/api/one-twelve/) and [Configuration](/reference/configuration/).
+
 ## Safety
 
 Hardware-specific permissions remain host configuration; OpenBoxGL stores no root credential. `ryzenadj` runs with a 10-second timeout and only ever receives `-stapm-limit=<mW>` arguments. If the limit should not persist, configure a restore value so the session end restores it; keep in mind the restore is skipped when the apply was skipped under `auto`.

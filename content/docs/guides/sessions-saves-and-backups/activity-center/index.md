@@ -14,8 +14,11 @@ OpenBox manages all background operations through the durable **Operation Servic
 
 ## Supported Operations
 
-- **Library Imports**: Folder scanning, archive inspection, and storefront auto-imports.
-- **Metadata Synchronization**: LaunchBox Games Database downloads and batch matching.
-- **Media Downloads**: Artwork, screenshot, and video fetching.
+- **Library Imports**: Folder scanning, archive inspection, and storefront auto-imports (`storefront.auto_import`).
+- **Metadata Synchronization**: LaunchBox Games Database downloads and batch matching (`metadata.db_sync`, `metadata.match_preview`, `metadata.apply`).
+- **Media Downloads**: Artwork, screenshot, and video fetching (`media.bulk_download`, `media.cleanup`, `media.memories_import`).
+- **ScreenScraper and SteamGridDB**: hash scraping and artwork jobs (`screenscraper.match`, `screenscraper.apply`, `steamgrid.match`, `steamgrid.apply`).
+- **Library Export**: JSON/CSV projections queued as durable jobs (`library.export`).
+- **Clips and Reels**: local reel creation (`clips.reel`).
 - **Emulator Management**: Flathub emulator installations and updates.
 - **Backups**: Library backup creation and save state archiving.

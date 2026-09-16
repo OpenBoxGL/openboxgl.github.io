@@ -5,12 +5,12 @@ description: Every way to install OpenBoxGL, with verification steps per method.
 
 # Downloads
 
-One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBox application, currently **v1.12.0**.
+One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBox application, currently **v1.12.1**.
 
 | Method | Best for | Updates | Verify |
 | --- | --- | --- | --- |
 | AppImage with installer | Desktop, Steam Deck, handhelds, immutable systems | Built-in verified updater | `openbox-release.pub` Ed25519 plus SHA-256 checksum |
-| AppImage manual | Offline or custom path | Manual re-download | `chmod +x` then `--version` or `--web` |
+| AppImage manual | Offline or custom path | Manual re-download | `chmod +x` then `openbox --help` or `--web` |
 | Flatpak | Sandboxed installs | Flatpak workflow | `flatpak run io.openbox.GameLauncher` |
 | From source | Development, patching | `git pull` | `python3 web_app.py` |
 | System install | Install to `/usr/local` | `sudo make install` again | `openbox --help` |
@@ -20,7 +20,7 @@ One table for every install method. Pick the row that matches your system, then 
 The installer pins the release public key, verifies the SHA-256 checksum, and verifies the Ed25519 signature before installing to `~/.local/bin`.
 
 ```bash
-VERSION=1.12.0
+VERSION=1.12.1
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output install.sh \
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -85,4 +85,4 @@ openbox --web    # loopback web UI
 | FUSE to mount AppImages | Required | Not needed | Not needed |
 | bubblewrap bwrap | Optional, plugins sandboxed when present | Bundled check | Optional |
 
-See [Installation](/install/) for prerequisites in detail, [Updating](/updating/) for the update flow and architecture-matched rollback, and [Getting started](/getting-started/) for the first import. v1.12.0 publishes signed x86_64 and aarch64 AppImages plus an x86_64 Flatpak bundle.
+See [Installation](/install/) for prerequisites in detail, [Updating](/updating/) for the update flow and architecture-matched rollback, and [Getting started](/getting-started/) for the first import. v1.12.1 publishes signed x86_64 and aarch64 AppImages plus an x86_64 Flatpak bundle.

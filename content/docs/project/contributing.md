@@ -22,7 +22,7 @@ Run the full suite before submitting a pull request:
 
 ```bash
 ./run_all_tests.sh
-make check      # scripts/check_tests.py runs the repository's current lint, contract, compile, test, coverage, module, and token gates; also `make version-check` for updates.py sync
+make check      # scripts/check_tests.py runs the repository's current lint, runtime-module, v1-contract, version-sync, frontend (eslint), i18n-key, CSP-framing (check_csp.py), compile, test, coverage, module, and token gates; also `make version-check` for updates.py sync
 ```
 
 Each `test_*.py` is a standalone contract test (plain asserts or unittest) run directly with `python3 -B <file>`. Iterate on one module with `python3 -B tests/test_catalog.py`. Packaging checks use `./build_appimage.sh` and `python3 -B tests/test_packaging.py`. All tests must pass on CI before a PR merges.

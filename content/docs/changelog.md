@@ -4,6 +4,18 @@ description: Release notes for OpenBox, from the latest AppImage back to the fir
 sidebar: false
 ---
 
+## 1.12.1 (2026-09-15) — Hardening
+
+Small, safe update on top of Living Library: a harder update path, clearer errors, and no more silent skips.
+
+- **Verified updates:** the AppImage updater rejects order-8 Ed25519 small-order keys, fails closed on non-object release payloads, normalizes the signature digest before validation, resolves a symlinked install destination so the real AppImage is replaced (with directory fsync), and escapes `%` so paths cannot inject desktop-entry field codes.
+- **Clearer errors:** unreadable Steam libraries surface an `errors[]` array naming the path and OS error; RetroAchievements 401/403 responses say the credentials were rejected; an unreachable metadata database reports a clean connection error instead of raw socket messages.
+- **Reliability:** the last manual rows are now gated tests — `docs/reliability.md` has zero Manual rows — and coverage floors ratchet to 83% total / 58% `web_app.py`.
+- **API fixes:** deleting a missing playlist returns 404, scoped exports without a name fail fast with 400, Game Night queues explain empties with an `empty_reason` plus an exclusion breakdown, background jobs carry typed operation kinds (`library.export`, `screenscraper.*`, `steamgrid.*`, `storefront.auto_import`, `clips.reel`), and Backlog Radio rows hydrated from stored playlists carry `estimated_minutes`.
+- **Test isolation:** the suite no longer clobbers the developer library — an isolated `OPENBOX_DATA_DIR` is exported for test runs and guarded at import time.
+
+[Full OpenBox 1.12.1 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.12.1) · [Compare v1.12.0...v1.12.1](https://github.com/vindeckyy/OpenBoxGL/compare/v1.12.0...v1.12.1)
+
 ## 1.12.0 (2026-09-14) — Living Library
 
 Searches you pinned become shelves that stay correct on their own, every game gets a story worth scrolling, and the launch-options sheet is complete down to environment variables.
@@ -388,7 +400,7 @@ Searches you pinned become shelves that stay correct on their own, every game ge
 **Verification**
 
 - `./run_all_tests.sh`: 47 test files, 0 failures at that tag; the then-current suite had 62 test files.
-- `make check`: lint, compile checks, coverage floors green; then-current floors were `60%` total and `48%` `web_app.py` in `scripts/check_tests.py` (now `72.0%` / `54.0%`).
+- `make check`: lint, compile checks, coverage floors green; then-current floors were `60%` total and `48%` `web_app.py` in `scripts/check_tests.py` (now `83.0%` / `58.0%`).
 - CI smoke test now covers Big Box platform switching and IGDB search parameters; JS linting runs in CI; Dependabot watches GitHub Actions and npm.
 
 ## 1.0.0 (2026-08-14)
@@ -418,7 +430,7 @@ Searches you pinned become shelves that stay correct on their own, every game ge
 
 **Verification**
 
-- 47 test files, 0 failures at that tag; `make check` gates passed with the then-current floors. At that tag the suite had 62 test files with `60%` total coverage floor and `48%` `web_app.py` floor per `scripts/check_tests.py` (now `72.0%` / `54.0%`). The UI smoke test drives a real server and asserts the Tools menu opens under every stock theme.
+- 47 test files, 0 failures at that tag; `make check` gates passed with the then-current floors. At that tag the suite had 62 test files with `60%` total coverage floor and `48%` `web_app.py` floor per `scripts/check_tests.py` (now `83.0%` / `58.0%`). The UI smoke test drives a real server and asserts the Tools menu opens under every stock theme.
 
 ## 0.9.0 (2026-08-12)
 

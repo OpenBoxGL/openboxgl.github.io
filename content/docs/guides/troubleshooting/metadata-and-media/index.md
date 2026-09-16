@@ -9,6 +9,7 @@ Metadata and media work against local files and optional external providers. Sta
 
 - `/api/metadata/search` and bulk media return `409` with `"Download the LaunchBox metadata database first."` until the database is downloaded (Metadata dialog, **Download database**).
 - The first download can be large (up to 2 GiB allowed) and runs as a background job; poll the status endpoint until it reaches `done`.
+- An unreachable database fails the sync job with `"Could not reach the metadata database (<reason>). Check the connection and try again."` (`URLError`/`TimeoutError` during LBDB sync no longer leak raw socket messages into the job panel).
 - A missing database returns `409` from readiness-dependent routes.
 
 ## Media downloads

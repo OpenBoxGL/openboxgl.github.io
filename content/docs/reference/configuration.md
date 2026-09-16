@@ -134,6 +134,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `memories_import_enabled` | `false` | Boolean; opt-in import of external media into the Memories gallery (v1.11.0+) |
 | `memories_import_roots` | `[]` | At most 32 absolute, existing directories allowed as Memories import sources (v1.11.0+) |
 | `steamgrid_enabled` | `true` | Boolean; enables the SteamGridDB artwork provider (still requires `STEAMGRIDDB_API_KEY`) (v1.11.0+) |
+| `steamgrid_key_configured` | `(derived)` | Read-only projection in `public_settings`: true when a SteamGridDB API key is configured (`pkg/state/cache.py:481`); not writable via Settings |
 | `obs_replay_enabled` | `false` | Boolean; enables Record That clip capture via the OBS replay buffer (v1.11.0+) |
 | `obs_websocket_url` | `""` | OBS WebSocket endpoint for replay-buffer capture (v1.11.0+) |
 | `obs_websocket_timeout` | 5.0 | 0.1 to 30 seconds for OBS WebSocket calls (v1.11.0+) |

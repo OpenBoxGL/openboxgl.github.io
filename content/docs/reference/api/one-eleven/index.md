@@ -66,6 +66,7 @@ Time Machine is journal-backed and bounded. Reads do not mutate the library. Rev
 | `POST` | `/api/v2/library/time-machine/revert` | Preview or apply a revert. Body: `event_id`, optional `game_id`, `fields`, `undo`; add `apply: true` and the returned `base_token` to apply. |
 | `POST` | `/api/v2/library/query/parse` | Parse a natural-language query into deterministic filters without changing library state. |
 | `GET` | `/api/v2/library/trash` | List soft-deleted library entries. |
+| `POST` | `/api/v2/library/trash` | Soft-delete a reviewed library entry. Body: `game_id`. |
 | `POST` | `/api/v2/library/trash/restore` | Restore a reviewed trash entry. |
 | `POST` | `/api/v2/library/trash/purge` | Permanently remove a trash entry. Treat this as destructive. |
 
@@ -91,6 +92,29 @@ Backlog Radio and Radar use local library and history data. They do not call a r
 | `POST` | `/api/v2/insights/trophies/evaluate` | Evaluate and persist newly earned local trophies. |
 
 Launcher trophies are deterministic OpenBox milestones over local library and history data. They are not RetroAchievements, do not require an account, and do not submit data to a service.
+
+Each radio pick and radar entry carries `estimated_minutes` (integer, rounded): the genre-based length estimate minus already-played minutes (floor 15; unplayed games report the full estimate). Picks hydrated from the stored managed playlist carry it too, with a frontend fallback for older entries. The genre fallback when no history exists is RPG/strategy/simulation 120 min, adventure/action/shooter/platform/fighting 60 min, puzzle/card/board 30 min, and 45 min otherwise; a game fits a requested session when its median session (or the fallback estimate) is at most 1.5x the requested minutes.
+
+## Game Night party queue
+
+Game Night builds a couch-multiplayer queue from the local library. Since 1.12.1 an empty build explains itself instead of returning a bare empty list.
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/v2/party/queue` | Build a queue. Body: `players` (2–8), optional `minutes` session budget. Returns `queue`, `count`, `empty_reason`, `excluded`. |
+| `GET` | `/api/v2/party/queue` | Read the persisted queue and round index. |
+| `POST` | `/api/v2/party/next` | Advance the round. An empty queue returns `400`. |
+
+```json
+{
+  "queue": [],
+  "count": 0,
+  "empty_reason": "No games support 6 players — lower the player count or add Max players metadata.",
+  "excluded": {"total": 120, "hidden": 4, "unusable_path": 10, "too_few_players": 96, "no_controller_or_platform": 8, "over_budget": 2}
+}
+```
+
+`empty_reason` is `null` when the queue is non-empty; the top exclusion reason wins (empty library, too few players, no couch-ready titles, missing files, over-budget sessions, all hidden). Non-object bodies and non-integer or out-of-range `players`/`minutes` return `400`.
 
 ## Arcade Room and Museum kiosk
 

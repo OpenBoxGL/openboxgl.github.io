@@ -33,7 +33,7 @@ Search supports field-targeted terms, quoted values, and negative terms. Prefix 
 
 Bare terms search name, sort title, alternate names, platform, genre, developer, publisher, series, region, notes, source, play mode, status, progress, controller support, and tags. Short bare terms also match title initials and acronyms (e.g. `oot` matches *Ocarina of Time*).
 
-Sort options are **Title**, **Rating**, **Recently played**, **Recent activity**, **Play time**, **Date added**, **Platform**, and **Genre**. The **arrange bar** on the right edge jumps through the current sort's groups; it appears once the view has at least four groups. The **Surprise me** button (or `Ctrl+Alt+Q` / `Ctrl+Alt+R`) opens the **"What should I play?"** picker, which scores the current view by available time, mood, familiarity, and players — with a "Just surprise me" fallback for a purely random pick. See [Discovery](/guides/discovery/).
+Sort options are **Title**, **Rating**, **Recently played**, **Recent activity**, **Play time**, **Date added**, **Platform**, and **Genre**. The **arrange bar** on the right edge jumps through the current sort's groups; it appears once the view has at least four groups. The **Surprise me** button (or `Ctrl+Alt+Q` / `Ctrl+Alt+R`) selects/focuses a random game in the grid (the Surprise Me button / "Just surprise me" opens the picker), which scores the current view by available time, mood, familiarity, and players — with a "Just surprise me" fallback for a purely random pick. See [Discovery](/guides/discovery/).
 
 The **image group** dropdown changes which artwork shows on cards: Box fronts, Backgrounds, Screenshots, Clear logos, Fanart, Banners, Box backs, Box spines, 3D boxes, Title screens, Icons, Cart fronts, Cart backs, Discs, Ads / flyers, and Manuals. The choice can be remembered per platform or per playlist from the dropdown's save action. **List view** shows Title, Platform, Genre, ESRB, Progress, Plays, and Rating columns.
 
@@ -56,3 +56,5 @@ Removing a game asks twice: first to confirm the library entry removal, then whe
 ## Source and status
 
 Capability status belongs to the [parity matrix](/reference/parity/), maintained from `PARITY.md`. Library data lives in `~/.local/share/openbox-game-launcher/library.json` unless `OPENBOX_DATA_DIR` points elsewhere. State is schema version 6, written atomically with a `.bak` last-known-good copy beside it; recovery is covered in [Data and recovery](/reference/data-and-recovery/).
+
+Large libraries (5,000+ games) self-enable the SQLite FTS read model unless `OPENBOX_ENABLE_SQLITE_READ=0` opts out, and an opt-in weekly automatic backup keeps 4 archives on a 7-day schedule — see [Organizing](/guides/library/organizing/#large-libraries-and-automatic-backups-v1120), [API 1.12 additions](/reference/api/one-twelve/), and [Library backups](/guides/sessions-saves-and-backups/library-backups/).

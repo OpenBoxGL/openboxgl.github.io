@@ -8,7 +8,7 @@ Credentials are optional and come from three places in order: persisted settings
 ## RetroAchievements
 
 - **Required**: username and web API key, from Settings > RetroAchievements or `~/.env` (`RETROACHIEVEMENTS_USERNAME` / `RETROACHIEVEMENTS_API_KEY`, with aliases `RA_USERNAME`/`RA_API_KEY` and others).
-- Credentials are validated against `API_GetUserProfile.php` before saving; rejected credentials raise `400`.
+- Credentials are validated against `API_GetUserProfile.php` before saving; rejected credentials raise `400 "RetroAchievements rejected those credentials."` (HTTP `401`/`403` or a profile without a `User`).
 - Matching needs a local ROM file (ZIP and 7z hashing supported), and only supported platforms auto-match (NES, SNES, N64, GB/C/A, Genesis/MD, SMS, Game Gear, Atari 2600/7800, Lynx, PC Engine, Arcade by set name). Other platforms require entering a RetroAchievements Game ID manually in Edit metadata.
 - `"Configure RetroAchievements first."` means no credentials are saved.
 

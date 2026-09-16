@@ -20,7 +20,9 @@ Exports contain only the game-field projection. Settings, credentials, webhooks,
 
 ## Files and rotation
 
-Exports land in `<data dir>/exports/` with collision-safe filenames. The newest **10** exports are kept; older ones are removed automatically. Download them from the export dialog (validated by name regex and directory containment) or via `GET /api/v2/library/export/download?file=<name>`.
+Exports land in `<data dir>/exports/` with collision-safe filenames. The newest **10** exports are kept; older ones are removed automatically. List them with `GET /api/v2/library/export/exports` (`handlers/export.py:24-27`), download them from the export dialog (validated by name regex and directory containment) or via `GET /api/v2/library/export/download?file=<name>` — note the export download uses `?file=`, while the backup diff below uses `?archive=`.
+
+To compare the live library against a backup archive (not an export file), use `GET /api/v2/backup/diff?archive=<name>` (`handlers/health.py:112-131`): it reports `added`/`removed`/`changed` game ids plus `settings_changed` and a `summary`. Only `OpenBoxBackup-*.zip` archives inside the data directory or `backups/` are accepted.
 
 ## See also
 

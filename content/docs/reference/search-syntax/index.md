@@ -85,6 +85,21 @@ Leading articles (*The*, *A*, *An*) are handled cleanly so searches match with o
 | `dev:team favorite:yes` | Favorited games by "team" |
 | `installed:no` | Owned-but-uninstalled titles |
 
+## Natural-language grammar (Backlog Radio query bar)
+
+The query bar above the field syntax also accepts short natural phrases, parsed deterministically by `pkg/parity/parity_query.py:33-37` and rendered as removable chips. Thresholds are named constants, surfaced in the chips:
+
+| Phrase | Meaning |
+| --- | --- |
+| `short` / `quick` | Time-to-beat at most **5.0h** (`SHORT_GAME_HOURS`) |
+| `long` / `epic` | Time-to-beat at least **20.0h** (`LONG_GAME_HOURS`) |
+| `highly rated` | Rating at least **4.0** (`HIGH_RATING_MIN`) |
+| `top rated` / `best rated` | Rating at least **4.5** (`TOP_RATING_MIN`) |
+| `retro` / `classic` | Released **2000 or earlier** (`RETRO_YEAR_MAX`) |
+| `recently played` / `newly added` | Within the last **31 days** (`RECENT_DAYS`) |
+
+Typed keys (`platform:PC`, `genre:rpg`, `source:`, `tag:`, `progress:`, ESRB, region, series, player counts, ratings, time/idle phrases) combine with implicit AND. `POST /api/v2/library/query/parse` accepts query text up to **2,000 characters** (`handlers/library.py:825-826`) and returns rules, clauses, `chips`, leftover `unparsed` words with a `hint`, and `plain_query`; input with nothing parsable stays a plain substring search. Clauses **fail closed** on missing metadata: `ttb`/`year`/`played_within` filters never match a game lacking the field (`None` → `False`), and idle/never-played semantics keep never-played games in the idle set (`True`) rather than guessing. See [Backlog Radio](/guides/discovery/backlog-radio/).
+
 ## See also
 
 - [Library overview](/guides/library/), browse and search in context

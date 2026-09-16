@@ -47,7 +47,7 @@ Rescan all configured watch folders once. Returns `{"added", "found", "errors": 
 
 <ApiEndpoint method="POST" path="/api/import/steam">
 
-Import installed Steam games from local manifests (`steamapps/appmanifest_*.acf` across all library folders). Missing launcher raises `400` (for example, `"Steam, Flatpak, or xdg-open is required to launch imported Steam games."`). Returns `{"added", "found"}`.
+Import installed Steam games from local manifests (`steamapps/appmanifest_*.acf` across all library folders). Missing launcher raises `400` (for example, `"Steam, Flatpak, or xdg-open is required to launch imported Steam games."`). Returns `{"added", "found", "errors"}`: unreadable libraries are reported, not skipped silently — each `errors` entry names the path and the OS error (`"<steamapps path>: <strerror>"`, for example a read-only mount).
 
 </ApiEndpoint>
 
@@ -260,7 +260,7 @@ Capture the screen with the first available tool among gnome-screenshot, spectac
 <ApiEndpoint method="GET" path="/api/emulators">
 
 
-`{"emulators": [...], "install_all": {...}, "update_all": {...}}`. Each emulator: `app_id`, `name`, `platforms`, `installed`, `mode` (`native`|`flatpak`|`""`), `profiles` (platform to command), `can_install` (flatpak present), `recommendations`. The known set is Dolphin, PPSSPP, PCSX2, RPCS3, Cemu, MAME, xemu, ScummVM, RetroArch, DuckStation, melonDS.
+`{"emulators": [...], "install_all": {...}, "update_all": {...}}`. Each emulator: `app_id`, `name`, `platforms`, `installed`, `mode` (`native`|`flatpak`|`""`), `profiles` (platform to command), `can_install` (flatpak present), `recommendations`. The dialog catalog covers Dolphin, PPSSPP, PCSX2, RPCS3, Cemu, MAME, xemu, ScummVM, RetroArch, DuckStation, melonDS, Eden, Vita3K, and Xenia, backed by the 24 adapter YAML files in `emulator_defs/` (authoritative registry at `GET /api/v2/emulators/registry`).
 
 </ApiEndpoint>
 

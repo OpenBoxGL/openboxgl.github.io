@@ -81,6 +81,8 @@ Body: `{ "format": "json" | "csv", "scope": "all" | "platform" | "playlist", "sc
 
 The worker result is `{ "file": "openbox-export-2026-09-03.json", "count": 412 }`.
 
+Validation is fail-fast: an unknown `format` returns `400 "Export format must be json or csv."`, an unknown `scope` returns `400 "Export scope must be all, platform, or playlist."`, and a `platform`/`playlist` scope without `scope_name` returns `400 "Export scope <scope> requires a name."` An unknown playlist name fails the job with `"Playlist not found: <name>"`, and an unknown scope or format inside the worker fails with `"Unknown export scope."` / `"Unknown export format."`
+
 </ApiEndpoint>
 
 <ApiEndpoint method="GET" path="/api/v2/library/export/exports">

@@ -17,7 +17,7 @@ The **Emulators** button opens the Emulator profiles dialog. Profiles are one pe
 
 | Token | Value |
 | --- | --- |
-| `{path}` / `{ImagePath}` | Absolute game or ROM path (after archive extraction, when enabled) |
+| `{path}` / `{Path}` / `{ImagePath}` | Absolute game or ROM path (after archive extraction, when enabled) |
 | `{name}` / `{Name}` | Game title |
 | `{dir}` / `{Dir}` | Parent directory of the target game file |
 | `{file}` / `{File}` | Filename with extension |
@@ -29,6 +29,7 @@ The **Emulators** button opens the Emulator profiles dialog. Profiles are one pe
 | `{app_id}` | Steam application ID |
 | `{heroic_app_id}` | Heroic application ID |
 | `{lutris_id}` | Lutris game identifier |
+| `{state_path}` / `{state_dir}` / `{state_config}` / `{state_name}` | Quick Resume state values from the adapter `state:` block (`launch_tokens.py:47-72`); empty for ordinary launch commands |
 
 <CommandBuilder />
 
@@ -46,7 +47,7 @@ When launching a title, OpenBox resolves the executable and arguments using a st
 
 ### Emulator catalog
 
-The same dialog lists supported emulators with install state, mode (native or Flatpak), platforms, and per-platform profiles:
+The same dialog lists supported emulators with install state, mode (native or Flatpak), platforms, and per-platform profiles (24 adapter YAML files in `emulator_defs/`):
 
 - Dolphin (GameCube `-b -e {path}`, Wii, WiiWare)
 - PPSSPP (PSP `{path}`)
@@ -60,6 +61,8 @@ The same dialog lists supported emulators with install state, mode (native or Fl
 - DuckStation (PlayStation `-batch {path}`)
 - melonDS (Nintendo DS `{path}`)
 - Eden (Nintendo Switch `{path}`)
+- Vita3K (PlayStation Vita)
+- Xenia (Xbox 360)
 
 **Install** adds the app from Flathub (adding the Flathub remote if missing) and, when done, adds its profiles to the editor (save to apply). **Install all available emulators** and **Update installed emulators** run bulk background jobs with per-emulator status. **Open** launches the emulator standalone. Detected native binaries (DOSBox, wine, mame, dolphin-emu, pcsx2-qt, ppsspp, rpcs3, duckstation-qt, eden) appear as **Add N detected profiles**.
 

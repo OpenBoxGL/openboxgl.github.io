@@ -58,6 +58,10 @@ Yes. A token-authenticated REST API covers library, launch, saves, backups, them
 
 OpenBox is an independent open-source project. It is not affiliated with LaunchBox, Unbroken Software, LLC, or the Openbox window manager. Those names appear only to describe compatibility and comparison boundaries. See [Legal and trademarks](/policies/legal-and-trademarks/).
 
+## What's new in 1.11 / 1.12?
+
+**1.11 (Every Second Counts):** Quick Resume, Moments, clips/reels, Time Machine, Backlog Radio, Arcade Room/Museum kiosk, Household, Steam Bridge, ES-DE migration, SteamGridDB artwork, and local launcher trophies — see [API 1.11 additions](/reference/api/one-eleven/). **1.12 (Living Library):** smart collections, per-game Story timelines, per-game `launch_env`/`launch_confirm`, opt-in weekly backups, SQLite self-enable at 5,000 games, palette recents, and the Living Library overview on the [home page](/) — see [API 1.12 additions](/reference/api/one-twelve/).
+
 ## Where do I report a bug or request a feature?
 
 Use the GitHub issue templates: [report a bug](https://github.com/vindeckyy/OpenBoxGL/issues/new?template=bug_report.yml) or [request a feature](https://github.com/vindeckyy/OpenBoxGL/issues/new?template=feature_request.yml). Include the diagnostic log from Settings > Copy diagnostic log; it redacts tokens and passwords but can include game names and file paths.

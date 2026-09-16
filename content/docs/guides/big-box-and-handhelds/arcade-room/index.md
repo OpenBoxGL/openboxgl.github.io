@@ -46,4 +46,6 @@ This is a convenience boundary for a local exhibit, not account authentication, 
 
 There is no registered `openbox://arcade` URI in the current parser or SPA. Use Tools or the command palette. `openbox://bigbox` and `?deeplink=bigbox` open Big Box, which is a related fullscreen surface but not a deep link for the Arcade Room itself.
 
+MAME set classification (`parent`/`merged`/`split`/`non-merged`) is an import-time property, not a room filter — see [Importing](/guides/library/importing/#arcade-sets) and [Troubleshooting](/guides/troubleshooting/#import-problems).
+
 See [Big Box and handhelds](/guides/big-box-and-handhelds/), [Keyboard & Controller Shortcuts](/reference/shortcuts/), and [API 1.11 additions](/reference/api/one-eleven/) for the related controls and route contract.

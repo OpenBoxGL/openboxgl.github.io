@@ -95,7 +95,7 @@ Settings → Controller also supports **user-defined presets**: up to 16 custom 
 
 ## MangoHud performance overlay (v1.7.2)
 
-Settings → Controller includes a **MangoHud** toggle. When enabled, `MANGOHUD=1` is set in the environment when launching games, causing the MangoHud on-screen performance overlay (FPS, CPU/GPU usage, frame pacing) to appear. MangoHud must be installed on your system separately.
+Settings → Controller includes a **MangoHud** toggle. When enabled, `MANGOHUD=1` and `MANGOHUD_CONFIG=font_size=24,no_display` are set in the environment when launching games (`pkg/parity/parity_gamescope.py:580-581`), causing the MangoHud on-screen performance overlay (FPS, CPU/GPU usage, frame pacing) to appear. MangoHud must be installed on your system separately.
 
 ## Controller bench (v1.7.2)
 

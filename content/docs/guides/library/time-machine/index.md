@@ -9,7 +9,7 @@ The **Time Machine** makes catalog history visible without replacing the canonic
 
 Choose **Tools → Time Machine**, then use **Timeline** to browse retained events. Filter by days, event kind, or game. Events can include catalog edits, imports, deletes/restores, sessions, and Moments. The journal is local and may be enabled even when catalog synchronization is off.
 
-History is bounded by the journal's retained snapshots and events. If compaction created a horizon, a gap, or a corruption marker, the UI reports that boundary; it does not invent the missing state. Use [Library backups](/reference/library-backups/) when you need a complete archive of files and settings.
+History is bounded by the journal's retained snapshots and events. The journal keeps at most **25,000 events** (`JOURNAL_MAX_EVENTS`) over a **400-day retention window** (`JOURNAL_RETENTION_DAYS` in `pkg/parity/parity_time_machine.py:55-60`), compacting to a horizon when over budget. If compaction created a horizon, a gap, or a corruption marker, the UI reports that boundary; it does not invent the missing state. Use [Library backups](/reference/library-backups/) when you need a complete archive of files and settings.
 
 ## Browse as of a date
 
@@ -17,7 +17,7 @@ The **Browse as of** tab materializes a read-only catalog view for a date. It is
 
 ## Preview a revert
 
-From an event, choose the revert action and review the affected game and fields. The API equivalent is a read-only request with `apply: false`:
+From an event, choose the revert action and review the affected game and fields. The request accepts an `undo` flag to reverse an event's effect rather than re-apply named fields (`handlers/timemachine.py:60-108`). The API equivalent is a read-only request with `apply: false`:
 
 ```bash
 curl -s -X POST \
@@ -43,8 +43,8 @@ OpenBox rechecks the token and writes a new journal event; it does not rewrite h
 
 ## API surface
 
-- `GET /api/v2/library/time-machine/events?days=90&kind=&game_id=&offset=0&limit=200` lists the bounded journal page.
+- `GET /api/v2/library/time-machine/events?days=90&kind=&game_id=&offset=0&limit=200` lists the bounded journal page (default 200, max **1,000** per `EVENT_PAGE_MAX`; `game` is accepted as an alias for `game_id`).
 - `GET /api/v2/library/time-machine/as-of?date=YYYY-MM-DD` returns a read-only materialized view.
-- `POST /api/v2/library/time-machine/revert` previews or applies a field-level revert.
+- `POST /api/v2/library/time-machine/revert` previews or applies a field-level revert. The preview returns a plan with `base_token`; apply by sending the reviewed plan back with `apply: true` and the current `base_token`. A changed library stops the apply with `TM_REVERT_STALE` — preview again.
 
 The related v2 trash routes (`GET /api/v2/library/trash`, `POST /api/v2/library/trash/restore`, and `POST /api/v2/library/trash/purge`) cover the soft-delete path. See [API 1.11 additions](/reference/api/one-eleven/) for the full request/response guidance and [Data and recovery](/reference/data-and-recovery/) for backup boundaries.

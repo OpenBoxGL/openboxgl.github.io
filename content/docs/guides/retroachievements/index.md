@@ -53,7 +53,7 @@ ROMs inside **ZIP and 7z archives** are hashed too (each archive's largest membe
 | Problem | Cause / fix |
 | --- | --- |
 | `"Configure RetroAchievements first."` | No credentials saved. Add username + API key in Settings or `~/.env` and restart. |
-| `"Rejected credentials"` | The username/key did not validate against `API_GetUserProfile.php`. Double-check the API key (it is not your password). |
+| `"RetroAchievements rejected those credentials."` | The username/key did not validate against `API_GetUserProfile.php` (HTTP `401`/`403` or a profile without a `User`). Double-check the API key (it is not your password). |
 | No match found for a ROM | The hash does not match a set on RetroAchievements, or the platform is not auto-matched. Verify the ROM is the exact dump; use a different ROM set; or enter the Game ID manually. |
 | Achievements not showing in emulator | Run **Inject credentials** after launching once with the emulator, and confirm the emulator's achievements setting is enabled (RetroArch: Settings > Achievements). |
 | System/game lists stale | Lists are cached for 7 days under `cache/retroachievements/`. |

@@ -225,7 +225,7 @@ Capture the screen with the first available tool among gnome-screenshot, spectac
 <ApiEndpoint method="POST" path="/api/ra/settings">
 
 
-`{"username", "api_key"}` validates against `API_GetUserProfile.php` and persists to `retroachievements.json` (mode `0o600`). Rejected credentials raise `400`. Returns the profile summary.
+`{"username", "api_key"}` validates against `API_GetUserProfile.php` and persists to `retroachievements.json` (mode `0o600`). Rejected credentials raise `400 "RetroAchievements rejected those credentials."` — RetroAchievements `401`/`403` responses are translated to that message instead of a generic HTTP failure, and a profile without a `User` fails the same way. Returns the profile summary.
 
 </ApiEndpoint>
 
@@ -290,4 +290,4 @@ Invalid or missing archive name returns `404`. (v1.7.2+)
 
 ## Errors
 
-Missing games return `404`; destructive operations validate prerequisites before touching files; provider and tool failures return `400` with the exact reason. See [REST API overview](/reference/api/overview/) for the shared envelope and [Save archives](/reference/save-archives/) / [Library backups](/reference/library-backups/) for the archive contracts.
+Missing games return `404`; destructive operations validate prerequisites before touching files; provider and tool failures return `400` with the exact reason. An unreachable metadata database during LBDB sync fails the job with `"Could not reach the metadata database (<reason>). Check the connection and try again."` instead of a raw socket message. See [REST API overview](/reference/api/overview/) for the shared envelope and [Save archives](/reference/save-archives/) / [Library backups](/reference/library-backups/) for the archive contracts.

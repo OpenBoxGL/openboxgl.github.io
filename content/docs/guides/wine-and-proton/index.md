@@ -9,12 +9,12 @@ OpenBox includes a local-first Wine and Proton prefix manager. It automatically 
 
 OpenBox's Wine subsystem inspects standard local directories at startup and caches known runtime environments:
 
-1. **Prefix Discovery**:
-   - System standard: `~/.wine`, `~/.local/share/wineprefixes/`
-   - Lutris: `~/.local/share/lutris/runners/wine`
-   - Faugus Launcher: `~/.config/faugus-launcher/prefixes`, `~/Faugus`
-   - Bottles: `~/.local/share/bottles/bottles`
-   - Custom folders: `~/Games` and `WINEPREFIX` environment variable
+1. **Prefix Discovery** (`DEFAULT_PREFIX_ROOTS` in `pkg/parity/parity_wine.py:17-27,47-70`):
+    - System standard: `~/.wine`, `~/.local/share/wineprefixes/`
+    - Faugus Launcher prefixes: `~/.config/faugus-launcher/prefixes`, `~/.local/share/faugus-launcher/prefixes`, `~/Faugus`
+    - Bottles: `~/.local/share/bottles/bottles`
+    - Custom folders: `~/Games` and `WINEPREFIX` environment variable
+    - Note: `~/.local/share/lutris/runners/wine` is a **runner** directory (Wine builds), not a prefix store — it is a Proton/runner root below, and prefix scanning skips runner-only trees.
 
 2. **Proton Runtime Discovery**:
    - Steam Proton: `~/.local/share/Steam/compatibilitytools.d`, `~/.steam/root/compatibilitytools.d`, `~/.steam/steam/compatibilitytools.d`
@@ -52,6 +52,7 @@ The Wine and Proton subsystem is fully accessible over OpenBox's local REST API:
 - `GET /api/wine/protons`: Returns all detected Proton runtime versions.
 - `GET /api/wine/prefix-for-game?game_id=<id>`: Resolves or suggests the optimal prefix for a given library title.
 
-<Callout type="tip" title="Isolated Game Saves">
-Save discovery scans automatically index the `drive_c/users/<user>/AppData` and `Saved Games` directories inside any attached Wine prefix.
+<Callout type="tip" title="Game saves inside prefixes">
+
+If a game's configured save path lives inside its attached Wine prefix (for example under `drive_c/users/<user>/AppData` or `Saved Games`), point save discovery at that absolute path. There is no automatic Wine-prefix save scan — configure the path explicitly so backups capture it.
 </Callout>

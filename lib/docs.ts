@@ -186,6 +186,13 @@ export function buildSidebar(): DocNode[] {
 
   // Any slugs not covered by a section (or a descendant of a covered item)
   // are appended to Start here. Only the 404 page is a true orphan.
+  // Note: several section entries below (changelog, faq, localization,
+  // roadmap, steam-deck, policies/privacy, reference/cli) carry
+  // `sidebar: false` frontmatter and are intentionally hidden from the
+  // rendered sidebar by isSidebarVisible. They are kept in the section
+  // lists so getAllSlugs/slug resolution still treats them as covered
+  // (not orphans) and deep links keep working; they serve as landing
+  // pages linked from the home page, README table, and guide cross-refs.
   const covered = new Set(
     sections.flatMap((s) =>
       s.children.flatMap((c) => [c.slug, ...slugs.filter((slug) => slug.startsWith(`${c.slug}/`))]),
