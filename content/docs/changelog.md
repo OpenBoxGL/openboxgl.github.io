@@ -4,6 +4,36 @@ description: Release notes for OpenBox, from the latest AppImage back to the fir
 sidebar: false
 ---
 
+## 1.13.0 (Unreleased) — Solid Ground
+
+> **Coming soon.** This release is still in test. These notes are a preview and move to the top of the changelog when 1.13.0 ships.
+
+The theme is simple: finish the features from the last wave, fix the sharp edges users hit, and make very large libraries fast.
+
+**New**
+
+- **Household presence:** see who is playing what right now, with elapsed time, over the same local sync folder. Off by default, per-member opt-in, no retained history.
+- **Game Night deck builder:** save named queues, apply theme presets, and share a deck so everyone spins the same order from a seed.
+- **Time Machine compare:** diff two dates in your library and revert metadata-only changes through a safe whitelist — paths and launch settings are never touched.
+- **Save history:** per-game save versions with source, age, size, read-back verification, restore, and a test-restore drill that checks a backup in a temp folder first.
+- **Artwork Doctor:** a hygiene report for missing, low-resolution, wrong-aspect, and duplicate art, with a cancelable "fix all with SteamGridDB" job, per-item progress, and undo.
+- **Setup checklists:** each platform shows BIOS (with SHA1 drift), emulator, first launch, and artwork as green or red, so "why doesn't this console work" has a concrete answer.
+- **Plugin API v1:** a frozen, documented surface with palette commands, bound library reads, and notifications, plus honest visibility for plugins that cannot be sandboxed.
+- **High-contrast theme:** a sixth stock theme, with contrast checks in the test suite proving the token system works.
+- **Getting started and extras:** first-run "try these" cards, an auto-moment prompt when a session ends on a high note, a keyboard shortcut cheat sheet (`?`), and a Constellation upgrade with saved viewpoints, path-finding, and PNG export.
+- **Household:** a week-seeded deterministic weekly challenge, and shelf shares you can import as wishlist entries.
+- **Repair and cleanup:** a missing-file repair wizard with dry-run preview, duplicate detection and merge that keeps history and moves absorbed records to Trash, per-game/per-member session export (Markdown/CSV), collection export/import, and undo toasts for trash and purge.
+- **Updates and emulators:** signed emulator-definition updates with an atomic apply, and background AppImage downloads that apply on restart with real progress.
+- **Kiosk PIN lockout:** exponential backoff after repeated failures, with honest wording that the PIN is a convenience boundary, not a security boundary.
+
+**Faster and safer**
+
+- Libraries are shared instead of deep-copied on every request, sync journaling only records what changed, and the auto-import watch loop idles quietly. Measured at 20,000 games: library reads p95 85→75 ms, facets 774→46 ms, media manager 709→2 ms, picker 887→222 ms.
+- Closing the window or refreshing no longer stops running games, Escape no longer discards unsaved game edits, and a damaged library file boots into a recovery flow instead of refusing to start.
+- Large imports and bulk edits no longer hit the request-size ceiling, error toasts look like errors again, and read-only requests can no longer fail on a full disk.
+- Concurrent edits can no longer be observed half-applied, notifications stack instead of clobbering each other, exports stream instead of loading whole archives into memory, and failures that used to be silently swallowed (sort order, view mode, artwork saves, settings) are surfaced.
+- The release gates got honest: the changed-line and new-module coverage checks now actually run on pull requests, broken documentation links fail the build, and the API reference is generated from the live routes so it cannot drift.
+
 ## 1.12.1 (2026-09-15) — Hardening
 
 Small, safe update on top of Living Library: a harder update path, clearer errors, and no more silent skips.

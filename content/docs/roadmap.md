@@ -20,9 +20,19 @@ The [changelog](/changelog/) is the accurate record. The current release is **1.
 
 Earlier milestones include 1.11.0 (Quick Resume, Moments and Record That clips, Time Machine, Backlog Radio, the command palette, Arcade Room and Museum kiosk mode, Household, Steam Bridge, ES-DE import, SteamGridDB artwork, and local launcher trophies), 1.10.0 (review-first LaunchBox XML migration, manual shelf entries, causal catalog sync, indexed search, and launch hardening), 1.9.0 (picker, Constellation, Wrapped, Timeline, Mastery, Game Night, video snaps, and Mood Match), 1.8.0 (keyboard/gamepad navigation, ScreenScraper, custom gamescope presets, library export, and ARM64 packaging), 1.7.2 (internationalization, the optional SQLite read model, MangoHud, BIOS SHA1 drift detection, backup diff, and visual chip builder), 1.7.1 (Play Insights analytics, spacer-window grid virtualization, background search worker, FacetCache LRU, write coalescing, and Launch Doctor fixes), 1.7.0 (Library Setup Center, durable Activity Center operations, Launch Doctor preflight, additive v2 API, and Flatpak packaging), 1.6.0 (modular state architecture, centralized launch tokens, accessible tools menu, dialog focus traps, and CSP hardening), 1.5.1 (large-library write optimizations), 1.5.0 (Proton/Wine prefix management, Faugus Launcher, and Eden Switch), and 1.0.0 (native WebKitGTK window, Server-Sent Events, and the frozen v1 contract).
 
-## In progress
+## Coming next: 1.13 — Solid Ground
 
-Work in progress is tracked in the app repository: the [CHANGELOG](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/CHANGELOG.md) for shipped releases and [GitHub issues](https://github.com/vindeckyy/OpenBoxGL/issues) for planned work. New ideas come from the sources below.
+The next release is in test, not shipped. The theme: finish the features from the last wave, fix the sharp edges, and make very large libraries fast. Highlights:
+
+- **Household presence** ("who's playing what right now"), plus a deterministic weekly challenge and wishlist shelf shares.
+- **Game Night deck builder** with saved queues, theme presets, and seeded sharing.
+- **Time Machine compare** between two dates, and save history with read-back verification and a test-restore drill.
+- **Artwork Doctor** and **per-platform setup checklists** turn artwork and emulator problems into one-click fixes and green/red answers.
+- **Plugin API v1**, a sixth high-contrast theme, first-run tips, auto-moment prompts, signed emulator-definition updates, and background AppImage updates that apply on restart.
+- **Repair and cleanup:** missing-file repair, duplicate merge, session export, collection export/import, and undo for trash and purge.
+- **Faster and safer:** library state is shared instead of copied (measured at 20,000 games: facets 774→46 ms, media manager 709→2 ms), refresh no longer stops running games, unsaved edits are protected, a damaged library file boots into recovery, and the coverage gates now actually run on pull requests.
+
+The [changelog](/changelog/) has the full preview. Work in progress is tracked in the app repository: the [CHANGELOG](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/CHANGELOG.md) for shipped releases and [GitHub issues](https://github.com/vindeckyy/OpenBoxGL/issues) for planned work. New ideas come from the sources below.
 
 ## Where ideas come from
 
