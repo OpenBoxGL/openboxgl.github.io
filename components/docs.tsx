@@ -209,7 +209,7 @@ export function FeatureGrid({
 
 export function InstallOptions({ children }: { children?: ReactNode }) {
   return (
-    <div className="my-6 grid gap-3 md:grid-cols-3">
+    <div className="my-6 grid min-w-0 grid-cols-1 gap-3 md:grid-cols-3">
       {/* Child sections carry data-slot="appimage|flatpak|source"; render each as a column. */}
       {children}
     </div>
@@ -229,7 +229,7 @@ export function InstallOptionCard({
     source: "git + Python 3.10+",
   }
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-card p-4">
+    <div className="flex min-w-0 flex-col rounded-xl border border-border bg-card p-4">
       <div className="min-w-0 flex-1 text-sm text-foreground/85 [&_p]:my-2 [&_code]:rounded [&_code]:bg-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_a]:text-primary [&_a]:underline [&_h3]:text-base [&_h3]:font-bold [&_h3]:tracking-tight [&_h4]:mt-4 [&_h4]:font-semibold [&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-border [&_pre]:bg-[#0d1117] [&_pre]:p-3 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5]">
         {children}
       </div>
