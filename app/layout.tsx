@@ -25,6 +25,7 @@ export const metadata: Metadata = {
     "OpenBox",
     "game launcher",
     "Linux gaming",
+    "Windows gaming",
     "Steam Deck",
     "emulator frontend",
     "ROM manager",

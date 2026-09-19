@@ -25,7 +25,7 @@ A `.env` file sets an environment variable only when that variable is not alread
 4. Your home directory (`~/.env`).
 5. `~/.config/openbox-game-launcher/.env`.
 
-The current working directory and the application directory are not searched. Each `.env` file must be an owner-only regular file (mode `0o600`, no group or other permission bits), must not be a symlink, and must be under 1 MiB; anything else is skipped silently.
+The current working directory and the application directory are not searched. Each `.env` file must be an owner-only regular file (mode `0o600`, no group or other permission bits), must not be a symlink, and must be under 1 MiB; anything else is skipped silently. Windows has no POSIX mode bits, so there the check rejects reparse points instead and otherwise relies on the per-user profile ACL — keep `.env` inside your own profile directory.
 
 Values already in the environment are never overridden by `.env`. The template lives at `.env.example` in the repository. Put real secrets in `~/.env` or `~/.config/openbox-game-launcher/.env` only, never in a tracked file.
 
@@ -35,26 +35,39 @@ Values already in the environment are never overridden by `.env`. The template l
 
 | Variable | Meaning |
 | --- | --- |
-| `OPENBOX_DATA_DIR` | Data directory. Read at import time, before `.env` bootstrap; must be exported in the shell, desktop entry, or systemd unit before launch. Defaults to `~/.local/share/openbox-game-launcher`. |
+| `OPENBOX_DATA_DIR` | Data directory. Read at import time, before `.env` bootstrap; must be exported in the shell, desktop entry, or systemd unit before launch. Defaults to `~/.local/share/openbox-game-launcher`, and to `%LOCALAPPDATA%\openbox-game-launcher` on Windows. |
 | `OPENBOX_SAFE_MODE` | Any non-empty value (conventionally `1`) disables plugin execution and the webhook dispatcher for the whole process. Exposed as `settings.safe_mode`. |
-| `APPIMAGE` | Set automatically when running from an AppImage; the updater refuses to install without it. Exposed as `settings.appimage`. |
+| `APPIMAGE` | Set automatically when running from an AppImage; the Linux updater refuses to install without it. Exposed as `settings.appimage`. Windows updates use the verified `OpenBox-<arch>-windows.zip` path instead. |
 | `OPENBOX_ENV_FILE` | Explicit path to a single `.env` file, checked first before the data-directory roots. Read directly from the process environment; must point at an owner-only regular file (not a symlink) or it is skipped. |
 | `OPENBOX_ALLOW_HTTP_WEBHOOKS` | Set to `1` to allow plain-HTTP webhook URLs. Required only for trusted local test targets; HTTPS is the default and safer. |
 | `OPENBOX_ALLOW_HTTP_GAMEYFIN` | Set to `1` to allow plain-HTTP Gameyfin URLs. HTTPS is the default; loopback (localhost) addresses are always allowed. |
 | `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS` | Set to `1` in the process shell to allow unsandboxed plugin execution when bubblewrap is unavailable. Read directly from the process environment (not `.env`). |
 | `OPENBOX_MEDIA_ROOTS` | Colon-separated list (`os.pathsep`) of additional absolute directories approved for scanning and media storage. Up to 32 roots. |
-| `OPENBOX_ENABLE_DMABUF` | Set to `1` to enable WebKitGTK DMA-BUF rendering in the native window. Disabled by default to prevent silent blank windows on AMD GPUs (including Steam Deck). |
-| `OPENBOX_WEBKIT_HARDWARE_ACCELERATION` | WebKitGTK hardware acceleration policy in native window (`always` or `on-demand`; default is `on-demand`). |
+| `OPENBOX_ENABLE_DMABUF` | Set to `1` to enable WebKitGTK DMA-BUF rendering in the Linux native window. Disabled by default to prevent silent blank windows on AMD GPUs (including Steam Deck). Windows uses WebView2 instead and ignores this. |
+| `OPENBOX_WEBKIT_HARDWARE_ACCELERATION` | WebKitGTK hardware acceleration policy in the Linux native window (`always` or `on-demand`; default is `on-demand`). |
 | `OPENBOX_SNAPSHOT_DEBOUNCE` | Debounce delay in seconds (float) for background library state snapshot writes (defaults to `0.0`). |
-| `OPENBOX_INSTALL_DIR` | Custom installation directory used by `install.sh` (defaults to `~/.local/bin`). |
-| `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v1.12.0`) during `install.sh` execution. |
-| `OPENBOX_PYTHON` | Path to the Python interpreter invoked by the native host (defaults to `python3`). |
+| `OPENBOX_INSTALL_DIR` | Custom installation directory used by `install.sh` (defaults to `~/.local/bin`). On Windows the same variable, or `install.ps1 -InstallDir`, defaults to `%LOCALAPPDATA%\OpenBox`; the runtime lands in `<InstallDir>\share\openbox` and the previous tree is kept at `<InstallDir>\share\openbox.previous`. |
+| `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v1.13.0`) during `install.sh` execution. |
+| `OPENBOX_PYTHON` | Path to the Python interpreter invoked by the native host (defaults to `python3`; on Windows the launchers locate `python.exe` or `py.exe` on `PATH` unless this is set). |
 | `OPENBOX_WEB_APP` | Path to `web_app.py` invoked by the native host. |
-| `OPENBOX_NATIVE_HOST` | Path override for the native host binary used by `openbox-native.sh` (defaults to `native_host` beside the app). |
+| `OPENBOX_NATIVE_HOST` | Path override for the native host binary used by `openbox-native.sh` (defaults to `native_host` beside the app). On Windows it overrides the `native_host.exe` binary that `openbox-native.ps1` runs. |
+| `OPENBOX_SHARE` | Runtime directory override used by the Windows launchers (`openbox.ps1`, `openbox-native.ps1`) to point at the extracted runtime tree. |
 | `OPENBOX_BUNDLED_LIB_PATH` | `LD_LIBRARY_PATH` value used by the AppImage wrapper for bundled libraries. |
 | `OPENBOX_ARCH` | Overrides `uname -m` architecture detection in `install.sh` and `build_appimage.sh` (`x86_64` or `aarch64`). |
 | `OPENBOX_UPDATE_INFORMATION` | zsync update-metadata line embedded by `build_appimage.sh` for the verified updater (packaging-time, not user-facing). |
 | `OPENBOX_ENABLE_SQLITE_READ` | Set to `1` to enable the SQLite read model (`pkg/state/sqlite_readmodel.py`) for accelerated search and facets on large libraries. It uses stdlib `sqlite3` with FTS5 full-text search (LIKE fallback if FTS5 is unavailable). JSON remains the source of truth; SQLite is a read-only projection. Release evidence covers 10k and 20k libraries; larger collections are exploratory. Since v1.12.0 the read model also self-enables at 5,000+ games (`should_auto_enable()`, latched per process); an explicit `0`/`false`/`no` opt-out is never overridden. (v1.7.2+) |
+
+### Windows launchers
+
+The Windows runtime tree ships three entry points:
+
+| Entry point | What it does |
+| --- | --- |
+| `openbox.cmd` | Double-clickable wrapper |
+| `openbox.ps1` | Runs the ladder: the native WebView2 window first, the browser app window second. `--web` forces the browser app window. |
+| `openbox-native.ps1` | Runs `native_host.exe`, or falls back when it is absent |
+
+Python is located as `python.exe` or `py.exe` on `PATH`, or through `OPENBOX_PYTHON`; `OPENBOX_SHARE` points the launchers at the runtime directory. `native_host.exe` ships compiled in the released portable install; rebuilding it from a source checkout is `powershell -File scripts/build_native_host_windows.ps1` (MSVC toolchain; WebView2 SDK from the NuGet cache or nuget.org), and without `native_host.exe` the launchers open the same UI in a browser app window. See [Windows](/windows/) for the install layout.
 
 ### Credentials (all optional)
 
@@ -81,7 +94,7 @@ The alias pattern lets users choose whichever name suits their setup. A RetroAch
 
 </Callout>
 
-Credentials supplied through the Settings dialog are persisted in the data directory (`retroachievements.json`, `emumovies.json`, `settings.json` for Gameyfin) with owner-only permissions (`0o600` via `secure_text_write`). The API and diagnostic log redact the values, but the files themselves are plaintext.
+Credentials supplied through the Settings dialog are persisted in the data directory (`retroachievements.json`, `emumovies.json`, `settings.json` for Gameyfin) with owner-only permissions (`0o600` via `secure_text_write`). The API and diagnostic log redact the values, but the files themselves are plaintext. Windows has no POSIX mode bits, so there these files rely on the per-user profile ACL instead.
 
 ## Persisted settings
 

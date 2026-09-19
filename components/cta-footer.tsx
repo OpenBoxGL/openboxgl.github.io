@@ -27,7 +27,7 @@ export function CtaFooter() {
             <p>Free, open source, and ready for your little corner of gaming.</p>
             <div className="ob-footer-actions">
               <a href="/install/" className="ob-button ob-button-primary">
-                Install on Linux
+                Install on Linux or Windows
               </a>
               <a
                 href="https://github.com/vindeckyy/OpenBoxGL"
@@ -53,7 +53,7 @@ export function CtaFooter() {
 
         <div className="ob-footer-bottom">
           <span>OpenBoxGL / AGPL-3.0</span>
-          <span>Built for Linux, Steam Deck, and handheld PCs.</span>
+          <span>Built for Linux, Windows, Steam Deck, and handheld PCs.</span>
         </div>
       </div>
     </footer>

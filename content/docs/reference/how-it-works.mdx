@@ -5,7 +5,7 @@ description: A code-level guide to startup, state, imports, launching, sessions,
 
 This page is for developers and maintainers who want to follow a real OpenBoxGL operation through the code. It starts at process startup, follows a library entry through import and launch, then covers the workers and extension points that sit around that path.
 
-OpenBoxGL has a local application core with one presentation layer served by two hosts. The web UI is the loopback HTTP server; the native window is a small C WebKitGTK shim that spawns that same server as a child and renders the identical `index.html`. Both hosts use the same data directory and state-store rules for durable library data, and both run the same server process, so there is no second presentation stack to keep in parity.
+OpenBoxGL has a local application core with one presentation layer served by two hosts. The web UI is the loopback HTTP server; on Linux the native window is a small C WebKitGTK shim that spawns that same server as a child and renders the identical `index.html`, and on Windows the WebView2 host `native_host_win.c` plays the same role (see [Windows](/windows/)). Both hosts use the same data directory and state-store rules for durable library data, and both run the same server process, so there is no second presentation stack to keep in parity.
 
 That distinction explains most of the architecture. Durable facts such as games, settings, playlists, queue entries, notifications, and completed history belong in `library.json`. Temporary facts such as an open dialog, an active browser selection, a running `Popen` object, or a queued worker live in memory and disappear when their process stops.
 
@@ -30,6 +30,7 @@ The application is easiest to understand as a set of boundaries around one local
 ```text
 AppImage or source entry point
  -> native_host (C WebKitGTK) or web_app.py --web
+ -> on Windows: openbox.cmd / openbox.ps1 -> native_host.exe (WebView2) or web_app.py --web
  -> environment and data-directory selection
  -> JsonStateStore and library bootstrap
  -> native window or browser shell
@@ -47,18 +48,18 @@ Launch path
  -> build_launch()
  -> optional archive extraction and performance setup
  -> before_launch plugin subprocesses
- -> Popen(start_new_session=True)
+ -> Popen(start_new_session=True on POSIX; creationflags on Windows)
  -> process-local RUNNING and PROCESSES maps
  -> finish_session()
  -> durable playtime and optional history
  -> save backup, integrations, stop event, and after_session plugins
 ```
 
-The composition root is `web_app.py`, which owns the loopback server and the domain logic. The native host is `native_host.c`, a C shim that spawns `web_app.py --no-browser` and renders its `index.html` in a WebKitGTK window. Shared launch and data-directory entry points live in `openbox.py`. Persistence rules are in `state_store.py`. The single renderer is `index.html`; other modules own narrower rules, such as archive safety, import adapters, metadata, saves, integrations, plugins, themes, and jobs.
+The composition root is `web_app.py`, which owns the loopback server and the domain logic. The native host is `native_host.c`, a C shim that spawns `web_app.py --no-browser` and renders its `index.html` in a WebKitGTK window; Windows uses the WebView2 host `native_host_win.c`, which spawns `python.exe -B web_app.py --no-browser` and is shipped compiled as `native_host.exe` in the release zip. Shared launch and data-directory entry points live in `openbox.py`. Persistence rules are in `state_store.py`. The single renderer is `index.html`; other modules own narrower rules, such as archive safety, import adapters, metadata, saves, integrations, plugins, themes, and jobs.
 
 ## Startup and process ownership
 
-The normal native startup path is `native_host` spawning `web_app.main()` with `--no-browser`. The web development path is `web_app.main()` directly. The shell scripts and AppImage wrapper select which host runs, but they do not become a second application layer.
+The normal native startup path is `native_host` spawning `web_app.main()` with `--no-browser`. The web development path is `web_app.main()` directly. The shell scripts and AppImage wrapper select which host runs, but they do not become a second application layer. On Windows the launchers are `openbox.cmd`, `openbox.ps1`, and `openbox-native.ps1`, which run `native_host.exe` when it is present and otherwise fall back to the browser app window; `--web` forces the browser UI.
 
 ### Web UI startup order
 
@@ -86,13 +87,14 @@ The exact startup code lives near `main()` in `web_app.py`. The important orderi
 
 The server asks the operating system for port `0`, which means the final port is selected at bind time. A second OpenBoxGL process therefore gets a different port and token. Stopping a process removes its own `server.port` and `server.token` files.
 
-Configured startup and shutdown commands are parsed with `shlex.split()`. Their first executable path is expanded, and the command runs in a new process session. Startup command failures are logged or ignored by the current implementation rather than becoming a different application startup mode.
+Configured startup and shutdown commands are parsed with `shlex.split()` on POSIX and MSVCRT quoting on Windows (`pkg/platform_compat.split_command()`). Their first executable path is expanded, and the command runs in a new process session on POSIX or a new process group on Windows (`launch_kwargs()`). Startup command failures are logged or ignored by the current implementation rather than becoming a different application startup mode.
 
 ### Two hosts, one server, one durable data boundary
 
 | Host | Entry point | Owns | Does not own |
 | --- | --- | --- | --- |
 | Native window | `native_host` (spawns `web_app.py --no-browser`) | Window chrome, single instance, tray, geometry, native dialogs | Application logic, HTTP routes |
+| Native window (Windows) | `native_host.exe` from `native_host_win.c` (spawns `python.exe -B web_app.py --no-browser`) | Same chrome surface over WebView2: single instance per data directory, tray icon, geometry, native dialogs, `openbox://` deeplinks | Application logic, HTTP routes |
 | Web UI | `web_app.py` and `index.html` | HTTP routes, Big Box, integrations, plugin hooks, live process maps, session events | A durable browser database or a separate library format |
 
 Both hosts run the same server and the same `index.html`, so they share one durable data boundary and one code path. The lock serializes normal state-store transactions across processes. It does not make every in-memory view instantly consistent, and it cannot protect a process that edits `library.json` directly without using the store's lock.
@@ -120,7 +122,9 @@ Completed history is worth calling out. Normal session history records store the
 ~/.local/share/openbox-game-launcher/
 ```
 
-When the custom variable is not set and the new library file does not exist, the startup code can copy the legacy LaunchBox Linux library from its old location. That migration happens before normal state-store use. It is a one-time compatibility copy, not a general synchronization mechanism.
+On Windows the default is `%LOCALAPPDATA%\openbox-game-launcher` (`%APPDATA%` when `LOCALAPPDATA` is unset), and `OPENBOX_DATA_DIR` overrides both platforms. The resolution lives in `pkg/platform_compat.py`; see [Windows](/windows/) for the install layout.
+
+When the custom variable is not set and the new library file does not exist, the startup code can copy the legacy LaunchBox Linux library from its old location (`~/.local/share/launchbox-linux/library.json`, `USERPROFILE` on Windows). That migration happens before normal state-store use. It is a one-time compatibility copy, not a general synchronization mechanism.
 
 A typical data directory contains:
 
@@ -146,7 +150,7 @@ APP_DIR/
 
 `library.json` is the durable state document. The other files are part of the local application boundary too. Moving only `library.json` leaves media, save archives, installed plugins, themes, metadata, and recovery material behind.
 
-The environment variable must be available before startup selects `DATA`. An `.env` file discovered later in bootstrap cannot retroactively change that already-selected data directory. Export it from the shell, desktop entry, or service that starts OpenBoxGL.
+The environment variable must be available before startup selects `DATA`. An `.env` file discovered later in bootstrap cannot retroactively change that already-selected data directory. Export it from the shell, desktop entry, or service that starts OpenBoxGL. On Windows set it in the process environment (for example `$env:OPENBOX_DATA_DIR` in PowerShell) before running a launcher; the launchers read it the same way.
 
 ## The state store
 
@@ -192,6 +196,8 @@ The store has two locks:
 - an in-process `threading.RLock` for callers sharing one Python process;
 - a sidecar file lock on `.<state filename>.lock` for cooperating OpenBoxGL processes.
 
+The sidecar lock is `fcntl.flock` on POSIX and a byte-range `msvcrt.locking` lock on Windows; both live in `pkg/platform_compat.py` and release automatically when the owning process dies.
+
 `update()` acquires the locks, reloads the current file, passes that state to the mutator, normalizes the result, and writes while the exclusive lock remains held. The transaction is therefore serialized across the native host and the web UI when both run the server. Direct edits to `library.json` bypass that guarantee.
 
 Loads use a file signature containing metadata such as modification time, size, and inode. A matching signature can reuse the in-memory cache. This avoids repeated normalization and JSON decoding for unchanged files. It is metadata-based rather than a content hash, so an external writer that preserves all signature fields could evade cache invalidation. Normal application writes change the signature and invalidate the cache.
@@ -212,7 +218,7 @@ mutator
  -> in-memory cache refreshed
 ```
 
-Files below the compact serialization threshold are pretty-printed. A payload whose compact form exceeds 1 MiB (or library with >500 games) is written compactly. The file ends with a newline in either case. The backup is staged into a temporary file and committed via `os.replace()` before the primary replacement, ensuring the backup write is atomic without risking corruption to the existing `.bak`.
+Files below the compact serialization threshold are pretty-printed. A payload whose compact form exceeds 1 MiB (or library with >500 games) is written compactly. The file ends with a newline in either case. The backup is staged into a temporary file and committed via `os.replace()` before the primary replacement, ensuring the backup write is atomic without risking corruption to the existing `.bak`. The `chmod 0600` steps are POSIX ownership hardening; on Windows `os.chmod` only toggles the read-only attribute, so the data directory's ACL is what limits access there.
 
 ### Recovery
 
@@ -263,7 +269,7 @@ Imports turn an external source into normalized game dictionaries. Import adapte
 
 ### Folder import
 
-A folder import in the native window starts with a GTK file dialog. In the browser fallback it starts with an absolute path, because the browser cannot browse the host filesystem itself:
+A folder import in the native window starts with a GTK file dialog (an `IFileDialog` folder picker in the Windows host). In the browser fallback it starts with an absolute path, because the browser cannot browse the host filesystem itself:
 
 ```text
 index.html import action
@@ -286,9 +292,9 @@ Storefront adapters inspect installed manifests and convert them into the same b
 
 | Source | Adapter behavior |
 | --- | --- |
-| Steam | Reads VDF/manifests from known Steam roots and library folders. Launch selection falls back through native Steam, Flatpak Steam, and `xdg-open`. |
-| Heroic | Reads Epic, GOG, and Amazon JSON manifests. |
-| Lutris | Invokes the native or Flatpak Lutris command with a bounded subprocess timeout and classifies sources such as Xbox, EA, Ubisoft, and generic Lutris. |
+| Steam | Reads VDF/manifests from known Steam roots and library folders. Launch selection falls back through native Steam, Flatpak Steam, and `xdg-open`. On Windows the roots come from the registry and `Program Files` and the launcher is `steam.exe -applaunch` (`pkg/platform_compat.steam_install_roots()`). |
+| Heroic | Reads Epic, GOG, and Amazon JSON manifests. On Windows it reads them from `%APPDATA%\heroic` and launches the recorded executable directly. |
+| Lutris | Invokes the native or Flatpak Lutris command with a bounded subprocess timeout and classifies sources such as Xbox, EA, Ubisoft, and generic Lutris. Lutris is a Linux launcher, so this adapter has no Windows equivalent. |
 | Gameyfin | Uses the Gameyfin integration and distinguishes catalog entries from installed entries. |
 | ROM and emulator layouts | Uses extension, directory, multi-disc, and platform rules in `parity_import.py`. |
 
@@ -316,7 +322,7 @@ POST /api/launch
  -> apply optional performance profile
  -> run before_launch plugin chain
  -> validate plugin output
- -> Popen(..., start_new_session=True)
+ -> Popen(..., start_new_session=True on POSIX; creationflags on Windows)
  -> update play metadata and live process maps
  -> publish session.started
  -> daemon completion thread waits for exit
@@ -334,12 +340,12 @@ The command source is selected in this order:
 
 1. a per-game `launch` override;
 2. the profile command for the game's platform;
-3. the `.sh` fallback, which invokes `bash <path>`;
+3. the `.sh` fallback, which invokes `bash <path>` (`sh` when `bash` is absent; on Windows, where neither is normally present, it raises "Shell scripts require bash or sh on PATH.");
 4. a direct executable path when no command is configured.
 
-Configured command text is tokenized with `shlex.split()`. Literal replacements then fill `{path}`, `{name}`, `{app_id}`, `{heroic_app_id}`, `{lutris_id}`, and `{rom_name}`. Because replacement occurs after splitting, a path containing spaces stays inside its existing argument. Shell operators in the configured command are not interpreted by a shell. A profile that does not contain `{path}` receives the selected launch path as a final argument.
+Configured command text is tokenized with `shlex.split()` on POSIX and MSVCRT quoting on Windows, both through `pkg/platform_compat.split_command()`. Literal replacements then fill `{path}`, `{name}`, `{app_id}`, `{heroic_app_id}`, `{lutris_id}`, and `{rom_name}`. Because replacement occurs after splitting, a path containing spaces stays inside its existing argument. Shell operators in the configured command are not interpreted by a shell. A profile that does not contain `{path}` receives the selected launch path as a final argument.
 
-The direct fallback requires an executable file in the Web UI launch path. This early validation is intentional. It avoids starting a process that cannot perform useful work and gives the browser a message naming the missing command, permission, path, or dependency.
+The direct fallback requires an executable file in the Web UI launch path. On POSIX that means the execute bit; on Windows `is_executable()` accepts the executable suffixes `.exe`, `.bat`, `.cmd`, `.com`, `.lnk`, and `.ps1`. This early validation is intentional. It avoids starting a process that cannot perform useful work and gives the browser a message naming the missing command, permission, path, or dependency.
 
 ### Plugin and performance stages
 
@@ -349,9 +355,9 @@ The `before_launch` plugin chain receives a JSON payload and may rewrite `args` 
 
 ### Process ownership
 
-The Web launcher passes `start_new_session=True` to `subprocess.Popen`. The launched game becomes the leader of a new process session and process group. Pause, resume, stop, restart, and force-close then operate on the group with `SIGSTOP`, `SIGCONT`, `SIGTERM`, or `SIGKILL` rather than targeting only the direct child.
+The Web launcher passes `start_new_session=True` to `subprocess.Popen` on POSIX, where the launched game becomes the leader of a new process session and process group. Pause, resume, stop, restart, and force-close then operate on the group with `SIGSTOP`, `SIGCONT`, `SIGTERM`, or `SIGKILL` rather than targeting only the direct child. On Windows the same call goes through `pkg/platform_compat.launch_kwargs()`, which passes `CREATE_NEW_PROCESS_GROUP` instead; pause and resume use `NtSuspendProcess`/`NtResumeProcess` on the process and its descendants, and stop or force-close uses `taskkill /PID <pid> /T` (adding `/F` for force).
 
-Live process data is held in `RUNNING` and `PROCESSES` under `PROCESS_LOCK`, with active sessions persisted to `active_sessions` in `library.json` (Schema v6). It includes the launch ID, stable identity information, PID, process start time, selected profile, and pause state. On startup, `reconcile_sessions_on_startup()` automatically reattaches to surviving game processes and transitions deceased ones to `abandoned`.
+Live process data is held in `RUNNING` and `PROCESSES` under `PROCESS_LOCK`, with active sessions persisted to `active_sessions` in `library.json` (Schema v6). It includes the launch ID, stable identity information, PID, process start time, selected profile, and pause state. On startup, `reconcile_sessions_on_startup()` automatically reattaches to surviving game processes and transitions deceased ones to `abandoned`. Liveness and process identity checks go through `pkg/platform_compat.process_alive()`: Windows never uses `os.kill(pid, 0)`, which CPython maps to `TerminateProcess` there, and reads start time, command line, and image name through `ctypes` instead of `/proc`.
 
 ## Session completion and teardown
 
@@ -438,7 +444,7 @@ Supported hooks are:
 
 Each invocation starts `plugin_runner.py` as a separate Python process. JSON travels over stdin and stdout. Input and output are capped at 2 MiB, execution is limited to five seconds, and the child environment removes `PYTHONPATH`, `PYTHONHOME`, `LD_PRELOAD`, and `LD_LIBRARY_PATH` while setting `PYTHONNOUSERSITE=1`.
 
-This boundary isolates crashes, timeouts, malformed output, and nonzero exits from the main process. It does not sandbox a trusted local plugin. The child still has the user's privileges and can read or modify files available to that account. `OPENBOX_SAFE_MODE=1` skips plugin hooks and disables the webhook dispatcher, making it the first diagnostic setting for plugin-caused failures.
+This boundary isolates crashes, timeouts, malformed output, and nonzero exits from the main process. It does not sandbox a trusted local plugin. The child still has the user's privileges and can read or modify files available to that account. On Linux the runner is additionally wrapped in a bubblewrap sandbox when `bwrap` is available; on Windows `bwrap` does not exist, so plugins are skipped with a warning unless `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1`, which runs them unsandboxed as a plain subprocess. `OPENBOX_SAFE_MODE=1` skips plugin hooks and disables the webhook dispatcher, making it the first diagnostic setting for plugin-caused failures.
 
 ### Themes
 
@@ -482,7 +488,7 @@ Those controls do not create multi-user authentication, remote tenancy, or a sec
 
 ## Tests as architecture contracts
 
-The repository's tests are standalone `test_*.py` scripts collected by `run_all_tests.sh`. They use temporary directories, real subprocesses, threaded HTTP handlers, migrations, locks, archives, and integration fixtures. That makes the tests useful for tracing boundaries, not only for checking individual functions.
+The repository's tests are standalone `test_*.py` scripts collected by `run_all_tests.sh`. On Windows there is no bash, so `python -B scripts\run_windows_tests.py` runs every `tests/test_*.py` in a subprocess with a 120-second timeout per file, and the individual `scripts/check_*.py` gates run directly; `make check` remains the full Linux gate. They use temporary directories, real subprocesses, threaded HTTP handlers, migrations, locks, archives, and integration fixtures. That makes the tests useful for tracing boundaries, not only for checking individual functions.
 
 | Contract | Representative tests |
 | --- | --- |
@@ -522,7 +528,7 @@ A cross-cutting feature should be implemented from the durable boundary outward:
 5. add the route and JSON shape;
 6. add browser loading, success, error, empty, disabled, focus, and cancellation behavior where applicable;
 7. add tests at every crossed boundary;
-8. run `./run_all_tests.sh` and the packaging checks when the distribution path changes.
+8. run `./run_all_tests.sh` and the packaging checks when the distribution path changes (`python -B scripts\run_windows_tests.py` plus the `scripts/check_*.py` gates on Windows, where bash and `make check` are not available).
 
 Keep `web_app.py` as orchestration when a feature already has a focused owner. Keep `index.html` responsible for browser state, rendering, and feedback rather than filesystem, process, or persistence rules. That separation is the main way to keep a large single-file browser surface from becoming a second backend.
 

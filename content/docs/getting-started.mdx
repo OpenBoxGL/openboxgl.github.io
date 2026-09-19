@@ -7,7 +7,7 @@ This path is for a first run with a local executable folder. Use a disposable fo
 
 <Callout type="note" title="What happens under the hood">
 
-When you start OpenBox for the first time, OpenBoxGL does several things silently: it creates your data directory (`~/.local/share/openbox-game-launcher` by default), generates a per-launch `server.token`, writes the port to `server.port`, and initializes an empty `library.json` with schema version 6. You won't see these files unless you look in the data directory, but they're the reason nothing gets corrupted when the server restarts unexpectedly. See [Interfaces and data](/interfaces-and-data/) for where every file lives.
+When you start OpenBox for the first time, OpenBoxGL does several things silently: it creates your data directory (`~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, by default), generates a per-launch `server.token`, writes the port to `server.port`, and initializes an empty `library.json` with schema version 6. You won't see these files unless you look in the data directory, but they're the reason nothing gets corrupted when the server restarts unexpectedly. See [Interfaces and data](/interfaces-and-data/) for where every file lives.
 
 </Callout>
 
@@ -15,15 +15,15 @@ The goal is a full loop: install, import one game, see it in the library, launch
 
 ## Before you start
 
-- Follow [Installation](/install/) and start OpenBox. You should see the three-column workspace: filters on the left, an empty cover grid in the center, and the detail pane on the right.
-- Make one folder containing a single executable `.sh` file. For a realistic first test, use a short script like this:
+- Follow [Installation](/install/) and start OpenBox. On Linux, run the AppImage, Flatpak, or source entry point (`./openbox` or `python3 web_app.py`). On Windows, double-click `openbox.cmd` or run `powershell -File .\openbox.ps1` from the runtime directory; add `--web` to either one to force the browser app window instead of the native window. The full Windows path is in [Windows](/windows/). You should see the three-column workspace: filters on the left, an empty cover grid in the center, and the detail pane on the right.
+- Make one folder containing a single launchable file. On Linux that is an executable `.sh` file; on Windows use an `.exe` (or a `.cmd`/`.bat` script). For a realistic first test on Linux, use a short script like this:
 
 ```bash
 #!/bin/bash
 echo "OpenBox launch works" && sleep 3
 ```
 
-Make it executable (`chmod +x`). A non-executable file with no launch command is the most common first-launch failure, and the app now reports it explicitly instead of silently failing.
+Make it executable (`chmod +x`). On Windows, `scripts\install.ps1` already placed the runtime under `%LOCALAPPDATA%\OpenBox\share\openbox`, so any small `.exe` on your machine works as the test target. A non-executable file with no launch command is the most common first-launch failure, and the app now reports it explicitly instead of silently failing.
 
 The workspace looks like this once you have a library entry: filters on the left, the grouped cover grid in the center, and the selected game's detail pane on the right.
 
@@ -33,23 +33,23 @@ The workspace looks like this once you have a library entry: filters on the left
 
 <Steps>
 
-<li><strong>Install and start OpenBox.</strong> From the AppImage, Flatpak, or source as described on the [Installation](/install/) page. When the library is empty, the **Library Setup Center** appears; you can close it and use the topbar buttons, or start from its guided **Set up library** preview-before-commit scan.</li>
+<li><strong>Install and start OpenBox.</strong> From the AppImage, Flatpak, or source on Linux, or from the signed portable package on Windows, as described on the [Installation](/install/) page and in [Windows](/windows/). When the library is empty, the **Library Setup Center** appears; you can close it and use the topbar buttons, or start from its guided **Set up library** preview-before-commit scan.</li>
 
 <Callout type="note">
 
-**You should see:** An empty cover grid in the center. The Library Setup Center suggests scanning game folders or connecting storefronts with a safe, non-destructive preview before committing to your library. If the window did not open, run OpenBox from a terminal and read the printed error. In `--web` mode OpenBoxGL prints `http://127.0.0.1:PORT/?token=...`; open that URL yourself.
+**You should see:** An empty cover grid in the center. The Library Setup Center suggests scanning game folders or connecting storefronts with a safe, non-destructive preview before committing to your library. If the window did not open, start OpenBox from a terminal (`./openbox` or `python3 web_app.py` on Linux; `powershell -File .\openbox.ps1` on Windows) and read the printed error. In `--web` mode OpenBoxGL prints `http://127.0.0.1:PORT/?token=...`; open that URL yourself.
 
 </Callout>
 
-<li><strong>Choose Set up library or Import Folder.</strong> Click **Set up library** in the topbar (or **Import Folder**). In the native window a folder picker dialog opens to select your games folder. In the browser fallback (`--web`) the app prompts for the absolute path, for example `/home/you/test-game`.</li>
+<li><strong>Choose Set up library or Import Folder.</strong> Click **Set up library** in the topbar (or **Import Folder**). In the native window a folder picker dialog opens to select your games folder. In the browser fallback (`--web`) the app prompts for the absolute path, for example `/home/you/test-game` on Linux or `C:\Games\test-game` on Windows.</li>
 
 <Callout type="note">
 
-**You should see:** In the native window, a GTK folder picker. Choose the folder and confirm. In the browser fallback, a text input field labeled "Folder path"; type or paste the path and press Enter.
+**You should see:** In the native window, a native folder picker (GTK on Linux, the Windows folder dialog on Windows). Choose the folder and confirm. In the browser fallback, a text input field labeled "Folder path"; type or paste the path and press Enter.
 
 </Callout>
 
-<li><strong>Select a folder containing one executable `.sh` file.</strong> Setup Center performs a read-only scan for supported files (`.sh`, `.appimage`, `.exe`, `.iso`, `.rom`, console extensions, and archives), presents a preview with storytelling progress, checks for duplicates, and commits cleanly without side effects.</li>
+<li><strong>Select a folder containing one launchable file.</strong> That is the executable `.sh` on Linux or the `.exe` on Windows from the previous section. Setup Center performs a read-only scan for supported files (`.sh`, `.appimage`, `.exe`, `.iso`, `.rom`, console extensions, and archives), presents a preview with storytelling progress, checks for duplicates, and commits cleanly without side effects.</li>
 
 <Callout type="note">
 
@@ -75,7 +75,7 @@ The workspace looks like this once you have a library entry: filters on the left
 
 ![The game detail pane with metadata, launch controls, save management, and history](/openbox-game-detail.png)
 
-<li><strong>Select PLAY and watch the session result.</strong> PLAY runs the game's launch command without a shell. For a `.sh` file, that means `bash <path>`. A lifecycle overlay appears ("Starting"), the process starts, and after it exits, the overlay reports the outcome: either "Session ended, play time and history were saved" for a clean exit, or the actual exit code for a failure. The session is recorded with start time, duration, and exit status.</li>
+<li><strong>Select PLAY and watch the session result.</strong> PLAY runs the game's launch command without a shell. On Linux, for a `.sh` file, that means `bash <path>`; on Windows a `.exe` runs directly. A lifecycle overlay appears ("Starting"), the process starts, and after it exits, the overlay reports the outcome: either "Session ended, play time and history were saved" for a clean exit, or the actual exit code for a failure. The session is recorded with start time, duration, and exit status.</li>
 
 <Callout type="note">
 
@@ -97,15 +97,15 @@ ROMs are the deliberate exception: they require a configured platform emulator p
 
 ### The game is missing after import
 
-Check the folder path you selected. The import resolves `~` but does not guess; a wrong path imports nothing and reports it. Re-run Setup Center with the correct absolute path. Existing entries are never duplicated, so re-importing the same folder is safe.
+Check the folder path you selected. The import resolves `~` on Linux but does not guess; a wrong path imports nothing and reports it. Re-run Setup Center with the correct absolute path. Existing entries are never duplicated, so re-importing the same folder is safe.
 
 ### PLAY is disabled or launch fails with a validation error
 
 Open the game detail view or check Launch Doctor preflight notifications. Launch Doctor provides actionable fix buttons:
 
-- **"has no launch command and its file is not executable"**: make the file executable (`chmod +x`), or assign an emulator profile. Launch Doctor displays an explanation and fix options.
+- **"has no launch command and its file is not executable"**: make the file executable (`chmod +x` on Linux; a Windows `.exe` needs no permission bit), or assign an emulator profile. Launch Doctor displays an explanation and fix options.
 - **"The configured path no longer exists"**: the imported file was moved or deleted. Point the game at the new path under Edit game, or re-import the folder.
-- **"Set a launch command for the platform"**: the platform has no profile. See [Emulators and launching](/guides/emulators-and-launching/). Launch Doctor can automatically install missing Flathub emulators.
+- **"Set a launch command for the platform"**: the platform has no profile. See [Emulators and launching](/guides/emulators-and-launching/). On Linux, Launch Doctor can automatically install missing Flathub emulators; on Windows you install the Windows build of the emulator yourself and point the profile at its executable.
 
 ### The session reports a failure
 
@@ -113,7 +113,7 @@ An immediate exit with a non-zero code reports "Session failed" with the exit co
 
 ### The window did not open
 
-Run the entry point from a terminal. In `--web` mode, OpenBoxGL prints `http://127.0.0.1:PORT/?token=...` and you can open that URL yourself. If the native window fails, the launcher prints an install hint for WebKitGTK and falls back to a chrome-less app window, then your default browser. The server binds to loopback only; nothing is exposed to the network.
+Run the entry point from a terminal. In `--web` mode, OpenBoxGL prints `http://127.0.0.1:PORT/?token=...` and you can open that URL yourself. If the native window fails, the launcher prints an install hint for WebKitGTK and falls back to a chrome-less app window, then your default browser. On Windows the native window needs the WebView2 runtime and uses the `native_host.exe` the installer ships; a source checkout builds it with `scripts/build_native_host_windows.ps1`. If either the runtime or the host binary is missing, the launchers open the same UI in a browser app window instead, so Windows still works. The server binds to loopback only; nothing is exposed to the network.
 
 ### I imported the wrong folder
 
@@ -131,12 +131,14 @@ Nothing is sent anywhere: no account, no telemetry, and no network traffic unles
 
 ## Next steps
 
+- [Windows](/windows/) for the full Windows install, launcher, and native-host path.
 - [Importing](/guides/library/importing/) for Steam, Heroic, Lutris, ROM folders, and arcade sets.
 - [Emulators and launching](/guides/emulators-and-launching/) for command tokens and platform profiles.
 - [Interfaces and data](/interfaces-and-data/) for where every file lives.
 - [Metadata and media](/guides/metadata-and-media/) for enrichment after the first import.
 
-## What's new in 1.11 / 1.12
+## What's new in 1.11 through 1.13
 
 - **1.11 — Every Second Counts:** Quick Resume, Moments, clips/reels, Time Machine, Backlog Radio + natural query, Arcade Room/Museum kiosk, Household, Steam Bridge, ES-DE migration, SteamGridDB artwork, and local launcher trophies. Start with [API 1.11 additions](/reference/api/one-eleven/).
 - **1.12 — Living Library:** smart collections, per-game Story timelines (1h–100h milestones), per-game `launch_env`/`launch_confirm`, opt-in weekly backups, SQLite self-enable at 5,000 games, and command-palette recents. Start with [API 1.12 additions](/reference/api/one-twelve/).
+- **1.13 — Windows support:** Windows x86_64 joins Linux as a supported platform, installed from the signed portable package with `install.ps1`. The native window uses WebView2 with the host the release ships compiled; a source checkout builds it with `scripts/build_native_host_windows.ps1`, and without it the launchers open the same UI in a browser app window. Data lives in `%LOCALAPPDATA%\openbox-game-launcher`, the in-app updater verifies the same key pin, checksum, and Ed25519 signature, and every bundled emulator definition carries its Windows executable name. See [Windows](/windows/) and the [release notes](/changelog/). Linux also gains fixes in this release: process liveness no longer uses `os.kill(pid, 0)` (which terminates the target on Windows), stored references use POSIX separators on Windows, and the metadata database closes cached SQLite handles before replacing the file.

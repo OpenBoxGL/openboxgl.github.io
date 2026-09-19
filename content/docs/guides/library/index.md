@@ -1,6 +1,6 @@
 ---
 title: Library overview
-description: Browse, search, and safely maintain a mixed Linux game library.
+description: Browse, search, and safely maintain a mixed-platform game library.
 ---
 
 OpenBoxGL presents imported games in a searchable grid or list. Select a card to open its detail pane, where metadata, artwork, launch, saves, and history stay together. The top bar is grouped into three zones:

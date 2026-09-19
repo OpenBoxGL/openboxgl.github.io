@@ -1,12 +1,35 @@
 ---
 title: Changelog
-description: Release notes for OpenBox, from the latest AppImage back to the first build.
+description: Release notes for OpenBox, from the latest release back to the first build.
 sidebar: false
 ---
 
-## 1.13.0 (Unreleased) — Solid Ground
+## 1.13.0 (2026-09-19) — Windows
 
-> **Coming soon.** This release is still in test. These notes are a preview and move to the top of the changelog when 1.13.0 ships.
+OpenBox runs natively on Windows x86_64 alongside Linux. The runtime is unchanged: standard library only (plus `ctypes` on Windows), no `pip install`, no `requirements.txt`, no virtualenv.
+
+- **Native Windows host:** `native_host.exe` renders the same UI over the loopback server through WebView2 and exposes the same `window.openboxNative` bridge the page already uses. It remembers window geometry, provides the tray icon and minimize-to-tray, handles `openbox://` deeplinks, enforces a single instance per data directory through a named pipe (a second launch focuses the running window), shuts the server down gracefully on close, and force-kills the process tree through a job object if it does not exit. The WebView2 runtime is present on Windows 11 and most Windows 10 systems. The host is built from source, not shipped compiled: `powershell -File scripts/build_native_host_windows.ps1` builds `native_host.exe` from `native_host_win.c` next to `web_app.py`, and needs the MSVC toolchain (Visual Studio Build Tools with the C++ workload); the WebView2 SDK comes from the NuGet cache or from nuget.org. `OPENBOX_NATIVE_HOST` overrides the host binary path. Without `native_host.exe` the launchers open the same UI in the browser app window, so Windows works out of the box.
+- **Windows launchers:** `openbox.cmd` is the double-clickable wrapper, `openbox.ps1` runs the ladder (native window, else browser app window; `--web` forces the browser), and `openbox-native.ps1` runs the native host or falls back. Python is located as `python.exe` or `py.exe` on `PATH`, or through `OPENBOX_PYTHON`; `OPENBOX_SHARE` points the launchers at the runtime directory.
+- **Verified Windows installer:** the release asset `install.ps1` (`scripts/install.ps1`) runs on Windows PowerShell 5.1 with the standard library only — it needs neither curl nor OpenSSL — and follows the same verification ladder as the Linux installer: it fetches `openbox-release.pub`, checks its SHA-256 against a pinned bootstrap anchor (unless `-PublicKeyPath` is given), then verifies the archive's `.sha256` sidecar and its Ed25519 `.sig` before extracting.
+- **Install layout:** `OpenBox-x86_64-windows.zip` (with its `.sha256` and `.sig`) is a portable zip of the full source tree under one top-level `OpenBox/` folder. `-InstallDir`, or `OPENBOX_INSTALL_DIR`, defaults to `%LOCALAPPDATA%\OpenBox`; the runtime lands in `<InstallDir>\share\openbox` and the previous tree is kept at `<InstallDir>\share\openbox.previous` for rollback. The installer registers a Start Menu shortcut and the `openbox://` protocol handler, and adds the bin root to the *user* PATH unless `-NoPathUpdate` is given.
+- **Windows data directory:** `%LOCALAPPDATA%\openbox-game-launcher`, overridable with `OPENBOX_DATA_DIR`; the layout matches Linux — `library.json`, `server.token`, `server.port`, media, backups, themes, and logs.
+- **Verified Windows updates:** the in-app updater checks the same key pin, SHA-256, and Ed25519 signature in pure Python (no OpenSSL), downloads `OpenBox-<arch>-windows.zip`, and swaps the installed tree; the previous tree stays in place for rollback.
+- **Windows emulator support:** every bundled emulator definition carries its Windows executable name, so adapter detection, resume state, and Launch Doctor work with Windows builds (Dolphin, RetroArch, PCSX2, RPCS3, Cemu, melonDS, PPSSPP, Vita3K, xemu, Xenia, and the rest).
+- **Platform seam and CI:** `pkg/platform_compat.py` holds the platform differences and uses only the standard library, plus `ctypes` on Windows. A new `windows-latest` CI job runs beside the Linux jobs.
+
+**Fixed**
+
+- Process liveness no longer probes with `os.kill(pid, 0)` — that call terminates the target on Windows — so reattaching to or shutting down a running game no longer kills it.
+- Stored references use POSIX separators on Windows: SBOM symlink targets, emulator-directory token parents, and the runtime-module manifest.
+- The metadata database closes cached SQLite handles before replacing the file, so a resync cannot fail with a locked database.
+
+**Still Linux only:** gamescope and Game Mode, AppImage and Flatpak packaging, XDG desktop entries, `sudo make install`, Steam Deck and handheld tuning, and Flathub-aware emulator management. Linux remains the primary distro-integration target; Windows support is x86_64 only. See [Windows](/windows/) for the platform guide.
+
+[Full OpenBox 1.13.0 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.13.0) · [Compare v1.12.1...v1.13.0](https://github.com/vindeckyy/OpenBoxGL/compare/v1.12.1...v1.13.0)
+
+## Unreleased — Solid Ground
+
+> **Coming soon.** This release is still in test and not shipped. These notes move into the changelog once it ships.
 
 The theme is simple: finish the features from the last wave, fix the sharp edges users hit, and make very large libraries fast.
 

@@ -93,10 +93,12 @@ OpenBox isolates plugin execution using **Bubblewrap** (`bwrap`) when available 
 
 When the sandbox cannot be created, enabled plugins are **skipped** with a warning. To run trusted local plugins without the sandbox, set `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` in the process environment (not `.env`). To disable all plugin execution for troubleshooting, launch OpenBox with `OPENBOX_SAFE_MODE=1`.
 
+Windows has no `bwrap`, so plugin hooks cannot be isolated there: enabled plugins are **skipped** with the same warning, and `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` is the only way to run them. The runner then executes as an ordinary subprocess with your own user's access to the filesystem and network, so set it only for plugin code you have read.
+
 ## Installing & Testing
 
-1. Create directory `~/.local/share/openbox-game-launcher/plugins/my-plugin/`.
+1. Create directory `~/.local/share/openbox-game-launcher/plugins/my-plugin/` on Linux, or `%LOCALAPPDATA%\openbox-game-launcher\plugins\my-plugin\` on Windows.
 2. Add `plugin.json` and `plugin.py`.
 3. Open OpenBox → **Tools** → **Plugins**.
 4. Enable your plugin in the list.
-5. Check the diagnostic log at `~/.local/share/openbox-game-launcher/openbox.log` for plugin warnings (skipped plugins, timeouts, oversized output, and the last 400 bytes of stderr on a nonzero exit). **Settings → Copy diagnostic log** copies a redacted summary to the clipboard.
+5. Check the diagnostic log (`openbox.log` beside that data directory) for plugin warnings (skipped plugins, timeouts, oversized output, and the last 400 bytes of stderr on a nonzero exit). **Settings → Copy diagnostic log** copies a redacted summary to the clipboard.

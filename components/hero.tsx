@@ -31,7 +31,7 @@ export function Hero() {
           <div className="ob-hero-aside">
             <p>Your Steam favorites. That folder of ROMs.<br className="ob-desktop-break" /> The game you forgot you owned.<br />One beautiful library, on your machine.</p>
             <a href="/downloads/" className="ob-button ob-button-primary">Download OpenBox <span aria-hidden="true">↗</span></a>
-            <span className="ob-platform-note">For Linux & Steam Deck · Free & open source</span>
+            <span className="ob-platform-note">For Linux, Windows & Steam Deck · Free & open source</span>
           </div>
         </div>
 

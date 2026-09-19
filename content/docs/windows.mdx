@@ -1,0 +1,181 @@
+---
+title: Windows
+description: Install and run OpenBoxGL on Windows with the signed portable installer, the PowerShell launchers, and the WebView2 native window.
+---
+
+OpenBoxGL runs natively on Windows as of 1.13.0. There is no MSI, no installer wizard, no account, and no license key: the portable installer verifies a signed release, lays the runtime down under `%LOCALAPPDATA%\OpenBox`, and adds the launchers to your user `PATH`.
+
+The Windows build is the same Python standard-library application that runs on Linux. The library format, the web UI, the HTTP API, the plugins, and the emulator definitions are identical across platforms, so a library directory moves between Linux and Windows unchanged.
+
+Windows builds are **x86_64**.
+
+## Requirements
+
+| Requirement | Needed for | Notes |
+| --- | --- | --- |
+| Windows 10 or 11, x86_64 | Everything | Current Windows 10 builds and Windows 11. |
+| Windows PowerShell 5.1 | Installer and launchers | Ships with Windows. PowerShell 7 is not required. |
+| Python 3.10 or newer | Everything | `python.exe` or `py.exe` must be on `PATH`; set `OPENBOX_PYTHON` to point at another interpreter. The portable install is the source tree, so it uses your interpreter. |
+| WebView2 runtime | The native window | Present on Windows 11 and most Windows 10 systems. Without it, OpenBox runs the same UI in a browser app window. |
+| Visual Studio Build Tools, C++ workload | Building the native host from source | Not needed for the released install, which ships the compiled host. See [the native window](#the-native-window). |
+
+The installer itself needs Python, because it uses the same RFC 8032 verifier the in-app updater uses to check the release signature.
+
+## Install from a signed release
+
+Download the installer and the release archive from the same tag, then run the installer. The installer pins the release public key, verifies its SHA-256 against a committed anchor, and verifies the archive's `.sha256` sidecar and Ed25519 signature before extracting anything.
+
+```powershell
+$Version = '1.13.0'
+Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
+  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
+.\install.ps1 -Tag "v$Version"
+```
+
+Pass `-Run` to start OpenBox when the install finishes:
+
+```powershell
+.\install.ps1 -Tag "v$Version" -Run
+```
+
+If you would rather download the archive yourself, place `OpenBox-x86_64-windows.zip`, its `.sha256`, and its `.sig` next to `install.ps1`; the installer uses the local files when the tag's assets are already present.
+
+### What the installer does
+
+<Steps>
+
+<li>Resolves `openbox-release.pub` from the release and checks its SHA-256 against the pinned bootstrap anchor. `-PublicKeyPath` replaces that anchor for mirror or offline installs, and the checksum and signature gates still apply.</li>
+  <li>Downloads `OpenBox-x86_64-windows.zip` (or the `-Arch` you select) with its `.sha256` and `.sig`, then fails closed if any check does not match.</li>
+  <li>Extracts the archive, which must contain exactly one top-level folder holding `web_app.py`.</li>
+  <li>Moves the runtime to `<InstallDir>\share\openbox`, keeping any previous install at `<InstallDir>\share\openbox.previous`.</li>
+  <li>Registers the Start Menu shortcut and the `openbox://` protocol handler for the current user.</li>
+  <li>Adds the runtime folder to your user `PATH` unless you pass `-NoPathUpdate`.</li>
+
+</Steps>
+
+Nothing is extracted before every verification step passes.
+
+### Installer options
+
+| Option | Effect |
+| --- | --- |
+| `-Tag <tag>` | Release tag to install. The latest release is used when omitted. |
+| `-InstallDir <path>` | Bin root. Defaults to `OPENBOX_INSTALL_DIR`, then `%LOCALAPPDATA%\OpenBox`. The runtime lands in `<InstallDir>\share\openbox`. |
+| `-Run` | Launch OpenBox after a successful install. |
+| `-NoPathUpdate` | Skip adding the runtime folder to the user `PATH`. |
+| `-Arch <arch>` | Artifact architecture. Defaults to the host CPU. |
+| `-PublicKeyPath <file>` | Use a local release public key instead of the pinned anchor, for mirrors and offline installs. |
+| `-ReleaseBase <url>` | Base URL the release assets are served from. Defaults to the project's GitHub releases. |
+| `-Repo <owner/name>` | Repository to resolve releases from. |
+
+### Uninstall
+
+There is no uninstaller command. To remove the install:
+
+1. Delete `%LOCALAPPDATA%\OpenBox` (including `share\openbox.previous`).
+2. Remove the runtime folder from your user `PATH` in **Settings → System → About → Advanced system settings → Environment Variables**.
+3. Delete the `OpenBox.lnk` shortcut from your Start Menu programs folder.
+4. Delete the `HKEY_CURRENT_USER\Software\Classes\openbox` registry key to remove the `openbox://` handler.
+
+Your library is untouched by all of this: it lives in the data directory, not in the install.
+
+## Launching OpenBox
+
+The install contains three launchers, mirroring the `openbox` and `openbox-native` scripts on Linux:
+
+| Launcher | What it does |
+| --- | --- |
+| `openbox.cmd` | Double-clickable wrapper around `openbox.ps1`. This is what the Start Menu shortcut and the `openbox://` handler call. |
+| `openbox.ps1` | The ladder: run the native window, otherwise the browser app window, otherwise the loopback web UI in your default browser. |
+| `openbox-native.ps1` | Run the native host directly, with the same fallback when the host is missing or fails. |
+
+```powershell
+openbox                 # native window when built, otherwise the browser app window
+openbox --web           # always use the loopback web UI in your default browser
+openbox-native          # run the native host explicitly
+```
+
+Both scripts accept the same flags as the Linux launchers and forward them to the application. The launchers find the runtime through `OPENBOX_SHARE`, then their own folder, then `%LOCALAPPDATA%\OpenBox\share\openbox`, and find Python as `python.exe` or `py.exe` on `PATH` unless `OPENBOX_PYTHON` is set.
+
+`--web` prints a `http://127.0.0.1:PORT/?token=...` URL. The token is per-launch and is written to the data directory, so the window you opened can always be re-opened from the terminal output if a browser does not appear.
+
+## The native window
+
+The native window is a WebView2 host that renders the same UI over the loopback server. It is the Windows counterpart of the WebKitGTK host: it owns the Python server's lifetime, exposes the same `window.openboxNative` bridge the page already speaks, remembers window geometry, provides the tray icon and minimize-to-tray, handles `openbox://` deeplinks, allows one instance per data directory (a second launch focuses the running window), shuts the server down gracefully when the window closes, and force-kills the process tree through a job object if it does not exit.
+
+The released portable install ships this host compiled, so the native window opens as installed — no toolchain, no build step. Building it yourself is only needed when you run from a source checkout (a git clone has no `native_host.exe` beside `web_app.py`), or when you want to change the host yourself:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\build_native_host_windows.ps1
+```
+
+The script builds `native_host.exe` next to `web_app.py` from `native_host_win.c` and embeds `openbox.ico` as its icon. It needs the MSVC toolchain, which means **Visual Studio Build Tools** with the **C++ workload**; the WebView2 SDK is taken from your NuGet cache when present and downloaded from nuget.org otherwise. The loader is linked statically, so the resulting binary needs no extra DLL. Release and CI builds run this same script, and the release refuses to publish a zip that does not contain the host.
+
+Once `native_host.exe` is next to `web_app.py`, every launcher uses it automatically. Set `OPENBOX_NATIVE_HOST` to point at a host binary somewhere else.
+
+If the host is missing (source checkout, or a failed build), the launchers print a warning and open the same UI in a browser app window. Nothing else changes: your library, settings, and data directory are the same either way.
+
+<Callout type="tip" title="WebView2 is the only runtime dependency">
+
+The WebView2 runtime ships with Windows 11 and is installed on most Windows 10 systems. If it is missing, install it from [Microsoft's WebView2 page](https://developer.microsoft.com/microsoft-edge/webview2/) or keep using `--web`, which needs nothing but a browser.
+
+</Callout>
+
+## Where your data lives
+
+| Content | Location |
+| --- | --- |
+| Library, settings, media, backups, themes, logs | `%LOCALAPPDATA%\openbox-game-launcher` |
+| Per-launch server token and port files | The same data directory (`server.token`, `server.port`) |
+| Installed runtime | `%LOCALAPPDATA%\OpenBox\share\openbox` |
+| Previous runtime kept for rollback | `%LOCALAPPDATA%\OpenBox\share\openbox.previous` |
+
+Set `OPENBOX_DATA_DIR` to move the library, which is read before the `.env` bootstrap, so it must be in the process environment at launch. This is the same contract the Linux builds use; only the default location differs. See [Configuration](/reference/configuration/) for the full environment list.
+
+## Updating
+
+The built-in updater understands the Windows portable install. It verifies the release key the same way the installer does — pinned key anchor, SHA-256 checksum, Ed25519 signature, with the same stdlib-only implementation, so Windows needs neither curl nor OpenSSL — then downloads `OpenBox-x86_64-windows.zip`, extracts it, and stages the swap.
+
+Because a running install cannot be replaced in place, the swap happens **after OpenBox exits**: the old tree is moved to `share\openbox.previous`, the staged tree takes its place, and the app asks you to restart. Your data directory is never part of the swap. See [Updating](/updating/) for the general update flow.
+
+Manual update: download the newer `OpenBox-x86_64-windows.zip` and run that release's `install.ps1`, which keeps the previous tree for rollback.
+
+## Emulators and games on Windows
+
+Emulator support is not Linux-specific. Every bundled emulator definition carries its Windows executable name, so adapter detection, resume-state capture, and Launch Doctor work with Windows builds of Dolphin, RetroArch, PCSX2, RPCS3, Cemu, melonDS, PPSSPP, Vita3K, xemu, Xenia, and the others the matrix lists. See [Emulators and launching](/guides/emulators-and-launching/) and the [Hardware matrix](/reference/hardware-matrix/).
+
+Windows games launch through the game's own executable or through an emulator, exactly as on Linux. Controller support, save-state capture, screenshots, and portable library paths behave identically.
+
+## Troubleshooting
+
+| Problem | Cause / fix |
+| --- | --- |
+| `No Python 3 interpreter found` | Install Python 3.10+ and make sure `python.exe` or `py.exe` is on `PATH`, or set `OPENBOX_PYTHON` to the interpreter's full path. |
+| `running scripts is disabled on this system` | Run the installer or launcher with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.13.0`, or set the execution policy for your user. |
+| `The release public key does not match the pinned trust anchor` | The release key changed or the download was tampered with. Install only from the project's GitHub releases, or pass `-PublicKeyPath` if you deliberately mirror a different key. |
+| The window does not open | Run `openbox --web` from a terminal and open the printed `http://127.0.0.1:PORT/?token=...` URL. |
+| `native_host is missing ... falling back` | The WebView2 host has not been built. Build it as described above, or ignore it and use the browser app window. |
+| WebView2 host exits immediately | Install or repair the WebView2 runtime, then re-run `openbox-native`. The exit code and warning are printed to the console. |
+| `openbox` is not recognized | The install folder is not on your `PATH` yet. Open a new terminal after installing, or run `%LOCALAPPDATA%\OpenBox\share\openbox\openbox.cmd`. |
+| A second launch does not open a new window | That is the single-instance rule: the running window is focused instead. Different data directories run independently. |
+
+More at [Troubleshooting startup and browser](/guides/troubleshooting/startup-and-browser/).
+
+## What stays Linux-only
+
+Windows runs the application, the library, the emulators, and the native window. The distribution-level integrations remain Linux:
+
+- AppImage and Flatpak packaging, and the built-in updater's AppImage path.
+- gamescope presets and Steam Deck / handheld tuning, including Game Mode.
+- XDG desktop entries, `sudo make install`, and distro packaging.
+- Flathub-aware emulator management.
+
+See [Steam Deck](/steam-deck/) for the handheld workflow and [Compare](/compare/) for the platform matrix.
+
+## Related pages
+
+- [Installation](/install/)
+- [Downloads](/downloads/)
+- [Updating](/updating/)
+- [Configuration](/reference/configuration/)
+- [Getting started](/getting-started/)

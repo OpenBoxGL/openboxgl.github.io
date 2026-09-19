@@ -135,6 +135,7 @@ export function buildSidebar(): DocNode[] {
       "guides/wine-and-proton",
       "guides/big-box-and-handhelds",
       "steam-deck",
+      "windows",
       "guides/retroachievements",
       "themes",
     ]),

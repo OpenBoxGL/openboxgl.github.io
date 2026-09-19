@@ -30,7 +30,7 @@ Installing from the **catalog** is also possible (`/api/plugins/catalog`), but t
 
 ## Trust and safety
 
-- Plugins execute with the same user privileges as OpenBoxGL and can read and modify files in your data directory and under your account, unless `bwrap` is available, in which case the OS sandbox hides `~/` and `/tmp` and drops network access.
+- Plugins execute with the same user privileges as OpenBoxGL and can read and modify files in your data directory and under your account, unless `bwrap` is available, in which case the OS sandbox hides `~/` and `/tmp` and drops network access. `bwrap` exists only on Linux, so on Windows every plugin hook is unsandboxed and therefore skipped unless you opt in with `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1`.
 - The child-process isolation is robustness, not a security sandbox without bubblewrap; with `bwrap` it is an OS sandbox (`--unshare-all`, `--ro-bind`, no network).
 - **Install only packages you wrote or audited.** Review `plugin.py` after install (it lives in `plugins/<id>/`).
 - Safe mode (`OPENBOX_SAFE_MODE=1` in the environment) disables all plugin execution process-wide. It is the first thing to try when a plugin causes launch or library failures.

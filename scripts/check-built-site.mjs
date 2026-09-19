@@ -13,8 +13,12 @@ async function walk(dir) {
 }
 await walk(root);
 
+// Windows joins with backslashes; every path test below is written for
+// POSIX separators, so normalize once.
+const toPosix = (path) => path.replace(/\\/g, '/');
+
 const routeForFile = (file) => {
-  const path = relative(root, file).replace(/\\/g, '/');
+  const path = toPosix(relative(root, file));
   return path === 'index.html' ? '/' : `/${path.replace(/\/index\.html$/, '')}/`;
 };
 const routeForPath = (pathname) => {
@@ -33,8 +37,9 @@ const isStub = (html) => html.includes('http-equiv="refresh"');
 const titles = new Set();
 const pages = new Map();
 for (const file of files) {
-  if (file.endsWith('404.html')) continue;
-  if (file.includes('_not-found') || file.includes('/404/')) continue;
+  const normalized = toPosix(file);
+  if (normalized.endsWith('404.html')) continue;
+  if (normalized.includes('_not-found') || normalized.includes('/404/')) continue;
   const html = await readFile(file, 'utf8');
   const route = routeForFile(file);
   const stub = isStub(html);

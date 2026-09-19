@@ -10,19 +10,18 @@ OpenBox is maintained by one person in the open, so the roadmap is short and hon
 
 ## In the current release
 
-The [changelog](/changelog/) is the accurate record. The current release is **1.12.1 — Living Library**:
+The [changelog](/changelog/) is the accurate record. The current release is **1.13.0 — Windows**:
 
-- Smart collections pin a Backlog Radio query as a named sidebar shelf that re-evaluates live — the collection stores the query, not a snapshot.
-- Game Story gives every game a deterministic narrative tab: added, first played, longest session, milestones, progress, and captured Moments.
-- Per-game launch options finish the sheet: `launch_env` KEY=value environment overrides and an "Always confirm before launch" flag.
-- Weekly automatic backups keep a bounded archive history with a last-run line in Settings.
-- The SQLite read model self-enables at 5,000+ games (env opt-out honored), and the command palette ranks recently used games and actions first.
+- Windows 10 and 11 on x86_64 run OpenBox natively: a signed portable install (`install.ps1`) that pins the release key and verifies the SHA-256 checksum and Ed25519 signature before extracting, `openbox.cmd` / `openbox.ps1` / `openbox-native.ps1` launchers, library data in `%LOCALAPPDATA%\openbox-game-launcher`, the `openbox://` protocol handler, and emulator definitions that carry their Windows executable names.
+- The WebView2 native window (`native_host_win.c`) mirrors the WebKitGTK host: one UI over the loopback server, the same native bridge, remembered window geometry, tray icon and minimize-to-tray, `openbox://` deeplinks, and one instance per data directory — with the browser app window as the no-toolchain fallback.
+- The platform seam is `pkg/platform_compat.py`, so the runtime still needs nothing but the standard library on either platform.
+- Fixes carried with the port: process liveness no longer uses a probe that terminates the process on Windows, stored references keep POSIX separators, and the metadata database closes cached SQLite handles before an atomic replace.
 
-Earlier milestones include 1.11.0 (Quick Resume, Moments and Record That clips, Time Machine, Backlog Radio, the command palette, Arcade Room and Museum kiosk mode, Household, Steam Bridge, ES-DE import, SteamGridDB artwork, and local launcher trophies), 1.10.0 (review-first LaunchBox XML migration, manual shelf entries, causal catalog sync, indexed search, and launch hardening), 1.9.0 (picker, Constellation, Wrapped, Timeline, Mastery, Game Night, video snaps, and Mood Match), 1.8.0 (keyboard/gamepad navigation, ScreenScraper, custom gamescope presets, library export, and ARM64 packaging), 1.7.2 (internationalization, the optional SQLite read model, MangoHud, BIOS SHA1 drift detection, backup diff, and visual chip builder), 1.7.1 (Play Insights analytics, spacer-window grid virtualization, background search worker, FacetCache LRU, write coalescing, and Launch Doctor fixes), 1.7.0 (Library Setup Center, durable Activity Center operations, Launch Doctor preflight, additive v2 API, and Flatpak packaging), 1.6.0 (modular state architecture, centralized launch tokens, accessible tools menu, dialog focus traps, and CSP hardening), 1.5.1 (large-library write optimizations), 1.5.0 (Proton/Wine prefix management, Faugus Launcher, and Eden Switch), and 1.0.0 (native WebKitGTK window, Server-Sent Events, and the frozen v1 contract).
+Earlier milestones include 1.12.1 — Hardening (a harder update path, clearer errors, no silent skips), 1.12.0 — Living Library (smart collections, Game Story, per-game `launch_env` overrides and confirm-before-launch, weekly automatic backups, the SQLite read model at 5,000+ games), 1.11.0 (Quick Resume, Moments and Record That clips, Time Machine, Backlog Radio, the command palette, Arcade Room and Museum kiosk mode, Household, Steam Bridge, ES-DE import, SteamGridDB artwork, and local launcher trophies), 1.10.0 (review-first LaunchBox XML migration, manual shelf entries, causal catalog sync, indexed search, and launch hardening), 1.9.0 (picker, Constellation, Wrapped, Timeline, Mastery, Game Night, video snaps, and Mood Match), 1.8.0 (keyboard/gamepad navigation, ScreenScraper, custom gamescope presets, library export, and ARM64 packaging), 1.7.2 (internationalization, the optional SQLite read model, MangoHud, BIOS SHA1 drift detection, backup diff, and visual chip builder), 1.7.1 (Play Insights analytics, spacer-window grid virtualization, background search worker, FacetCache LRU, write coalescing, and Launch Doctor fixes), 1.7.0 (Library Setup Center, durable Activity Center operations, Launch Doctor preflight, additive v2 API, and Flatpak packaging), 1.6.0 (modular state architecture, centralized launch tokens, accessible tools menu, dialog focus traps, and CSP hardening), 1.5.1 (large-library write optimizations), 1.5.0 (Proton/Wine prefix management, Faugus Launcher, and Eden Switch), and 1.0.0 (native WebKitGTK window, Server-Sent Events, and the frozen v1 contract).
 
-## Coming next: 1.13 — Solid Ground
+## Coming next: Solid Ground (unreleased)
 
-The next release is in test, not shipped. The theme: finish the features from the last wave, fix the sharp edges, and make very large libraries fast. Highlights:
+The next feature release is in test, not shipped, and it is not tied to a version number yet: the 1.13.0 line shipped as the Windows support release above. The theme: finish the features from the last wave, fix the sharp edges, and make very large libraries fast. Highlights:
 
 - **Household presence** ("who's playing what right now"), plus a deterministic weekly challenge and wishlist shelf shares.
 - **Game Night deck builder** with saved queues, theme presets, and seeded sharing.
@@ -37,7 +36,7 @@ The [changelog](/changelog/) has the full preview. Work in progress is tracked i
 ## Where ideas come from
 
 - GitHub issues, using the feature request template. The maintainer triages these directly.
-- The [parity matrix](/reference/parity/), which tracks LaunchBox workflows and what is intentionally not replicated on Linux.
+- The [parity matrix](/reference/parity/), which tracks LaunchBox workflows and what is intentionally not replicated on Linux and Windows — gamescope and Game Mode, AppImage and Flatpak packaging, XDG desktop integration, and Flathub-aware emulator management stay Linux-only.
 - The community: the project is open source (AGPL-3.0), and contributions that follow [Contributing](/project/contributing/) are welcome.
 
 ## What will not happen

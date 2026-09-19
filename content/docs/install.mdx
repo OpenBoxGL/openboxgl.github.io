@@ -1,9 +1,9 @@
 ---
 title: Installation
-description: Install OpenBoxGL on Linux with AppImage, Flatpak, or source.
+description: Install OpenBoxGL on Linux with AppImage, Flatpak, or source, or on Windows with the signed portable installer.
 ---
 
-OpenBoxGL runs on Linux with Python 3.10+ for source installs. AppImage is the recommended path: it bundles its own Python runtime, so you never depend on system Python versions or library packages.
+OpenBoxGL runs on Linux and, since 1.13.0, natively on Windows. On Linux the AppImage is the recommended path with Python 3.10+ for source installs: it bundles its own Python runtime, so you never depend on system Python versions or library packages. On Windows the signed portable installer is the supported path; it is covered in full on the [Windows](/windows/) page.
 
 There is no OpenBox account, installer wizard, or license key. Downloading a release or cloning the repository is the entire installation.
 
@@ -15,24 +15,30 @@ There is no OpenBox account, installer wizard, or license key. Downloading a rel
 | [Flatpak](#flatpak) | Sandboxed installs from a manifest | Your normal Flatpak workflow |
 | [Source](#source--system) | Development, testing, or patching | `git pull` and re-run |
 | [System install](#source--system) | Installing to `/usr/local` from source | `sudo make install` again |
+| [Windows portable](#windows) | Windows 10 and 11, x86_64 | Built-in verified updater |
 
-The fastest path is the [versioned release installer](#versioned-release-installer): download the tag-pinned script, inspect it, then run it. It selects the matching AppImage, pins the release public key, verifies its SHA-256 checksum and Ed25519 signature, and installs it to `~/.local/bin`.
+The fastest path on Linux is the [versioned release installer](#versioned-release-installer): download the tag-pinned script, inspect it, then run it. It selects the matching AppImage, pins the release public key, verifies its SHA-256 checksum and Ed25519 signature, and installs it to `~/.local/bin`.
 
-Only the AppImage receives the built-in updater. Flatpak, source, and system installs follow their own package or source workflow; see [Updating](/updating/).
+On Windows, download the release's `install.ps1`, inspect it, and run it: it verifies the same key pin, checksum, and signature before extracting the portable install to `%LOCALAPPDATA%\OpenBox`, registering the Start Menu shortcut and the `openbox://` handler, and adding the launchers to your user `PATH`. The full walkthrough is on the [Windows](/windows/) page.
+
+Only the AppImage and the Windows portable install receive the built-in updater. Flatpak, source, and system installs follow their own package or source workflow; see [Updating](/updating/).
 
 ## Prerequisites
 
 Before you install, confirm your system meets the baseline:
 
-| Requirement | AppImage | Flatpak | Source |
-| --- | --- | --- | --- |
-| Linux desktop (X11 or Wayland) | Yes | Yes | Yes |
-| WebKitGTK for the native window | Bundled | Bundled | Required (`libwebkit2gtk-4.1`) |
-| Python | Bundled | Bundled | 3.10+ |
-| `flatpak` + `flatpak-builder` | Not needed | Required | Not needed |
-| `git` | Not needed | Not needed | Required |
-| FUSE (to mount AppImages) | Required | Not needed | Not needed |
-| bubblewrap `bwrap` | Optional (plugins sandboxed when present) | Bundled check | Optional (plugins sandboxed when present) |
+| Requirement | AppImage | Flatpak | Source | Windows |
+| --- | --- | --- | --- | --- |
+| Linux desktop (X11 or Wayland) | Yes | Yes | Yes | Not applicable |
+| Windows 10 or 11, x86_64 | Not applicable | Not applicable | Not applicable | Yes |
+| WebKitGTK for the native window | Bundled | Bundled | Required (`libwebkit2gtk-4.1`) | Not used |
+| WebView2 runtime for the native window | Not used | Not used | Not used | Optional (bundled on Windows 11 and most Windows 10 systems) |
+| Python | Bundled | Bundled | 3.10+ | 3.10+ (`python.exe` or `py.exe` on `PATH`) |
+| `flatpak` + `flatpak-builder` | Not needed | Required | Not needed | Not needed |
+| `git` | Not needed | Not needed | Required | Not needed |
+| FUSE (to mount AppImages) | Required | Not needed | Not needed | Not applicable |
+| bubblewrap `bwrap` | Optional (plugins sandboxed when present) | Bundled check | Optional (plugins sandboxed when present) | Not applicable |
+| Visual Studio Build Tools (C++ workload) | Not needed | Not needed | Not needed | Only to build the native host |
 
 <Callout type="tip" title="No Python packages to install">
 
@@ -142,9 +148,32 @@ The current `sudo make install` wrapper path is not the recommended installation
 
 </Callout>
 
+## Windows
+
+Windows 10 and 11 on x86_64 are supported since 1.13.0, through a signed portable install rather than an AppImage. Download the release's `install.ps1` and run it; it resolves and pins the release public key, then verifies the archive's SHA-256 checksum and Ed25519 signature before extracting the runtime to `%LOCALAPPDATA%\OpenBox\share\openbox`:
+
+```powershell
+$Version = '1.13.0'
+Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
+  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
+.\install.ps1 -Tag "v$Version"
+```
+
+Requirements are Windows PowerShell 5.1, which ships with Windows, and Python 3.10 or newer on `PATH`. The installer and the built-in updater verify signatures with the Python standard library, so neither curl nor OpenSSL is needed. The installer keeps the previous tree at `share\openbox.previous`, registers the Start Menu shortcut and the `openbox://` protocol handler, and adds the runtime folder to your user `PATH`.
+
+The `openbox.cmd`, `openbox.ps1`, and `openbox-native.ps1` launchers mirror `openbox` and `openbox-native` on Linux: `openbox` opens the native WebView2 window once the host is built and the same UI in a browser app window otherwise, while `openbox --web` always uses the browser. Library data lives in `%LOCALAPPDATA%\openbox-game-launcher`.
+
+The [Windows](/windows/) page covers installer options, the native host build, deeplinks, updating, and Windows troubleshooting in full.
+
 ## Making an app menu entry
 
 Open Settings and choose **Install desktop shortcut** (the button appears when OpenBoxGL detects it is running from an AppImage). This writes a `.desktop` entry under `~/.local/share/applications` pointing at the AppImage's current path. If you move the AppImage afterwards, re-run the install shortcut so the entry follows the new location. Desktop integrators such as Gear Lever also work.
+
+On Windows the portable installer performs the equivalent step for you, writing `OpenBox.lnk` into your Start Menu programs folder and registering the `openbox://` handler. If you move the install, re-register it from the install folder:
+
+```powershell
+python -B updates.py install-desktop-entry .\openbox.cmd
+```
 
 ## Verify your install
 
@@ -172,9 +201,11 @@ Secrets and tokens (RetroAchievements, EmuMovies, IGDB, GitHub) are read from th
 
 See [Configuration](/reference/configuration/) for the full environment contract.
 
-## Where the AppImage keeps state
+## Where installs keep state
 
 All library data, media, backups, themes, and logs live in `~/.local/share/openbox-game-launcher` (or the `OPENBOX_DATA_DIR` you set), never inside the AppImage file. Updating or deleting the AppImage does not touch your library.
+
+The Windows portable install uses the same layout under `%LOCALAPPDATA%\openbox-game-launcher`; updating or deleting `%LOCALAPPDATA%\OpenBox` leaves the library untouched.
 
 ## Troubleshooting
 
@@ -185,6 +216,7 @@ All library data, media, backups, themes, and logs live in `~/.local/share/openb
 | Window does not open | Run from a terminal and read the printed error. In `--web` mode, open the printed `http://127.0.0.1:PORT/?token=...` URL yourself. |
 | Source: `python3: command not found` or `ModuleNotFoundError` | Python 3.10+ is required and must be `python3`. On some distros install `python3` and use `python3 web_app.py`. |
 | Flatpak can't read Steam/ROMs | Keep folders under your home directory; the manifest grants `--filesystem=home`. |
+| Windows: `running scripts is disabled on this system` | Run the script with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.13.0`, or set your user execution policy. See [Windows](/windows/). |
 | Library looks empty after install | Check `OPENBOX_DATA_DIR`, the server reads a different directory than the one you edited. It must be in the process environment at launch. |
 
 More at [Troubleshooting startup and browser](/guides/troubleshooting/startup-and-browser/).

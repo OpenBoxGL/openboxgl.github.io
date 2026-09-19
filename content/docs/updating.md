@@ -1,9 +1,9 @@
 ---
 title: Updating
-description: Update AppImage installations and understand package boundaries.
+description: Update AppImage and Windows portable installations and understand package boundaries.
 ---
 
-OpenBoxGL has one built-in updater and it is for the AppImage only. This page explains what it verifies, what happens during an update, what can go wrong, and how the other installation types update instead.
+OpenBoxGL has one built-in updater with two platform paths: the AppImage on Linux and the portable install on Windows. This page explains what it verifies, what happens during an update, what can go wrong, and how the other installation types update instead.
 
 ## Upgrading from a pre-1.0 build
 
@@ -16,11 +16,12 @@ The one behavioral change to expect is the window itself: instead of a browser t
 | Installation | Updater | How to update |
 | --- | --- | --- |
 | AppImage | Built-in verified updater | Settings > Check for updates, then Install verified update |
+| Windows portable | Built-in verified updater | Settings > Check for updates, then Install verified update, then restart |
 | Flatpak | None | Rebuild the manifest (`flatpak-builder --user --install --force-clean build-dir io.openbox.GameLauncher.yml`) or use your local Flatpak workflow |
 | Source | None | `git pull` in the checkout, then restart |
 | System install (`sudo make install`) | None | `git pull`, then `sudo make install` again |
 
-The updater only recognizes an AppImage: it refuses to run when `APPIMAGE` is not set (source and Flatpak launches never set it). If you are on Flatpak or source, the update button reports the release channel but the install step will not replace anything, by design.
+The updater only recognizes an AppImage or a Windows portable install: on Linux it refuses to run when `APPIMAGE` is not set (source and Flatpak launches never set it), and on Windows it requires the launcher to live under the installed tree. If you are on Flatpak or source, the update button reports the release channel but the install step will not replace anything, by design.
 
 ## How the AppImage update works
 
@@ -36,9 +37,21 @@ That is why the Settings dialog says "The current AppImage will be retained as a
 
 ### What you see
 
-- **Update status line** in Settings shows the running version and whether it is an AppImage ("AppImage") or a source checkout.
-- After a successful install, the status line reports the installed version and the backup path. **You must restart OpenBoxGL to use the update**; the running process still executes the old file.
-- The desktop entry does not change because it points at the same path; only the file contents at that path were replaced.
+- **Update status line** in Settings shows the running version and the install kind: an AppImage ("AppImage"), a Windows portable install, or a source checkout.
+- After a successful install, the status line reports the installed version and the backup path. **You must restart OpenBoxGL to use the update**; the running process still executes the old file (on Windows the swap only happens once the app exits).
+- The desktop entry does not change because it points at the same path; only the file contents at that path were replaced. On Windows the Start Menu shortcut points at `openbox.cmd` inside the install tree, which the swap replaces in place.
+
+## How the Windows portable update works
+
+The Windows path runs the same version comparison, asset selection, and verification ladder as the AppImage path, then swaps the whole installed tree instead of a single file:
+
+1. **Asset selection.** The updater looks for `OpenBox-x86_64-windows.zip` under the trusted `https://github.com/vindeckyy/OpenBoxGL/releases/download/` prefix, together with its `.sha256` and `.sig` assets. A release missing any of the three is rejected before anything is downloaded.
+2. **Verification.** The pinned release public key, the SHA-256 checksum, and the Ed25519 signature are checked with the same standard-library RFC 8032 implementation the installer uses, so Windows needs neither curl nor OpenSSL. The signature is verified before the archive is downloaded.
+3. **Staged download.** The archive is downloaded with a 2 GiB cap into a scratch folder inside the install root and extracted there. The extracted tree must contain `web_app.py`, otherwise the update stops without touching the install.
+4. **Swap after exit.** A running install cannot be replaced in place, so a detached PowerShell applier waits for OpenBox to exit (up to ten minutes), moves the current tree to `share\openbox.previous`, moves the staged tree into place, and deletes the scratch folder. Restart OpenBoxGL to use the update; until the app exits, the update has not landed.
+5. **Rollback.** The previous tree stays at `share\openbox.previous`. To roll back, exit OpenBox, delete the current `share\openbox`, and rename `share\openbox.previous` to `share\openbox`.
+
+Your library is never part of the swap: it lives in `%LOCALAPPDATA%\openbox-game-launcher` (or `OPENBOX_DATA_DIR`).
 
 ## Common failures and recovery
 
@@ -51,6 +64,14 @@ Every successful AppImage update renames the current file to an architecture-mat
 ### "Automatic updates require the OpenBox AppImage"
 
 The app is not running from an AppImage. This is expected for Flatpak, source, and system installs; update those through their own workflow above.
+
+### "Automatic updates require an installed copy of OpenBox"
+
+The Windows build is not running from a portable install (for example, you launched `web_app.py` from a source checkout). Install with `install.ps1`, or update a checkout with `git pull`.
+
+### Windows: the update is downloaded but nothing changed yet
+
+The staged tree is swapped in only after OpenBox exits, because Windows cannot replace files that are in use. Quit OpenBox (including the tray icon) and it lands within seconds; the applier gives up after ten minutes, and nothing is lost if it does — the staged tree and the current install are both intact.
 
 ### "GitHub releases request failed (4xx) or Could not reach GitHub releases"
 

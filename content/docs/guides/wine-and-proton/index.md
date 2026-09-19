@@ -5,6 +5,12 @@ description: Discovers, configures, and isolates Windows game runners, Wine pref
 
 OpenBox includes a local-first Wine and Proton prefix manager. It automatically discovers existing prefixes from Bottles, Lutris, Heroic, Steam Proton, and custom directories, eliminating manual prefix path management.
 
+<Callout type="caution" title="This guide applies to Linux hosts">
+
+Since 1.13.0 OpenBox also runs natively on Windows, where Windows titles launch directly: the Windows build does not use Wine, Proton, or UMU, and none of the discovery or launch behavior below applies there. See [Windows](/windows/) for the native Windows host, install layout, and launchers.
+
+</Callout>
+
 ## How it works
 
 OpenBox's Wine subsystem inspects standard local directories at startup and caches known runtime environments:

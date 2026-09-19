@@ -12,7 +12,7 @@ PORT=$(cat "$DATA_DIR/server.port")
 BASE="http://127.0.0.1:$PORT"
 ```
 
-Use the header form in scripts. The query-string token is accepted for the browser launch path but can leak into history and logs. POST bodies are JSON objects and are subject to the shared 65,536-byte body limit. Durable operations return `202` with a `job_id`; inspect them through the jobs endpoints documented in [Saves and operations](/reference/api/saves-and-operations/).
+Use the header form in scripts. The query-string token is accepted for the browser launch path but can leak into history and logs. POST bodies are JSON objects and are subject to the shared 65,536-byte body limit. Durable operations return `202` with a `job_id`; inspect them through the jobs endpoints documented in [Saves and operations](/reference/api/saves-and-operations/). On Windows the data directory is `%LOCALAPPDATA%\openbox-game-launcher`, so `server.token` and `server.port` live there instead.
 
 ## Quick Resume and Moments
 
