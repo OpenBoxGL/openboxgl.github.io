@@ -8,7 +8,7 @@ sidebar: false
 
 OpenBox runs natively on Windows x86_64 alongside Linux. The runtime is unchanged: standard library only (plus `ctypes` on Windows), no `pip install`, no `requirements.txt`, no virtualenv.
 
-- **Native Windows host:** `native_host.exe` renders the same UI over the loopback server through WebView2 and exposes the same `window.openboxNative` bridge the page already uses. It remembers window geometry, provides the tray icon and minimize-to-tray, handles `openbox://` deeplinks, enforces a single instance per data directory through a named pipe (a second launch focuses the running window), shuts the server down gracefully on close, and force-kills the process tree through a job object if it does not exit. The WebView2 runtime is present on Windows 11 and most Windows 10 systems. The host is built from source, not shipped compiled: `powershell -File scripts/build_native_host_windows.ps1` builds `native_host.exe` from `native_host_win.c` next to `web_app.py`, and needs the MSVC toolchain (Visual Studio Build Tools with the C++ workload); the WebView2 SDK comes from the NuGet cache or from nuget.org. `OPENBOX_NATIVE_HOST` overrides the host binary path. Without `native_host.exe` the launchers open the same UI in the browser app window, so Windows works out of the box.
+- **Native Windows host:** `native_host.exe` renders the same UI over the loopback server through WebView2 and exposes the same `window.openboxNative` bridge the page already uses. It remembers window geometry, provides the tray icon and minimize-to-tray, handles `openbox://` deeplinks, enforces a single instance per data directory through a named pipe (a second launch focuses the running window), shuts the server down gracefully on close, and force-kills the process tree through a job object if it does not exit. The WebView2 runtime is present on Windows 11 and most Windows 10 systems. The release ships the host compiled: the portable zip carries `native_host.exe`, and the same binary is attached to the release on its own as `OpenBox-x86_64-windows-native-host.exe` (with `.sha256` and `.sig`) so a source checkout gets the native window without the MSVC toolchain. `powershell -File scripts/build_native_host_windows.ps1` still builds it from `native_host_win.c` next to `web_app.py` for anyone compiling it themselves (Visual Studio Build Tools with the C++ workload; WebView2 SDK from the NuGet cache or from nuget.org). `OPENBOX_NATIVE_HOST` overrides the host binary path. Without `native_host.exe` the launchers open the same UI in the browser app window, so Windows works out of the box.
 - **Windows launchers:** `openbox.cmd` is the double-clickable wrapper, `openbox.ps1` runs the ladder (native window, else browser app window; `--web` forces the browser), and `openbox-native.ps1` runs the native host or falls back. Python is located as `python.exe` or `py.exe` on `PATH`, or through `OPENBOX_PYTHON`; `OPENBOX_SHARE` points the launchers at the runtime directory.
 - **Verified Windows installer:** the release asset `install.ps1` (`scripts/install.ps1`) runs on Windows PowerShell 5.1 with the standard library only — it needs neither curl nor OpenSSL — and follows the same verification ladder as the Linux installer: it fetches `openbox-release.pub`, checks its SHA-256 against a pinned bootstrap anchor (unless `-PublicKeyPath` is given), then verifies the archive's `.sha256` sidecar and its Ed25519 `.sig` before extracting.
 - **Install layout:** `OpenBox-x86_64-windows.zip` (with its `.sha256` and `.sig`) is a portable zip of the full source tree under one top-level `OpenBox/` folder. `-InstallDir`, or `OPENBOX_INSTALL_DIR`, defaults to `%LOCALAPPDATA%\OpenBox`; the runtime lands in `<InstallDir>\share\openbox` and the previous tree is kept at `<InstallDir>\share\openbox.previous` for rollback. The installer registers a Start Menu shortcut and the `openbox://` protocol handler, and adds the bin root to the *user* PATH unless `-NoPathUpdate` is given.
@@ -26,36 +26,6 @@ OpenBox runs natively on Windows x86_64 alongside Linux. The runtime is unchange
 **Still Linux only:** gamescope and Game Mode, AppImage and Flatpak packaging, XDG desktop entries, `sudo make install`, Steam Deck and handheld tuning, and Flathub-aware emulator management. Linux remains the primary distro-integration target; Windows support is x86_64 only. See [Windows](/windows/) for the platform guide.
 
 [Full OpenBox 1.13.0 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.13.0) · [Compare v1.12.1...v1.13.0](https://github.com/vindeckyy/OpenBoxGL/compare/v1.12.1...v1.13.0)
-
-## Unreleased — Solid Ground
-
-> **Coming soon.** This release is still in test and not shipped. These notes move into the changelog once it ships.
-
-The theme is simple: finish the features from the last wave, fix the sharp edges users hit, and make very large libraries fast.
-
-**New**
-
-- **Household presence:** see who is playing what right now, with elapsed time, over the same local sync folder. Off by default, per-member opt-in, no retained history.
-- **Game Night deck builder:** save named queues, apply theme presets, and share a deck so everyone spins the same order from a seed.
-- **Time Machine compare:** diff two dates in your library and revert metadata-only changes through a safe whitelist — paths and launch settings are never touched.
-- **Save history:** per-game save versions with source, age, size, read-back verification, restore, and a test-restore drill that checks a backup in a temp folder first.
-- **Artwork Doctor:** a hygiene report for missing, low-resolution, wrong-aspect, and duplicate art, with a cancelable "fix all with SteamGridDB" job, per-item progress, and undo.
-- **Setup checklists:** each platform shows BIOS (with SHA1 drift), emulator, first launch, and artwork as green or red, so "why doesn't this console work" has a concrete answer.
-- **Plugin API v1:** a frozen, documented surface with palette commands, bound library reads, and notifications, plus honest visibility for plugins that cannot be sandboxed.
-- **High-contrast theme:** a sixth stock theme, with contrast checks in the test suite proving the token system works.
-- **Getting started and extras:** first-run "try these" cards, an auto-moment prompt when a session ends on a high note, a keyboard shortcut cheat sheet (`?`), and a Constellation upgrade with saved viewpoints, path-finding, and PNG export.
-- **Household:** a week-seeded deterministic weekly challenge, and shelf shares you can import as wishlist entries.
-- **Repair and cleanup:** a missing-file repair wizard with dry-run preview, duplicate detection and merge that keeps history and moves absorbed records to Trash, per-game/per-member session export (Markdown/CSV), collection export/import, and undo toasts for trash and purge.
-- **Updates and emulators:** signed emulator-definition updates with an atomic apply, and background AppImage downloads that apply on restart with real progress.
-- **Kiosk PIN lockout:** exponential backoff after repeated failures, with honest wording that the PIN is a convenience boundary, not a security boundary.
-
-**Faster and safer**
-
-- Libraries are shared instead of deep-copied on every request, sync journaling only records what changed, and the auto-import watch loop idles quietly. Measured at 20,000 games: library reads p95 85→75 ms, facets 774→46 ms, media manager 709→2 ms, picker 887→222 ms.
-- Closing the window or refreshing no longer stops running games, Escape no longer discards unsaved game edits, and a damaged library file boots into a recovery flow instead of refusing to start.
-- Large imports and bulk edits no longer hit the request-size ceiling, error toasts look like errors again, and read-only requests can no longer fail on a full disk.
-- Concurrent edits can no longer be observed half-applied, notifications stack instead of clobbering each other, exports stream instead of loading whole archives into memory, and failures that used to be silently swallowed (sort order, view mode, artwork saves, settings) are surfaced.
-- The release gates got honest: the changed-line and new-module coverage checks now actually run on pull requests, broken documentation links fail the build, and the API reference is generated from the live routes so it cannot drift.
 
 ## 1.12.1 (2026-09-15) — Hardening
 

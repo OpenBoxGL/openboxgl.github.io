@@ -19,7 +19,7 @@ Since 1.13.0 OpenBoxGL runs on **Linux and Windows x86_64**, so the comparison b
 | Install | AppImage, Flatpak, or source on Linux; signed portable package via `install.ps1` on Windows | Windows installer only |
 | Data | Local JSON at `~/.local/share/openbox-game-launcher/library.json` on Linux, `%LOCALAPPDATA%\openbox-game-launcher\library.json` on Windows; no account | Cloud library for Premium |
 | Game sources | Steam, Heroic, Lutris, Faugus, RetroArch, ROMs, Arcade, ScummVM, RPCS3, Vita3K, Eden | Windows-first imports |
-| Native window | WebKitGTK on Linux; WebView2 on Windows, built from source with `scripts/build_native_host_windows.ps1` | Windows-only desktop app |
+| Native window | WebKitGTK on Linux; WebView2 on Windows, shipped compiled in the portable release (source checkouts build it with `scripts/build_native_host_windows.ps1`) | Windows-only desktop app |
 | Automation | Local REST API on loopback with per-launch token auth | Limited external automation surface |
 | Handheld | Big Box Stage, Hybrid, CoverFlow with controller mapping, AppImage on immutable systems, `--game-mode` guest under gamescope — Linux only | Big Box exists, handheld flows are secondary |
 | Windows emulators | Every bundled emulator definition carries its Windows executable name, so adapter detection, resume state, and Launch Doctor work with Windows builds | Windows-native emulator support |

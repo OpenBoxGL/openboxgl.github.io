@@ -24,8 +24,9 @@ Every release publishes these artifacts:
 | `OpenBox-aarch64.AppImage` | ARM64 | AppImage, signed |
 | `OpenBox-x86_64.flatpak` | x86_64 | Flatpak bundle |
 | `OpenBox-x86_64-windows.zip` | x86_64 | Windows portable, signed |
+| `OpenBox-x86_64-windows-native-host.exe` | x86_64 | WebView2 window host, signed |
 
-The Windows archive ships with the same `.sha256` sidecar and `.sig` signature as the AppImages, verified by `install.ps1` and by the in-app updater with the Python standard library alone.
+The Windows archive ships with the same `.sha256` sidecar and `.sig` signature as the AppImages, verified by `install.ps1` and by the in-app updater with the Python standard library alone. The native-host executable is the same binary that archive carries, published on its own for source checkouts, and it goes through the same checksum and signature ladder.
 
 ## AppImage with installer, recommended
 
