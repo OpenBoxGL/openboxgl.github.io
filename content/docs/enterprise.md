@@ -31,7 +31,7 @@ Every release is signed with Ed25519. On Linux the installer selects the matchin
 | `install.sh` | Cryptographically verified Linux installer | Same release assets |
 | `install.ps1` | Cryptographically verified Windows installer (PowerShell 5.1, standard library only) | Same release assets |
 
-Verify path: on Linux, download the AppImage matching your architecture, its `.sig` and `.sha256`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.13.0"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. On Windows, download `OpenBox-x86_64-windows.zip` with its `.sha256` and `.sig` and run the released `install.ps1`, which applies the same key-pin, checksum, and signature checks before extracting. See [Updating](/updating/) for architecture-matched rollback and [Windows](/windows/) for the platform guide.
+Verify path: on Linux, download the AppImage matching your architecture, its `.sig` and `.sha256`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.13.1"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. On Windows, download `OpenBox-x86_64-windows.zip` with its `.sha256` and `.sig` and run the released `install.ps1`, which applies the same key-pin, checksum, and signature checks before extracting. See [Updating](/updating/) for architecture-matched rollback and [Windows](/windows/) for the platform guide.
 
 ## Build and CI
 

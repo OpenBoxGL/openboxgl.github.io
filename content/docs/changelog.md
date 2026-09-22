@@ -4,6 +4,24 @@ description: Release notes for OpenBox, from the latest release back to the firs
 sidebar: false
 ---
 
+## 1.13.1 (2026-09-22) — The Windows debut, made solid
+
+A strict patch release on top of 1.13.0's Windows debut: no new features, just regression fixes, hardening, and audits. Every fix below is pinned by a regression test.
+
+**Fixed**
+
+- **Invisible utility dialogs:** prompt, choice, confirm, and Trophy Case dialogs rendered inside a `hidden` wrapper, so every path prompt and confirmation — including the game editor's unsaved-changes guard — was a silent dead end.
+- **Dialog dismissal:** clicking outside a nested dialog closed every open dialog instead of only the topmost one; dismissal now routes through the shared close path, with focus restoration for lazily created dialogs.
+- **Setup wizard:** emoji source-tile icons that render as tofu without an emoji font, selections never highlighted, duplicate sources piling up, no way to remove a selected source, the wizard re-opening on every refresh of an empty library, and stale content on reopen — all fixed, with clickable completed steps.
+- **Windows native host:** "Reveal in Explorer" never opened anything (the command line missed the `explorer.exe` token); rejected or malformed WebView2 bridge messages now reject the pending promise instead of hanging the UI forever.
+- **Event streams:** the server answers `503 SSE_BUSY` with `Retry-After` when every subscriber slot is taken; reconnects close the previous `EventSource` instead of leaking it; hidden tabs can no longer overwrite newer state with stale mutations.
+- **Windows installer rollback:** a failed Start Menu or protocol registration now restores the previous installation tree instead of leaving a half-registered install.
+- **Story day grouping:** timezone-aware timestamps convert to the viewer's local day before grouping, so a moment captured at 23:30 local sits with its session instead of the next day.
+- **Six untranslated strings** (game editor media toggle labels, two Big Box empty-view messages, the sidebar Filters label) now go through i18n in all five locales.
+- **Test and gate fixes:** a test file that fails then passes on retry now prints the first failed attempt's output; the standalone changed-line checker applies ADR 0025 itself.
+
+[Full OpenBox 1.13.1 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.13.1) · [Compare v1.13.0...v1.13.1](https://github.com/vindeckyy/OpenBoxGL/compare/v1.13.0...v1.13.1)
+
 ## 1.13.0 (2026-09-19) — Windows
 
 OpenBox runs natively on Windows x86_64 alongside Linux. The runtime is unchanged: standard library only (plus `ctypes` on Windows), no `pip install`, no `requirements.txt`, no virtualenv.
@@ -438,7 +456,7 @@ Searches you pinned become shelves that stay correct on their own, every game ge
 **State and API contract**
 
 - Schema v5 adds a host-owned `ui_state` block; existing games, settings, playlists, and history migrate untouched.
-- The v1 API contract freezes (`contracts.py` + `v1_contracts.json`, 60 routes) with a CI check that fails when the contract drifts.
+- The v1 API contract freezes (`contracts.py` + `v1_contracts.json`, 61 routes) with a CI check that fails when the contract drifts.
 
 **Frontend**
 

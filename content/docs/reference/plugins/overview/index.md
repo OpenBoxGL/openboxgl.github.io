@@ -7,8 +7,9 @@ Plugins are optional local Python packages that observe or extend OpenBoxGL. The
 
 ## Trust boundary
 
-- Plugins are local code executed with the same user privileges as OpenBoxGL. A plugin can read and modify files in your data directory and under your account, not only library entries.
-- The runner isolates a plugin into a child process and scrubs Python preload paths, but that is robustness isolation, not a security sandbox: the child shares your user and your filesystem.
+- On Linux, each hook runs inside a bubblewrap OS sandbox when `bwrap` is available: every namespace is unshared (no network access), the host root is mounted read-only, and `/home`, `/tmp`, `/run`, `/mnt`, and `/media` are replaced with empty filesystems. The plugin sees only its own package directory (read-only) and the JSON hook payload on stdin — never your data directory or home folder.
+- If the sandbox cannot be created, the plugin is skipped rather than run unsandboxed, unless `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` is set. Reserve that escape hatch for plugin code you have read and audited: without the sandbox, the plugin runs as a plain child process with your user privileges and can read and modify files in your data directory and under your account, not only library entries. On Windows `bwrap` does not exist, so plugins are skipped with a warning unless the variable is set.
+- In both modes the plugin environment is scrubbed before launch: `PYTHONPATH`, `PYTHONHOME`, `LD_PRELOAD`, and `LD_LIBRARY_PATH` are removed, `PYTHONNOUSERSITE=1` is set, and any variable whose name contains `TOKEN`, `PASSWORD`, `SECRET`, or `API_KEY` (case-insensitive) — or starts with `OPENBOX_`, `RETROACHIEVEMENTS_`, `EMUMOVIES_`, `GITHUB_`, `RA_`, `IGDB_`, or `GAMEYFIN_` — is stripped, so plugins cannot read tokens, secrets, or host state out of the environment.
 - Install only packages you wrote or audited. The bundled catalog is documentation-oriented; installing from it still runs downloaded code.
 
 ## Lifecycle
@@ -22,7 +23,7 @@ Plugins are optional local Python packages that observe or extend OpenBoxGL. The
 
 | Hook | When | Effect on result |
 | --- | --- | --- |
-| `library` | Every `/api/library` read (cached for 3 seconds), skipped in safe mode | May rewrite the `games` list; the response uses the last plugin's output when it is a dict with a `games` list of the same length |
+| `library` | Every `/api/library` read (cached for 30 seconds), skipped in safe mode | May rewrite the `games` list; the response uses the last plugin's output when it is a dict with a `games` list of the same length |
 | `before_launch` | At launch, after profile/archive resolution, skipped in safe mode | May rewrite `args`/`cwd` or cancel with `{"cancel": true, "error": "..."}`; invalid output raises a launch validation error |
 | `after_session` | After a session ends (history recorded, plugins run unless safe mode) | Ignored (return value discarded) |
 

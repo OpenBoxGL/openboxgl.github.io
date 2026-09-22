@@ -26,7 +26,7 @@ The installer itself needs Python, because it uses the same RFC 8032 verifier th
 Download the installer and the release archive from the same tag, then run the installer. The installer pins the release public key, verifies its SHA-256 against a committed anchor, and verifies the archive's `.sha256` sidecar and Ed25519 signature before extracting anything.
 
 ```powershell
-$Version = '1.13.0'
+$Version = '1.13.1'
 Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
 .\install.ps1 -Tag "v$Version"
@@ -38,7 +38,7 @@ Pass `-Run` to start OpenBox when the install finishes:
 .\install.ps1 -Tag "v$Version" -Run
 ```
 
-If you would rather download the archive yourself, place `OpenBox-x86_64-windows.zip`, its `.sha256`, and its `.sig` next to `install.ps1`; the installer uses the local files when the tag's assets are already present.
+The installer always fetches `OpenBox-x86_64-windows.zip`, its `.sha256`, and its `.sig` from the release tag into a fresh temp directory — placing the files next to `install.ps1` yourself has no effect. For a mirrored or offline key, pass `-PublicKeyPath` instead.
 
 ### What the installer does
 
@@ -151,7 +151,7 @@ Windows games launch through the game's own executable or through an emulator, e
 | Problem | Cause / fix |
 | --- | --- |
 | `No Python 3 interpreter found` | Install Python 3.10+ and make sure `python.exe` or `py.exe` is on `PATH`, or set `OPENBOX_PYTHON` to the interpreter's full path. |
-| `running scripts is disabled on this system` | Run the installer or launcher with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.13.0`, or set the execution policy for your user. |
+| `running scripts is disabled on this system` | Run the installer or launcher with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.13.1`, or set the execution policy for your user. |
 | `The release public key does not match the pinned trust anchor` | The release key changed or the download was tampered with. Install only from the project's GitHub releases, or pass `-PublicKeyPath` if you deliberately mirror a different key. |
 | The window does not open | Run `openbox --web` from a terminal and open the printed `http://127.0.0.1:PORT/?token=...` URL. |
 | `native_host is missing ... falling back` | The WebView2 host has not been built. Build it as described above, or ignore it and use the browser app window. |

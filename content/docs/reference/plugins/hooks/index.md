@@ -13,7 +13,7 @@ Contract:
 
 - Return a dict with a `games` list, or the input unchanged.
 - The final response uses the last plugin's output only when it is a dict with a `games` list of the same length as the input, and every element is a dict. Otherwise the pre-plugin games win.
-- The result is cached for 3 seconds (`PLUGIN_LIBRARY_TTL`) and invalidated on state changes.
+- The result is cached for 30 seconds (`PLUGIN_LIBRARY_TTL`) and invalidated on state changes. While the cache is stale, the previous result is served immediately and a refresh runs in the background; only the first call — or a call after a state change — blocks until the fresh result is ready.
 
 Example:
 

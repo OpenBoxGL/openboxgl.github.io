@@ -104,12 +104,21 @@ The source install uses only the Python standard library, there is no `pip insta
 
  ### Flatpak
 
- Build and install the Flatpak from the project's manifest with `flatpak-builder`:
+ Install the published bundle, or build from the project's manifest with `flatpak-builder`:
 
  ```bash
+ flatpak install --bundle OpenBox-x86_64.flatpak
+ flatpak run io.openbox.GameLauncher
+ ```
+
+ ```bash
+ git clone https://github.com/vindeckyy/OpenBoxGL.git
+ cd OpenBoxGL
  flatpak-builder --user --install --force-clean build-dir io.openbox.GameLauncher.yml
  flatpak run io.openbox.GameLauncher
  ```
+
+ Download `OpenBox-x86_64.flatpak` from the [release page](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.13.1) for the bundle install.
 
  - The manifest (the `native-host` and `openbox` modules) uses the GNOME Flatpak runtime (`org.gnome.Platform` 49) and grants `--filesystem=home`, so Steam, Heroic, Lutris, and ROM folders under your home directory are readable.
  - The Flatpak is not updated by OpenBoxGL's built-in updater (it only understands the AppImage). Update by rebuilding the manifest or using the Flatpak workflow you already have for local builds.
@@ -153,7 +162,7 @@ The current `sudo make install` wrapper path is not the recommended installation
 Windows 10 and 11 on x86_64 are supported since 1.13.0, through a signed portable install rather than an AppImage. Download the release's `install.ps1` and run it; it resolves and pins the release public key, then verifies the archive's SHA-256 checksum and Ed25519 signature before extracting the runtime to `%LOCALAPPDATA%\OpenBox\share\openbox`:
 
 ```powershell
-$Version = '1.13.0'
+$Version = '1.13.1'
 Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
 .\install.ps1 -Tag "v$Version"
@@ -216,7 +225,7 @@ The Windows portable install uses the same layout under `%LOCALAPPDATA%\openbox-
 | Window does not open | Run from a terminal and read the printed error. In `--web` mode, open the printed `http://127.0.0.1:PORT/?token=...` URL yourself. |
 | Source: `python3: command not found` or `ModuleNotFoundError` | Python 3.10+ is required and must be `python3`. On some distros install `python3` and use `python3 web_app.py`. |
 | Flatpak can't read Steam/ROMs | Keep folders under your home directory; the manifest grants `--filesystem=home`. |
-| Windows: `running scripts is disabled on this system` | Run the script with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.13.0`, or set your user execution policy. See [Windows](/windows/). |
+| Windows: `running scripts is disabled on this system` | Run the script with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.13.1`, or set your user execution policy. See [Windows](/windows/). |
 | Library looks empty after install | Check `OPENBOX_DATA_DIR`, the server reads a different directory than the one you edited. It must be in the process environment at launch. |
 
 More at [Troubleshooting startup and browser](/guides/troubleshooting/startup-and-browser/).

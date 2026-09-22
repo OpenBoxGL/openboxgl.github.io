@@ -10,7 +10,7 @@ OpenBox is maintained by one person in the open, so the roadmap is short and hon
 
 ## In the current release
 
-The [changelog](/changelog/) is the accurate record. The current release is **1.13.0 — Windows**:
+The [changelog](/changelog/) is the accurate record. The current release is **1.13.1 — The Windows debut, made solid**:
 
 - Windows 10 and 11 on x86_64 run OpenBox natively: a signed portable install (`install.ps1`) that pins the release key and verifies the SHA-256 checksum and Ed25519 signature before extracting, `openbox.cmd` / `openbox.ps1` / `openbox-native.ps1` launchers, library data in `%LOCALAPPDATA%\openbox-game-launcher`, the `openbox://` protocol handler, and emulator definitions that carry their Windows executable names.
 - The WebView2 native window (`native_host_win.c`) mirrors the WebKitGTK host: one UI over the loopback server, the same native bridge, remembered window geometry, tray icon and minimize-to-tray, `openbox://` deeplinks, and one instance per data directory — with the browser app window as the no-toolchain fallback.

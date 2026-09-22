@@ -5,7 +5,7 @@ description: Every way to install OpenBoxGL, with verification steps per method.
 
 # Downloads
 
-One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBox application, currently **v1.13.0**.
+One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBox application, currently **v1.13.1**.
 
 | Method | Best for | Updates | Verify |
 | --- | --- | --- | --- |
@@ -33,7 +33,7 @@ The Windows archive ships with the same `.sha256` sidecar and `.sig` signature a
 The installer pins the release public key, verifies the SHA-256 checksum, and verifies the Ed25519 signature before installing to `~/.local/bin`.
 
 ```bash
-VERSION=1.13.0
+VERSION=1.13.1
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output install.sh \
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -64,7 +64,7 @@ chmod +x OpenBox-$(uname -m).AppImage
 Windows 10 and 11 on x86_64 install from a signed portable archive. The installer resolves and pins the release public key, verifies the archive's SHA-256 checksum and its Ed25519 signature, and only then extracts the runtime to `%LOCALAPPDATA%\OpenBox\share\openbox`.
 
 ```powershell
-$Version = '1.13.0'
+$Version = '1.13.1'
 Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
 less install.ps1
@@ -77,7 +77,21 @@ It keeps the previous runtime at `share\openbox.previous`, registers the Start M
 
 ## Flatpak
 
+Install the published bundle directly — no build step needed:
+
 ```bash
+curl --proto '=https' --tlsv1.2 --fail --location \
+  --output OpenBox-x86_64.flatpak \
+  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v1.13.1/OpenBox-x86_64.flatpak"
+flatpak install --bundle OpenBox-x86_64.flatpak
+flatpak run io.openbox.GameLauncher
+```
+
+Or build from the project's manifest with `flatpak-builder`:
+
+```bash
+git clone https://github.com/vindeckyy/OpenBoxGL.git
+cd OpenBoxGL
 flatpak-builder --user --install --force-clean build-dir io.openbox.GameLauncher.yml
 flatpak run io.openbox.GameLauncher
 ```
@@ -116,4 +130,4 @@ openbox --web    # loopback web UI
 | FUSE to mount AppImages | Required | Not needed | Not needed | Not applicable |
 | bubblewrap bwrap | Optional, plugins sandboxed when present | Bundled check | Optional | Not applicable |
 
-See [Installation](/install/) for prerequisites in detail, [Updating](/updating/) for the update flow and rollback, and [Getting started](/getting-started/) for the first import. v1.13.0 publishes signed x86_64 and aarch64 AppImages, an x86_64 Flatpak bundle, and a signed x86_64 Windows portable archive.
+See [Installation](/install/) for prerequisites in detail, [Updating](/updating/) for the update flow and rollback, and [Getting started](/getting-started/) for the first import. v1.13.1 publishes signed x86_64 and aarch64 AppImages, an x86_64 Flatpak bundle, and a signed x86_64 Windows portable archive.
