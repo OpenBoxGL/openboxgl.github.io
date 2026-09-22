@@ -20,8 +20,12 @@ A manifest missing any of these raises `"Plugin id, name, and version are requir
 | Field | Type | Default | Rules |
 | --- | --- | --- | --- |
 | `entry` | string | `plugin.py` | Python file name inside the package. Must be a real file, with a `.py` suffix, and must resolve inside the package (no symlinks or `..` escapes); otherwise `"Plugin entry must be a Python file inside the package."` |
-| `hooks` | array of strings | `[]` | Subset of `library`, `before_launch`, `after_session`. An unknown hook raises `"Plugin declares an unsupported hook."` |
+| `hooks` | array of strings | `[]` | Subset of `library`, `before_launch`, `after_session`, `command`, `library_source`, `events`. An unknown hook raises `"Plugin declares an unsupported hook."` |
 | `description` | string | `""` | Free text, used by the catalog and plugin list. |
+| `api_version` | integer | `1` | Plugin API version the package targets. Must be a positive integer; a version newer than the host supports raises and is surfaced with an error. |
+| `commands` | array of objects | `[]` | Up to 32 `{id, label, description?}` entries, exposed in the command palette under the `>` prefix and run via the `command` hook. |
+| `permissions` | array of strings | `[]` | Declared permissions. In 1.14.0 the only permission is `network`: declared permissions are denied by default and granted by the user at install/enable time in the Plugins manager (Android-style prompt). Granting `network` adds network access to the sandbox; grants are stored per plugin and cleared on removal. |
+| `settings` | object | — | JSON Schema subset (`string`, `number`, `integer`, `boolean`, `enum`, plus `minLength`/`maxLength`/`minimum`/`maximum`). The Plugins manager renders a settings form from the schema and injects stored values into hook payloads as `payload["settings"]` — but only when the manifest declares a `settings` schema. Unset optional fields fall back to their `default`. |
 
 ## Example
 
@@ -30,8 +34,12 @@ A manifest missing any of these raises `"Plugin id, name, and version are requir
  "id": "example-plugin",
  "name": "Example Plugin",
  "version": "1.0.0",
+ "api_version": 1,
  "entry": "main.py",
- "hooks": ["library"]
+ "hooks": ["library"],
+ "commands": [
+   {"id": "stats", "label": "Show library stats", "description": "Reports a game count."}
+ ]
 }
 ```
 
@@ -41,10 +49,10 @@ The `read_manifest` validator (in `plugins.py`) checks, in order:
 
 1. `plugin.json` exists and decodes.
 2. `id` matches the pattern, and `name` and `version` are non-empty.
-3. `hooks` is a list and a subset of the three supported hooks.
+3. `hooks` is a list and a subset of the six supported hooks.
 4. `entry` is a `.py` file that resolves strictly inside the package directory.
 
-Invalid packages are skipped by `list_plugins` and refused by `install_plugin`, so a bad manifest never lands in the installed set.
+Invalid packages are surfaced by `list_plugins` with `"valid": false` and the validation error (so the Plugins manager can explain why a package cannot run) and refused by `install_plugin`, so a bad manifest never lands in the installed set as a working plugin.
 
 ## Install behavior
 

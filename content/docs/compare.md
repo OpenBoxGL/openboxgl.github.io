@@ -11,7 +11,7 @@ Since 1.13.0 OpenBoxGL runs on **Linux and Windows x86_64**, so the comparison b
 
 ## At a glance
 
-| Topic | OpenBox 1.13.1 | LaunchBox |
+| Topic | OpenBox 1.14.0 | LaunchBox |
 | --- | --- | --- |
 | License | AGPL-3.0, full source on GitHub | Proprietary |
 | Cost | Free, no subscription | Premium paywall for advanced workflows |
@@ -46,7 +46,7 @@ Every LaunchBox Premium equivalent ships without a subscription in OpenBoxGL: cu
 
 ## How to verify
 
-- Check the current release tag at [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest), currently v1.13.1.
+- Check the current release tag at [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest), currently v1.14.0.
 - For Windows, the same release publishes `OpenBox-x86_64-windows.zip` with its `.sha256` and `.sig`, plus `install.ps1`; the installer verifies all three before extracting. The full path is in [Windows](/windows/).
 - Open PARITY.md in the application repository and confirm the acceptance check for any row before relying on it.
 - For pricing, LaunchBox Premium pricing is published by Unbroken Software. OpenBox cost is zero and source is AGPL-3.0 at [LICENSE](https://github.com/vindeckyy/OpenBoxGL/blob/master/LICENSE).

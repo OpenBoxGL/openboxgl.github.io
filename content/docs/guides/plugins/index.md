@@ -3,11 +3,11 @@ title: Plugins guide
 description: Install and use local Python plugins to extend OpenBoxGL.
 ---
 
-Plugins are optional local Python packages that observe or extend OpenBoxGL through three hooks. They run as separate processes with a JSON stdin/stdout protocol, so a plugin that crashes or misbehaves cannot take down the library.
+Plugins are optional local Python packages that observe or extend OpenBoxGL through six hooks. They run as separate processes with a JSON stdin/stdout protocol, so a plugin that crashes or misbehaves cannot take down the library.
 
 <Callout type="caution" title="What 'separate process' actually means">
 
-Without bubblewrap, isolation is robustness, not a security sandbox. The child process shares your user privileges and your filesystem, it can read and write any file your OpenBoxGL process can reach. The 5-second timeout, 2 MiB payload cap, and `PYTHONNOUSERSITE=1` environment cleaning prevent runaway behavior, but they don't restrict what the plugin can see on disk. When `bwrap` (bubblewrap) is available, OpenBoxGL runs plugins in an OS sandbox (`--unshare-all`, `--ro-bind / /`, `tmpfs` on `/home`/`/tmp`/`/run`, no network); if the sandbox cannot be created, enabled plugins are skipped unless `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` is set for trusted local plugins. Review every installed `plugin.py` before enabling it, and use `OPENBOX_SAFE_MODE=1` if you're unsure about a package. See [How OpenBoxGL works](/reference/how-it-works/#the-plugin-runner) for the execution pipeline.
+Without bubblewrap, isolation is robustness, not a security sandbox. The child process shares your user privileges and your filesystem, it can read and write any file your OpenBoxGL process can reach. The 5-second timeout, 2 MiB payload cap, and `PYTHONNOUSERSITE=1` environment cleaning prevent runaway behavior, but they don't restrict what the plugin can see on disk. When `bwrap` (bubblewrap) is available, OpenBoxGL runs plugins in an OS sandbox (`--unshare-all`, `--ro-bind / /`, `tmpfs` on `/home`/`/tmp`/`/run`, no network); if the sandbox cannot be created, enabled plugins are skipped unless you trust the plugin in the Plugins manager ("Trust and run", bound to the package's SHA-256) or set `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` for trusted local plugins. Review every installed `plugin.py` before enabling it, and use `OPENBOX_SAFE_MODE=1` if you're unsure about a package. See [How OpenBoxGL works](/reference/how-it-works/#the-plugin-runner) for the execution pipeline.
 
 </Callout>
 
@@ -18,6 +18,9 @@ Without bubblewrap, isolation is robustness, not a security sandbox. The child p
 | `library` | On every library read | Rewrites the games list shown in the UI |
 | `before_launch` | At launch, after profile/archive resolution | Rewrites the launch `args`/`cwd`, or cancels the launch with an error |
 | `after_session` | After a session ends | Observes the session record; the result is discarded |
+| `command` | When you invoke one of its commands from the command palette (`>` prefix) | Runs a declared command; can show a UI notification |
+| `library_source` | On every library build | Imports games into the library with a source badge |
+| `events` | On lifecycle events (app start/shutdown, scan finished, playtime milestones, library changes) | Observes the event; failures never break the host operation |
 
 ## Install a plugin
 
@@ -30,18 +33,18 @@ Installing from the **catalog** is also possible (`/api/plugins/catalog`), but t
 
 ## Trust and safety
 
-- Plugins execute with the same user privileges as OpenBoxGL and can read and modify files in your data directory and under your account, unless `bwrap` is available, in which case the OS sandbox hides `~/` and `/tmp` and drops network access. `bwrap` exists only on Linux, so on Windows every plugin hook is unsandboxed and therefore skipped unless you opt in with `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1`.
+- Plugins execute with the same user privileges as OpenBoxGL and can read and modify files in your data directory and under your account, unless `bwrap` is available, in which case the OS sandbox hides `~/` and `/tmp` and drops network access. `bwrap` exists only on Linux, so on Windows every plugin hook is unsandboxed and therefore skipped unless you trust the plugin in the Plugins manager ("Trust and run", bound to the package's SHA-256 so updates re-prompt) or opt in with `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1`.
 - The child-process isolation is robustness, not a security sandbox without bubblewrap; with `bwrap` it is an OS sandbox (`--unshare-all`, `--ro-bind`, no network).
 - **Install only packages you wrote or audited.** Review `plugin.py` after install (it lives in `plugins/<id>/`).
 - Safe mode (`OPENBOX_SAFE_MODE=1` in the environment) disables all plugin execution process-wide. It is the first thing to try when a plugin causes launch or library failures.
-- `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` opts into unsandboxed execution for trusted local plugins when the sandbox cannot be created (otherwise they are skipped with a warning).
+- `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` opts into unsandboxed execution for trusted local plugins when the sandbox cannot be created (otherwise they are skipped with a warning). Per-plugin "Trust and run" in the Plugins manager is the finer-grained alternative: the grant is bound to the installed package's SHA-256 and updates re-prompt.
 
 ## Write your own
 
 The [Plugin API reference](/reference/plugins/) documents the full contract:
 
 - [Manifest](/reference/plugins/manifest/), `plugin.json` fields and ID validation
-- [Hooks](/reference/plugins/hooks/), the three payloads and response rules
+- [Hooks](/reference/plugins/hooks/), the six payloads and response rules
 - [Processes and errors](/reference/plugins/process-and-errors/), limits (2 MiB in/out, 5-second timeout), environment cleaning, and failure handling
 - [Catalog](/reference/plugins/catalog/), bundled entries and installation
 

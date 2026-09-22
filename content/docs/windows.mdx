@@ -26,7 +26,7 @@ The installer itself needs Python, because it uses the same RFC 8032 verifier th
 Download the installer and the release archive from the same tag, then run the installer. The installer pins the release public key, verifies its SHA-256 against a committed anchor, and verifies the archive's `.sha256` sidecar and Ed25519 signature before extracting anything.
 
 ```powershell
-$Version = '1.13.1'
+$Version = '1.14.0'
 Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
 .\install.ps1 -Tag "v$Version"
@@ -45,7 +45,7 @@ The installer always fetches `OpenBox-x86_64-windows.zip`, its `.sha256`, and it
 <Steps>
 
 <li>Resolves `openbox-release.pub` from the release and checks its SHA-256 against the pinned bootstrap anchor. `-PublicKeyPath` replaces that anchor for mirror or offline installs, and the checksum and signature gates still apply.</li>
-  <li>Downloads `OpenBox-x86_64-windows.zip` (or the `-Arch` you select) with its `.sha256` and `.sig`, then fails closed if any check does not match.</li>
+  <li>Downloads `OpenBox-x86_64-windows.zip` with its `.sha256` and `.sig`, then fails closed if any check does not match. `-Arch` accepts `x86_64` (or `amd64`); ARM64 values fail because there is no ARM64 Windows zip.</li>
   <li>Extracts the archive, which must contain exactly one top-level folder holding `web_app.py`.</li>
   <li>Moves the runtime to `<InstallDir>\share\openbox`, keeping any previous install at `<InstallDir>\share\openbox.previous`.</li>
   <li>Registers the Start Menu shortcut and the `openbox://` protocol handler for the current user.</li>
@@ -63,7 +63,7 @@ Nothing is extracted before every verification step passes.
 | `-InstallDir <path>` | Bin root. Defaults to `OPENBOX_INSTALL_DIR`, then `%LOCALAPPDATA%\OpenBox`. The runtime lands in `<InstallDir>\share\openbox`. |
 | `-Run` | Launch OpenBox after a successful install. |
 | `-NoPathUpdate` | Skip adding the runtime folder to the user `PATH`. |
-| `-Arch <arch>` | Artifact architecture. Defaults to the host CPU. |
+| `-Arch <arch>` | Artifact architecture, x86_64 only. Defaults to the host CPU; `aarch64`/`arm64` are rejected because OpenBox publishes Windows builds for x86_64 only. |
 | `-PublicKeyPath <file>` | Use a local release public key instead of the pinned anchor, for mirrors and offline installs. |
 | `-ReleaseBase <url>` | Base URL the release assets are served from. Defaults to the project's GitHub releases. |
 | `-Repo <owner/name>` | Repository to resolve releases from. |
@@ -151,7 +151,7 @@ Windows games launch through the game's own executable or through an emulator, e
 | Problem | Cause / fix |
 | --- | --- |
 | `No Python 3 interpreter found` | Install Python 3.10+ and make sure `python.exe` or `py.exe` is on `PATH`, or set `OPENBOX_PYTHON` to the interpreter's full path. |
-| `running scripts is disabled on this system` | Run the installer or launcher with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.13.1`, or set the execution policy for your user. |
+| `running scripts is disabled on this system` | Run the installer or launcher with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.14.0`, or set the execution policy for your user. |
 | `The release public key does not match the pinned trust anchor` | The release key changed or the download was tampered with. Install only from the project's GitHub releases, or pass `-PublicKeyPath` if you deliberately mirror a different key. |
 | The window does not open | Run `openbox --web` from a terminal and open the printed `http://127.0.0.1:PORT/?token=...` URL. |
 | `native_host is missing ... falling back` | The WebView2 host has not been built. Build it as described above, or ignore it and use the browser app window. |

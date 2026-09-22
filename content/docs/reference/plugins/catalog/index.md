@@ -14,6 +14,8 @@ The plugin catalog is the curated list of community plugins OpenBoxGL knows abou
 
 `GET /api/plugins/catalog` tries the remote catalog first and falls back to the bundled file on any network or parse failure, so the catalog always returns something valid.
 
+The newer `GET /api/v2/plugins/catalog` returns the same entries enriched with `installed`, `installed_version`, and `update_available` for each entry, plus a top-level `sandbox` field describing the host sandbox status (the enrichment is per-entry, not attached to `sandbox`).
+
 ## Bundled entries
 
 The current bundled catalog (`plugins/catalog.json`) contains one documentation example:

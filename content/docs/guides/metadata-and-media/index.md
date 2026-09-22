@@ -25,6 +25,20 @@ After batch imports, OpenBox provides a dedicated **Metadata Match Review** queu
 
 **Use Steam data** fills name, developer, publisher, genre, year, and description from the Steam storefront API for entries with a Steam App ID, and downloads the library cover and header image.
 
+## Automatic post-import scrape
+
+The setup wizard's Options step has an **Automatically match metadata and download media after import** toggle (on by default). When enabled, every import batch triggers one `POST /api/v2/metadata/auto-scrape` call, which queues exactly two jobs: `metadata-match:{batch}` (offline LaunchBox match preview plus opted-in ScreenScraper dual-hash and IGDB exact-title passes) and `metadata-media:{batch}` (LaunchBox media for confidently matched games, then SteamGridDB fill for anything still missing). Anything the automatic pass cannot resolve stays in the Metadata Match Review queue above.
+
+All online providers stay **off by default**; each runs only when its opt-in is enabled and configured, with per-run budgets, so a single game's failure never aborts a pass. The master toggle, provider opt-ins, and media-type lists are persisted through `GET`/`POST /api/v2/metadata/scrape-settings` — unchecking every media type runs match-only.
+
+## Thumbnail chooser
+
+Every LaunchBox, SteamGridDB, and ScreenScraper search result now offers a **Thumbnails** button that opens a chooser dialog with all image candidates grouped by media kind; picking one applies exactly that image instead of the top pick. (IGDB results apply directly with a **Use** button.) Chosen URLs are downloaded only when they match a candidate the provider returned for that record, so the server never fetches an arbitrary URL. `GET /api/v2/metadata/media-candidates` lists LaunchBox image candidates.
+
+## Time to beat
+
+The Information card's **Time to beat** fact comes from IGDB (its `game_time_to_beats` endpoint, converted from seconds to hours) and is projected into the game list, so pickers and sorting can use it.
+
 ## Media Manager and Durable Operations
 
 The **Media** button opens the Media Manager, which shows a per-platform audit: games, database matched, missing box front, missing background, and missing screenshots. Check the types to download (cover, background, screenshots) and whether to replace existing media, then **Download for matched games**. This runs a durable background operation tracked in the **Activity drawer** (`#activityButton`), backed by `operations.json` with live Server-Sent Events (SSE) progress and cancel/resume support.

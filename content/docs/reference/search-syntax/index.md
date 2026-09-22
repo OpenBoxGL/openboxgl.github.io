@@ -100,6 +100,10 @@ The query bar above the field syntax also accepts short natural phrases, parsed 
 
 Typed keys (`platform:PC`, `genre:rpg`, `source:`, `tag:`, `progress:`, ESRB, region, series, player counts, ratings, time/idle phrases) combine with implicit AND. `POST /api/v2/library/query/parse` accepts query text up to **2,000 characters** (`handlers/library.py:825-826`) and returns rules, clauses, `chips`, leftover `unparsed` words with a `hint`, and `plain_query`; input with nothing parsable stays a plain substring search. Clauses **fail closed** on missing metadata: `ttb`/`year`/`played_within` filters never match a game lacking the field (`None` → `False`), and idle/never-played semantics keep never-played games in the idle set (`True`) rather than guessing. See [Backlog Radio](/guides/discovery/backlog-radio/).
 
+## Game DNA smart search
+
+The sidebar search box has a **Title | Smart** toggle (default Title, persisted). Title mode is the grammar above. Smart mode runs fully offline — no cloud, no downloads — using classical information retrieval: BM25 plus a curated 151-concept lexicon (English, with German, Spanish, French, and Portuguese overlays) hashed into 1024 dimensions, with a 250 ms debounce. Smart results carry **why** explanation chips showing which concepts matched. **More like this** is available in the details pane, the card context menu, and Big Box (gamepad-operable toggle feeding the hybrid search, with why-chips as subtitle lines). The atomic sidecar index lives at `<APP_DIR>/dna_index.json` and is excluded from cloud sync; library mutations invalidate it automatically, and it can be rebuilt on demand.
+
 ## See also
 
 - [Library overview](/guides/library/), browse and search in context

@@ -4,6 +4,27 @@ description: Release notes for OpenBox, from the latest release back to the firs
 sidebar: false
 ---
 
+## 1.14.0 (2026-09-22) — Library Intelligence
+
+Six flagships that make the library smarter and the couch experience complete: a full plugin platform, metadata that handles itself, a personal backlog layer, a Big Box you can drive from the couch, a 0–100 library health score, and offline smart search over your own descriptions.
+
+- **Plugins 2.0:** a catalog browser tab with per-entry Install/Update, per-plugin checksum-bound trust (no global trust toggle; updates re-prompt), Android-style permission prompts at install/enable time, per-plugin settings forms generated from the manifest schema, a `library_source` importer hook that merges plugin games into the library with a source badge, a single `events` lifecycle hook (`app_startup`, `app_shutdown`, `scan_finished`, `playtime_milestone`, `game_added`, `game_removed`, `game_updated`), and palette integration listing plugin commands under the `>` prefix. The plugin API v1 surface is frozen (see the repo's `docs/plugin-api.md`). New routes: `GET/POST /api/v2/plugins/trust`, `POST /api/v2/plugins/permissions`, `GET/POST /api/v2/plugins/settings`, `GET /api/v2/plugins/catalog`, `GET /api/v2/plugins/commands`, `POST /api/v2/plugins/command`.
+- **Effortless metadata:** a new "Automatically match metadata and download media after import" toggle in the setup wizard (default on) with opt-in provider checkboxes for ScreenScraper, IGDB, and SteamGridDB (all default off). Each import batch runs exactly two jobs: an offline LaunchBox match pass plus opt-in provider passes, then a media pass. ScreenScraper ROM-hash matching now requires independent MD5-only and CRC32-only lookups to agree before anything auto-applies. Every LaunchBox, SteamGridDB, and ScreenScraper search result offers a Thumbnails button with a chooser dialog grouped by media kind.
+- **Backlog management:** every game gets a personal backlog layer — Unplayed/Playing progress states, personal 0–5 star ratings distinct from metadata ratings, manual playtime logging, dated notes (the legacy single note migrates on read), and an optional one-time "Mark as Playing?" prompt on first launch. New query grammar (`progress:unplayed`, `my 4 stars`, `unrated by me`) and new v2 routes under `/api/v2/library/playtime/*`, `/api/v2/library/notes/*`, `/api/v2/library/progress/set`, and `/api/v2/library/rating/set`.
+- **Couch-ready Big Box:** a `--bigbox` CLI flag and a "Start in Big Box mode" checkbox so a Deck or HTPC boots straight in, a d-pad-navigable on-screen keyboard for the hybrid search, and Steam Bridge copying cached SteamGridDB artwork into the Steam grid directory so bridged games are no longer grey tiles in Game Mode.
+- **Library health score:** a 0–100 score across five weighted dimensions (file integrity 35, duplicates 20, artwork 20, metadata 15, launch readiness 10) where every deduction names its games. The audit dialog gains a health card with per-dimension fix queues (dry-run preview first, every fix undoable), a Big Box health tile, and scheduled rescans. Backing it: the Artwork Doctor (scan and bulk-fix artwork problems via SteamGridDB, undoable per batch), a missing-file repair wizard that relinks paths against a folder you pick, and duplicate detection with a merge preview that absorbs records into the Trash so merges are reversible.
+- **Game DNA search:** offline smart search behind a Title | Smart toggle on the search box. Smart mode runs classical IR only — BM25 plus a curated 151-concept lexicon in English, German, Spanish, French, and Portuguese — with "why" explanation chips and "More like this" in the details pane, card context menu, and Big Box. No AI cloud, no downloads.
+
+**Fixed**
+
+- The Big Box pause overlay no longer leaks gamepad input to the grid behind it, attract mode can no longer start over the pause and Game Night overlays, and opening the pause overlay for a game without attached documents no longer crashes.
+
+**Changed**
+
+- The three per-surface gamepad poll loops are unified into a single requestAnimationFrame loop that dispatches each frame to the highest-priority active surface; no input behavior changes.
+
+[Full OpenBox 1.14.0 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.14.0) · [Compare v1.13.1...v1.14.0](https://github.com/vindeckyy/OpenBoxGL/compare/v1.13.1...v1.14.0)
+
 ## 1.13.1 (2026-09-22) — The Windows debut, made solid
 
 A strict patch release on top of 1.13.0's Windows debut: no new features, just regression fixes, hardening, and audits. Every fix below is pinned by a regression test.

@@ -25,6 +25,7 @@ The native window renders the same UI as the web fallback; both serve `index.htm
 | `-h`, `--help` | Show command-line options and usage summary, then exit. |
 | `--no-browser` | Start the server without opening a window. Useful for remote or scripted starts; the printed URL still works. |
 | `--game-mode` | Force gamescope guest behavior (Steam Deck / Bazzite Game Mode). On the web entry point this opens Big Box fullscreen in a kiosk browser; the native window detects gamescope guests from the environment and needs no flag. |
+| `--bigbox` | Open the UI with `?deeplink=bigbox` so it starts in Big Box mode. Pairs with the **Start in Big Box mode** setting (`bigbox_start_at_launch`) for Deck/HTPC boot. |
 | `--play <id>` | Launch a game by stable `game_id` or numeric library id, using the authenticated local launch route. This is the command used by Steam Bridge shortcuts. |
 | `--uri <openbox://...>` | Dispatch a deep link against a running instance (or start one) and exit. You can also pass a bare `openbox://...` URI directly as a positional argument. |
 | `--launcher` | Open the rofi/wofi/dmenu keyboard launcher against the running instance and exit. |

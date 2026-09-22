@@ -14,8 +14,8 @@ Every plugin requires a `plugin.json` manifest placed in its directory under `~/
   "id": "play-notifier",
   "name": "Play Session Notifier",
   "version": "1.0.0",
+  "api_version": 1,
   "description": "Sends local desktop notifications when games start and finish.",
-  "author": "OpenBox Community",
   "entry": "plugin.py",
   "hooks": [
     "before_launch",
@@ -33,13 +33,17 @@ Every plugin requires a `plugin.json` manifest placed in its directory under `~/
 | `name` | string | Display name shown in the Plugins dialog. |
 | `version` | string | Non-empty version string (e.g. `1.0.0`). |
 | `description` | string | Optional short summary of plugin capabilities. |
-| `author` | string | Optional author or organization name. |
+| `author` | string | Ignored by the runtime — it is not read by OpenBoxGL; keep it only for your own tooling. |
 | `entry` | string | Entry point Python file inside the package (defaults to `plugin.py`; must resolve inside the package, no symlinks or `..`). |
-| `hooks` | array | List of subscribed lifecycle hooks (`before_launch`, `after_session`, `library`). |
+| `hooks` | array | List of subscribed lifecycle hooks (`before_launch`, `after_session`, `library`, `command`, `library_source`, `events`). |
+| `api_version` | integer | Plugin API version targeted (defaults to `1`); newer versions are refused. |
+| `commands` | array | Up to 32 `{id, label, description?}` entries, exposed in the command palette under the `>` prefix. |
+| `permissions` | array | Declared permissions; in 1.14.0 only `network`, granted by the user in the Plugins manager at install/enable time. |
+| `settings` | object | JSON Schema subset for per-plugin settings; the Plugins manager renders a form and injects stored values into hook payloads. |
 
 ## Hook Lifecycles & JSON Protocol
 
-OpenBox runs each hook as a child process: `python3 plugin_runner.py <entry> <hook>` (wrapped in `bwrap` when available). The runner loads the entry file as a module and calls the function named after the hook: `def library(payload)`, `def before_launch(payload)`, or `def after_session(payload)`. The payload arrives as one decoded JSON dict argument, and the function's return value (a dict) is written to stdout as JSON. If the module does not define the hook function, the payload passes through unchanged.
+OpenBox runs each hook as a child process: `python3 plugin_runner.py <entry> <hook>` (wrapped in `bwrap` when available). The runner loads the entry file as a module and calls the function named after the hook: `def library(payload)`, `def before_launch(payload)`, `def after_session(payload)`, `def command(payload)`, `def library_source(payload)`, or `def events(payload)`. The payload arrives as one decoded JSON dict argument, and the function's return value (a dict) is written to stdout as JSON. If the module does not define the hook function, the payload passes through unchanged.
 
 ### Supported Hooks
 
@@ -49,9 +53,18 @@ OpenBox runs each hook as a child process: `python3 plugin_runner.py <entry> <ho
 2. **`after_session`**: Dispatched when a game process exits.
    - **Input Payload**: the session record itself, `{"game": "Chrono Trigger", "started": "...", "seconds": 1800, "exit_code": 0, ...}`
    - **Output Result**: any dict; the result is discarded. Exceptions are caught by the runner, so a failing plugin never breaks session bookkeeping.
-3. **`library`**: Dispatched on library reads (cached 3 seconds, invalidated on state changes).
+3. **`library`**: Dispatched on library reads (cached 30 seconds, invalidated on state changes).
    - **Input Payload**: `{"games": [...]}` — the full public game projection.
    - **Output Result**: `{"games": [...]}` — a dict whose `games` list has the same length as the input, every element a dict. Anything else is ignored and the pre-plugin list wins.
+4. **`command`**: Invoked from the command palette (`>` prefix) or `POST /api/v2/plugins/command` for a manifest-declared command.
+   - **Input Payload**: `{"command": "<command id>", "library": [...]}` — the library summary is bounded to 500 entries with only `game_id`, `name`, `platform`, `progress`, `favorite`, and `playtime_seconds`.
+   - **Output Result**: any dict; may include `{"notification": {"level": "info" | "success" | "warning" | "error", "message": "..."}}` to show a UI notification. Hook errors are surfaced to the caller.
+5. **`library_source`**: Runs on every library state build, making the plugin a library importer.
+   - **Input Payload**: `{"api_version": 1}` (plus `settings` when the manifest declares a settings schema).
+   - **Output Result**: `{"games": [...]}` — a bare list or any other shape is rejected with a warning. Entries are namespaced as `plugin:<plugin_id>:<their_id>` and shown with a source badge; disabling or removing the plugin drops its games on the next rebuild.
+6. **`events`**: Fan-out for lifecycle events — `app_startup`, `app_shutdown`, `scan_finished`, `playtime_milestone`, `game_added`, `game_removed`, `game_updated`.
+   - **Input Payload**: `{"event": "<name>", ...}` with a small bounded payload (e.g. `game_added` carries `game_ids`, up to 500; `game_updated` carries `changes`, up to 100).
+   - **Output Result**: any dict; failures never break the host operation.
 
 ## Minimal Python Plugin (`plugin.py`)
 
@@ -91,9 +104,9 @@ OpenBox isolates plugin execution using **Bubblewrap** (`bwrap`) when available 
 - Private empty `tmpfs` mounts for `/home`, `/tmp`, `/run`, `/mnt`, `/media`
 - Network isolation (disabled by default)
 
-When the sandbox cannot be created, enabled plugins are **skipped** with a warning. To run trusted local plugins without the sandbox, set `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` in the process environment (not `.env`). To disable all plugin execution for troubleshooting, launch OpenBox with `OPENBOX_SAFE_MODE=1`.
+When the sandbox cannot be created, enabled plugins are **skipped** with a warning. To run trusted local plugins without the sandbox, either trust the plugin in the Plugins manager (**Trust and run** — the grant is bound to the package's SHA-256, so updates re-prompt) or set `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` in the process environment (not `.env`). To disable all plugin execution for troubleshooting, launch OpenBox with `OPENBOX_SAFE_MODE=1`.
 
-Windows has no `bwrap`, so plugin hooks cannot be isolated there: enabled plugins are **skipped** with the same warning, and `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` is the only way to run them. The runner then executes as an ordinary subprocess with your own user's access to the filesystem and network, so set it only for plugin code you have read.
+Windows has no `bwrap`, so plugin hooks cannot be isolated there: enabled plugins are **skipped** with the same warning until you trust them one by one in the Plugins manager or set `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1`. The runner then executes as an ordinary subprocess with your own user's access to the filesystem and network, so trust it only for plugin code you have read.
 
 ## Installing & Testing
 

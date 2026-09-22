@@ -5,6 +5,10 @@ description: Browse a library fullscreen with controller-oriented layouts.
 
 Big Box is the fullscreen controller-oriented view of the app. Click **Big Box** in the top bar (or launch with `?deeplink=bigbox`; OpenBoxGL also opens Big Box automatically when it detects a gamescope guest session).
 
+## Starting in Big Box
+
+Settings → Big Box has a **Start in Big Box mode** checkbox (`bigbox_start_at_launch`), and the `--bigbox` CLI flag (see [CLI reference](/reference/cli/)) opens the UI with `?deeplink=bigbox` — so a Deck or HTPC can boot straight into Big Box like Steam Big Picture.
+
 ## Layouts
 
 Settings, **Big Box layout**, chooses among three modes:
@@ -45,6 +49,14 @@ The **screensaver / attract mode** shows a rotating random game after a delay. S
 
 **Big Box shutdown commands** run when switching into Big Box; they are not run when leaving it.
 
+## On-screen keyboard
+
+When the hybrid search takes focus, a d-pad-navigable QWERTY + symbols grid opens and types into the search via input events, reusing the existing filter. It sits on the gamepad loop just below the pause overlay, so the pad keeps driving the grid everywhere else.
+
+## Health tile
+
+Big Box shows a library **health tile** with a re-scan action, so you can check the 0–100 health score and re-run the audit without leaving the couch.
+
 ## Themes and media packs
 
 Big Box uses the same CSS themes as the desktop UI (see [Themes](/themes/)), including per-platform themes. Bundled media packs add platform clear logos, Xbox or PlayStation controller prompt packs (which also change the on-screen hint), and core status badges.
@@ -57,6 +69,8 @@ On Steam Deck, Bazzite, and other gamescope sessions, OpenBoxGL runs as a guest 
 2. In Desktop Mode, add a non-Steam game pointing at the AppImage with launch options or target args including `--game-mode`.
 3. Enable Steam Input for that shortcut if you want controller profiles in Big Box.
 4. Return to Game Mode and launch OpenBox. It opens Big Box fullscreen.
+
+After shortcuts are applied, Steam Bridge copies cached SteamGridDB artwork (cover → capsule, background → hero, clear logo → logo) into the account's Steam grid directory, so bridged games are no longer grey tiles in Game Mode. Original bytes are copied as-is (no resize); skips are logged and reported, and nothing is ever written outside a detected Steam account directory.
 
 Under gamescope, OpenBoxGL detects the guest via environment (`GAMESCOPE_WAYLAND_DISPLAY`, `STEAM_GAMESCOPE_RESTRICTED`, or a `gamescope` desktop name) and opens Big Box fullscreen in the native window. In the web fallback (`--web`, or when the native host is missing), the UI opens in a kiosk browser (Chromium, Chrome, Brave, or Edge, native or Flatpak), and OpenBoxGL marks that window with a dedicated `STEAM_GAME` id (`413091001`) so it is visible under gamescope. Steam titles launched from OpenBox still go through Steam (`steam -applaunch` / `steam://`), so Steam Input and overlays keep working. Non-Steam games get a stable synthetic `STEAM_GAME` id derived from their identity, in the range 700,000,000 to 899,999,999.
 

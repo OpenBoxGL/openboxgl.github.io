@@ -41,15 +41,20 @@ The child environment is cleaned before execution:
 | Exception inside the plugin | The child exits nonzero; handled as above. Plugin exceptions can never raise inside the OpenBoxGL process |
 | Spawn error (`OSError`) | Warning; payload passes through |
 
-A plugin therefore cannot break a launch or a library read by crashing: worst case its changes are dropped and a warning is logged. The one exception is `before_launch` output validation: valid JSON that is structurally wrong (missing `args`/`cwd`, empty argv, nonexistent cwd) aborts the launch with a validation error, because launching with a broken command would be worse.
+A plugin therefore cannot break a launch or a library read by crashing: worst case its changes are dropped and a warning is logged. Exceptions:
+
+- A non-dict `before_launch` return falls back to the input payload (the runner echoes it), and structurally invalid `args`/`cwd` are discarded with a warning while the host launches with the original command; only `{"cancel": true}` aborts the launch.
+- `command` hook errors (bad JSON, non-object, oversized output, nonzero exit, timeout) are surfaced to the `POST /api/v2/plugins/command` caller as a `400`.
 
 ## Safe mode
 
 With `OPENBOX_SAFE_MODE` set in the environment:
 
-- `run_plugins` is never called for `library`, `before_launch`, or `after_session`.
+- `run_plugins` is never called for `library`, `before_launch`, `after_session`, or `library_source`; the `library_source` merge and the `events` dispatcher are skipped as well.
 - The webhook dispatcher is not created (`get_webhook_dispatcher` returns None).
 - `settings.safe_mode` reports true to the UI.
+
+Explicitly invoked palette commands (`POST /api/v2/plugins/command`) are not blocked by safe mode.
 
 Safe mode is a diagnosis tool: enable it, confirm the problem disappears, then remove or fix the offending plugin and restart normally.
 
