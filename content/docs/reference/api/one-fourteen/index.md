@@ -3,11 +3,11 @@ title: API 1.14 additions
 description: Request and response guidance for the Plugins 2.0, Game DNA, library health score, backlog, and effortless metadata workflows shipped in OpenBox 1.14.0.
 ---
 
-OpenBox 1.14.0 adds these authenticated, additive `/api/v2/*` workflows without changing the frozen v1 contract. The server still binds to loopback, chooses a random port at launch, and accepts `X-OpenBox-Token: <redacted> The v1 surface stays frozen; everything new lives under `/api/v2`.
+OpenBox 1.14.0 adds these authenticated, additive `/api/v2/*` workflows without changing the frozen v1 contract. The server still binds to loopback, chooses a random port at launch, and accepts `X-OpenBox-Token: TOKEN` on every protected route.
 
 ```bash
 DATA_DIR="$HOME/.local/share/openbox-game-launcher"
-TOKEN=<redacted>
+TOKEN=$(cat "$DATA_DIR/server.token")
 PORT=$(cat "$DATA_DIR/server.port")
 BASE="http://127.0.0.1:$PORT"
 ```
