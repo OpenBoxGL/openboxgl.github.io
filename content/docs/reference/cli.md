@@ -23,6 +23,7 @@ The native window renders the same UI as the web fallback; both serve `index.htm
 | Flag | Behavior |
 | --- | --- |
 | `-h`, `--help` | Show command-line options and usage summary, then exit. |
+| `--bigbox` | Open the UI straight into Big Box mode at startup by appending `&deeplink=bigbox` to the launch URL. Ignored by `--backup`/`--restore-backup`, which never start the server. (v1.14.0+) |
 | `--no-browser` | Start the server without opening a window. Useful for remote or scripted starts; the printed URL still works. |
 | `--game-mode` | Force gamescope guest behavior (Steam Deck / Bazzite Game Mode). On the web entry point this opens Big Box fullscreen in a kiosk browser; the native window detects gamescope guests from the environment and needs no flag. |
 | `--bigbox` | Open the UI with `?deeplink=bigbox` so it starts in Big Box mode. Pairs with the **Start in Big Box mode** setting (`bigbox_start_at_launch`) for Deck/HTPC boot. |

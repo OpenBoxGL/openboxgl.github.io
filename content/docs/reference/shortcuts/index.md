@@ -1,6 +1,6 @@
 ---
 title: Keyboard & Controller Shortcuts
-description: Complete hotkey and gamepad bindings for desktop window management and Big Box kiosk mode.
+description: Complete hotkey and gamepad bindings for the library, the tools menu, and Big Box kiosk mode.
 ---
 
 OpenBox is designed for seamless navigation whether you are sitting at a desktop with a mechanical keyboard or holding a Steam Deck on the couch.
@@ -20,6 +20,37 @@ OpenBox is designed for seamless navigation whether you are sitting at a desktop
 | <kbd>F11</kbd> | **Fullscreen** | Toggles borderless fullscreen window mode. |
 | <kbd>Escape</kbd> | **Dismiss** | Closes active dialog, tools menu, or context popup. |
 
+## Library Grid Keyboard Navigation
+
+These move the focus in the library grid and list once nothing is typing and no dialog is open.
+
+| Shortcut | Action |
+| --- | --- |
+| <kbd>ArrowRight</kbd> / <kbd>ArrowLeft</kbd> | Next / previous game |
+| <kbd>ArrowDown</kbd> / <kbd>ArrowUp</kbd> | Move one row (by the current column count) |
+| <kbd>PageDown</kbd> / <kbd>PageUp</kbd> | Move one screen of games |
+| <kbd>Home</kbd> / <kbd>End</kbd> | Jump to the first / last game |
+| <kbd>Escape</kbd> | Clear the current selection and blur the grid |
+
+## Command Palette Navigation
+
+| Shortcut | Action |
+| --- | --- |
+| <kbd>ArrowDown</kbd> / <kbd>ArrowUp</kbd> | Move through palette results |
+| <kbd>Enter</kbd> | Run the highlighted result |
+| <kbd>Escape</kbd> | Close the palette |
+
+## Arcade Room Keyboard Navigation
+
+| Shortcut | Action |
+| --- | --- |
+| <kbd>ArrowLeft</kbd> / <kbd>ArrowRight</kbd> | Move between cabinets |
+| <kbd>ArrowUp</kbd> / <kbd>ArrowDown</kbd> | Move between zones within a cabinet |
+| <kbd>Home</kbd> / <kbd>End</kbd> | Jump to the first / last entry |
+| <kbd>Enter</kbd> | Show the current game |
+| <kbd>Space</kbd> / <kbd>P</kbd> | Launch the current game |
+| <kbd>Escape</kbd> / <kbd>Backspace</kbd> | Leave Arcade Room |
+
 ## Tools Menu Keyboard Navigation (WAI-ARIA)
 
 | Shortcut | Action | Description |
@@ -33,17 +64,27 @@ OpenBox is designed for seamless navigation whether you are sitting at a desktop
 
 | Shortcut | Action | Description |
 | --- | --- | --- |
-| <kbd>ArrowLeft</kbd> / <kbd>ArrowRight</kbd> | **Previous / Next** | Cycles through game titles or cover flow items. |
-| <kbd>Enter</kbd> | **Launch / Confirm** | Launches the selected game or applies the focused menu action. |
-| <kbd>P</kbd> | **Session Control** | Opens the running session control overlay (pause, resume, kill). |
+| <kbd>ArrowLeft</kbd> / <kbd>ArrowUp</kbd> | **Previous** | Moves back through the cover flow. |
+| <kbd>ArrowRight</kbd> / <kbd>ArrowDown</kbd> | **Next** | Moves forward through the cover flow. |
+| <kbd>Enter</kbd> | **Launch / Confirm** | Launches the selected game, confirms a screensaver pick, or applies the focused menu action. |
+| <kbd>P</kbd> | **Session Control** | Opens the running session control overlay (pause, resume, kill). Only acts when a session is running. |
 | <kbd>M</kbd> | **Filter Menu** | Opens the Big Box platform, playlist, and sort filter menu. |
 | <kbd>R</kbd> | **Shuffle** | Jumps to a random title in the current list. |
 | <kbd>F</kbd> | **Favorite** | Toggles the Favorite flag on the active title. |
-| <kbd>Escape</kbd> / <kbd>Backspace</kbd> | **Back / Exit** | Exits Big Box mode or returns from submenus. |
+| <kbd>Escape</kbd> | **Back / Exit** | Blurs the Big Box search field, closes the filter menu or the pause overlay, or exits Big Box mode. |
+| <kbd>Backspace</kbd> | **Back / Exit** | Same as <kbd>Escape</kbd> inside the filter menu. |
 
 ## 1.11 deep-link shortcuts
 
 The CLI can dispatch `openbox://resume/<id>`, `openbox://moment/<id>`, and `openbox://clip/<id>` for the current release; `openbox://launch/<id>` is also available for direct play. Arcade Room has no registered URI action: open it from Tools or the Ctrl/Cmd-K palette. See [Command line and deep links](/reference/cli/) for token, server, and stable-id details.
+
+## Context menu
+
+| Shortcut | Action |
+| --- | --- |
+| <kbd>ContextMenu</kbd> (or <kbd>Shift</kbd> + <kbd>F10</kbd>) | Open the context menu for the focused game |
+| <kbd>ArrowDown</kbd> / <kbd>ArrowUp</kbd> / <kbd>Home</kbd> / <kbd>End</kbd> | Move through context menu items |
+| <kbd>Escape</kbd> / <kbd>Tab</kbd> | Close the context menu |
 
 ## Big Box Gamepad Bindings
 

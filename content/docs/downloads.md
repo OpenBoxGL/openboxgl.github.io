@@ -5,7 +5,7 @@ description: Every way to install OpenBoxGL, with verification steps per method.
 
 # Downloads
 
-One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBox application, currently **v1.14.0**.
+One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBox application, currently **v1.15.0**.
 
 | Method | Best for | Updates | Verify |
 | --- | --- | --- | --- |
@@ -38,8 +38,8 @@ Every release publishes these artifacts:
 | `OpenBox-x86_64-windows-native-host.exe` | x86_64 | WebView2 window host, signed |
 | `OpenBox-x86_64-windows-native-host.exe.sha256` | x86_64 | SHA-256 checksum sidecar |
 | `OpenBox-x86_64-windows-native-host.exe.sig` | x86_64 | Ed25519 signature sidecar |
-| `OpenBox-1.14.0-sbom.json` | x86_64 | SBOM (CycloneDX 1.4) |
-| `OpenBox-1.14.0-aarch64-sbom.json` | ARM64 | SBOM (CycloneDX 1.4) |
+| `OpenBox-1.15.0-sbom.json` | x86_64 | SBOM (CycloneDX 1.4) |
+| `OpenBox-1.15.0-aarch64-sbom.json` | ARM64 | SBOM (CycloneDX 1.4) |
 
 The Windows archive ships with the same `.sha256` sidecar and `.sig` signature as the AppImages, verified by `install.ps1` and by the in-app updater with the Python standard library alone. The native-host executable is the same binary that archive carries, published on its own for source checkouts, and it goes through the same checksum and signature ladder.
 
@@ -48,7 +48,7 @@ The Windows archive ships with the same `.sha256` sidecar and `.sig` signature a
 The installer pins the release public key, verifies the SHA-256 checksum, and verifies the Ed25519 signature before installing to `~/.local/bin`.
 
 ```bash
-VERSION=1.14.0
+VERSION=1.15.0
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output install.sh \
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -79,7 +79,7 @@ chmod +x OpenBox-$(uname -m).AppImage
 Windows 10 and 11 on x86_64 install from a signed portable archive. The installer resolves and pins the release public key, verifies the archive's SHA-256 checksum and its Ed25519 signature, and only then extracts the runtime to `%LOCALAPPDATA%\OpenBox\share\openbox`.
 
 ```powershell
-$Version = '1.14.0'
+$Version = '1.15.0'
 Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
 less install.ps1
@@ -88,7 +88,7 @@ less install.ps1
 
 To launch right after installing, add `-Run`. Install to a different directory with `-InstallDir`, or skip the user `PATH` edit with `-NoPathUpdate`. The installer requires Windows PowerShell 5.1 and Python 3.10 or newer on `PATH`; it needs neither curl nor OpenSSL, because signature verification uses the same standard-library RFC 8032 implementation as the in-app updater.
 
-It keeps the previous runtime at `share\openbox.previous`, registers the Start Menu shortcut and the `openbox://` protocol handler, and adds the runtime folder to your user `PATH`. See [Windows](/windows/) for the launcher ladder, the WebView2 native window, and uninstall steps.
+It keeps the previous runtime at `share\openbox.previous`, registers the Start Menu shortcut and the `openbox://` protocol handler, and adds the runtime folder to your user `PATH`. The release publishes only the two installers, `install.sh` and `install.ps1`, as standalone assets — the uninstaller is not one of them. It ships **inside** the zip and inside the install tree, so you run it from `scripts\uninstall.ps1` under your install directory (for a default install, `%LOCALAPPDATA%\OpenBox\share\openbox\scripts\uninstall.ps1`). It removes exactly what this installer created — the install tree, the `PATH` entry, the shortcut, and the `openbox://` registration — and never touches your library. See [Windows](/windows/) for the launcher ladder, the WebView2 native window, and the full uninstall procedure.
 
 ## Flatpak
 
@@ -97,7 +97,7 @@ Install the published bundle directly — no build step needed:
 ```bash
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output OpenBox-x86_64.flatpak \
-  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v1.14.0/OpenBox-x86_64.flatpak"
+  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v1.15.0/OpenBox-x86_64.flatpak"
 flatpak install --bundle OpenBox-x86_64.flatpak
 flatpak run io.openbox.GameLauncher
 ```
@@ -145,4 +145,4 @@ openbox --web    # loopback web UI
 | FUSE to mount AppImages | Required | Not needed | Not needed | Not applicable |
 | bubblewrap bwrap | Optional, plugins sandboxed when present | Bundled check | Optional | Not applicable |
 
-See [Installation](/install/) for prerequisites in detail, [Updating](/updating/) for the update flow and rollback, and [Getting started](/getting-started/) for the first import. v1.14.0 publishes signed x86_64 and aarch64 AppImages with checksum, signature, and zsync sidecars, an x86_64 Flatpak bundle, a signed x86_64 Windows portable archive with its sidecars, the signed WebView2 native-host binary with its sidecars, the release installer scripts and public key, and CycloneDX SBOMs for both Linux architectures.
+See [Installation](/install/) for prerequisites in detail, [Updating](/updating/) for the update flow and rollback, and [Getting started](/getting-started/) for the first import. v1.15.0 publishes signed x86_64 and aarch64 AppImages, an x86_64 Flatpak bundle, and a signed x86_64 Windows portable archive.

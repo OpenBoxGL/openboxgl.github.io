@@ -12,7 +12,7 @@ OpenBoxGL brings mixed game collections into one searchable catalog. Keep librar
 
 <ProductShot src="/openbox-screenshot.png" alt="The OpenBox native window: filter rail on the left, grouped cover grid in the center, and the selected game's detail pane on the right." caption="The native window: filter rail, grouped cover grid, and game detail pane in one workspace." />
 
-[**Install OpenBoxGL 1.14.0**](/install/) [**Read the quick start**](/getting-started/) [**Read the release notes**](/changelog/)
+[**Install OpenBoxGL 1.15.0**](/install/) [**Read the quick start**](/getting-started/) [**Read the release notes](/changelog/)
 
 ## What OpenBoxGL is
 
@@ -28,7 +28,7 @@ The application ships one UI over two hosts, both over the same local data:
 
 When you start OpenBox, a local server starts on `127.0.0.1` and the native window renders the UI against it. With `--web`, your browser opens to the same server instead. The server never listens on the network, and every request must carry a per-launch token, so the window (or tab) you open is the only client.
 
-<Callout type="note" title="Platforms in 1.13.0">
+<Callout type="note" title="Platforms since 1.13.0">
 
 Linux installs from the AppImage, Flatpak, or source. Windows x86_64 installs from the signed portable package with the published `install.ps1` script, which verifies the release key, the archive checksum, and its Ed25519 signature before extracting. Linux stays the primary target for distribution integration: gamescope and Steam Game Mode, AppImage/Flatpak packaging, XDG desktop entries, `sudo make install`, and handheld tuning remain Linux-only. See [Windows](/windows/) and [Installation](/install/).
 
@@ -56,14 +56,16 @@ Each area has its own guide. The cards below say what you will find there.
  label="OpenBoxGL guides"
  items={[
    { href: '/guides/library/', title: 'Library', eyebrow: 'Browse', description: 'Grid and list browsing, advanced search, filters, favorites, collections, playlists, health checks, and safe removal.' },
-   { href: '/reference/api/one-twelve/', title: 'Living Library', eyebrow: 'New in 1.12', description: 'Smart collections, Game Story timelines, per-game launch_env, weekly backups, SQLite at 5,000+ games, and palette recents.' },
+  { href: '/reference/api/one-twelve/', title: 'Living Library', eyebrow: 'New in 1.12', description: 'Smart collections, Game Story timelines, per-game launch_env, weekly backups, SQLite at 5,000+ games, and palette recents.' },
+  { href: '/guides/emulators-and-launching/#emulator-definition-updates', title: 'Emulator definition updates', eyebrow: 'New in 1.15', description: 'Check for, install, and roll back a signed community definition pack in Settings > Emulators. It shadows the bundled set, never overwrites a definition you edited, and says plainly when no pack has been published yet.' },
+  { href: '/changelog/', title: 'Library intelligence', eyebrow: 'New in 1.14', description: 'A 0-100 library health score, the Artwork Doctor, missing-file repair and duplicate merge, offline Game DNA search, Plugins 2.0, and a personal backlog layer.' },
   { href: '/guides/library/importing/', title: 'Imports', eyebrow: 'Bring in', description: 'Steam, Heroic, Lutris, Gameyfin, ROM folders, arcade DAT files, standalone games, and local services.' },
   { href: '/guides/metadata-and-media/', title: 'Metadata and media', eyebrow: 'Enrich', description: 'LaunchBox Games Database and IGDB matching, artwork, media audits, and bounded background jobs.' },
   { href: '/guides/emulators-and-launching/', title: 'Launching', eyebrow: 'Play', description: 'Profiles, per-game overrides, archive extraction, dependency checks, and command tokens.' },
   { href: '/guides/big-box-and-handhelds/', title: 'Big Box', eyebrow: 'Fullscreen', description: 'Controller-oriented layouts, themes, screensavers, and Steam Deck / gamescope support.' },
   { href: '/guides/sessions-saves-and-backups/', title: 'Saves and sessions', eyebrow: 'Protect', description: 'Play history, save discovery, versioned backups, restore protection, and statistics sync.' },
   { href: '/guides/sessions-saves-and-backups/quick-resume-moments/', title: 'Quick Resume and Moments', eyebrow: 'Remember', description: 'Resume supported emulator sessions, capture moments, record clips, and revisit session recaps.' },
-  { href: '/guides/library/time-machine/', title: 'Time Machine', eyebrow: 'Rewind', description: 'Inspect the journal, browse bounded as-of views, and preview safe catalog reverts.' },
+  { href: '/guides/library/time-machine/', title: 'Time Machine', eyebrow: 'Rewind', description: 'Inspect the journal, browse bounded as-of views, compare two dates to see exactly what changed, and preview safe catalog reverts.' },
   { href: '/guides/library/queue-tags-notifications/', title: 'Organization', eyebrow: 'Automate', description: 'Play queue, normalized tags, notifications, and signed webhook automation.' },
   { href: '/guides/retroachievements/', title: 'RetroAchievements', eyebrow: 'Achieve', description: 'Match ROMs to achievement sets and track hardcore, beaten, and mastered progress.' },
   { href: '/guides/plugins/', title: 'Plugins', eyebrow: 'Extend', description: 'Install local Python extensions that observe or change the library and launches.' },
@@ -73,7 +75,7 @@ Each area has its own guide. The cards below say what you will find there.
   { href: '/guides/emulators-and-launching/steam-bridge-esde/', title: 'Handheld migration', eyebrow: 'Move', description: 'Review Steam shortcuts.vdf changes, use openbox --play, and import ES-DE gamelists safely.' },
   { href: '/guides/metadata-and-media/steamgriddb-and-trophies/', title: 'Artwork and trophies', eyebrow: 'Polish', description: 'Use optional SteamGridDB artwork and deterministic local OpenBox launcher trophies.' },
   { href: '/guides/storefront-manager/', title: 'Storefront Manager', eyebrow: 'Catalog', description: 'Browse owned versus installed catalogs and automate imports on startup.' },
-  { href: '/themes/', title: 'Themes', eyebrow: 'Customize', description: 'Five bundled CSS themes and local theme imports, global or per platform.' },
+  { href: '/themes/', title: 'Themes', eyebrow: 'Customize', description: 'Six bundled CSS themes (including High Contrast), motion that respects your system setting, and local theme imports, global or per platform.' },
  ]}
 />
 

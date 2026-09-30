@@ -58,7 +58,7 @@ The source install uses only the Python standard library, there is no `pip insta
  Download the installer from a specific signed release, inspect it, then run it. The installer verifies the release public-key pin, SHA-256 checksum, and Ed25519 signature before installing to `~/.local/bin`:
 
  ```bash
-  VERSION=1.14.0
+ VERSION=1.15.0
  curl --proto '=https' --tlsv1.2 --fail --location \
    --output install.sh \
    "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -120,7 +120,7 @@ The source install uses only the Python standard library, there is no `pip insta
  flatpak run io.openbox.GameLauncher
  ```
 
- Download `OpenBox-x86_64.flatpak` from the [release page](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.14.0) for the bundle install.
+Download `OpenBox-x86_64.flatpak` from the [release page](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.15.0) for the bundle install.
 
  - The manifest (the `native-host` and `openbox` modules) uses the GNOME Flatpak runtime (`org.gnome.Platform` 49) and grants `--filesystem=home`, so Steam, Heroic, Lutris, and ROM folders under your home directory are readable.
  - The Flatpak is not updated by OpenBoxGL's built-in updater (it only understands the AppImage). Update by rebuilding the manifest or using the Flatpak workflow you already have for local builds.
@@ -164,7 +164,7 @@ The current `sudo make install` wrapper path is not the recommended installation
 Windows 10 and 11 on x86_64 are supported since 1.13.0, through a signed portable install rather than an AppImage. Download the release's `install.ps1` and run it; it resolves and pins the release public key, then verifies the archive's SHA-256 checksum and Ed25519 signature before extracting the runtime to `%LOCALAPPDATA%\OpenBox\share\openbox`:
 
 ```powershell
-$Version = '1.14.0'
+$Version = '1.15.0'
 Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
 .\install.ps1 -Tag "v$Version"
@@ -174,7 +174,7 @@ Requirements are Windows PowerShell 5.1, which ships with Windows, and Python 3.
 
 The `openbox.cmd`, `openbox.ps1`, and `openbox-native.ps1` launchers mirror `openbox` and `openbox-native` on Linux: `openbox` opens the native WebView2 window once the host is built and the same UI in a browser app window otherwise, while `openbox --web` always uses the browser. Library data lives in `%LOCALAPPDATA%\openbox-game-launcher`.
 
-The [Windows](/windows/) page covers installer options, the native host build, deeplinks, updating, and Windows troubleshooting in full.
+The release publishes only the two installers, `install.sh` and `install.ps1`, as standalone assets — the uninstaller is not one of them. It ships **inside** the zip and inside the install tree, so you run it from `scripts\uninstall.ps1` under your install directory (for a default install, `%LOCALAPPDATA%\OpenBox\share\openbox\scripts\uninstall.ps1`) with `powershell -ExecutionPolicy Bypass -File`; add `-InstallDir` for a non-default install, or `-WhatIf` to preview. It removes exactly what the installer created — the install tree and its rollback copy, the user `PATH` entry, the Start Menu shortcut, and the `openbox://` registration — and never touches your library or settings. The [Windows](/windows/) page covers installer options, the native host build, deeplinks, updating, the uninstaller, and Windows troubleshooting in full.
 
 ## Making an app menu entry
 
@@ -227,7 +227,7 @@ The Windows portable install uses the same layout under `%LOCALAPPDATA%\openbox-
 | Window does not open | Run from a terminal and read the printed error. In `--web` mode, open the printed `http://127.0.0.1:PORT/?token=...` URL yourself. |
 | Source: `python3: command not found` or `ModuleNotFoundError` | Python 3.10+ is required and must be `python3`. On some distros install `python3` and use `python3 web_app.py`. |
 | Flatpak can't read Steam/ROMs | Keep folders under your home directory; the manifest grants `--filesystem=home`. |
-| Windows: `running scripts is disabled on this system` | Run the script with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.14.0`, or set your user execution policy. See [Windows](/windows/). |
+| Windows: `running scripts is disabled on this system` | Run the script with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.15.0`, or set your execution policy for your user. See [Windows](/windows/). |
 | Library looks empty after install | Check `OPENBOX_DATA_DIR`, the server reads a different directory than the one you edited. It must be in the process environment at launch. |
 
 More at [Troubleshooting startup and browser](/guides/troubleshooting/startup-and-browser/).

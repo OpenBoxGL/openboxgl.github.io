@@ -10,22 +10,22 @@ The application repository's `PARITY.md` is the maintenance source for capabilit
 
 Every workflow in `PARITY.md` is marked `done`, or carries a decision status for workflows without a Linux equivalent:
 
-- <StatusBadge status="done" /> means the workflow is usable end to end. The 1.13.0 line runs on Linux (AppImage, Flatpak, source, and system installs) and on Windows x86_64, so `done` rows apply on both unless the row's note or the Linux-only list below says otherwise.
+- <StatusBadge status="done" /> means the workflow is usable end to end. The 1.15.0 line runs on Linux (AppImage, Flatpak, source, and system installs) and on Windows x86_64, so `done` rows apply on both unless the row's note or the Linux-only list below says otherwise.
 - <StatusBadge status="partial" /> means a deliberate Linux equivalent exists but the Windows/premium surface is broader or unavailable.
 - <StatusBadge status="missing" /> means no usable equivalent yet.
 - Decision rows ("Not applicable", "Replaced by ...", "Use ... instead") mark Windows-only workflows with no Linux equivalent; they are documented as boundaries rather than implied support.
 
-Verified against **v1.14.0** (application `docs/PARITY.md`).
+Verified against **v1.15.0** (application `docs/PARITY.md`).
 
 ## Platform coverage
 
-The 1.13.0 line runs on Linux and on Windows x86_64. Windows uses the native WebView2 host, the `install.ps1` installer, and verified in-place updates of `OpenBox-<arch>-windows.zip`; the platform seam lives in `pkg/platform_compat.py` (standard library only, plus `ctypes` on Windows).
+The 1.15.0 line runs on Linux and on Windows x86_64. Windows uses the native WebView2 host, the `install.ps1` installer with its matching `uninstall.ps1`, and verified in-place updates of `OpenBox-<arch>-windows.zip`; the platform seam lives in `pkg/platform_compat.py` (standard library only, plus `ctypes` on Windows).
 
 These surfaces remain Linux-only and are not part of the Windows build: gamescope and Game Mode, AppImage and Flatpak packaging, XDG desktop entries, `sudo make install`, Steam Deck and handheld tuning, and Flathub-aware emulator management. See [Windows](/windows/) for the platform guide.
 
 ## Capability status
 
-The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Brazilian Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0/1.12.0 features plus the 1.13.0 Windows support below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
+The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Brazilian Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0 through 1.15.0 features plus the Windows support below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
 
 | Area | Status | Notes |
 | --- | --- | --- |
@@ -57,6 +57,15 @@ The source matrix tracks the current LaunchBox-aligned capabilities, including L
 | Per-game launch environment (v1.12.0) | <StatusBadge status="done" /> | `launch_env` KEY=value overrides and `launch_confirm` per game; merge order game > platform > global |
 | Scheduled backups and SQLite default (v1.12.0) | <StatusBadge status="done" /> | Opt-in weekly automatic library backups with retention; FTS read model self-enables at 5,000+ games with env opt-out |
 | Windows support (v1.13.0) | <StatusBadge status="done" /> | Native WebView2 host built from `native_host_win.c`, signed `install.ps1` with the same key-pin/checksum/signature ladder, verified in-place updates, and Windows executable names in the bundled emulator definitions |
+| Library health score (v1.14.0) | <StatusBadge status="done" /> | 0–100 score across five weighted dimensions (file integrity, duplicates, artwork, metadata, launch readiness) with a "Fix all" queue (dry-run preview first, every fix undoable), a Big Box health tile, and a scheduled rescan |
+| Artwork Doctor (v1.14.0) | <StatusBadge status="done" /> | Bulk SteamGridDB artwork hygiene report with safe fix/undo helpers via `parity_artwork_hygiene.py` |
+| Missing-file repair and duplicate merge (v1.14.0) | <StatusBadge status="done" /> | Missing-path reports become fixable: relink games and media after a move with candidate matching and review before apply; duplicate detection consolidates colliding game records with a reviewable merge plan |
+| Game DNA offline search (v1.14.0) | <StatusBadge status="done" /> | Title/Smart toggle on the search box; Smart mode runs BM25 plus a curated 151-concept lexicon (English, German, Spanish, French, Portuguese) with "why" chips and "More like this", fully offline |
+| Emulator definition updates (v1.15.0) | <StatusBadge status="done" /> | Signed community definition pack installs into the per-user data directory and shadows the bundled set without overwriting it; verified with the release Ed25519 key, a signature failure raises a security notification, local definitions always win, and rollback removes exactly what the pack installed (ADR 0061) |
+| Time Machine compare (v1.15.0) | <StatusBadge status="done" /> | `GET /api/v2/library/time-machine/compare` diffs the library between two journal points read-only: added, removed, and per-field changed rows with true totals even when the page truncates |
+| Motion and reduced motion (v1.15.0) | <StatusBadge status="done" /> | Every duration and easing is a structural token; a single `prefers-reduced-motion` block zeroes them all, dialogs animate out as well as in, theme switches cross-fade, and the toast is one top-layer surface (ADR 0063) |
+| High Contrast theme (v1.15.0) | <StatusBadge status="done" /> | A sixth stock theme redeclaring every `:root` token at maximum contrast (21:1 body text, AAA foregrounds), checked against every theme by a contrast matrix in `tests/test_stock_themes.py` |
+| Windows uninstaller (v1.15.0) | <StatusBadge status="done" /> | `scripts/uninstall.ps1` removes exactly what `install.ps1` creates — the install tree and its rollback copy, the user `PATH` entry, the Start Menu shortcut, and the `openbox://` registration — and never touches the library or settings; `-WhatIf` previews it (ADR 0062) |
 
 ## Intentionally not replicated on Linux
 

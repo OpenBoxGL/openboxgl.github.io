@@ -3,13 +3,14 @@ title: Themes
 description: Choose stock themes or import a local CSS theme.
 ---
 
-Themes are plain CSS files with instant apply: changing the active theme re-applies instantly without restarting. Five stock themes ship with OpenBoxGL and are installed into the user themes folder automatically at startup:
+Themes are plain CSS files with instant apply: changing the active theme re-applies instantly without restarting. Six stock themes ship with OpenBoxGL and are installed into the user themes folder automatically at startup:
 
 - **Midnight Circuit**: dark blue-black palette with cyan accents.
 - **Phosphor Terminal**: dark green terminal palette.
 - **Harbor Light**: light paper-toned palette with blue and coral accents.
 - **Cinema Marquee**: dark cinema palette with gold accents.
 - **Nordic Mist**: dark slate palette with muted teal accents.
+- **High Contrast**: maximum-contrast palette added in v1.15.0 — body text at 21:1 against pure black, with AAA foregrounds.
 
 <ThemePreviewer />
 
@@ -58,3 +59,27 @@ Two **Settings → Appearance** toggles personalize the UI from your games' art:
 - **Adaptive theming in Big Box** (`mood_match_bigbox`) extends the effect to the Big Box background and cover ring.
 
 Both default off. Theme authors can restyle the effect through the `--mood-primary`, `--mood-ink`, `--mood-secondary`, `--mood-glow`, `--mood-tint`, and `--mood-transition` tokens.
+
+## Motion and reduced motion
+
+Every duration and easing in the UI is a **token**, not a literal: `--dur-fast` 150 ms, `--dur-base` 200 ms, `--dur-slow` 240 ms, `--dur-out` 140 ms for every exit, `--dur-spin` 2400 ms, `--dur-loop`, `--stagger`, plus `--ease-out`, `--ease-in`, `--ease-move`, and `--ease-linear`. These are structural, not part of the theme palette: a theme must not redeclare them, because the theme stylesheet loads after the base one and would otherwise defeat the override below. Authoring a new animation means choosing a token; a raw duration fails the token gate.
+
+<Callout type="note" title="One switch, and nothing can be missed">
+
+Reduced motion is correct by construction. A single `prefers-reduced-motion: reduce` block sets every duration token to approximately zero, and it is written with a specificity that outranks a theme's `:root` regardless of load order. Anything that cannot be zeroed — an infinite loop — is switched off instead, so a button in its busy state shows an ellipsis rather than a frozen spinner, cover shimmer and card skeletons stop, and the Big Box startup video and video snaps are hidden entirely.
+
+</Callout>
+
+Turn it on through your operating system's accessibility settings (Windows: **Settings → Accessibility → Visual effects → Animation effects**; GNOME and most Linux desktops: the same switch under Accessibility → Seeing), and OpenBox picks it up live — there is no in-app toggle, because a second one is a second thing that can be missed. Motion that JavaScript owns (the Game Night wheel, the Constellation layout, dialog exits, and the toast timers) reads the same tokens at call time rather than at load time, so the setting applies without a restart.
+
+What you see with motion on:
+
+- Dialogs animate in **and out**; the exit is not skipped for dialogs built lazily at runtime.
+- Switching themes cross-fades rather than snapping.
+- Covers reserve their box and fade in when the image loads, so the grid does not jump.
+- The library grid's entrance animation plays for a view change only — not on every search keystroke, favorite, bulk toggle, or cover-ratio regroup.
+- The Big Box stage slides in from the direction you moved.
+
+## Contrast is checked, not assumed (v1.15.0)
+
+Text and interactive colors use semantic ink tokens — `--ink-strong`, `--on-active`, `--on-danger`, `--border-input`, `--state-hover`, and `--state-press` — rather than raw palette entries. A contrast matrix in the test suite checks every stock theme against a fixed list of foreground/background pairs a component actually paints — body and muted text on the background, ink on card, field, hover, rating-badge, and insight-card surfaces, on-active on the active and accent colors, on-danger on danger, the four toast colors, the three health colors, and the input boundary and focus ring at the lower non-text threshold. The hover and press state tokens are alpha overlays rather than foregrounds, so they are excluded from the matrix by design. That matrix is how the High Contrast theme doubled as the proof that the token contract holds end to end: it redeclares `:root` only, uses no raw color outside `:root`, and any component that needed a hardcoded color to stay legible would show up there as an unreadable panel rather than a passing gate.

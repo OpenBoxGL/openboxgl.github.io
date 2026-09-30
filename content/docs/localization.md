@@ -6,7 +6,7 @@ sidebar: false
 
 # Localization
 
-OpenBox ships locale catalogs for **English, Spanish, German, French, and Brazilian Portuguese**. The locale selector is in **Settings > Interface language**; switching re-translates the keyed UI surfaces without a page reload. Some operational and browser fallback labels remain English.
+OpenBox ships locale catalogs for **English, Spanish, German, French, and Portuguese**. The locale selector is in **Settings > Interface language**; switching re-translates the keyed UI surfaces without a page reload. Some operational and browser fallback labels remain English.
 
 ## How it works
 
@@ -24,7 +24,7 @@ The locale is loaded via `fetch('/locales/{locale}.json')` on page load, with `e
 
 - All 5 locale files have 100% key coverage (no missing keys in any locale).
 - All `data-i18n` and `t()` references in the codebase have corresponding keys in `en.json`.
-- No locale file carries extra keys outside `en.json` (`check_i18n.py:7-13`): an extra key fails the gate the same way a missing key does.
+- No locale file carries extra keys outside `en.json` (`check_i18n.py:9`): an extra key fails the gate the same way a missing key does.
 
 A locale file with missing keys will fail CI. This prevents shipping partial translations.
 
@@ -37,6 +37,8 @@ A locale file with missing keys will fail CI. This prevents shipping partial tra
 5. Add the locale to `available_locales` in `pkg/state/cache.py`.
 6. Run `python3 scripts/check_i18n.py` to verify 100% key coverage.
 7. Run `make check` to verify the full gate passes.
+
+Each entry in `available_locales` carries both a plain `name` and a `native` name, but the picker renders only the native one — the option label is the native name, falling back to the plain name and then the code. So the shipped list shows `English`, `Español`, `Deutsch`, `Français`, and `Português`; the plain names (`English`, `Spanish`, `German`, `French`, `Portuguese`) exist in the payload but are never displayed. Add a `native` name to a new locale or its picker entry will fall back to the plain name.
 
 ## Related pages
 

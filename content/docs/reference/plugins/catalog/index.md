@@ -3,26 +3,27 @@ title: Plugin catalog reference
 description: Bundled catalog entries and local installation behavior.
 ---
 
-The plugin catalog is the curated list of community plugins OpenBoxGL knows about. It is bundled with the application and refreshed from the repository when the network is available.
+The plugin catalog is the curated list of community plugins OpenBoxGL knows about. It is bundled with the application and refreshed from a commit-pinned repository URL when the network is available.
 
 ## Catalog sources
 
 | Source | Path / URL | Timeout / cap | Fallback |
 | --- | --- | --- | --- |
-| Remote | `https://raw.githubusercontent.com/vindeckyy/OpenBoxGL/master/plugins/catalog.json` | 20 s, 4 MiB | Bundled local catalog |
+| Remote | The pinned `plugins/catalog.json` commit on the OpenBoxGL repository | 20 s, 4 MiB, plus a pinned SHA-256 check on the response | Bundled local catalog |
 | Local | `plugins/catalog.json` next to the application | none | `[]` |
 
-`GET /api/plugins/catalog` tries the remote catalog first and falls back to the bundled file on any network or parse failure, so the catalog always returns something valid.
+`GET /api/plugins/catalog` tries the remote catalog first and falls back to the bundled file on any network, checksum, or parse failure, so the catalog always returns something valid. `GET /api/v2/plugins/catalog` (1.14.0+) additionally enriches every entry with `installed`, `installed_version`, and `update_available`, and reports the current `sandbox` status as a top-level response field.
 
 The newer `GET /api/v2/plugins/catalog` returns the same entries enriched with `installed`, `installed_version`, and `update_available` for each entry, plus a top-level `sandbox` field describing the host sandbox status (the enrichment is per-entry, not attached to `sandbox`).
 
 ## Bundled entries
 
-The current bundled catalog (`plugins/catalog.json`) contains one documentation example:
+The current bundled catalog (`plugins/catalog.json`) contains two documentation examples, both `local_only`:
 
 | id | name | hooks | url | notes |
 | --- | --- | --- | --- | --- |
 | `openbox.library-stats` | Library Stats Hook | `after_session` | (empty) | `local_only: true` example |
+| `openbox.hello-palette` | Hello Palette | `command` | (empty) | `local_only: true` example declaring one palette command |
 
 ## Entry fields
 

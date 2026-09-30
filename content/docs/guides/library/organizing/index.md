@@ -55,6 +55,33 @@ The **Health** button runs a Library Audit over the whole library: duplicate ide
 
 **Media** opens the Media Manager: a per-platform audit (games, database matched, missing box front, missing background, missing screenshots), bulk media downloads, and duplicate-media cleanup with a separate dry-run and apply step. Duplicate detection hashes cover, background, and screenshot files; the apply step deletes only files inside the OpenBox data directory and never symlinks.
 
+## Library health score (v1.14.0)
+
+The **Health** dialog no longer just lists problems — it scores the library out of 100 and tells you where the points went. The score is the weighted sum of five dimensions, and every deduction names the games behind it, so a number is never the whole answer:
+
+| Dimension | Weight | What it measures |
+| --- | --- | --- |
+| File integrity | 35 | Game files present and reachable |
+| Duplicates | 20 | Duplicate game records — identity collisions, cross-source included |
+| Artwork | 20 | Missing media across the media types, weighted by type priority (cover ≫ banner/icon; screenshots as a group) |
+| Metadata | 15 | Missing or sparse descriptive fields |
+| Launch readiness | 10 | ROM-suffix games with no emulator profile and no per-game override, plus games flagged broken |
+
+The health card sits at the top of the audit, and **Breakdown** opens a per-dimension dialog listing the exact issues in that dimension. Each dimension has a **Fix all in this dimension** queue that shows a dry-run preview first and stays undoable — nothing is changed before you approve the plan, and every fix can be reversed. A **health tile** in Big Box shows the current score with a re-scan action, and a **scheduled rescan** (daily, weekly, on startup, or off; default weekly) keeps it fresh without getting in the way of a game you are actually playing.
+
+## Artwork Doctor (v1.14.0)
+
+The **Artwork Doctor** is the artwork half of that work, run as one cancelable batch job. It scans the artwork fields — cover, hero, background, clear logo, icon, and banner — for missing covers, artwork files that are missing on disk, low-resolution and wrong-aspect images, and duplicate cover images, then fixes all of them with SteamGridDB. Every replacement is recorded against the provider it came from, and the whole batch is undoable — the same "preview, then apply, then undo if you disagree" contract as the rest of the health fixes. Missing **game** files are not its business: that is the health score's `file_integrity` dimension, and the missing-file repair wizard is what relinks them.
+
+## Repair missing files and merge duplicates (v1.14.0)
+
+Two wizards turn the health report into fixes:
+
+- **Repair missing files** scans for missing game and media paths, matches them against a folder you pick, and relinks only the matches that are **still missing** — anything that changed since the scan is skipped rather than guessed at, so a half-moved folder cannot get a wrong link written.
+- **Merge duplicates** groups identity, path, and title collisions and shows a merge preview. It keeps the record with the most play history, unions media and list fields, and moves the absorbed entries to the **Trash** so a merge is reversible rather than destructive. The health dialog's dedupe button opens it.
+
+The API equivalents are `GET /api/v2/library/health` and `/health/issues` for the snapshot and issue lists, `POST /api/v2/library/health/scan` and `/health/fix` to run and apply, `GET/POST /api/v2/library/repair` with `/repair/preview` and `/repair/apply` for the missing-file wizard, and `POST /api/v2/library/duplicates/merge` for the merge.
+
 ## Safe deletion
 
 Removing a game asks twice: first to confirm removing the library entry, then whether to also delete the game's listed media files. Game files are never deleted. **Settings** has **Remove all imported Steam games** for wiping Steam entries only. The audit and duplicate tools also report before they change anything. Keep a backup when the operation affects files; see [Sessions, saves, and backups](/guides/sessions-saves-and-backups/).

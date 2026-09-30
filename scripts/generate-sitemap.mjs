@@ -15,13 +15,17 @@ async function walk(dir) {
 }
 await walk(ROOT);
 
+// Windows joins with backslashes; every path test below is written for
+// POSIX separators, so normalize once and test only the normalized form.
+const toPosix = (path) => path.replace(/\\/g, '/');
 const urls = [];
 for (const file of files) {
-  if (file.endsWith('404.html')) continue;
-  if (file.includes('_not-found') || file.includes('/404/')) continue;
+  const normalized = toPosix(file);
+  if (normalized.endsWith('404.html')) continue;
+  if (normalized.includes('_not-found') || normalized.includes('/404/')) continue;
   const html = await readFile(file, 'utf8');
   if (html.includes('http-equiv="refresh"')) continue;
-  const path = relative(ROOT, file).replace(/\\/g, '/');
+  const path = toPosix(relative(ROOT, normalized));
   const route = path === 'index.html' ? '/' : `/${path.replace(/\/index\.html$/, '')}/`;
   urls.push(route);
 }

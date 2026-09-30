@@ -17,7 +17,10 @@ Plugins are optional local Python packages that observe or extend OpenBoxGL. The
 1. **Install** (`/api/plugins/install`): a directory or ZIP package is staged, validated, and moved into `plugins/<id>/`. Updates replace the previous version atomically; a failed install or update restores the previous version.
 2. **Enable/disable** (`/api/plugins/toggle`): disabled plugin ids persist in `plugins-state.json`; disabled plugins are skipped by every hook.
 3. **Run**: on each hook event, enabled plugins that declare the hook execute in sorted (alphabetical) directory order, each as a separate process.
-4. **Remove** (`/api/plugins/remove`): the package moves to `plugins/.removed/<id>-<timestamp>` (recoverable) and its disabled state is cleared, so a reinstall comes back enabled.
+4. **Remove** (`/api/plugins/remove`): the package moves to `plugins/.removed/<id>-<timestamp>` (recoverable) and its disabled state, trust grant, and permission grants are cleared, so a reinstall comes back enabled and untrusted.
+5. **Trust** (`GET`/`POST /api/v2/plugins/trust`, 1.14.0+): on a host where the bubblewrap sandbox cannot be created, a plugin does nothing until you grant per-plugin trust in the Plugins manager. The grant is bound to the installed package's SHA-256, so any update that changes the package invalidates it and re-prompts. There is deliberately no global "trust everything" switch; `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` remains the operator-level override.
+6. **Permissions** (`POST /api/v2/plugins/permissions`, 1.14.0+): declared permissions are denied by default. The only permission in 1.14.0 is `network`; granting it adds `--share-net` to the plugin's sandbox argv, and without the grant the plugin keeps the no-network sandbox. A grant can never exceed the manifest declaration.
+7. **Settings** (`GET`/`POST /api/v2/plugins/settings`, 1.14.0+): a manifest `settings` JSON Schema subset renders a form in the Plugins manager; validated values are stored per plugin and delivered to the hook as `payload["settings"]`.
 
 ## Hook execution points
 
@@ -26,13 +29,13 @@ Plugins are optional local Python packages that observe or extend OpenBoxGL. The
 | `library` | Every `/api/library` read (cached for 30 seconds), skipped in safe mode | May rewrite the `games` list; the response uses the last plugin's output when it is a dict with a `games` list of the same length |
 | `before_launch` | At launch, after profile/archive resolution, skipped in safe mode | May rewrite `args`/`cwd` or cancel with `{"cancel": true, "error": "..."}`; structurally invalid output is discarded with a warning and the original launch command is used |
 | `after_session` | After a session ends (history recorded, plugins run unless safe mode) | Ignored (return value discarded) |
-| `command` | Explicit invocation from the command palette (`>` prefix) or `POST /api/v2/plugins/command` | Runs the plugin's `command` hook with the declared command id; may return a UI notification |
-| `library_source` | Every library state build, skipped in safe mode | Merges the plugin's returned `{"games": [...]}` into the library with a source badge; disabling or removing the plugin drops its games on the next rebuild |
-| `events` | Lifecycle events (`app_startup`, `app_shutdown`, `scan_finished`, `playtime_milestone`, `game_added`, `game_removed`, `game_updated`), skipped in safe mode | Best-effort fan-out; failures never break the host operation |
+| `command` | When a palette command is invoked (1.14.0+) | Returns an optional `notification` to show; unlike the chained hooks, its errors surface to the caller |
+| `library_source` | On every library read, for manifests declaring it (1.14.0+) | Contributes imported games, namespaced `plugin:<plugin_id>:<id>` and merged into the public library |
+| `events` | On each lifecycle event: `app_startup`, `app_shutdown`, `scan_finished`, `playtime_milestone`, `game_added`, `game_removed`, `game_updated` (1.14.0+) | Result discarded; a failure is logged and never breaks the emitting operation |
 
 ## Safe mode
 
-`OPENBOX_SAFE_MODE=1` (any non-empty value) in the process environment disables plugin execution process-wide: `library`, `before_launch`, `after_session`, `library_source`, and the `events` dispatcher all skip. The setting is exposed to the UI as `settings.safe_mode`. It is the first thing to try when a plugin causes launch or library failures. Explicitly invoked palette commands (`POST /api/v2/plugins/command`) are not blocked by safe mode.
+`OPENBOX_SAFE_MODE=1` (any non-empty value) in the process environment disables plugin execution process-wide: `library` hooks, `before_launch`, `after_session`, the `command`, `library_source`, and `events` hooks, and the webhook dispatcher all skip. The setting is exposed to the UI as `settings.safe_mode`. It is the first thing to try when a plugin causes launch or library failures.
 
 ## Limits and failure behavior
 

@@ -197,6 +197,63 @@ Download GOG cover/background for a Heroic/GOG id. Returns `{"cover", "backgroun
 
 </ApiEndpoint>
 
+## Automatic post-import scrape
+
+The auto-scrape master toggle and its per-provider opt-ins are owned by the metadata routes, not the Settings dialog: they are stored in raw state settings so the feature never touches settings-handler normalization.
+
+<ApiEndpoint method="GET" path="/api/v2/metadata/scrape-settings">
+
+
+Returns the four flags: `scrape_after_import` (master, default `true`) and `scrape_screenscraper_enabled`, `scrape_igdb_enabled`, `scrape_steamgrid_enabled` (all default `false`).
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/metadata/scrape-settings">
+
+
+Persists any subset of those flags. Values are coerced to booleans; unknown keys are ignored.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/metadata/auto-scrape">
+
+
+Queues the match and media jobs for one import batch. Body: `import_batch_id` (required), optional `media_types` and `overwrite`. Returns `202` with `match_job_id`, `media_job_id`, and `preview_id`. When `scrape_after_import` is off the route answers `200 {"queued": false, "reason": "scrape_after_import is disabled"}` instead of queueing. A missing batch id returns `400`. (v1.14.0+)
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/metadata/media-candidates">
+
+
+Lists the media candidates discovered for a match preview, so the review UI can show what an apply would download before it downloads it.
+
+</ApiEndpoint>
+
+## SteamGridDB artwork hygiene
+
+Batched artwork hygiene: a report pass finds wrong-size, duplicated, or mismatched covers, and fix/undo apply or roll back a batch.
+
+<ApiEndpoint method="GET" path="/api/v2/steamgrid/hygiene/report">
+
+
+The current hygiene findings grouped by issue kind, with the affected games and the recommended action.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/steamgrid/hygiene/fix">
+
+
+Applies a hygiene batch for the given findings. Requires the API key the other SteamGridDB artwork routes do.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/steamgrid/hygiene/undo">
+
+
+Reverts the most recent hygiene batch and restores the previous artwork.
+
+</ApiEndpoint>
+
 ## Media
 
 <ApiEndpoint method="GET" path="/api/media">
@@ -340,6 +397,30 @@ Saves a scan configuration (`folder`, `emulator_id`, `auto_update`). Returns `{"
 <ApiEndpoint method="GET" path="/api/v2/emulators/registry">
 
 Returns the emulator registry with platform coverage, adapter types, and installed status. Add `?health=1` to include per-adapter health status: `bios_ok` (BIOS file exists and SHA1 matches if expected), `firmware_ok`, and `core_ok`. The health check also reports `BIOS_SHA1_DRIFT` when a BIOS file exists but its hash doesn't match the expected value from the emulator definition. (v1.7.2+ for `?health=1`)
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/emulators/defs/status">
+
+Reports the emulator-definition update channel: the installed community pack and its version, which definitions in the data directory are local edits, and whether the published index offers anything newer. A missing pack is a normal state, not an error — the status still answers.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/emulators/defs/update">
+
+Checks the published index for a newer signed community pack and reports what an install would do, without writing anything.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/emulators/defs/update">
+
+Installs the newest signed community definition pack. The archive is verified with the release Ed25519 key and validated in full before a single file is written; a signature failure raises a persisted `security` notification. The pack installs into the per-user data directory and shadows the bundled set without overwriting it, and a definition the user already has is kept. Retractions the pack declares are honored. (v1.15.0+)
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/emulators/defs/rollback">
+
+Removes exactly what the update channel installed and restores the bundled definition set. Never touches definitions the user created or edited.
 
 </ApiEndpoint>
 

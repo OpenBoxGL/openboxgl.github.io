@@ -30,7 +30,7 @@ const items = [
   {
     icon: Blocks,
     title: "Themes",
-    body: "Five bundled CSS themes plus imported community themes, applied globally or per platform, with live reload.",
+    body: "Six bundled CSS themes — including a maximum-contrast High Contrast theme — plus imported community themes, applied globally or per platform, with live reload.",
   },
 ]
 

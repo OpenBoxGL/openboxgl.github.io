@@ -15,8 +15,8 @@ Check for a new release. Queries the GitHub releases API for `vindeckyy/OpenBoxG
 
 ```json
 {
-  "current": "1.14.0",
-  "latest": "1.14.0",
+  "current": "1.15.0",
+  "latest": "1.15.0",
  "available": false,
  "last_checked": "<timestamp or empty>",
  "notes": "...",
@@ -120,7 +120,7 @@ Open the themes folder in the file manager via `xdg-open` (missing `xdg-open`: `
 <ApiEndpoint method="GET" path="/api/plugins">
 
 
-`{"plugins": [{"id", "name", "version", "entry", "hooks", "enabled"}, ...]}` sorted by id. Invalid packages are skipped.
+`{"plugins": [{"id", "name", "version", "entry", "hooks", "enabled", "valid", "sandbox", ...}, ...]}` sorted by id. Invalid packages are **not** hidden: they are reported with `valid: false` and a sandbox status so the manager can explain why they cannot run.
 
 </ApiEndpoint>
 
@@ -141,14 +141,14 @@ Open the themes folder in the file manager via `xdg-open` (missing `xdg-open`: `
 <ApiEndpoint method="POST" path="/api/plugins/remove">
 
 
-`{"id"}` moves the plugin directory to `plugins/.removed/<id>-<timestamp>` (reversible by moving it back) and clears its disabled state. Returns `{"removed": "<id>"}`.
+`{"id"}` moves the plugin directory to `plugins/.removed/<id>-<timestamp>` (reversible by moving it back) and clears its disabled state, trust grant, and permission grants. Returns `{"removed": "<id>"}`.
 
 </ApiEndpoint>
 
 <ApiEndpoint method="GET" path="/api/plugins/catalog">
 
 
-`{"catalog": [...]}` from the bundled local catalog, falling back to the remote catalog (`raw.githubusercontent.com/vindeckyy/OpenBoxGL/master/plugins/catalog.json`, 20-second timeout, 4 MiB cap).
+`{"catalog": [...]}` from the commit-pinned remote catalog (20-second timeout, 4 MiB cap, and a pinned SHA-256 check on the response), falling back to the bundled local catalog.
 
 </ApiEndpoint>
 
@@ -156,10 +156,68 @@ Open the themes folder in the file manager via `xdg-open` (missing `xdg-open`: `
 
 
 `{"id"}` downloads the catalog entry's package (128 MiB cap, SHA-256 verified when the entry provides one, 120-second timeout) and installs it. Unknown id or `local_only` entries raise `400` (`"This catalog entry is documentation-only. Install local plugin packages manually."`). Returns `{"plugin": {...}}`.
+</ApiEndpoint>
 
 See [Plugins](/reference/plugins/) for the manifest and hook contract.
 
+### Plugins 2.0 routes (1.14.0+)
+
+<ApiEndpoint method="GET" path="/api/v2/plugins/catalog">
+
+
+The catalog enriched per entry with `installed`, `installed_version`, and `update_available`, plus a top-level `sandbox` field reporting the sandbox mode the host will use (`ready`, `unavailable`, or `disabled`).
+
 </ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/plugins/commands">
+
+
+`{api_version, sandbox, commands}` — the manifest-declared commands from enabled, valid plugins, consumed by the command palette.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/plugins/command">
+
+
+`{plugin_id, command}` runs that plugin's `command` hook in the sandbox and returns its result plus any `notification`. Unlike the chained hooks, a failure surfaces to the caller.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/plugins/trust">
+
+
+`?id=<plugin id>` returns the per-plugin trust record: `{trusted, checksum, checksum_matches, granted_at}`. Trust is only reported `true` while the recorded checksum still matches the installed package.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/plugins/trust">
+
+
+`{id, trusted}` grants or revokes unsandboxed-execution trust for one plugin, recording the package SHA-256 at grant time. There is no trust-everything switch.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/plugins/permissions">
+
+
+`{id, permissions}` records a permission grant. Requested permissions must be in the whitelist (`network` in 1.14.0) **and** declared by the manifest; anything else returns `400`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/plugins/settings">
+
+
+`?id=<plugin id>` returns `{schema, values}` for the Plugins manager form: the manifest's validated `settings` schema and the stored values merged over schema defaults.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/plugins/settings">
+
+
+`{id, values}` validates and stores per-plugin settings against the manifest schema. An unknown key, an out-of-enum value, or a type/range violation returns `400`.
+
+</ApiEndpoint>
+
 
 ## Premium read models
 
@@ -215,7 +273,7 @@ See [Plugins](/reference/plugins/) for the manifest and hook contract.
 
 ```json
 {
-  "report": "{\"version\": \"1.13.1\", \"python\": \"3.12.3\", \"platform\": \"Linux-...\", \"data_dir\": \"~/.local/share/openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
+  "report": "{\"version\": \"1.15.0\", \"python\": \"3.12.3\", \"platform\": \"Linux-...\", \"data_dir\": \"~/.local/share/openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
 }
 ```
 
@@ -223,7 +281,7 @@ The same report on Windows carries the Windows host and data directory:
 
 ```json
 {
-  "report": "{\"version\": \"1.13.1\", \"python\": \"3.12.3\", \"platform\": \"Windows-...\", \"data_dir\": \"C:\\\\Users\\\\<you>\\\\AppData\\\\Local\\\\openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
+  "report": "{\"version\": \"1.15.0\", \"python\": \"3.12.3\", \"platform\": \"Windows-...\", \"data_dir\": \"C:\\\\Users\\\\<you>\\\\AppData\\\\Local\\\\openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
 }
 ```
 
@@ -254,7 +312,7 @@ The same report on Windows carries the Windows host and data directory:
 
 <ApiEndpoint method="GET" path="/api/native/capabilities">
 
-Returns native host capabilities detected by the backend when running inside the native wrapper (WebKitGTK on Linux, WebView2 on Windows). Detection is the `OPENBOX_NATIVE_HOST` variable the host sets before spawning this server, so the payload shape is the same on both platforms; `gamepad` stays `"webkit"` either way, because the host's gamepad hook is a stub and the Web Gamepad API keeps serving.
+Returns native host capabilities detected by the backend when running inside the native wrapper (WebKitGTK on Linux, WebView2 on Windows), plus the identity fields **Settings → About** displays. Detection is the `OPENBOX_NATIVE_HOST` variable the host sets before spawning this server, so the payload shape is the same on both platforms; `gamepad` stays `"webkit"` either way, because the host's gamepad hook is a stub and the Web Gamepad API keeps serving.
 
 ```json
 {
@@ -264,9 +322,14 @@ Returns native host capabilities detected by the backend when running inside the
   "single_instance": true,
   "gamepad": "webkit",
   "fullscreen": true,
-  "clipboard": true
+  "clipboard": true,
+  "version": "1.15.0",
+  "platform": "win32",
+  "data_dir": "C:\\Users\\<you>\\AppData\\Local\\openbox-game-launcher"
 }
 ```
+
+`version`, `platform`, and `data_dir` were added in v1.15.0. `webview` is what **Settings → About** reads to say whether you are in the native window or a browser tab — a browser tab is a supported configuration, not a failure state.
 
 </ApiEndpoint>
 

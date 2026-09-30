@@ -13,6 +13,14 @@ When creating a custom theme, you only need to override `:root` variables. No co
 
 The table below is the minimal starter subset (matching the warm default look). The full contract is much larger — mood-match (`--mood-*`), constellation edge (`--constellation-edge-*`), mastery (`--mastery-*`), overlay-insight, gamepad, health, toast, and font tokens — and is documented on the [Design system](/project/design-system/) page. Start with these, then override more as needed.
 
+Text and interactive colors should use the **semantic ink tokens** rather than raw palette entries: `--ink-strong` for primary headings, `--on-active` for text on an active tab or selection, `--on-danger` for text on a danger surface, `--border-input` for form borders, and `--state-hover` / `--state-press` for interaction states. A contrast matrix in the test suite checks every stock theme against a fixed list of foreground/background pairs — text and ink on their surfaces, the on-active and on-danger pairs, toasts, health colors, and the non-text boundary and focus ring — so authoring against those tokens is what keeps a theme legible in all six bundled palettes. The hover and press tokens are alpha overlays rather than foregrounds and are deliberately not part of the matrix. See [Themes](/themes/#contrast-is-checked-not-assumed-v1150).
+
+<Callout type="caution" title="Do not redeclare the motion tokens">
+
+The duration and easing tokens (`--dur-fast`, `--dur-base`, `--dur-slow`, `--dur-out`, `--dur-spin`, `--dur-loop`, `--stagger`, and the `--ease-*` family) are **structural, not themable**. Your stylesheet loads after the base one, so a `:root` that redefines them would defeat the reduced-motion override and make animation un-disableable for users who ask for it. Animate through the existing tokens, or set a property without a duration. See [Motion and reduced motion](/themes/#motion-and-reduced-motion).
+
+</Callout>
+
 | Token | Purpose | Example |
 | --- | --- | --- |
 | `--bg` | Main window background | `#11100e` |

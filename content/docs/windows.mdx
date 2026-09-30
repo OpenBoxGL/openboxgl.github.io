@@ -26,7 +26,7 @@ The installer itself needs Python, because it uses the same RFC 8032 verifier th
 Download the installer and the release archive from the same tag, then run the installer. The installer pins the release public key, verifies its SHA-256 against a committed anchor, and verifies the archive's `.sha256` sidecar and Ed25519 signature before extracting anything.
 
 ```powershell
-$Version = '1.14.0'
+$Version = '1.15.0'
 Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
 .\install.ps1 -Tag "v$Version"
@@ -70,14 +70,38 @@ Nothing is extracted before every verification step passes.
 
 ### Uninstall
 
-There is no uninstaller command. To remove the install:
+The release ships the uninstaller inside the archive, at `scripts\uninstall.ps1` — it is not published as a standalone release asset, so there is no separate download for it. It is the exact mirror of the installer, and it removes precisely what `install.ps1` creates:
 
-1. Delete `%LOCALAPPDATA%\OpenBox` (including `share\openbox.previous`).
-2. Remove the runtime folder from your user `PATH` in **Settings → System → About → Advanced system settings → Environment Variables**.
-3. Delete the `OpenBox.lnk` shortcut from your Start Menu programs folder.
-4. Delete the `HKEY_CURRENT_USER\Software\Classes\openbox` registry key to remove the `openbox://` handler.
+- the install tree at `<InstallDir>\share\openbox` and its `openbox.previous` rollback copy, dropping the now-empty `share\` and bin roots when nothing else lives there;
+- the install's entry in your user `PATH`;
+- the `OpenBox.lnk` Start Menu shortcut;
+- the `openbox://` protocol registration at `HKCU\Software\Classes\openbox`.
 
-Your library is untouched by all of this: it lives in the data directory, not in the install.
+Run the copy inside your install, using the same `-InstallDir` you installed with (omit it for a default install, which is `%LOCALAPPDATA%\OpenBox`):
+
+```powershell
+# Preview first (recommended)
+powershell -ExecutionPolicy Bypass `
+  -File "$env:LOCALAPPDATA\OpenBox\share\openbox\scripts\uninstall.ps1" -WhatIf
+
+# Then actually remove
+powershell -ExecutionPolicy Bypass `
+  -File "$env:LOCALAPPDATA\OpenBox\share\openbox\scripts\uninstall.ps1"
+
+# Non-default install directory
+powershell -ExecutionPolicy Bypass `
+  -File "D:\Apps\OpenBox\share\openbox\scripts\uninstall.ps1" -InstallDir "D:\Apps\OpenBox"
+```
+
+It runs on Windows PowerShell 5.1 with the standard library only, and takes one optional argument, `-InstallDir <path>`, if the installer used something other than `%LOCALAPPDATA%\OpenBox` (it also honors `OPENBOX_INSTALL_DIR`). The `-WhatIf` example above previews the whole thing before anything is removed.
+
+<Callout type="note" title="Your library is never touched">
+
+The uninstaller never writes to the data directory. The library, settings, media, backups, and themes live in `%LOCALAPPDATA%\openbox-game-launcher` and survive, so reinstalling picks them straight back up. If you want the data gone too, that is a separate, deliberate deletion of the data folder — the uninstaller will not do it for you.
+
+</Callout>
+
+To remove an install made before 1.15.0, or to do it by hand, the four steps the script performs are: delete `%LOCALAPPDATA%\OpenBox` (including `share\openbox.previous`), remove the runtime folder from your user `PATH` in **Settings → System → About → Advanced system settings → Environment Variables**, delete the `OpenBox.lnk` shortcut from your Start Menu programs folder, and delete the `HKEY_CURRENT_USER\Software\Classes\openbox` registry key.
 
 ## Launching OpenBox
 
@@ -121,6 +145,19 @@ The WebView2 runtime ships with Windows 11 and is installed on most Windows 10 s
 
 </Callout>
 
+## Which window am I using?
+
+**Settings → About** (v1.15.0) answers the question the fallback above raises. It shows four things, read from the same host report the window itself uses:
+
+| Row | What it tells you |
+| --- | --- |
+| **Version** | The exact version you are running. This is the value to put in a [bug report](https://github.com/vindeckyy/OpenBoxGL/issues/new?template=bug_report.yml). |
+| **Platform** | `Windows`, `Linux`, or `macOS`. |
+| **Data folder** | The data directory in use — `%LOCALAPPDATA%\openbox-game-launcher` unless `OPENBOX_DATA_DIR` says otherwise. Copy it from here when backing up or reporting. |
+| **Window** | Whether OpenBox is in its **native window** or a **browser tab**. A browser tab is a supported configuration, not a failure: it is what you get with `openbox --web`, without WebView2, or from a source checkout with no compiled host. |
+
+The same four values are available over the API through the native capabilities response, which reports `version`, `platform`, and `data_dir` alongside its existing fields. See [API local administrator](/reference/api/local-admin/).
+
 ## Where your data lives
 
 | Content | Location |
@@ -151,7 +188,7 @@ Windows games launch through the game's own executable or through an emulator, e
 | Problem | Cause / fix |
 | --- | --- |
 | `No Python 3 interpreter found` | Install Python 3.10+ and make sure `python.exe` or `py.exe` is on `PATH`, or set `OPENBOX_PYTHON` to the interpreter's full path. |
-| `running scripts is disabled on this system` | Run the installer or launcher with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.14.0`, or set the execution policy for your user. |
+| `running scripts is disabled on this system` | Run the installer, uninstaller, or launcher with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.15.0`, or set the execution policy for your user. |
 | `The release public key does not match the pinned trust anchor` | The release key changed or the download was tampered with. Install only from the project's GitHub releases, or pass `-PublicKeyPath` if you deliberately mirror a different key. |
 | The window does not open | Run `openbox --web` from a terminal and open the printed `http://127.0.0.1:PORT/?token=...` URL. |
 | `native_host is missing ... falling back` | The WebView2 host has not been built. Build it as described above, or ignore it and use the browser app window. |

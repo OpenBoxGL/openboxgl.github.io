@@ -204,11 +204,12 @@ The `:root` block in `static/app.css` is the theme contract. Every stock theme o
 
 - `themes/Cinema Marquee.css`
 - `themes/Harbor Light.css` (the only bundled light theme)
+- `themes/High Contrast.css` (added in 1.15.0; dark, pure-black base)
 - `themes/Midnight Circuit.css`
 - `themes/Nordic Mist.css`
 - `themes/Phosphor Terminal.css`
 
-`scripts/check_tokens.py` enforces the contract in CI: raw hex outside `:root` must stay at the ratcheted baseline of 0. A new visual value means a new `:root` token plus its entry in each of the five theme files (each stock theme carries 281 `:root` tokens). For the full per-token table, read the `:root` block in `static/app.css` in the repository you are running — this page documents the palette groups, not a frozen count of names.
+`scripts/check_tokens.py` enforces the contract in CI: raw hex outside `:root` must stay at the ratcheted baseline of 0. A new visual value means a new `:root` token plus its entry in each of the six theme files. For the full per-token table, read the `:root` block in `static/app.css` in the repository you are running — this page documents the palette groups, not a frozen count of names.
 
 ### Feature token families (introduced in v1.9.0)
 
@@ -219,6 +220,6 @@ The `:root` block in `static/app.css` is the theme contract. Every stock theme o
 
 ## Related
 
-- [Themes](/themes/) for the five stock CSS themes and the import workflow
+- [Themes](/themes/) for the six stock CSS themes and the import workflow
 - [How OpenBoxGL works](/reference/how-it-works/) for how tokens render at runtime
 - `static/app.css` in the application repository for the authoritative `:root` block

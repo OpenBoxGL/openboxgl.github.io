@@ -3,7 +3,7 @@ title: Faugus Launcher Integration
 description: Import games, manage prefixes, and configure UMU-backed launches from Faugus Launcher.
 ---
 
-OpenBox provides native integration with **Faugus Launcher**, the lightweight Linux game manager for Wine and UMU games.
+OpenBox provides native integration with **Faugus Launcher**, the lightweight Linux game manager for Wine and UMU games: it reads Faugus manifests and prefixes and imports the titles into your unified library.
 
 ## Overview
 
@@ -21,17 +21,15 @@ You can also drive the scan entirely through the REST API (below).
 Each imported title automatically receives:
 - Canonical identity deduplication (matching against existing Steam, GOG, or ROM titles)
 - Target executable path
-- Dedicated Wine prefix path
-- Pre-configured launch command (`umu-run {path}`)
-
-Prefix-only rows (a prefix directory with no manifest entry, `pkg/parity/parity_faugus.py:151-159`) import as **unlaunchable stubs**: they carry an empty path, a derived display name, and the prefix/runner metadata, so they are visible for review but cannot launch until a real executable is attached.
+- Dedicated Wine prefix path, recorded as `wine_prefix`
+- A **suggested** launch command (`umu-run {path}`) — a starting point you can edit in Edit Metadata, not a wrapper the app applies for you. Prefix-only rows import without it.
 
 ## REST Endpoints
 
 Automate Faugus scans or integrate with scripts:
 
-- `GET /api/faugus/status`: Checks if Faugus data directories and manifests exist.
-- `GET /api/faugus/scan`: Scans manifests and returns all discovered games with metadata.
+- `GET /api/faugus/status`: Reports whether Faugus data directories exist, and which ones.
+- `GET /api/faugus/scan`: Scans manifests and prefix directories and returns the discovered games with their prefix and runner metadata.
 - `POST /api/faugus/import`: Imports the scanned games into the OpenBox library.
 
 ```bash

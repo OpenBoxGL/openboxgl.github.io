@@ -166,6 +166,13 @@ Removes an abandoned persisted active-session row by `launch_id`; it does not si
 
 </ApiEndpoint>
 
+<ApiEndpoint method="GET" path="/api/v2/history/timeline">
+
+
+The session history as a chronological timeline rather than a newest-first list, for the Play History view. Read-only; the same `track_session_history` toggle applies.
+
+</ApiEndpoint>
+
 ## Launch
 
 <ApiEndpoint method="POST" path="/api/launch">
@@ -195,6 +202,174 @@ Launch an application/version/document extra: `{"id"|"game_id", "kind": "applica
 
 
 `?id=<index>` returns `{"items": [{"id", "score", "reasons": [...]}]}` with human-readable reasons. `404` when the game is missing.
+
+</ApiEndpoint>
+
+## Per-game v2 writes
+
+These `POST` routes exist alongside the frozen v1 game-update route. Each resolves exactly one game from the payload via `game_from_payload`, which prefers a stable `game_id` (or `stable_game_id`, storefront ids, or `path`/`name`) and otherwise falls back to a numeric `id` index; a game that cannot be resolved returns `400`. None of them accept a bulk `game_ids` list. Each returns a small acknowledgement, not the public game object: `progress/set` returns `{"ok": true, "game_id", "progress"}`, `rating/set` returns `{"ok": true, "game_id", "user_rating"}`, `playtime/log` and `playtime/update` return `{"ok": true, "game_id", "entry"}`, and `notes/add`, `notes/update`, `notes/delete`, and `playtime/delete` return `{"ok": true, "game_id"}`.
+
+<ApiEndpoint method="POST" path="/api/v2/library/progress/set">
+
+
+Sets the progress status of a game (`""` to clear, otherwise a known progress value). Invalid values return `400`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/rating/set">
+
+
+Sets the personal `user_rating` star rating for a game, an integer `0` to `5` where `0` clears it. This is separate from the metadata `rating` float, which this route does not touch. A missing, non-numeric, or out-of-range value returns `400` ("User rating must be an integer from 0 to 5.").
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/notes/add">
+
+
+Appends a dated note to a game's notes. Body: `text` (required, non-blank, max 2000 characters); blank or oversized text returns `400`. The handler stamps `ts` itself and returns `{"ok": true, "game_id"}` — it does not echo the saved note. Legacy plain-string notes migrate to `{"ts", "text"}` entries on the first mutation.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/notes/update">
+
+
+Replaces an existing note's text, addressed by its positional `index` in the game's notes list — notes have no id. Body: `index` (integer) and `text` (required, non-blank, max 2000 characters). A non-integer `index` returns `400` ("index must be an integer."), and so does an index outside the list ("Unknown note entry.") — the route never returns `404`. The entry keeps its original `ts`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/notes/delete">
+
+
+Deletes the note at positional `index` in the game's notes list. A non-integer or out-of-range `index` returns `400`, never `404`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/playtime/log">
+
+
+Adds a manual playtime session for a game without running a tracked session. Body: `seconds` (required integer, `1`-`86400`); optional `date` (a `YYYY-MM-DD` string, `""` when omitted) and `note` (max 200 characters). There is no `minutes` field — a missing, non-integer, or out-of-range `seconds` returns `400` ("seconds must be an integer." / "seconds must be between 1 and 86400."), as does a malformed `date` ("date must be YYYY-MM-DD.") or an oversized `note`. The entry counts toward `manual_playtime_seconds`, and the response is `{"ok": true, "game_id", "entry"}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/playtime/update">
+
+
+Replaces the manual playtime entry at positional `index` in the game's session list. Body: `index` (integer) plus a full replacement entry validated exactly as for `playtime/log` (`seconds` required `1`-`86400`, optional `date`, optional `note`). A non-integer or out-of-range `index` returns `400`, never `404`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/playtime/delete">
+
+
+Removes the manual playtime entry at positional `index` in the game's session list, then recomputes `manual_playtime_seconds` from the remaining entries. A non-integer or out-of-range `index` returns `400`, never `404`.
+
+</ApiEndpoint>
+
+## Library health
+
+The scheduled health audit and its repair flow. `health_rescan` in [Settings](/reference/configuration/) chooses the cadence (`daily`, `weekly`, `on_startup`, `off`).
+
+<ApiEndpoint method="GET" path="/api/v2/library/health">
+
+
+The latest library-health snapshot: issue counts by severity, missing media, orphaned saves, broken paths, and the timestamp of the last scan.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/library/health/issues">
+
+
+The individual health issues behind the snapshot, filterable and paged.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/health/scan">
+
+
+Queues a health scan as a background job. Returns `202` with a `job_id` you can track through `GET /api/v2/jobs`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/health/fix">
+
+
+Applies a previously previewed repair. Requires the `base_token` returned by the preview so a concurrent library change fails instead of repairing a stale view.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/health/undo">
+
+
+Reverts the most recent health repair using its recorded undo token.
+
+</ApiEndpoint>
+
+## Duplicate repair
+
+<ApiEndpoint method="GET" path="/api/v2/library/duplicates">
+
+
+Lists detected duplicate groups with their member records.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/duplicates/preview">
+
+
+Previews a merge for a duplicate group: which record survives, which fields are kept, and which entries are removed. Nothing is written.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/duplicates/merge">
+
+
+Applies a previewed merge. Requires the preview's `base_token`; a stale token returns `409` rather than merging against changed data.
+
+</ApiEndpoint>
+
+## Structural repair
+
+<ApiEndpoint method="GET" path="/api/v2/library/repair">
+
+
+Lists repairable structural problems found in library records (malformed entries, missing platform metadata, stale references).
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/repair/preview">
+
+
+Previews the field-level changes a repair would make, pinned to the current state token.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/repair/apply">
+
+
+Applies a previewed repair. A missing or stale `base_token` returns `409`.
+
+</ApiEndpoint>
+
+## Library DNA
+
+<ApiEndpoint method="GET" path="/api/v2/library/dna/status">
+
+
+Reports the DNA index state: whether an index exists, how many games it covers, and when it was last rebuilt.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/dna/search">
+
+
+Runs a DNA-style similarity search over indexed artwork/metadata and returns ranked candidates.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/library/dna/index/rebuild">
+
+
+Queues a full DNA index rebuild as a background job. Returns `202` with a `job_id`.
 
 </ApiEndpoint>
 

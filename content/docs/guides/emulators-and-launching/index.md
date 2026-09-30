@@ -57,7 +57,7 @@ The same dialog lists supported emulators with install state, mode (native or Fl
 - MAME (Arcade `{path}`)
 - xemu (Xbox `-dvd_path {path}`)
 - ScummVM (`{path}`)
-- RetroArch (NES, SNES, Nintendo 64, Game Boy Advance, Game Boy, Game Boy Color, Nintendo DS, Sega Master System, Game Gear, Sega Genesis)
+- RetroArch (NES, SNES, Nintendo 64, Game Boy, Game Boy Color, Game Boy Advance, Arcade, Sega Saturn)
 - DuckStation (PlayStation `-batch {path}`)
 - melonDS (Nintendo DS `{path}`)
 - Eden (Nintendo Switch `{path}`)
@@ -69,6 +69,22 @@ The same dialog lists supported emulators with install state, mode (native or Fl
 ### Authoritative Emulator Registry
 
 Authoritative definitions in `emulator_defs/` map extensions to platforms and startup commands. `GET /api/v2/emulators/registry` provides real-time adapter and compatibility views. Custom user profiles in `library.json` always override registry defaults.
+
+### Emulator definition updates
+
+The 24 definitions in `emulator_defs/` ship inside the application. If a newer emulator build needs a newer definition, OpenBoxGL can now fetch one without you editing YAML by hand (v1.15.0).
+
+**Tools → Emulators** is the home for the channel. This is a top-level entry in the **Tools** menu — not a Settings category; the Emulator profiles dialog it opens also holds the platform profile editor, the handheld performance profiles, and the emulator install catalog. The Emulator definitions panel at the bottom of that dialog shows the installed pack, which definitions you have edited (these are never overwritten), and the three actions: check for an update, install it, and roll it back. Until a pack has been published, the panel says **No community definition pack is published yet** — that is a normal state, not an error, because publishing needs a maintainer holding the release key and happens separately from an application release.
+
+How it behaves:
+
+- **Signed, and verified before anything is written.** The archive is verified with the same Ed25519 verifier the application updater uses, against `openbox-release.pub`. A signature failure raises a security notification rather than being skipped quietly.
+- **All or nothing.** The pack is fetched, verified, parsed, and validated in full before a single file lands.
+- **Local wins.** The pack installs into your per-user data directory and shadows the bundled set; it never overwrites the bundled definitions, and a definition you already have is kept as-is. Rollback removes exactly what the channel installed and restores the bundled set.
+- **Retractions are honored.** If a newer pack stops shipping a definition the previous one installed, the old file is removed rather than left shadowing the bundled set.
+- **No restart needed.** A definition update refreshes the emulator list, the platform map, and the folder-import extension list in place, so a newly added definition is recognized on the next scan.
+
+The API equivalents are `GET /api/v2/emulators/defs/status` (what is installed, what is local, whether anything is available), `GET`/`POST /api/v2/emulators/defs/update` (check, then install), and `POST /api/v2/emulators/defs/rollback`. They are additive `/api/v2` routes; the v1 surface is unchanged.
 
 ### Emulator-def schema
 

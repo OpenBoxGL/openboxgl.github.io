@@ -1,6 +1,6 @@
 ---
 title: API 1.12 additions
-description: Request and response guidance for the Living Library v2 workflows shipped in OpenBox 1.12.0.
+description: Request and response guidance for the Living Library v2 workflows shipped in OpenBox 1.12.0, and the 1.15.0 additions to them.
 ---
 
 OpenBox 1.12.0 adds these authenticated, additive `/api/v2/*` workflows without changing the frozen v1 contract. The server still binds to loopback, chooses a random port at launch, and accepts `X-OpenBox-Token: TOKEN` on every protected route.
@@ -84,6 +84,20 @@ Content and rotation reuse `create_backup` unchanged, so the archives are identi
 ## SQLite read model default threshold
 
 `GET /api/v2/library/search` continues to honor `OPENBOX_ENABLE_SQLITE_READ=1`. Since 1.12.0 the FTS read model also **self-enables at 5,000+ games** (`should_auto_enable()`, latched per process); an explicit `OPENBOX_ENABLE_SQLITE_READ=0`/`false`/`no` opt-out is never overridden. The response `source` field reports `sqlite` or `json`, so clients can tell which path answered. JSON remains the source of truth either way.
+
+## 1.15.0 additions
+
+1.15.0 adds the emulator-definition update channel and a read-only Time Machine diff. Both are additive: the frozen v1 contract is untouched and neither introduces a new versioned namespace, so they stay `/api/v2/*` alongside the 1.12.0 surface above.
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/v2/emulators/defs/status` | Local definition state: installed pack version, which files the channel owns, which are user edits, and the bundled set. |
+| `GET` | `/api/v2/emulators/defs/update` | Whether the published index offers a newer pack, without fetching or writing it. |
+| `POST` | `/api/v2/emulators/defs/update` | Fetch, verify, and install the signed community pack. A signature failure returns `400 {"error": "signature_verification_failed"}` **and** raises a persisted `security` notification. |
+| `POST` | `/api/v2/emulators/defs/rollback` | Remove exactly what the channel installed, restoring the bundled set. User-authored definitions are never touched. |
+| `GET` | `/api/v2/library/time-machine/compare?after=…&before=…` | Read-only diff of the library at two journal dates. |
+
+Full request and response detail lives on the group pages, where each route is described once: [Content and imports](/reference/api/content-and-imports/) for the definition channel, and [API 1.11 additions](/reference/api/one-eleven/) for `time-machine/compare`. The table above is the index; it is deliberately not a second copy of those descriptions.
 
 ## Related pages
 

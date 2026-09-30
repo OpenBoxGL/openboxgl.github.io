@@ -86,15 +86,17 @@ OpenBox does not require Wine or Proton on either platform. On Windows, games ru
 
 ## Can I script or automate it?
 
-Yes. A token-authenticated REST API covers library, launch, saves, backups, themes, plugins, and automation. Python plugins hook library loads, before_launch, and after_session. Webhooks deliver HMAC-signed events. See [REST API](/reference/api/), [Plugins](/guides/plugins/), and [Webhooks](/integrations/webhooks/).
+Yes. A token-authenticated REST API covers library, launch, saves, backups, themes, plugins, and automation. Python plugins hook six points: `library`, `before_launch`, `after_session`, `command`, `library_source`, and `events`. Webhooks deliver HMAC-signed events. See [REST API](/reference/api/), [Plugins](/guides/plugins/), and [Webhooks](/integrations/webhooks/).
 
 ## How is OpenBox related to LaunchBox or the Openbox window manager?
 
 OpenBox is an independent open-source project. It is not affiliated with LaunchBox, Unbroken Software, LLC, or the Openbox window manager. Those names appear only to describe compatibility and comparison boundaries. See [Legal and trademarks](/policies/legal-and-trademarks/).
 
-## What's new in 1.11 through 1.13?
+## What's new in 1.11 through 1.15?
 
 **1.11 (Every Second Counts):** Quick Resume, Moments, clips/reels, Time Machine, Backlog Radio, Arcade Room/Museum kiosk, Household, Steam Bridge, ES-DE migration, SteamGridDB artwork, and local launcher trophies — see [API 1.11 additions](/reference/api/one-eleven/). **1.12 (Living Library):** smart collections, per-game Story timelines, per-game `launch_env`/`launch_confirm`, opt-in weekly backups, SQLite self-enable at 5,000 games, palette recents, and the Living Library overview on the [home page](/) — see [API 1.12 additions](/reference/api/one-twelve/). **1.13 (Windows support):** Windows x86_64 with the signed portable `install.ps1`, a WebView2 native window shipped compiled in the portable install, the same updater verification on Windows, and Windows executable names in every bundled emulator definition — see [Windows](/windows/) and the [release notes](/changelog/). Linux fixes in 1.13: process liveness no longer uses `os.kill(pid, 0)`, stored references use POSIX separators on Windows, and the metadata database closes cached SQLite handles before replacing the file.
+
+**1.13.1 (Fixes):** the sweep that made the Windows release usable — utility dialogs that opened invisibly, nested dialogs that all closed at once, a setup wizard that re-opened on every refresh, a session token that was dropped on reload, hidden tabs that could overwrite newer state, and "Reveal in Explorer" that never opened anything. **1.14 (Library intelligence):** the 0–100 [library health score](/guides/library/organizing/#library-health-score-v1140), the Artwork Doctor, missing-file repair, duplicate merge, offline Game DNA search, [Plugins 2.0](/guides/plugins/), backlog management with your own star ratings, manual playtime, and dated notes, effortless metadata after import, ScreenScraper ROM-hash confidence, the thumbnail chooser, the Big Box boot option and on-screen keyboard, and Steam Bridge artwork. **1.15 (Finish the surface):** [motion that respects reduced motion](/themes/#motion-and-reduced-motion), a readable light theme and the sixth stock theme [High Contrast](/themes/), [signed emulator-definition updates](/guides/emulators-and-launching/#emulator-definition-updates), [Time Machine Compare](/guides/library/time-machine/#compare-two-points-in-time), [Settings → About](/windows/#which-window-am-i-using), the [Windows uninstaller](/windows/#uninstall), broader screen-reader and touch-target support, and Story PNG export — see the [release notes](/changelog/).
 
 ## Where do I report a bug or request a feature?
 

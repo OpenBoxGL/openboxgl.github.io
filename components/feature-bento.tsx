@@ -32,7 +32,7 @@ export function FeatureBento() {
           <div className="grid grid-cols-1 gap-3 md:col-span-2 md:row-span-2 sm:grid-cols-2">
             <BentoCard icon={Award} title="RetroAchievements" body="Match ROMs to achievement sets and track hardcore, beaten, and mastered progress." />
             <BentoCard icon={Clock} title="Play history" body="Session times, launch counts and last-played, per game." />
-            <BentoCard icon={Palette} title="Themes" body="Import your own CSS, or pick from five bundled themes." />
+            <BentoCard icon={Palette} title="Themes" body="Import your own CSS, or pick from six bundled themes, including a high-contrast one." />
             <BentoCard icon={Blocks} title="Plugins" body="Extend imports, scrapers and views with an open API." />
           </div>
         </div>

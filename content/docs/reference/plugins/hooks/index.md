@@ -1,9 +1,9 @@
 ---
 title: Plugin hooks reference
-description: The six hook payloads: library, before_launch, after_session, command, library_source, and events.
+description: The library, before_launch, after_session, command, library_source, and events hook payloads.
 ---
 
-A plugin's entry module exports one function per declared hook: `def library(payload)`, `def before_launch(payload)`, `def after_session(payload)`, `def command(payload)`, `def library_source(payload)`, or `def events(payload)`. The runner loads the module by path, calls the matching function with the decoded JSON payload, and writes the returned dict back to stdout as JSON. If the module does not export the hook function, the payload passes through unchanged.
+A plugin's entry module exports one function per declared hook: `def library(payload)`, `def before_launch(payload)`, `def after_session(payload)`, `def command(payload)`, `def library_source(payload)`, or `def events(payload)`. The runner loads the module by path, calls the matching function with the decoded JSON payload, and writes the returned dict back to stdout as JSON. If the module does not export the hook function, the payload passes through unchanged. The complete set is `before_launch`, `after_session`, `library`, `command`, `library_source`, and `events`; the first three are documented below and the three Plugins 2.0 hooks (1.14.0) follow.
 
 ## `library`
 
@@ -50,6 +50,7 @@ Payload: the session record as a dict with `game`, `started`, `seconds`, and `ex
 
 Contract: return any dict; the result is discarded. Exceptions are caught by the runner, so a failing `after_session` plugin never breaks session bookkeeping. `after_session` is skipped entirely in safe mode.
 
+
 Example:
 
 ```python
@@ -60,39 +61,43 @@ def after_session(session):
 
 ## `command`
 
-Palette command invocation. The plugin runs only when the user invokes one of its manifest-declared commands from the command palette (the `>` prefix) or via `POST /api/v2/plugins/command`.
-
-Payload: `{"command": "<command id>", "library": [<game summaries>]}`. The `library` here is bounded to 500 entries and carries only `game_id`, `name`, `platform`, `progress`, `favorite`, and `playtime_seconds`.
+Payload: `{"command": "<command id>", "library": [...], "settings"?: {...}}`. The `library` list is **bounded** to 500 entries and carries only `game_id`, `name`, `platform`, `progress`, `favorite`, and `playtime_seconds` — unlike the `library` hook, a command never sees the full game projection. `settings` is present only when the manifest declares a `settings` schema.
 
 Contract:
 
-- The result may include a UI notification: `{"notification": {"level": "info" | "success" | "warning" | "error", "message": "..."}}`.
-- Unlike chained hooks, a hook error here (bad JSON, non-object, oversized output, nonzero exit, timeout) is surfaced to the API caller as a `400` rather than silently skipped.
+- Return a JSON object. A `notification` key is rendered by the host: `{"notification": {"level": "info"|"success"|"warning"|"error", "message": "..."}}`.
+- Commands are surfaced in the command palette under the `>` prefix, from `GET /api/v2/plugins/commands`; running one posts `{plugin_id, command}` to `POST /api/v2/plugins/command`.
+- Palette commands are the one hook family whose errors **surface to the caller** instead of being silently discarded; the other chained hooks log and continue.
 
 Example:
 
 ```python
 def command(payload):
-  games = payload.get("library", [])
-  return {"notification": {"level": "success", "message": f"{len(games)} games in library"}}
+    games = payload["library"]
+    return {"notification": {"level": "success", "message": f"{len(games)} games"}}
 ```
 
 ## `library_source`
 
-Declaring `library_source` makes the plugin a library importer: its returned games merge into the public library on every state build.
-
-Payload: `{"api_version": 1}` on stdin, plus `settings` when the manifest declares a settings schema.
+Payload: `{"api_version": 1, "settings"?: {...}}`. Declaring this hook makes the plugin a **library importer**.
 
 Contract:
 
-- Return `{"games": [...]}` — a bare list or any other shape is rejected with a logged warning and the plugin contributes nothing on that build.
-- Entries are validated like folder imports and namespaced as `plugin:<plugin_id>:<their_id>`; the UI shows a source badge from the `plugin_source` / `plugin_source_name` provenance.
-- Returned lists are capped at the library entry limit.
+- Must return `{"games": [...]}`. A bare list or any other shape is rejected with a logged warning and the plugin contributes nothing on that build.
+- Returned entries are validated like folder imports, namespaced as `plugin:<plugin_id>:<their_id>`, and merged into the public library on every state build with `plugin_source` / `plugin_source_name` provenance so the UI can show a source badge.
+- The list is capped at the same 500-entry library limit used by the `command` hook.
 - Disabling or removing the plugin drops its games on the next rebuild.
+
+Example:
+
+```python
+def library_source(payload):
+    return {"games": [{"id": "demo", "name": "Plugin Title", "path": "/games/demo.iso"}]}
+```
 
 ## `events`
 
-One hook for all lifecycle events. The stdin payload always carries an `event` field plus a small bounded payload; all emission is best-effort, and failures never break the host operation.
+One hook function receives every lifecycle event (ADR 0057). The stdin payload always carries an `event` field plus a small bounded payload:
 
 | Event | Payload fields |
 | --- | --- |
@@ -104,19 +109,24 @@ One hook for all lifecycle events. The stdin payload always carries an `event` f
 | `game_removed` | `game_ids` (up to 500 ids) |
 | `game_updated` | `changes` (up to 100 `{game_id, changed: [...]}` entries) |
 
+`game_updated` compares only a fixed field set (`name`, `platform`, `progress`, `favorite`, `hidden`, `rating`, `playtime_seconds`) and sends changed field **names** only, never full objects, so the payload stays well inside the 2 MiB cap.
+
+Contract: all emission is best-effort and bounded by the standard per-plugin timeout; a failing `events` hook is logged and never breaks the operation that emitted it (imports, session bookkeeping, shutdown). Safe mode suppresses emission entirely.
+
 Example:
 
 ```python
 def events(payload):
-  if payload["event"] == "playtime_milestone":
-    return {"notification": {"level": "success",
-            "message": f"{payload['hours']}h in {payload['name']}!"}}
-  return {}
+    if payload["event"] == "playtime_milestone":
+        return {"notification": {"level": "success", "message": f"{payload['hours']}h in {payload['name']}!"}}
+    return {}
 ```
 
-## Hook chaining
+## Chaining and non-chained hooks
 
-Plugins execute in sorted directory order (alphabetical by plugin id). Each plugin's output feeds the next plugin's input for `library` and `before_launch`. One failing or timing-out plugin is skipped with a warning and the chain continues with the last good payload.
+`library` and `before_launch` are **chained**: plugins execute in sorted directory order (alphabetical by plugin id) and each plugin's output feeds the next plugin's input. One failing or timing-out plugin is skipped with a warning and the chain continues with the last good payload.
+
+`command`, `library_source`, and `events` are **not** chained. They run once with a purpose-built payload, and `emit_plugin_event` fans an event out independently to every enabled `events` plugin.
 
 ## Related
 

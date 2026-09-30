@@ -81,4 +81,14 @@ for (const [route, page] of pages) {
     }
   }
 }
+
+// The sitemap must advertise real content only. Regenerating it on Windows
+// once leaked /404/ because the exclusion tested a POSIX separator against a
+// backslash path, so pin that no crawler-visible error route is published.
+const sitemap = await readFile(join(root, 'sitemap.xml'), 'utf8');
+for (const loc of sitemap.matchAll(/<loc>([^<]*)<\/loc>/g)) {
+  const route = routeForPath(new URL(loc[1]).pathname);
+  if (!pages.has(route)) throw new Error(`sitemap lists unknown route ${route}`);
+  if (pages.get(route).stub) throw new Error(`sitemap lists redirect stub ${route}`);
+}
 console.log(`verified ${files.length} HTML pages and ${routes.size} routes`);

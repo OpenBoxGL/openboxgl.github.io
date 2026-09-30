@@ -64,6 +64,7 @@ Time Machine is journal-backed and bounded. Reads do not mutate the library. Rev
 | `GET` | `/api/v2/library/time-machine/events` | Page journal events. Optional query: `days`, `kind`, `game_id`, `offset`, `limit`. |
 | `GET` | `/api/v2/library/time-machine/as-of?date=YYYY-MM-DD` | Materialize the bounded library view at a date. |
 | `POST` | `/api/v2/library/time-machine/revert` | Preview or apply a revert. Body: `event_id`, optional `game_id`, `fields`, `undo`; add `apply: true` and the returned `base_token` to apply. |
+| `GET` | `/api/v2/library/time-machine/compare?after=YYYY-MM-DD&before=YYYY-MM-DD` | Read-only diff of the library at two journal dates. `after` is required; omitting `before` diffs against an empty baseline, so every game reads as `added` (a restore-point listing) and `removed`/`changed` are zero. Optional `fields` (comma-separated) bounds which catalog fields are compared; `limit` pages each list. Requires the library journal. Reversed dates return `400 TM_INVALID_DATE`. (v1.15.0+) |
 | `POST` | `/api/v2/library/query/parse` | Parse a natural-language query into deterministic filters without changing library state. |
 | `GET` | `/api/v2/library/trash` | List soft-deleted library entries. |
 | `POST` | `/api/v2/library/trash` | Soft-delete a reviewed library entry. Body: `game_id`. |
@@ -94,6 +95,10 @@ Backlog Radio and Radar use local library and history data. They do not call a r
 Launcher trophies are deterministic OpenBox milestones over local library and history data. They are not RetroAchievements, do not require an account, and do not submit data to a service.
 
 Each radio pick and radar entry carries `estimated_minutes` (integer, rounded): the genre-based length estimate minus already-played minutes (floor 15; unplayed games report the full estimate). Picks hydrated from the stored managed playlist carry it too, with a frontend fallback for older entries. The genre fallback when no history exists is RPG/strategy/simulation 120 min, adventure/action/shooter/platform/fighting 60 min, puzzle/card/board 30 min, and 45 min otherwise; a game fits a requested session when its median session (or the fallback estimate) is at most 1.5x the requested minutes.
+
+`GET /api/v2/insights/wrapped` returns the year-in-review "wrapped" payload assembled from the session journal, playtime, and completion data. It is a pure read projection: nothing is written, so the summary can never go stale.
+
+`year` is a **required** query parameter naming the calendar year to summarize. Omitting it returns `400` ("year is required"); a non-integer returns `400` ("year must be an integer"), and a year outside `1970`-`2100` returns `400` ("year must be between 1970 and 2100"). Example: `/api/v2/insights/wrapped?year=2026`.
 
 ## Game Night party queue
 

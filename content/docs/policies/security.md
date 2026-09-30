@@ -13,7 +13,9 @@ Maintainers aim to acknowledge valid reports within 5 business days and provide 
 
 | Version | Support |
 | --- | --- |
-| 1.13.x | Yes (current) |
+| 1.15.x | Yes (current) |
+| 1.14.x | No — upgrade required |
+| 1.13.x | No — upgrade required |
 | 1.12.x | No — upgrade required |
 | 1.11.x | No — upgrade required |
 | 1.10.x | No — upgrade required |
@@ -35,7 +37,7 @@ Maintainers aim to acknowledge valid reports within 5 business days and provide 
 | 0.4.x | Best effort |
 | < 0.4.0 | No |
 
-Only the latest release on the `master` branch is maintained. The older rows are historical release lines and do not promise backports; upgrade to 1.13.x to receive fixes.
+Only the latest release on the `master` branch is maintained, and the 1.15.x line is the current maintained release. The older rows document the historical support policy and do not promise backports; upgrade to 1.15.x to receive fixes.
 
 ## Protecting local data
 

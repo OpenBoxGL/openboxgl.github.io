@@ -41,8 +41,9 @@ Values already in the environment are never overridden by `.env`. The template l
 | `OPENBOX_ENV_FILE` | Explicit path to a single `.env` file, checked first before the data-directory roots. Read directly from the process environment; must point at an owner-only regular file (not a symlink) or it is skipped. |
 | `OPENBOX_ALLOW_HTTP_WEBHOOKS` | Set to `1` to allow plain-HTTP webhook URLs. Required only for trusted local test targets; HTTPS is the default and safer. |
 | `OPENBOX_ALLOW_HTTP_GAMEYFIN` | Set to `1` to allow plain-HTTP Gameyfin URLs. HTTPS is the default; loopback (localhost) addresses are always allowed. |
-| `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS` | Set to `1` in the process shell to allow unsandboxed plugin execution when bubblewrap is unavailable. Read directly from the process environment (not `.env`). |
+| `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS` | Set to `1` in the process shell to allow unsandboxed plugin execution when bubblewrap is unavailable. Read directly from the process environment (not `.env`; it is not in `ENV_KEYS`). |
 | `OPENBOX_MEDIA_ROOTS` | Colon-separated list (`os.pathsep`) of additional absolute directories approved for scanning and media storage. Up to 32 roots. |
+| `OPENBOX_EXECUTABLE` | Optional explicit path to the emulator/launcher executable recorded when importing Steam titles for Steam Bridge. Read from the process environment at scan time; when unset, the importer uses the Steam-reported executable. |
 | `OPENBOX_ENABLE_DMABUF` | Set to `1` to enable WebKitGTK DMA-BUF rendering in the Linux native window. Disabled by default to prevent silent blank windows on AMD GPUs (including Steam Deck). Windows uses WebView2 instead and ignores this. |
 | `OPENBOX_WEBKIT_HARDWARE_ACCELERATION` | WebKitGTK hardware acceleration policy in the Linux native window (`always` or `on-demand`; default is `on-demand`). |
 | `OPENBOX_SNAPSHOT_DEBOUNCE` | Debounce delay in seconds (float) for background library state snapshot writes (defaults to `0.0`). |
@@ -55,6 +56,7 @@ Values already in the environment are never overridden by `.env`. The template l
 | `OPENBOX_BUNDLED_LIB_PATH` | `LD_LIBRARY_PATH` value used by the AppImage wrapper for bundled libraries. |
 | `OPENBOX_ARCH` | Overrides `uname -m` architecture detection in `install.sh` and `build_appimage.sh` (`x86_64` or `aarch64`). |
 | `OPENBOX_UPDATE_INFORMATION` | zsync update-metadata line embedded by `build_appimage.sh` for the verified updater (packaging-time, not user-facing). |
+| `OPENBOX_RELEASE_BASE` | Base URL the release assets are served from, read by `scripts/install.ps1` (or pass `-ReleaseBase`). Overrides the default GitHub release download host. |
 | `OPENBOX_ENABLE_SQLITE_READ` | Set to `1` to enable the SQLite read model (`pkg/state/sqlite_readmodel.py`) for accelerated search and facets on large libraries. It uses stdlib `sqlite3` with FTS5 full-text search (LIKE fallback if FTS5 is unavailable). JSON remains the source of truth; SQLite is a read-only projection. Release evidence covers 10k and 20k libraries; larger collections are exploratory. Since v1.12.0 the read model also self-enables at 5,000+ games (`should_auto_enable()`, latched per process); an explicit `0`/`false`/`no` opt-out is never overridden. (v1.7.2+) |
 
 ### Windows launchers
@@ -98,7 +100,7 @@ Credentials supplied through the Settings dialog are persisted in the data direc
 
 ## Persisted settings
 
-The Settings dialog saves into `library.json` under `settings`. The save handler (`web_app._save_settings_locked`) validates each field before committing; an invalid value aborts the whole save with a `400` error. Keys must exist in the `settings_schema.py` registry: unknown keys are dropped with a diagnostic log warning rather than persisted. The full key list is exposed by `GET /api/settings`. Notable validated limits:
+The Settings dialog saves into `library.json` under `settings`. The save handler (`SettingsHandlers._save_settings_locked` in `handlers/settings.py:646`) validates each field before committing; an invalid value aborts the whole save with a `400` error. Keys must exist in the `settings_schema.py` registry: unknown keys are dropped with a diagnostic log warning rather than persisted. `GET /api/settings` returns the public projection of the settings, which is a curated subset of the registry (a few internal and separately-owned keys are not part of it). Notable validated limits:
 
 | Setting | Default | Validation |
 | --- | --- | --- |
@@ -117,6 +119,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `progress_automation_idle_days` | 30 | 0 to 3,650, days before marking Paused |
 | `progress_on_first_play` | "Playing" | Must be a known progress status |
 | `welcome_completed` | `false` | Boolean, suppresses opening the Library Setup Center on empty library launch |
+| `backlog_progress_suggest` | `true` | Boolean; kill switch for the one-time "Playing?" suggestion offered when launching an unplayed game (v1.14.0+) |
 | `image_group` | "cover" | One of cover, background, screenshot, clear_logo, fanart, banner, icon, box_back, box_spine, box_3d, title_screen, cart_front, cart_back, disc, advertisement, manual |
 | `badge_visibility` | favorite, installed, saves, documents, progress, storefront, achievements, rating | Subset of favorite, installed, missing_media, saves, documents, versions, storefront, achievements, highscores, progress, rating, broken, portable, controller |
 | `cloud_folder` | "" | Absolute, existing path for mounted-folder statistics sync and optional catalog sync |
@@ -129,6 +132,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `library_music` | "" | Path to existing audio file; empty disables Big Box library BGM |
 | `video_bgm_mix` | `false` | Boolean, lower music volume when mixing with video audio |
 | `bigbox_mode` | "stage" | One of stage, hybrid, coverflow |
+| `bigbox_start_at_launch` | `false` | Boolean; when true the UI opens straight into Big Box on startup (or unless a `?deeplink=bigbox` deeplink overrides it) (v1.14.0+) |
 | `attract_mode_seconds` | 90 | Seconds of idle before screensaver/attract mode triggers |
 | `bigbox_startup_video` | "" | Empty string (disabled) or path to startup video file |
 | `bigbox_shutdown_commands` | `[]` | At most 25 commands; run on entering Big Box (see note below) |
@@ -147,13 +151,20 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `memories_import_enabled` | `false` | Boolean; opt-in import of external media into the Memories gallery (v1.11.0+) |
 | `memories_import_roots` | `[]` | At most 32 absolute, existing directories allowed as Memories import sources (v1.11.0+) |
 | `steamgrid_enabled` | `true` | Boolean; enables the SteamGridDB artwork provider (still requires `STEAMGRIDDB_API_KEY`) (v1.11.0+) |
-| `steamgrid_key_configured` | `(derived)` | Read-only projection in `public_settings`: true when a SteamGridDB API key is configured (`pkg/state/cache.py:481`); not writable via Settings |
+| `scrape_after_import` | `true` | Master toggle for the automatic post-import scrape. Owned by the metadata routes rather than the Settings dialog: read/written through `GET`/`POST /api/v2/metadata/scrape-settings` |
+| `scrape_screenscraper_enabled` | `false` | ScreenScraper opt-in for the post-import scrape. Requires `SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` |
+| `scrape_igdb_enabled` | `false` | IGDB opt-in for the post-import scrape. Requires `IGDB_CLIENT_ID`/`IGDB_CLIENT_SECRET` |
+| `scrape_steamgrid_enabled` | `false` | SteamGridDB opt-in for the post-import scrape. Requires `STEAMGRIDDB_API_KEY` |
+| `steamgrid_key_configured` | `(derived)` | Read-only projection in `public_settings`: true when a SteamGridDB API key is configured (`pkg/state/cache.py:488`); not writable via Settings |
 | `obs_replay_enabled` | `false` | Boolean; enables Record That clip capture via the OBS replay buffer (v1.11.0+) |
 | `obs_websocket_url` | `""` | OBS WebSocket endpoint for replay-buffer capture (v1.11.0+) |
 | `obs_websocket_timeout` | 5.0 | 0.1 to 30 seconds for OBS WebSocket calls (v1.11.0+) |
 | `obs_websocket_password` | `""` | OBS WebSocket password; empty leaves the stored value unchanged (v1.11.0+) |
 | `museum_kiosk_enabled` | `false` | Boolean; Museum/kiosk mode with reduced interaction (v1.11.0+) |
+| `health_rescan` | `"weekly"` | Library health rescan cadence: `daily`, `weekly`, `on_startup`, or `off`. `on_startup` runs once at boot when no game session is active; `off` disables the hourly tick. (v1.14.0+) |
 | `museum_kiosk_pin_hash` | `""` | Salted PIN hash for the kiosk convenience boundary — not API authentication (v1.11.0+) |
+| `mood_match_enabled` | `false` | Boolean; enables adaptive cover theming (Mood Match) from the selected artwork. (v1.9.0+) |
+| `mood_match_bigbox` | `false` | Boolean; extends Mood Match to the Big Box background and cover ring. Only effective while `mood_match_enabled` is true. (v1.9.0+) |
 | `household_stats_sharing` | `false` | Boolean; opt-in sharing of play statistics with Household members (v1.11.0+) |
 | `party_queue` | `[]` | Game Night queue of up to 50 unique game ids (v1.9.0+) |
 | `party_players` | 2 | 2 to 8 Game Night players (v1.9.0+) |

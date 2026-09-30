@@ -3,7 +3,7 @@ title: Proton & Wine Prefix Manager
 description: Discovers, configures, and isolates Windows game runners, Wine prefixes, and Proton runtime environments on Linux.
 ---
 
-OpenBox includes a local-first Wine and Proton prefix manager. It automatically discovers existing prefixes from Bottles, Lutris, Heroic, Steam Proton, and custom directories, eliminating manual prefix path management.
+OpenBox ships a local-first Wine and Proton **discovery** layer. It automatically finds existing prefixes in `~/.wine`, `~/.local/share/wineprefixes`, the Lutris Wine runners tree, the Faugus prefix directories, the Bottles store, and `~/Games`, so you can point a title at a prefix without hand-writing a path. Heroic is not one of these sources: it appears only as a storefront importer, which is a different subsystem.
 
 <Callout type="caution" title="This guide applies to Linux hosts">
 
@@ -13,50 +13,45 @@ Since 1.13.0 OpenBox also runs natively on Windows, where Windows titles launch 
 
 ## How it works
 
-OpenBox's Wine subsystem inspects standard local directories at startup and caches known runtime environments:
+OpenBox's Wine subsystem inspects standard local directories and lists what it finds. It is a **discovery and suggestion** layer, not a runtime wrapper: it reads directories and reads the `wine_prefix` field on a game record, but it does not construct the launch command for you.
 
-1. **Prefix Discovery** (`DEFAULT_PREFIX_ROOTS` in `pkg/parity/parity_wine.py:17-27,47-70`):
-    - System standard: `~/.wine`, `~/.local/share/wineprefixes/`
-    - Faugus Launcher prefixes: `~/.config/faugus-launcher/prefixes`, `~/.local/share/faugus-launcher/prefixes`, `~/Faugus`
-    - Bottles: `~/.local/share/bottles/bottles`
-    - Custom folders: `~/Games` and `WINEPREFIX` environment variable
-    - Note: `~/.local/share/lutris/runners/wine` is a **runner** directory (Wine builds), not a prefix store — it is a Proton/runner root below, and prefix scanning skips runner-only trees.
+1. **Prefix Discovery** (`DEFAULT_PREFIX_ROOTS` in `pkg/parity/parity_wine.py:16-24`):
+   - `~/.wine`, `~/.local/share/wineprefixes/`
+   - Faugus Launcher prefixes: `~/.config/faugus-launcher/prefixes`, `~/Faugus`
+   - Bottles: `~/.local/share/bottles/bottles`
+   - Lutris: `~/.local/share/lutris/runners/wine`
+   - Custom folders: `~/Games`, plus the `WINEPREFIX` environment variable
+   - Note: `~/.local/share/lutris/runners/wine` holds Wine **builds**, not game prefixes. The scanner only accepts a directory that actually contains a `drive_c`, so a runner tree is skipped even though the root is scanned.
 
-2. **Proton Runtime Discovery**:
-   - Steam Proton: `~/.local/share/Steam/compatibilitytools.d`, `~/.steam/root/compatibilitytools.d`, `~/.steam/steam/compatibilitytools.d`
+2. **Proton Runtime Discovery** (`DEFAULT_PROTON_ROOTS` in `pkg/parity/parity_wine.py:28-36`):
+   - Steam Proton: `~/.steam/root/compatibilitytools.d`, `~/.steam/steam/compatibilitytools.d`, `~/.local/share/Steam/compatibilitytools.d`
    - Faugus runners: `~/.config/faugus-launcher/runners`, `~/.local/share/faugus-launcher/runners`
    - Lutris runners: `~/.local/share/lutris/runners/wine`
    - System and Flatpak executables: `wine`, `wine64`, `proton`, `umu-run`, `umu-launcher`
 
+   Proton roots are scanned one level deep, which is why the Steam `compatibilitytools.d` and Lutris runner trees resolve: each direct child of a root is checked for a `proton` file, a `files/bin/wine` or `dist/bin/wine` binary, or a name containing "proton" or "wine". (The two-level walk belongs to the separate prefix scanner, not to this one.)
+
 ## Assigning a Prefix to a Game
 
-In the game's **Edit Metadata** modal:
+`GET /api/wine/prefix-for-game?game_id=<id>` resolves a title's prefix by reading the `wine_prefix`, `prefix`, or `WINEPREFIX` field on the game record, including a `WINEPREFIX=` assignment inside the launch command.
 
-- **Wine Prefix**: Select a discovered prefix from the dropdown or type an absolute directory path.
-- **Wine / Proton Runner**: Choose between system Wine, Lutris Wine, or a detected Proton version.
-- **Launch Command**: By default, OpenBox executes the game executable directly inside its configured prefix environment, or prepends `umu-run` when installed.
+There is no control for setting this, and the library API cannot set it either: the game field cleaner copies only the fields in its accepted set, and `wine_prefix` is not one of them, so a `wine_prefix` key sent to the library API is dropped. The supported way to record a prefix on a title is the **Launch command** field of the **Edit Metadata** modal, because `WINEPREFIX=/path/to/prefix` written there is parsed out of the command and resolved like any other prefix. The one place OpenBox itself writes `wine_prefix` is the Faugus importer, which seeds imported titles with the prefix it found in the Faugus data. The prefix OpenBox reads is the one you assign; there is no automatic `WINEPREFIX` environment injection at spawn time, and no automatic UMU wrapper.
 
-```bash
-# Example resolved command executed by OpenBox
-WINEPREFIX="/home/deck/.local/share/bottles/prefixes/gaming" wine "/home/deck/Games/Cyberpunk2077/bin/x64/Cyberpunk2077.exe"
-```
+<Callout type="caution" title="OpenBox does not build the Wine launch command">
 
-## Running with UMU (Unified Linux Wine Game Launcher)
+The prefix and Proton discovery is read-only. OpenBox will not prepend `wine` or `umu-run` to your launch command for you. To launch through a runner, write the command yourself on the game record — for example `WINEPREFIX=/path/to/prefix wine "/path/to/game.exe"`. The Faugus importer is the one exception: it seeds imported titles with `umu-run {path}` as a starting point.
 
-When `umu-run` is detected on `$PATH`, OpenBox can launch Windows executables through UMU, which automatically matches the appropriate Proton version, DXVK layer, and runtime fixes based on the game's identity.
-
-```bash
-# UMU execution format
-GAMEID=openbox-game umu-run "{ImagePath}"
-```
+</Callout>
 
 ## REST API Endpoints
 
-The Wine and Proton subsystem is fully accessible over OpenBox's local REST API:
+The Wine and Proton discovery results are readable over OpenBox's local REST API:
 
-- `GET /api/wine/prefixes`: Returns all discovered Wine and Proton prefixes.
+- `GET /api/wine/prefixes`: Returns all discovered Wine prefixes, each as `{path, has_drive_c, name}`.
 - `GET /api/wine/protons`: Returns all detected Proton runtime versions.
-- `GET /api/wine/prefix-for-game?game_id=<id>`: Resolves or suggests the optimal prefix for a given library title.
+- `GET /api/wine/prefix-for-game?game_id=<id>`: Resolves the prefix recorded for a library title.
+
+All three return `available: false` with an empty list when the Wine layer is unavailable on the host.
 
 <Callout type="tip" title="Game saves inside prefixes">
 
