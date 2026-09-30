@@ -25,7 +25,7 @@ Offline semantic search over the library: BM25 plus a 151-concept lexicon (Engli
 | `POST` | `/api/v2/library/dna/index/rebuild` | Full index rebuild as a background job. Returns `202 {"state", "job_id"}`; track progress and cancel through the [durable jobs routes](/reference/api/saves-and-operations/). |
 
 ```bash
-curl -s -X POST -H "X-OpenBox-Token: <redacted> \
+curl -s -X POST -H "X-OpenBox-Token: $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"query": "short unplayed rpg", "limit": 10}' \
   "$BASE/api/v2/library/dna/search"
@@ -47,12 +47,12 @@ A 0–100 score over five weighted dimensions — `file_integrity` (35), `duplic
 
 ```bash
 # Preview, then execute with the preview token
-PREVIEW=$(curl -s -X POST -H "X-OpenBox-Token: <redacted> \
+PREVIEW=$(curl -s -X POST -H "X-OpenBox-Token: $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"dimension": "duplicates", "dry_run": true}' \
   "$BASE/api/v2/library/health/fix")
 TOKEN2=$(echo "$PREVIEW" | python3 -c 'import json,sys; print(json.load(sys.stdin)["base_token"])')
-curl -s -X POST -H "X-OpenBox-Token: <redacted> \
+curl -s -X POST -H "X-OpenBox-Token: $TOKEN" \
   -H "Content-Type: application/json" \
   -d "{\"dimension\": \"duplicates\", \"dry_run\": false, \"base_token\": \"$TOKEN2\"}" \
   "$BASE/api/v2/library/health/fix"
