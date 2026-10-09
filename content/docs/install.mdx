@@ -58,13 +58,15 @@ The source install uses only the Python standard library, there is no `pip insta
  Download the installer from a specific signed release, inspect it, then run it. The installer verifies the release public-key pin, SHA-256 checksum, and Ed25519 signature before installing to `~/.local/bin`:
 
  ```bash
- VERSION=1.15.0
+ VERSION=1.16.1
  curl --proto '=https' --tlsv1.2 --fail --location \
    --output install.sh \
    "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
  less install.sh
  OPENBOX_RELEASE_TAG="v${VERSION}" bash install.sh
  ```
+
+ `VERSION` is the current release, **1.16.1**. Pin it deliberately only when reproducing a specific build, because older releases carry security fixes that are not backported (see [Security](/policies/security/)). The `install.sh` file is itself fetched from that tag, so the download needs a tag either way; dropping the `OPENBOX_RELEASE_TAG="v${VERSION}"` prefix lets the installer resolve the latest release at run time instead.
 
  The installer needs `curl`, `python3`, `openssl`, and `sha256sum` on `PATH`: it verifies the release public-key pin, the SHA-256 checksum, and the Ed25519 signature before installing to `~/.local/bin`.
 
@@ -164,7 +166,7 @@ The current `sudo make install` wrapper path is not the recommended installation
 Windows 10 and 11 on x86_64 are supported since 1.13.0, through a signed portable install rather than an AppImage. Download the release's `install.ps1` and run it; it resolves and pins the release public key, then verifies the archive's SHA-256 checksum and Ed25519 signature before extracting the runtime to `%LOCALAPPDATA%\OpenBox\share\openbox`:
 
 ```powershell
-$Version = '1.15.0'
+$Version = '1.16.1'
 Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
 .\install.ps1 -Tag "v$Version"

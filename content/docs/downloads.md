@@ -48,7 +48,7 @@ The Windows archive ships with the same `.sha256` sidecar and `.sig` signature a
 The installer pins the release public key, verifies the SHA-256 checksum, and verifies the Ed25519 signature before installing to `~/.local/bin`.
 
 ```bash
-VERSION=1.15.0
+VERSION=1.16.1
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output install.sh \
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -79,7 +79,7 @@ chmod +x OpenBox-$(uname -m).AppImage
 Windows 10 and 11 on x86_64 install from a signed portable archive. The installer resolves and pins the release public key, verifies the archive's SHA-256 checksum and its Ed25519 signature, and only then extracts the runtime to `%LOCALAPPDATA%\OpenBox\share\openbox`.
 
 ```powershell
-$Version = '1.15.0'
+$Version = '1.16.1'
 Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
 less install.ps1
