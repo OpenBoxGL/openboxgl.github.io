@@ -90,3 +90,9 @@ Contributions are licensed under AGPL-3.0. Security issues must use the private 
 ## Developer Certificate of Origin
 
 OpenBox uses the [Developer Certificate of Origin](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/CONTRIBUTING.md#developer-certificate-of-origin). Sign commits with `git commit -s` to record that you have the right to submit the work under the project license.
+
+## Related pages
+
+- [Releasing](/project/releasing/) — how a release is cut, signed, and verified.
+- [Design system](/project/design-system/) — the token and component conventions new UI must follow.
+- [Architecture](/reference/architecture/) — the module map a change has to fit into.

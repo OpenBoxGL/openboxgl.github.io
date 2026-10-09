@@ -40,6 +40,18 @@ Prefix a term with a field name and a colon to target one field:
 | `controller:` | Controller support |
 | `tag:` (alias `tags:`) | Tag (see below) |
 
+## Your own ratings (v1.14.0)
+
+Every game carries a personal star rating (`user_rating`, 0–5, where 0 is unrated) that is separate from the provider's `rating`. These clauses read **your** rating, not the metadata one — they are distinct clause kinds, not aliases of `rating:`:
+
+| Form | Alias | Matches |
+| --- | --- | --- |
+| `myrating:4` | `my_rating:4`, `my-rating:4` | Games **you** rated 4 or higher (a floor, so `myrating:4+` is the same) |
+| `my 4 stars` | `my rating at least 4` | The same floor, in words |
+| `unrated by me` | `not rated by me` | Games with no rating from you |
+
+`rating:4` and `myrating:4` answer different questions and both are supported side by side. `unrated` on its own is the *provider* rating; `unrated by me` is yours. See [Backlog](/guides/library/backlog/) for where you set a personal rating.
+
 ## Negative terms
 
 Prefix any term with `-` to exclude it:

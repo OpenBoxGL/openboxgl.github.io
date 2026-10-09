@@ -4,6 +4,59 @@ description: Release notes for OpenBox, from the latest release back to the firs
 sidebar: false
 ---
 
+## 1.16.1 (2026-10-08) — Launch readiness everywhere
+
+A fix release on the [1.16.0](#1160-2026-10-05--make-it-true) line. It finishes launch readiness, adds launch definitions for 18 more systems, and keeps the library live and responsive. No route is removed or changed. Five routes are added: `GET /api/v2/launch/audit/status`, `POST /api/v2/launch/grant`, `POST /api/v2/launch/grant/undo`, `GET /api/v2/launch/cores`, and `POST /api/v2/launch/core`. See [API 1.16 additions](/reference/api/one-sixteen/).
+
+- **Launch readiness on the grid:** after a Launch Audit, a game it found blocked shows a **Won't launch** badge and one it found with warnings shows **Needs attention**. The badges come from the cached audit and disappear when the library has changed since the audit ran, so a stale report is never shown. Settings → Appearance has a switch to turn them off.
+- **The Launch Audit runs on the library health schedule** (daily or weekly), so the badges follow the library without a setting of their own, and one notice reaches the notification feed when the blocked or warning totals change.
+- **Group fixes and a scoped relink:** a group of games that share one Flatpak grant or one emulator install gets one button for all of them, and after a grant only that group's games are checked again — the merged result equals a full audit. A missing-file group gets a **Find moved files** button that opens the repair wizard limited to its games.
+- **Choose the RetroArch core for one game:** the Launch Doctor's **Choose core** lists the installed cores, the game launches with the one you pick, and **Use the default core** restores the definition's. The choice now applies on Windows too.
+- **A Flatpak emulator without folder access is no longer told to reinstall.** The Launch Doctor offers **Grant access**, which runs `flatpak override --user --filesystem=<folder>:ro <app>` after you confirm; **Remove access** reverses it until OpenBox restarts. The grant is read-only, the home folder itself cannot be granted, and the exact command is still shown with a Copy button.
+- **Every system out of the box:** launch definitions for 18 more systems — RetroArch cores for Genesis, Master System, Game Gear, Sega CD, PC Engine, Neo Geo Pocket, Atari 2600, 7800, Lynx, Jaguar, WonderSwan, Virtual Boy, C64, MSX, and Amiga, plus standalone Dreamcast (Flycast), 3DS (Azahar), and MS-DOS (DOSBox Staging). Definitions use **schema 2**, and a pack written for a newer schema is refused with the version it needs.
+- **Disc images ask which system they belong to.** `.bin`, `.cue`, and `.iso` files that several systems share wait for a platform choice in the import wizard instead of being guessed at, and a file cannot import until it has one.
+- **Always live and fast:** one live connection per tab that every live feature shares (the server accepts 16 at a time, so a busy tab could previously be refused and lose updates), a search that no longer moves the panels below it, and a session event stream that reopens when the page is shown again.
+- **Safer with your data:** a stale edit window can no longer overwrite a neighbouring game — a request naming a stable game id that no longer exists is refused. **Removing imported Steam games is undoable:** it moves them to the Trash with their position and playlist memberships instead of deleting outright, and the Trash's 200 entries are never evicted to make room. **Plugins trusted before this release need one re-approval**, because the trust check now covers file boundaries that the old checksum did not.
+- **Fixed:**
+  - Flatpak probes could hang a request; the status, open, setup, and install probes now give up after 5 s and count the emulator as not installed, and the two Windows `taskkill` calls are bounded too.
+  - "Played recently" missed last-played values written with `Z` or an offset; all date rules now compare in local time through one parser, and a bulk edit rejects a value it cannot read rather than silently hiding the game from every date rule.
+  - **Retry failed** in the media manager is now a button, enabled only when a download has failed games.
+  - A failed setting save rolls back and says why instead of looking applied; startup storefront imports name the sources that failed.
+  - Emulator Health no longer shows buttons that do nothing: the BIOS button reveals the folder where the host can, and a missing core or firmware is stated instead of offered as a dead button.
+  - Both preflight endpoints reject a body that is not a JSON object, and two no-op launch-token validation blocks were removed.
+  - Unescaped bridge ids on the Linux host: an id with an apostrophe, backslash, or line break no longer breaks the call and leaves the page's promise pending. The Windows host received the same fix.
+  - The native window now starts in the active theme's colour instead of the dark default.
+
+## 1.16.0 (2026-10-05) — Make it true
+
+Two questions every big library raises now have a one-click answer: **will my games actually launch?** and **what will restoring this backup do?** This release answers both, closes several security holes, and fixes a long list of places where OpenBox said one thing and did another.
+
+- **Find every game that won't launch, before you try it.** Open **Library health** and press **Check every game**. OpenBox runs the Launch Doctor over your whole library in the background; you can keep using the app and cancel at any time. Problems come back grouped by cause, so rather than 412 separate "won't launch" entries you see one line — **RetroArch is not installed — 412 games** — and fixing that one thing fixes all 412. A missing-emulator cause gets an **Install** button, a summary at the top counts ready, warning, and blocked games, and each group pages through the games behind it. It is read-only, fast on huge libraries because each emulator is looked up once rather than once per game, and it tells you when its results are out of date. Deep mode, which also looks inside zipped ROMs and checks BIOS files, is optional. See [Emulators and launching](/guides/emulators-and-launching/#check-every-game-v1160).
+- **See what a restore will do before you do it.** In **Backups**, choose **Preview changes** next to any backup. OpenBox shows the games that would be removed, the games that would come back, and for each game that would change exactly which fields differ with your value and the backup's side by side. A line says whether your settings would move too, and long lists show true totals such as "showing 200 of 1,340". The **Restore** button only appears after a preview has loaded successfully; if it cannot load you get a **Retry** button and no way to restore. See [Sessions, saves, and backups](/guides/sessions-saves-and-backups/#preview-a-restore-before-you-restore).
+- **Know when a game didn't start.** A game that closed the moment it opened used to look exactly like one you had played and quit. OpenBox now reads the exit code: an almost-immediate error exit shows **Session failed** with the code and a pointer to the launch command and emulator install, a longer run that errored shows **Session ended**, and a normal exit still shows "Play time and history were saved". The same information reaches webhooks, which also get a separate flag when a session ended because it timed out.
+- **Imports you can trust.** Games the wizard cannot resolve — such as an unknown platform — now wait for your decision instead of being imported on a guess, and the final confirmation step counts how many are still waiting. Your own `.m3u` playlists are never overwritten by a generated one. LaunchBox and ES-DE imports ask first, showing how many games will be added, how many merged into games you already have, and how many entries are in the plan; the review list says when it is showing only the first 50.
+- **Safer by default — upgrade if you are on 1.15.x or older.** These fixes are not backported, and 1.15.x is no longer supported: a crafted request could read any `.json` file on your computer including the settings file holding your metadata provider keys; a tampered ROM name in a high-score bundle could write outside the high-score folder; sandboxed plugins could read your library and settings if you had moved the data folder with `OPENBOX_DATA_DIR`; game names in the Wrapped report were inserted unescaped; and a third-party Python package that happened to be installed could change how your library was saved. See [Security](/policies/security/).
+- **Fixed:**
+  - **Playtime landing on the wrong game.** If you deleted a game while it was still running and then restarted OpenBox, those hours were added to whichever game happened to be last in your library. No game's playtime changes when the game it belongs to is gone.
+  - **Changes lost during a cloud sync.** An edit made while a cloud sync was in progress could be overwritten when the sync finished; your edit and the synced changes are now merged.
+  - **Dialogs closing abruptly.** Escape and backdrop clicks closed most dialogs instantly, without their closing animation, and left focus nowhere in particular. Every dialog now closes smoothly however you close it, and focus returns to the button that opened it.
+  - **Notifications erasing each other.** A second notification arriving while one with an **Undo** button was showing could remove that button before you clicked it. Notifications now stack up to three at a time, each keeps its own button, and they pause while your mouse is over them or one is focused.
+  - **Half-finished emulator-definition updates** now roll back completely if anything fails.
+  - **Controller stops after alt-tab**, **the command palette launching a different game than the one highlighted**, and **session cards showing another game's cover** are all fixed.
+  - **Big Box video and music** now stop and reset when Big Box closes instead of looping for the rest of the session.
+  - **Searches.** Searching for just `-` emptied the library view and quoted phrases could be split apart; both are fixed. Searches matching more than 20,000 games now say they are showing only part of the results instead of silently cutting them off.
+  - **Endless spinners.** If the server stopped responding, some screens spun forever; requests now give up after 60 seconds and tell you.
+  - **The Constellation view** could freeze the page while laying out with reduced motion on, and its spinner never stopped if loading failed; it now works in short steps and shows an error.
+  - **The Arcade Room** no longer closes when you cancel a launch, and **Time Machine** no longer stops working after a quick double-click on **Load more**.
+  - **The museum-mode PIN prompt** now waits progressively longer after each failed or dismissed attempt instead of reappearing forever.
+  - **Bulk-accepting metadata matches** now says that nothing was accepted, and why, instead of failing silently.
+  - The **ScreenScraper credential aliases** are fixed: setting `OPENBOX_SCREENSCRAPER_*` names was accepted but ignored, leaving a provider that reported itself unconfigured.
+  - This release also corrects four behaviours described in 1.15.0 that had shipped as documentation only — dialog exit animations, toast stacking, definition-channel atomicity, and the reduced-motion gate.
+
+[Full OpenBox 1.16.1 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.16.1) · [Compare v1.16.0...v1.16.1](https://github.com/vindeckyy/OpenBoxGL/compare/v1.16.0...v1.16.1) · [1.16 API reference](/reference/api/one-sixteen/)
+
+[Full OpenBox 1.16.0 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.16.0) · [Compare v1.15.0...v1.16.0](https://github.com/vindeckyy/OpenBoxGL/compare/v1.15.0...v1.16.0) · [1.16 API reference](/reference/api/one-sixteen/)
+
 ## 1.15.0 (2026-09-29) — Finish the surface
 
 The features that arrived without a screen finally have one, and the ones that had a screen got fixed. Motion respects your system setting, the light theme is readable, and nothing hides behind a dialog.
@@ -640,3 +693,8 @@ The first public builds: the local web UI and native Tk interface, folder and st
 - [Installation](/install/)
 - [Updating](/updating/)
 - [Security policy](/policies/security/)
+
+## Related pages
+
+- [Roadmap](/roadmap/) — what is shipping next and what is deferred.
+- [Security](/policies/security/) — supported versions and what each release closed.

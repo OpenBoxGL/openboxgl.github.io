@@ -79,3 +79,6 @@ Entries added via `/api/import/exclusions` block specific storefront titles from
 - [API content and imports](/reference/api/content-and-imports/) for every import route
 - [Accounts and media](/integrations/accounts-and-media/) for metadata providers
 - [Local services](/integrations/local-services/) for Gameyfin, OBS, and save tools
+
+- [Faugus Launcher](/guides/integrations/faugus/) — scanning and importing an existing Faugus library
+- [Storefront Manager](/guides/storefront-manager/) — importing from Steam, Epic, GOG, and Amazon through Heroic and Lutris

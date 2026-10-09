@@ -29,9 +29,9 @@ Click **Import Folder** in the top bar (or **Add Game** for a single entry) and 
 
 ### Ambiguous Extension Resolution
 
-Per ADR 0012, shared disc extensions (such as `.iso`) no longer guess platforms silently. OpenBox flags ambiguous multi-platform extensions (`AMBIGUOUS_PLATFORM`) and presents explicit platform candidates for user resolution in Setup Center and Launch Doctor.
+Per ADR 0012, shared disc extensions (such as `.iso`) no longer guess platforms silently. OpenBox flags ambiguous multi-platform extensions (`AMBIGUOUS_PLATFORM`) and presents explicit platform candidates for user resolution in Setup Center and Launch Doctor. Since 1.16.1, `.bin`, `.cue`, and `.iso` files that several systems share **wait for you to choose** in the import wizard, and a file cannot import until it has a platform — a guess is never made on your behalf.
 
-When several files share a base name with a `(Disc 1)`, `(Disc 2)`, `(CD 1)`, `(Side A)` style marker, they are grouped into one entry with a generated `.m3u` and the game name without the disc marker. When several files map to the same platform and name, only the best-ranked ROM is imported; the runner-up candidates are kept on the entry as `version_candidates`. Ranking prefers clean regional names (World and USA above Europe, then Japan), penalizes `(Beta)`, `(Proto)`, `(Demo)`, `(Sample)`, `(Unl)`, `(Pirate)`, `(Hack)`, and `(Translation)` tags, favors `.chd`, `.cue`, and `.m3u`, and treats a missing or unreadable file as the worst score.
+When several files share a base name with a `(Disc 1)`, `(Disc 2)`, `(CD 1)`, `(Side A)` style marker, they are grouped into one entry with a generated `.m3u` and the game name without the disc marker. Since 1.16.0 OpenBox **never overwrites a playlist it did not create**: if you had made your own `.m3u` next to the disc images, an import leaves it alone and imports the game exactly once, rather than replacing your playlist and losing the game it pointed to. When several files map to the same platform and name, only the best-ranked ROM is imported; the runner-up candidates are kept on the entry as `version_candidates`. Ranking prefers clean regional names (World and USA above Europe, then Japan), penalizes `(Beta)`, `(Proto)`, `(Demo)`, `(Sample)`, `(Unl)`, `(Pirate)`, `(Hack)`, and `(Translation)` tags, favors `.chd`, `.cue`, and `.m3u`, and treats a missing or unreadable file as the worst score.
 
 After a folder scan OpenBoxGL recommends an emulator per detected platform. If exactly one emulator is suggested it is used; if several are, you pick one interactively. Picking one installs it from Flathub and adds its platform profile.
 
@@ -84,6 +84,8 @@ See [Import sources](/integrations/import-sources/) for source-specific paths an
 ## LaunchBox XML migration (v1.10.0)
 
 Moving from LaunchBox? Export your LaunchBox library XML, then preview the migration with `POST /api/v2/import/launchbox/preview` — it reports how games dedupe against your current library and which emulator mappings apply (mappings are reported, never silently applied). The preview returns a `preview_token` and `source_digest`; apply with `POST /api/v2/import/launchbox/apply` sending the reviewed plan back. If the XML (`source_digest`) or the library changed since the preview, or the token mismatches, the apply stops with `StaleImportPlan` (`handlers/imports.py:153-162`, `pkg/parity/parity_launchbox_import.py:486,527-546`) — preview again instead of forcing it.
+
+**Applying a LaunchBox or ES-DE migration rewrites your library from the source file, so it confirms with exact numbers first (v1.16.0):** how many games will be added, how many will be merged into games you already have, and how many entries are in the plan. The review list also says plainly when it is only showing the first 50 entries, so a short list is never mistaken for the whole import.
 
 ## ES-DE gamelist migration (v1.11.0)
 

@@ -50,3 +50,9 @@ Every LaunchBox Premium equivalent ships without a subscription in OpenBoxGL: cu
 - For Windows, the same release publishes `OpenBox-x86_64-windows.zip` with its `.sha256` and `.sig`, plus `install.sh` and `install.ps1` as standalone assets; the installer verifies the key, checksum, and signature before extracting. The uninstaller is not a standalone asset — it ships **inside** the zip and the installed tree, where the installer also puts it, so it is run from the install at `scripts\uninstall.ps1` (for a default install, `%LOCALAPPDATA%\OpenBox\share\openbox\scripts\uninstall.ps1`). It removes exactly what the installer created while leaving your library in place. The full path is in [Windows](/windows/).
 - Open PARITY.md in the application repository and confirm the acceptance check for any row before relying on it.
 - For pricing, LaunchBox Premium pricing is published by Unbroken Software. OpenBox cost is zero and source is AGPL-3.0 at [LICENSE](https://github.com/vindeckyy/OpenBoxGL/blob/master/LICENSE).
+
+## Related pages
+
+- [Downloads](/downloads/) — every install method and its verify step.
+- [Enterprise](/enterprise/) — commercial use, licensing, and deployment.
+- [Showcase](/showcase/) — what the interface looks like in use.

@@ -61,6 +61,20 @@ Start with the diagnostic log and the exact visible error. **Settings** has **Co
 - Plugins are trusted local Python code: install only packages you trust. A failed plugin update rolls back to the previous version; removal keeps a recoverable copy.
 - Logs redact credentials, but may include game names and file paths, so review the copied log before sharing it.
 
+## Go deeper
+
+Each area above has a dedicated page with the full detail, the exact error strings, and the checks in the order worth trying:
+
+- [Startup and browser issues](/guides/troubleshooting/startup-and-browser/) — the server not starting, the window not appearing, Steam and Game Mode specifics.
+- [Import problems](/guides/troubleshooting/imports/) — every storefront and folder-import source, and what each one needs on the machine.
+- [Launch problems](/guides/troubleshooting/launching/) — command tokens, archive extraction, TDP limits, and sessions that end early.
+- [State recovery](/guides/troubleshooting/state-recovery/) — what to do when `library.json` needs recovery and how to avoid it.
+- [Backups and restores](/guides/troubleshooting/backups-and-restores/) — restore refusals and the safety copies behind them.
+- [Metadata and media](/guides/troubleshooting/metadata-and-media/) — the 409 before the database exists, provider limits, and media cleanup.
+- [Integration credentials](/guides/troubleshooting/integration-credentials/) — where credentials come from, in priority order, and why a provider reports itself unconfigured.
+- [Plugins](/guides/troubleshooting/plugins/) — a plugin that is skipped, times out, or is not trusted.
+- [Diagnostic logs](/guides/troubleshooting/diagnostic-logs/) — what the log records, what it redacts, and how to share it.
+
 ## Still stuck?
 
 Reproduce the failure with a small, disposable example (for example a single test ROM in a scratch folder), capture the exact visible error and the diagnostic log, and file an issue at [OpenBoxGL issues](https://github.com/vindeckyy/OpenBoxGL/issues) with both. Security and credential problems belong in [Security and legal](/policies/security/).

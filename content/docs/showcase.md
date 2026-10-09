@@ -39,3 +39,9 @@ Open a pull request that adds one image under the repository's root `public/` as
 | Year in Games | Playtime totals, session counts, streaks, and the printable report |
 | Mastery | Per-platform completion bars and the decade filter |
 | Game Night | Player count, session length, the spin wheel, and the up-next queue |
+
+## Related pages
+
+- [Downloads](/downloads/) — every install method and its verify step.
+- [Compare](/compare/) — how OpenBox lines up against LaunchBox.
+- [Enterprise](/enterprise/) — commercial use, licensing, and deployment.

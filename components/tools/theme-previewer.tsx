@@ -65,6 +65,19 @@ const STOCK_THEMES: ThemePreset[] = [
     text: "#c8ffc8",
     border: "#122c18",
   },
+  {
+    // Shipped in 1.15.0 as the sixth stock theme. Colors are the real
+    // `--bg` / `--surface-card` / `--brand` / `--accent` / `--text` /
+    // `--border-card` token values from the theme's :root block.
+    id: "high-contrast",
+    name: "High Contrast",
+    bg: "#000000",
+    card: "#0a0a0a",
+    brand: "#ffb000",
+    accent: "#6eb5c9",
+    text: "#ffffff",
+    border: "#c8c8c8",
+  },
 ]
 
 export function ThemePreviewer() {
@@ -299,7 +312,7 @@ export function ThemePreviewer() {
                     border: `1px solid ${customBorder}`,
                   }}
                 >
-                  v1.15.0
+                  v1.16.1
                 </span>
               </div>
               <div className="flex items-center gap-2">

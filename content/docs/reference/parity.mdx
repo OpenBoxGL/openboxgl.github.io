@@ -10,22 +10,22 @@ The application repository's `PARITY.md` is the maintenance source for capabilit
 
 Every workflow in `PARITY.md` is marked `done`, or carries a decision status for workflows without a Linux equivalent:
 
-- <StatusBadge status="done" /> means the workflow is usable end to end. The 1.15.0 line runs on Linux (AppImage, Flatpak, source, and system installs) and on Windows x86_64, so `done` rows apply on both unless the row's note or the Linux-only list below says otherwise.
+- <StatusBadge status="done" /> means the workflow is usable end to end. The 1.16.x line runs on Linux (AppImage, Flatpak, source, and system installs) and on Windows x86_64, so `done` rows apply on both unless the row's note or the Linux-only list below says otherwise.
 - <StatusBadge status="partial" /> means a deliberate Linux equivalent exists but the Windows/premium surface is broader or unavailable.
 - <StatusBadge status="missing" /> means no usable equivalent yet.
 - Decision rows ("Not applicable", "Replaced by ...", "Use ... instead") mark Windows-only workflows with no Linux equivalent; they are documented as boundaries rather than implied support.
 
-Verified against **v1.15.0** (application `docs/PARITY.md`).
+Verified against **v1.16.1** (application `docs/PARITY.md`).
 
 ## Platform coverage
 
-The 1.15.0 line runs on Linux and on Windows x86_64. Windows uses the native WebView2 host, the `install.ps1` installer with its matching `uninstall.ps1`, and verified in-place updates of `OpenBox-<arch>-windows.zip`; the platform seam lives in `pkg/platform_compat.py` (standard library only, plus `ctypes` on Windows).
+The 1.16.x line runs on Linux and on Windows x86_64. Windows uses the native WebView2 host, the `install.ps1` installer with its matching `uninstall.ps1`, and verified in-place updates of `OpenBox-<arch>-windows.zip`; the platform seam lives in `pkg/platform_compat.py` (standard library only, plus `ctypes` on Windows).
 
 These surfaces remain Linux-only and are not part of the Windows build: gamescope and Game Mode, AppImage and Flatpak packaging, XDG desktop entries, `sudo make install`, Steam Deck and handheld tuning, and Flathub-aware emulator management. See [Windows](/windows/) for the platform guide.
 
 ## Capability status
 
-The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Brazilian Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0 through 1.15.0 features plus the Windows support below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
+The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Brazilian Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0 through 1.16.1 features plus the Windows support below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
 
 | Area | Status | Notes |
 | --- | --- | --- |
@@ -66,6 +66,13 @@ The source matrix tracks the current LaunchBox-aligned capabilities, including L
 | Motion and reduced motion (v1.15.0) | <StatusBadge status="done" /> | Every duration and easing is a structural token; a single `prefers-reduced-motion` block zeroes them all, dialogs animate out as well as in, theme switches cross-fade, and the toast is one top-layer surface (ADR 0063) |
 | High Contrast theme (v1.15.0) | <StatusBadge status="done" /> | A sixth stock theme redeclaring every `:root` token at maximum contrast (21:1 body text, AAA foregrounds), checked against every theme by a contrast matrix in `tests/test_stock_themes.py` |
 | Windows uninstaller (v1.15.0) | <StatusBadge status="done" /> | `scripts/uninstall.ps1` removes exactly what `install.ps1` creates — the install tree and its rollback copy, the user `PATH` entry, the Start Menu shortcut, and the `openbox://` registration — and never touches the library or settings; `-WhatIf` previews it (ADR 0062) |
+| Launch Readiness (v1.16.0) | <StatusBadge status="done" /> | `POST /api/v2/launch/audit/scan` runs the Launch Doctor over every game as a cancellable job; `GET /api/v2/launch/audit` returns ready/warning/blocked totals and one row per root cause with paginated members, grouped so one cause reads as one sentence. Read-only, and the report lives in `cache/launch_audit.json` rather than `library.json` (ADR 0072) |
+| Restore Preview (v1.16.0) | <StatusBadge status="done" /> | Selecting a backup fetches `GET /api/v2/backup/diff` and shows what the restore would remove, bring back, and overwrite per field, with true totals; the Restore button is built only from a successful diff, so a restore can never happen unseen (ADR 0019) |
+| Import decisions (v1.16.0) | <StatusBadge status="done" /> | Candidates the wizard cannot resolve wait for you; the unresolved-candidate guard applies and the Confirm step counts what is still waiting. LaunchBox and ES-DE applies confirm with exact added/merged/plan counts (ADR 0072) |
+| Launch badges and group fixes (v1.16.1) | <StatusBadge status="done" /> | `GET /api/v2/launch/audit/status` marks blocked games "Won't launch" and warning games "Needs attention" on the grid, from the cached audit and never from a stale one; a group sharing one fix gets one button, and a missing-file group relinks from a single scoped refresh |
+| Flatpak folder grants (v1.16.1) | <StatusBadge status="done" /> | `POST /api/v2/launch/grant` grants one folder read-only instead of telling you to reinstall, with `/launch/grant/undo` reversing it until restart; the home folder itself cannot be granted |
+| Per-game RetroArch core (v1.16.1) | <StatusBadge status="done" /> | `GET /api/v2/launch/cores` lists installed cores and `POST /api/v2/launch/core` binds one to a game; an empty core restores the definition default, and the choice applies on Windows |
+| Launch definitions for 18 more systems (v1.16.1) | <StatusBadge status="done" /> | RetroArch cores for Genesis, Master System, Game Gear, Sega CD, PC Engine, Neo Geo Pocket, Atari 2600/7800, Lynx, Jaguar, WonderSwan, Virtual Boy, C64, MSX, and Amiga, plus standalone Dreamcast (Flycast), 3DS (Azahar), and MS-DOS (DOSBox Staging). Definitions use schema 2 and a pack written for a newer schema is refused (ADR 0067) |
 
 ## Intentionally not replicated on Linux
 

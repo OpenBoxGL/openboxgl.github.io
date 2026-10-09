@@ -122,3 +122,9 @@ Settings → Controller includes a **controller bench** tab with a live SVG game
 ## Video snaps in stage mode (v1.9.0)
 
 Big Box stage mode plays looping gameplay videos behind the selected cover when a video is available, with a 600ms debounce so fast scrolling stays smooth, background-music ducking while video audio plays, and `prefers-reduced-motion` support. Without a video it falls back to the static cover.
+
+## Guides in this section
+
+- [Handheld performance](/guides/big-box-and-handhelds/performance/) — frame pacing, TDP, resolution, and gamescope tuning on real devices.
+- [Arcade Room](/guides/big-box-and-handhelds/arcade-room/) — a controller-first platform showroom with fact cards and an optional kiosk PIN.
+- [Household](/guides/big-box-and-handhelds/household/) — opt-in members, challenges, and a leaderboard over a local folder.

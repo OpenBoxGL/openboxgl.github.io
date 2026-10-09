@@ -132,6 +132,40 @@ Launch Doctor (`POST /api/v2/launch/preflight` and `POST /api/v2/launch/prefligh
   - `pick_core`: Prompts for Libretro core selection when multiple cores are available.
   - `explain_token`: Displays guidance on resolving unexpanded or invalid command tokens.
 
+### Check every game (v1.16.0)
+
+Launch Doctor answers "why won't *this* game launch?". **Check every game** answers "which of my games will not launch, and why?" for the whole library.
+
+Open **Library health** and press **Check every game**. OpenBox runs the same Doctor over every game in the background — you can keep using the app and cancel at any time. The audit is read-only and never changes your library.
+
+- **Problems come back grouped by cause.** Rather than 412 separate "won't launch" entries, you see one line: **RetroArch is not installed — 412 games**. That single line tells you the real problem and that fixing that one thing fixes all 412 games. Groups are causes, not games.
+- **One click for a missing emulator.** When the cause is an emulator that isn't installed, the group has an **Install** button that installs it once for every game waiting on it.
+- **A summary at the top** shows how many games are ready, how many have warnings (no cover art, no save folder set), and how many are blocked and will not start.
+- **The games behind each cause.** Open a group to page through its games, then click one to jump straight to it; its details panel shows the full Launch Doctor result for that game.
+- **Fast, even on huge libraries.** Each emulator is looked up once rather than once per game, so a 20,000-game library is checked in seconds rather than an hour. The audit also runs on the scheduled library check (daily or weekly), so a report is usually already there.
+- **It tells you when it is out of date.** If you add or remove games after a check, OpenBox says the results describe an older version of your library and suggests running it again.
+- **Optional deep mode.** Deep mode also looks inside zipped ROMs and checks BIOS files against their expected versions. It is off by default because it reads every file and takes longer.
+
+### Launch badges and group fixes (v1.16.1)
+
+After an audit, a blocked game shows a **Won't launch** badge on the grid and a warning game shows **Needs attention**. The badges come from the cached audit and disappear when the library has changed since it ran, so a stale report is never shown. Settings → Appearance has a switch to turn them off.
+
+When a group shares one fix — one Flatpak grant, one emulator install — the group gets **one button for all of them**, and afterwards only that group's games are checked again. A missing-file group gets a **Find moved files** button that opens the repair wizard limited to its games.
+
+### Flatpak folder access (v1.16.1)
+
+A Flatpak emulator that cannot see a folder used to be reported as "not installed", and the suggested fix was a reinstall — which cannot grant access. The Launch Doctor now offers **Grant access** instead. After you confirm it runs:
+
+```bash
+flatpak override --user --filesystem=<folder>:ro <app-id>
+```
+
+**Remove access** reverses it until OpenBox restarts. The grant is read-only, and the home folder itself cannot be granted. The exact command is still shown with a Copy button. See [Flatpak installation](/install/#flatpak) for the packaging basics.
+
+### Choosing a RetroArch core per game (v1.16.1)
+
+The Launch Doctor's **Choose core** lists the cores actually installed on this machine, and the game launches with the one you pick. **Use the default core** restores the definition's choice. The per-game choice applies on Windows as well as Linux, and resume states record it.
+
 ## Launching and session controls
 
 Launch starts the process in its own session group. Before launch, the game's play count and last-played stamp update, and any configured performance profile applies (see [Handheld performance](/guides/big-box-and-handhelds/performance/)). Plugins with a `before_launch` hook can modify or cancel the command. Launch fails cleanly (before any process starts) when:
@@ -154,3 +188,9 @@ Tracking start delay (0-600 s) and poll frequency (0.5-60 s) are configurable. W
 Storefront clients (Steam, Heroic, Lutris) can be shut down after a session ends (**Close storefront clients after a session ends**), launched with `-shutdown` or `flatpak kill` depending on how they were installed.
 
 A missing launch command, missing profile, or non-executable game fails before a process is started. Check the detail pane's command and emulator installation when a session fails; see [Troubleshooting](/guides/troubleshooting/).
+
+## Related guides
+
+- [Wine and Proton](/guides/wine-and-proton/) — Windows games through Wine and Proton, prefix management, and the Eden Switch.
+- [Big Box and handhelds](/guides/big-box-and-handhelds/) — fullscreen kiosk layouts, controller navigation, and gamescope tuning.
+- [Troubleshooting launching](/guides/troubleshooting/launching/) — when a launch fails before or after a process starts.

@@ -78,6 +78,20 @@ The CLI form is `python3 web_app.py --backup [--items a,b] [--keep N]` for creat
 
 Invalid or missing archive returns `404`. This is useful for reviewing what changed since a backup before deciding whether to restore.
 
+### Restore preview (v1.16.0+)
+
+The three flat lists above are named relative to the **current library**, which is the 1.7.2 contract. Alongside them, the same response carries a `restore` block named from the point of view of someone about to restore — the only block the UI reads:
+
+- `restore.will_remove`: games you have now that the backup lacks. What a restore would delete.
+- `restore.will_add`: games in the backup that you no longer have. What a restore would bring back.
+- `restore.will_change`: games in both whose fields differ, each row carrying per-field `from` / `to` (a game you marked Beaten since the backup would go back to Playing).
+
+Each of the three is `{"total": <true count>, "truncated": <bool>, "rows": [...]}` and rows include display names, so a long difference can be capped for transport without understating the number.
+
+Settings are reported as an object: `settings.restored` is what a restore would act on, `settings.present` is what the archive physically holds, and `settings.would_change` is the question the UI asks — would this restore move my settings? It can be `false` while `settings.differs` is `true`, because a library-only backup can differ without the restore being able to act on it. `truncated` names which list lost rows.
+
+In the Backups dialog this renders as **Preview changes**: the Restore button is built only from a successful diff, and a failed diff offers a retry and no way to restore, so a restore can never happen unseen. See [Sessions, saves, and backups](/guides/sessions-saves-and-backups/#preview-a-restore-before-you-restore).
+
 ## Security notes
 
 - Restoring `library` replaces your current library (after the automatic `library.before-restore.json` copy). Keep both copies safe.

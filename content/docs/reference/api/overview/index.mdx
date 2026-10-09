@@ -80,7 +80,7 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 
 - **Frozen v1 Contract (`/api/v1/*`)**: Stable, frozen remote contract (enforced via `v1_contracts.json`, currently 61 routes; the contract pins path + methods, per-route params are manually verified).
 - **Base-only routes (`/api/*` without a `/api/v1/*` alias)**: local-workflow routes such as `GET /api/emulators/recommend`, `GET /api/plugins/catalog`, `POST /api/webhooks/test`, `POST /api/plugins/install|toggle|remove`, `/api/wine/*`, and `/api/faugus/*` are documented on the group pages as `/api/*` with no v1 alias. Treat them as local operations, not part of the frozen remote contract; v1 aliases are added only when a route becomes a stable remote dependency.
-- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through v1.14.0:
+- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through v1.16.1:
   - **Setup Center**: `POST /api/v2/setup/preview`, `GET /api/v2/setup/preview`, `GET /api/v2/setup/preview/items`, `POST /api/v2/setup/preview/decisions`, `POST /api/v2/setup/preview/revalidate`, `POST /api/v2/setup/commit`, `GET /api/v2/setup/summary`
   - **Launch Doctor**: `POST /api/v2/launch/preflight`, `POST /api/v2/launch/preflight/batch`
   - **Emulator Registry**: `GET /api/v2/emulators/registry` (with `?health=1` for BIOS/firmware/core status)
@@ -116,8 +116,12 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
   - **Duplicate merge and missing-file repair** (v1.14.0): `GET /api/v2/library/duplicates`, `POST /api/v2/library/duplicates/preview|merge`, `GET /api/v2/library/repair`, and `POST /api/v2/library/repair/preview|apply`. Both are preview/apply based and reversible.
   - **Effortless metadata** (v1.14.0): `GET /api/v2/metadata/media-candidates` (thumbnail chooser), `GET/POST /api/v2/metadata/scrape-settings` (auto-scrape master toggle plus provider opt-ins), and `POST /api/v2/metadata/auto-scrape` (queues match + media jobs for an import batch).
   - **Plugins 2.0** (v1.14.0): `GET /api/v2/plugins/catalog`, `GET /api/v2/plugins/commands`, `POST /api/v2/plugins/command`, `GET/POST /api/v2/plugins/trust` (checksum-bound), `POST /api/v2/plugins/permissions`, and `GET/POST /api/v2/plugins/settings`.
+  - **Launch Readiness** (v1.16.0): `POST /api/v2/launch/audit/scan` (cancellable whole-library job), `GET /api/v2/launch/audit` (cached report: ready/warning/blocked totals, one row per root cause, paginated members via `?group=`), reusing the Launch Doctor's cause codes unchanged. Deep mode is opt-in and the report lives in `cache/launch_audit.json`, never in `library.json`.
+  - **Launch badges and scoped refresh** (v1.16.1): `GET /api/v2/launch/audit/status` (per-game `blocked`/`warning` for the grid, empty when the report is stale) and `POST /api/v2/launch/audit/refresh` (re-check one group's games in-request; refuses a report that no longer matches the library).
+  - **Flatpak folder grants** (v1.16.1): `POST /api/v2/launch/grant` and `POST /api/v2/launch/grant/undo` grant and remove a read-only `flatpak override --user --filesystem=<folder>:ro` entry, replacing a reinstall prompt that could not grant access.
+  - **Per-game RetroArch core** (v1.16.1): `GET /api/v2/launch/cores` (installed cores) and `POST /api/v2/launch/core` (bind one to a game; an empty core restores the definition default).
 
-See [API 1.11 additions](/reference/api/one-eleven/), [API 1.12 additions](/reference/api/one-twelve/), and [API 1.14 additions](/reference/api/one-fourteen/) for request bodies, response examples, optional-tool caveats, and stale-plan handling.
+See [API 1.11 additions](/reference/api/one-eleven/), [API 1.12 additions](/reference/api/one-twelve/), [API 1.14 additions](/reference/api/one-fourteen/), and [API 1.16 additions](/reference/api/one-sixteen/) for request bodies, response examples, optional-tool caveats, and stale-plan handling.
 - **Locale files** (public, no auth): `GET /locales/{en,es,de,fr,pt}.json` — serves JSON locale files for the i18n system (v1.7.2)
 
 ### Machine-Readable Error Codes

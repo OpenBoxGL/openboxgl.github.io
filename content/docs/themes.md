@@ -83,3 +83,9 @@ What you see with motion on:
 ## Contrast is checked, not assumed (v1.15.0)
 
 Text and interactive colors use semantic ink tokens — `--ink-strong`, `--on-active`, `--on-danger`, `--border-input`, `--state-hover`, and `--state-press` — rather than raw palette entries. A contrast matrix in the test suite checks every stock theme against a fixed list of foreground/background pairs a component actually paints — body and muted text on the background, ink on card, field, hover, rating-badge, and insight-card surfaces, on-active on the active and accent colors, on-danger on danger, the four toast colors, the three health colors, and the input boundary and focus ring at the lower non-text threshold. The hover and press state tokens are alpha overlays rather than foregrounds, so they are excluded from the matrix by design. That matrix is how the High Contrast theme doubled as the proof that the token contract holds end to end: it redeclares `:root` only, uses no raw color outside `:root`, and any component that needed a hardcoded color to stay legible would show up there as an unreadable panel rather than a passing gate.
+
+## Related pages
+
+- [Custom themes](/guides/themes/custom-themes/) — authoring and importing your own theme CSS, and the token contract it must honor.
+- [Design system](/project/design-system/) — the token names, spacing, and component conventions a theme builds on.
+- [Localization](/localization/) — translating OpenBox into one of the five supported languages.

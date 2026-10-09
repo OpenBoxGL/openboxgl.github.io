@@ -73,6 +73,7 @@ def after_session(session):
 
 ## See also
 
+- [Creating a plugin](/guides/plugins/creating-a-plugin/), a worked manifest and hook from scratch
 - [Troubleshooting plugins](/guides/troubleshooting/plugins/), safe mode and failure handling
 - [Plugin API reference](/reference/plugins/), the full contract
 - [API local administrator](/reference/api/local-admin/), install/toggle/remove routes

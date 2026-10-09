@@ -53,3 +53,9 @@ Library data is local JSON at `~/.local/share/openbox-game-launcher/library.json
 - Feature request: [Feature request template](https://github.com/vindeckyy/OpenBoxGL/issues/new?template=feature_request.yml)
 - Security: see [Security](/policies/security/), do not file public issues for sensitive reports.
 - Copyright or trademark: see [DMCA](/policies/dmca/) and [Legal and trademarks](/policies/legal-and-trademarks/). Do not post notices in public issues.
+
+## Related pages
+
+- [Downloads](/downloads/) — every install method and its verify step.
+- [Compare](/compare/) — how OpenBox lines up against LaunchBox.
+- [Showcase](/showcase/) — what the interface looks like in use.

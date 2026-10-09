@@ -286,6 +286,30 @@ Returns `{"added": [...game_ids], "removed": [...game_ids], "changed": [...game_
 
 Invalid or missing archive name returns `404`. (v1.7.2+)
 
+**Restore Preview (v1.16.0+).** The three flat lists name the same three sets relative to the *current* library, which makes them easy to read backwards. The `restore` block names them the way a user experiences a restore, and it is the only one the UI reads:
+
+```json
+{
+  "restore": {
+    "will_remove": { "total": 12, "truncated": false, "rows": [{ "game_id": "...", "name": "..." }] },
+    "will_add":    { "total": 3,  "truncated": false, "rows": [{ "game_id": "...", "name": "..." }] },
+    "will_change": { "total": 1,  "truncated": false,
+      "rows": [{ "game_id": "...", "name": "...",
+                 "fields": [{ "field": "progress", "from": "Playing", "to": "Beaten" }] }] }
+  },
+  "settings": {
+    "restored": true, "present": true, "would_change": true, "differs": true,
+    "redacted_secrets": true, "keys_changed": ["metadata_provider"]
+  },
+  "truncated": { "added": false, "removed": false, "changed": false, "limit": 200 }
+}
+```
+
+- `will_remove` is games you have now that the backup lacks — what a restore would **delete**. Note this is the `added` list above; the two vocabularies are deliberately both present.
+- `will_change` rows carry per-field `from` / `to` detail.
+- `settings.would_change` answers the user's question — *would a restore move my settings?* — which is not the same as `differs`, because a library-only backup can differ without the restore being able to act on it.
+- `truncated` names which list lost rows; `total` is always the true count, so a long list never looks smaller than it is.
+
 </ApiEndpoint>
 
 ## Errors

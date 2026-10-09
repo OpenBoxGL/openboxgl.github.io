@@ -59,4 +59,16 @@ Removing a game asks twice: first to confirm the library entry removal, then whe
 
 Capability status belongs to the [parity matrix](/reference/parity/), maintained from `PARITY.md`. Library data lives in `~/.local/share/openbox-game-launcher/library.json` unless `OPENBOX_DATA_DIR` points elsewhere. State is schema version 6, written atomically with a `.bak` last-known-good copy beside it; recovery is covered in [Data and recovery](/reference/data-and-recovery/).
 
+## Guides in this section
+
+- [Setup Center](/guides/library/setup-center/) — the guided first-run workflow: sources, scan, decisions, readiness, options, confirm.
+- [Importing](/guides/library/importing/) — every import source, ambiguous platforms, playlists, and migration from LaunchBox or ES-DE.
+- [Organizing](/guides/library/organizing/) — the health score and its per-dimension fixes, duplicate merge, and missing-file repair.
+- [Queue, tags, and notifications](/guides/library/queue-tags-notifications/) — the play queue, tag filters, and how notifications behave.
+- [Insights](/guides/library/insights/) — Play Insights, streaks, Wrapped, the Mastery Map, and the history timeline.
+- [Backlog](/guides/library/backlog/) — progress statuses, your own star rating, manual playtime sessions, and notes.
+- [Time Machine](/guides/library/time-machine/) — browse the library as it was on a past date, and revert safely.
+- [Navigation](/guides/library/navigation/) — keyboard and controller navigation through the grid and detail pane.
+- [Export](/guides/library/export/) — portable, redacted exports of your library for inspection or external tooling.
+
 Large libraries (5,000+ games) self-enable the SQLite FTS read model unless `OPENBOX_ENABLE_SQLITE_READ=0` opts out, and an opt-in weekly automatic backup keeps 4 archives on a 7-day schedule — see [Organizing](/guides/library/organizing/#large-libraries-and-automatic-backups-v1120), [API 1.12 additions](/reference/api/one-twelve/), and [Library backups](/guides/sessions-saves-and-backups/library-backups/).

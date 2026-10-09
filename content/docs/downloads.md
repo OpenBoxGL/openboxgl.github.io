@@ -5,7 +5,7 @@ description: Every way to install OpenBoxGL, with verification steps per method.
 
 # Downloads
 
-One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBox application, currently **v1.15.0**.
+One table for every install method. Pick the row that matches your system, then follow its verify step. All methods install the same OpenBox application, currently **v1.16.1**.
 
 | Method | Best for | Updates | Verify |
 | --- | --- | --- | --- |
