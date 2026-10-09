@@ -22,6 +22,7 @@ Launch commands are tokenized strings: OpenBoxGL substitutes exact placeholders 
 | `{heroic_app_id}` | Heroic application ID (`heroic_app_id` field) | `1091500` |
 | `{lutris_id}` | Lutris game identifier (`lutris_id` field) | `1` |
 | `{EmulatorDir}` | Parent directory of the resolved emulator executable | `/usr/bin` |
+| `{retroarch_core}` | Core file name the game uses (v1.16.1+), expanded from the emulator definition before anything else. Set by choosing a per-game core in the Launch Doctor, or empty when the game uses the definition default | `snes9x_libretro.so` |
 | `{DataDir}` | OpenBox user data directory | `/home/you/.local/share/openbox-game-launcher` |
 
 ### Quick Resume state tokens (v1.11.0+)

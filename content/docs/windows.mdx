@@ -26,7 +26,14 @@ The installer itself needs Python, because it uses the same RFC 8032 verifier th
 Download the installer and the release archive from the same tag, then run the installer. The installer pins the release public key, verifies its SHA-256 against a committed anchor, and verifies the archive's `.sha256` sidecar and Ed25519 signature before extracting anything.
 
 ```powershell
-$Version = '1.15.0'
+# Omitting -Tag installs the latest release.
+.\install.ps1
+```
+
+To pin a specific version instead, set it explicitly. The current release is **1.16.1**:
+
+```powershell
+$Version = '1.16.1'
 Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
 .\install.ps1 -Tag "v$Version"
@@ -188,7 +195,7 @@ Windows games launch through the game's own executable or through an emulator, e
 | Problem | Cause / fix |
 | --- | --- |
 | `No Python 3 interpreter found` | Install Python 3.10+ and make sure `python.exe` or `py.exe` is on `PATH`, or set `OPENBOX_PYTHON` to the interpreter's full path. |
-| `running scripts is disabled on this system` | Run the installer, uninstaller, or launcher with `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tag v1.15.0`, or set the execution policy for your user. |
+| `running scripts is disabled on this system` | Run the installer, uninstaller, or launcher with `powershell -ExecutionPolicy Bypass -File .\install.ps1`, or set the execution policy for your user. |
 | `The release public key does not match the pinned trust anchor` | The release key changed or the download was tampered with. Install only from the project's GitHub releases, or pass `-PublicKeyPath` if you deliberately mirror a different key. |
 | The window does not open | Run `openbox --web` from a terminal and open the printed `http://127.0.0.1:PORT/?token=...` URL. |
 | `native_host is missing ... falling back` | The WebView2 host has not been built. Build it as described above, or ignore it and use the browser app window. |

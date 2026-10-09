@@ -24,7 +24,7 @@ Attempts and timeout are configurable per webhook and globally (`webhook_attempt
 | Event | Data allowlist |
 | --- | --- |
 | `session.started` | `launch_id`, `game_id`, `name`, `platform`, `started_at` |
-| `session.stopped` | `launch_id`, `game_id`, `name`, `seconds`, `exit_code`, `started_at`, `stopped_at` |
+| `session.stopped` | `launch_id`, `game_id`, `name`, `seconds`, `exit_code`, `timed_out`, `started_at`, `stopped_at` |
 | `queue.advanced` | `from_game_id`, `from_entry_id`, `to_game_id`, `to_entry_id` |
 | `library.imported` | `source`, `found`, `added` |
 | `library.changed` | `action`, `game_ids`, `count` |

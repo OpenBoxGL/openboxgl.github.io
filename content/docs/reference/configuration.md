@@ -122,6 +122,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `backlog_progress_suggest` | `true` | Boolean; kill switch for the one-time "Playing?" suggestion offered when launching an unplayed game (v1.14.0+) |
 | `image_group` | "cover" | One of cover, background, screenshot, clear_logo, fanart, banner, icon, box_back, box_spine, box_3d, title_screen, cart_front, cart_back, disc, advertisement, manual |
 | `badge_visibility` | favorite, installed, saves, documents, progress, storefront, achievements, rating | Subset of favorite, installed, missing_media, saves, documents, versions, storefront, achievements, highscores, progress, rating, broken, portable, controller |
+| `show_launch_badges` | `true` | Boolean; shows the "Won't launch" and "Needs attention" readiness badges on the grid from the last Launch Audit. Settings → Appearance. Badges disappear on their own when the library has changed since the audit ran. (v1.16.1+) |
 | `cloud_folder` | "" | Absolute, existing path for mounted-folder statistics sync and optional catalog sync |
 | `library_sync_enabled` | `false` | Explicit opt-in for causal catalog synchronization; it does not enable the separate statistics sync automatically |
 | `storefront_auto_import` | All off | Object with boolean keys: `steam`, `heroic`, `lutris`, `gameyfin` |
