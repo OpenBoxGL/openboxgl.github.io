@@ -17,8 +17,13 @@ OpenBoxGL distinguishes between what you *own* on a storefront and what you actu
 | --- | --- | --- |
 | Steam | `userdata/*/config/localconfig.vdf` | `steamapps/appmanifest_*.acf` |
 | Heroic | `store_cache` library JSON | installed manifests (`legendaryConfig`, `gog_store`, `nile_config`) |
+| Epic | `legendaryConfig/legendary/installed.json`, or `~/.config/legendary/installed.json` | the same manifests |
 | Lutris | `lutris --list-games --json` | `lutris --list-games --installed --json` |
 | Gameyfin | The configured server's catalog | The same catalog, filtered to installed titles |
+
+**Import Epic** (`POST /api/import/epic`) reads Epic on its own through Legendary, and also reads Epic Games Launcher Windows manifests when they are present. It is a source in its own right rather than part of Heroic: use it when you keep Epic games via a native Legendary install and have no Heroic profile to import. Imported titles carry `source: "Epic"` and are keyed by their Heroic app id, so they dedupe against a later Heroic import instead of appearing twice.
+
+The other per-source buttons are **Import Steam**, **Import Heroic**, **Import Lutris**, **Import Gameyfin**, **Import ScummVM**, **Import RPCS3**, and **Import Vita3K**.
 
 ## Import owned / uninstalled
 

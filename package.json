@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/check-version-currency.mjs && node scripts/test-release-assets.mjs && next build && node scripts/generate-redirects.mjs && node scripts/generate-sitemap.mjs && node scripts/check-built-site.mjs",
+    "build": "node scripts/check-api-coverage.mjs && node scripts/check-version-currency.mjs && node scripts/test-release-assets.mjs && next build && node scripts/generate-redirects.mjs && node scripts/generate-sitemap.mjs && node scripts/check-built-site.mjs",
     "start": "next start",
     "lint": "tsc --noEmit",
     "docs:index": "node scripts/build-docs-index.mjs",
-    "test": "node scripts/check-version-currency.mjs && node scripts/test-release-assets.mjs && node scripts/build-docs-index.mjs && next build && node scripts/generate-redirects.mjs && node scripts/generate-sitemap.mjs && node scripts/check-built-site.mjs",
+    "test": "node scripts/check-api-coverage.mjs && node scripts/check-version-currency.mjs && node scripts/test-release-assets.mjs && node scripts/build-docs-index.mjs && next build && node scripts/generate-redirects.mjs && node scripts/generate-sitemap.mjs && node scripts/check-built-site.mjs",
     "serve": "node server/index.mjs",
     "serve:dev": "bun --watch server/index.mjs",
-    "docker": "docker compose up --build"
+    "docker": "docker compose up --build",
+    "routes:sync": "OPENBOX_APP_DIR=../OpenBoxGL node scripts/check-api-coverage.mjs --sync"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
