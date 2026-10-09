@@ -38,8 +38,8 @@ Every release publishes these artifacts:
 | `OpenBox-x86_64-windows-native-host.exe` | x86_64 | WebView2 window host, signed |
 | `OpenBox-x86_64-windows-native-host.exe.sha256` | x86_64 | SHA-256 checksum sidecar |
 | `OpenBox-x86_64-windows-native-host.exe.sig` | x86_64 | Ed25519 signature sidecar |
-| `OpenBox-1.15.0-sbom.json` | x86_64 | SBOM (CycloneDX 1.4) |
-| `OpenBox-1.15.0-aarch64-sbom.json` | ARM64 | SBOM (CycloneDX 1.4) |
+| `OpenBox-1.16.1-sbom.json` | x86_64 | SBOM (CycloneDX 1.4) |
+| `OpenBox-1.16.1-aarch64-sbom.json` | ARM64 | SBOM (CycloneDX 1.4) |
 
 The Windows archive ships with the same `.sha256` sidecar and `.sig` signature as the AppImages, verified by `install.ps1` and by the in-app updater with the Python standard library alone. The native-host executable is the same binary that archive carries, published on its own for source checkouts, and it goes through the same checksum and signature ladder.
 
@@ -97,7 +97,7 @@ Install the published bundle directly — no build step needed:
 ```bash
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output OpenBox-x86_64.flatpak \
-  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v1.15.0/OpenBox-x86_64.flatpak"
+  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v1.16.1/OpenBox-x86_64.flatpak"
 flatpak install --bundle OpenBox-x86_64.flatpak
 flatpak run io.openbox.GameLauncher
 ```
@@ -145,4 +145,4 @@ openbox --web    # loopback web UI
 | FUSE to mount AppImages | Required | Not needed | Not needed | Not applicable |
 | bubblewrap bwrap | Optional, plugins sandboxed when present | Bundled check | Optional | Not applicable |
 
-See [Installation](/install/) for prerequisites in detail, [Updating](/updating/) for the update flow and rollback, and [Getting started](/getting-started/) for the first import. v1.15.0 publishes signed x86_64 and aarch64 AppImages, an x86_64 Flatpak bundle, and a signed x86_64 Windows portable archive.
+See [Installation](/install/) for prerequisites in detail, [Updating](/updating/) for the update flow and rollback, and [Getting started](/getting-started/) for the first import. v1.16.1 publishes signed x86_64 and aarch64 AppImages, an x86_64 Flatpak bundle, and a signed x86_64 Windows portable archive.

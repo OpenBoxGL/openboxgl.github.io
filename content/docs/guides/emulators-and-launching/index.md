@@ -72,7 +72,7 @@ Authoritative definitions in `emulator_defs/` map extensions to platforms and st
 
 ### Emulator definition updates
 
-The 24 definitions in `emulator_defs/` ship inside the application. If a newer emulator build needs a newer definition, OpenBoxGL can now fetch one without you editing YAML by hand (v1.15.0).
+The 42 definitions in `emulator_defs/` ship inside the application. If a newer emulator build needs a newer definition, OpenBoxGL can now fetch one without you editing YAML by hand (v1.15.0).
 
 **Tools → Emulators** is the home for the channel. This is a top-level entry in the **Tools** menu — not a Settings category; the Emulator profiles dialog it opens also holds the platform profile editor, the handheld performance profiles, and the emulator install catalog. The Emulator definitions panel at the bottom of that dialog shows the installed pack, which definitions you have edited (these are never overwritten), and the three actions: check for an update, install it, and roll it back. Since 1.16.1 each tagged release also publishes a signed [`community-defs.tar.gz`](https://github.com/vindeckyy/OpenBoxGL/releases/tag/emulator-defs) with its signature and an index, and OpenBox checks that release for updates. If no pack is available for you yet, the panel says **No community definition pack is published yet** — that is a normal state, not an error.
 
