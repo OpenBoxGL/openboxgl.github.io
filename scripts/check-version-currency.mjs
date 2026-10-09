@@ -59,8 +59,13 @@ if (!current) {
 const CONTEXTS = [
   // A release URL. The changelog's per-section tag links are excluded by caller.
   ['release URL', new RegExp(String.raw`(?:releases/(?:tag|download)/v?|releases/latest,\s*currently v?|/tag/v?)(${V})`, 'g')],
-  // A published release asset filename, e.g. OpenBox-1.15.0-sbom.json
-  ['asset filename', new RegExp(String.raw`(OpenBox-${V}-[a-z0-9.]+\.(?:json|zip|AppImage|flatpak|exe))`, 'g')],
+  // A published release asset filename, e.g. OpenBox-1.15.0-sbom.json.
+  // The capture group must be the version alone. Wrapping the whole filename
+  // put it through parse() as NaN, so this context could never fire.
+  [
+    'asset filename',
+    new RegExp(String.raw`(?:OpenBox-)(${V})(?:-[a-z0-9.]+\.(?:json|zip|AppImage|flatpak|exe))`, 'g'),
+  ],
   // Assigned to something the reader runs or sets.
   ['assigned value', new RegExp(String.raw`(?:VERSION\s*=|Version\s*=\s*['"]|RELEASE_TAG\s*=\s*["']v?|-Tag\s+v?|VERSION:\s*)(${V})`, 'g')],
   // Explicit current-release assertions.
@@ -109,10 +114,23 @@ if (CURRENT_REPO) {
     const documented = [...text.matchAll(/^\|\s*`([^`]+)`\s*\|/gm)]
       .map((m) => m[1])
       .filter((n) => /^(OpenBox|install|openbox)/.test(n));
-    for (const name of documented) if (!assets.includes(name)) missing.push(`${downloads}: ${name}`);
+    for (const name of documented) if (!assets.includes(name)) missing.push(name);
     assetNote = missing.length
       ? `${missing.length} documented asset(s) not published in v${current}`
       : `all ${documented.length} documented assets exist in v${current}`;
+    // A documented asset the release does not publish is a dead download link,
+    // which no other context catches: a *newer* bogus version passes the
+    // "is it older than current?" test below, and only this check knows the
+    // name is unpublished. Fold these into the failure list.
+    for (const name of missing) {
+      problems.push({
+        file: downloads,
+        line: text.split('\n').findIndex((l) => l.includes(`\`${name}\``)) + 1,
+        name: 'unpublished asset',
+        version: name,
+        text: 'documented in the asset table but not published in this release',
+      });
+    }
   }
 }
 

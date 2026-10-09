@@ -28,10 +28,12 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - run: bun run docs:index
-      # OPENBOX_RELEASE_REPO lets the version-currency gate check the documented
-      # release assets against the real release, so a stale asset name fails the
-      # build instead of shipping as a dead download link. The lookup is best
-      # effort: a failed lookup is reported and skipped, not fatal.
+      # OPENBOX_RELEASE_REPO turns on the version-currency gate's release-asset
+      # check: a filename the docs list but the release does not publish is a
+      # dead download link, so it fails the build. That check needs the network
+      # and is therefore CI-only; a failed lookup is reported and skipped rather
+      # than failing an otherwise-good build. The version-shape checks that need
+      # no network still run everywhere.
       - run: bun run build
         env:
           OPENBOX_RELEASE_REPO: vindeckyy/OpenBoxGL
