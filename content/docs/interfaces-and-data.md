@@ -60,7 +60,7 @@ The default data directory is `~/.local/share/openbox-game-launcher`. Everything
 | `themes/` | Stock themes plus locally imported CSS themes |
 | `plugins/` | Installed local plugin packages |
 | `metadata/` | The synced LaunchBox Games Database file |
-| `cache/` | Archive extraction and RetroAchievements working files |
+| `cache/` | Rebuildable working files: archive extraction, RetroAchievements lookups, and the Launch Audit report (`launch_audit.json`). Safe to delete — OpenBoxGL rebuilds it, though deleting the audit discards the grid readiness badges until the next check |
 | `media-queue.json` | Pending media download jobs |
 | `highscores/`, `bezels/` | MAME high-score exports and bezel downloads |
 
