@@ -243,3 +243,13 @@ waste effort or introduce regressions:
 - **Not verified:** I did not render the deployed site, so a redirect or uncommitted page
   outside `content/` could in principle hide a page. The 1.16.0 changelog's full "Fixed"
   list was not audited bullet-by-bullet — additional obscure fixes may add rows to §6.
+
+## Follow-up passes (after the initial report)
+
+The audit continued past the report above. Two methodological traps worth recording, because both produced wrong conclusions:
+
+**Version literals hide in code fences.** A plain `grep -rn "1\.15\.0"` finds them, but reading only the prose hits makes them look harmless example data. Five copy-pasteable installer blocks still pinned 1.15.0 after the first fix pass. Always parse fenced code blocks specifically, since those are what a reader actually runs.
+
+**UI labels are not all in `locales/en.json`.** Searching the locale file alone reported that `Session ended` and `Retry failed` did not exist — both are hardcoded in `static/sessions.js:157` and `index.html:364`. The real UI string surface is `locales/en.json` **plus** `index.html` **plus** `static/*.js`. Search all three before concluding a label is missing; the one genuine mismatch found this way was `Choose core`, which is actually `Choose a RetroArch core` (`library.core.title`).
+
+Current verified coverage, re-checked against source: 110/110 `KNOWN_SETTINGS`, 24/24 launch-token spellings, 9/9 webhook payloads field-for-field, 326/326 API routes, and every app-version literal in prose or code reads 1.16.1 or is explicitly historical.

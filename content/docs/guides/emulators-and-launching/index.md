@@ -164,7 +164,7 @@ flatpak override --user --filesystem=<folder>:ro <app-id>
 
 ### Choosing a RetroArch core per game (v1.16.1)
 
-The Launch Doctor's **Choose core** lists the cores actually installed on this machine, and the game launches with the one you pick. **Use the default core** restores the definition's choice. The per-game choice applies on Windows as well as Linux, and resume states record it.
+The Launch Doctor's **Choose a RetroArch core** lists the cores actually installed on this machine, and the game launches with the one you pick. **Use the default core** restores the definition's choice. The per-game choice applies on Windows as well as Linux, and resume states record it.
 
 ## Launching and session controls
 
