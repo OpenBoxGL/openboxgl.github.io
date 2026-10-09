@@ -257,3 +257,15 @@ Current verified coverage, re-checked against source: 110/110 `KNOWN_SETTINGS`, 
 **UI affordances.** All 14 menu paths the docs use (`Tools → Emulators`, `Settings → About`, `Tools → Time Machine`, `Settings → Advanced → Export library`, and the rest) resolve to real element text in `index.html`. Of the UI labels asserted in prose, one was wrong — `Choose core` is `Choose a RetroArch core` (`library.core.title`) — and is fixed. Labels confirmed correct include `Check every game`, `Preview changes`, `Grant access`, `Remove access`, `Use the default core`, `Find moved files`, `Won't launch`, `Needs attention`, `Emulator definitions`, `Session failed`, `Session ended` (`static/sessions.js:157`), and `Retry failed` (`index.html:364`).
 
 A bulk extraction of bolded text from UI-context lines is **not** a usable signal on its own: roughly half the hits are prose sentence leads (`You should see:`, `Fixed:`), brand names (`MAME`, `Ludusavi`, `MangoHud`), API route names, or the reference table's own column headers rather than shipped strings. Narrow to menu paths and quoted button names before drawing conclusions, or expect false positives.
+
+## Permanent gate: `scripts/check-version-currency.mjs`
+
+The recurring theme of this audit is that version references appear in at least six shapes, and sweeping for one at a time is how they survived three separate passes. Rather than keep sweeping by hand, the check is now part of the build.
+
+It derives the current version from the newest `## X.Y.Z` heading in the changelog, so **adding the next release's changelog entry is what arms it** — it then names every place still asserting an older release and fails the build until they agree.
+
+It deliberately does *not* flag every old version and then exempt the history. That approach produced 93 false positives on correct content, because nearly every version in a changelog is legitimately old. Instead it inspects a version literal only where it claims to be current: a release URL, a published asset filename, an assigned value (`VERSION=`, `$Version =`, `OPENBOX_RELEASE_TAG=`, `-Tag`), an explicit current-release assertion, or a comparison-table header. Prose like "added in v1.14.0" is never examined.
+
+With `OPENBOX_RELEASE_REPO` set — it is in CI — it also checks every documented release asset against the real release, so a stale asset name fails the build instead of shipping as a dead download link. That is what the two `OpenBox-1.15.0-sbom.json` entries would have been. The lookup is best effort: a failed API call is reported and skipped rather than failing an otherwise-good build.
+
+The gate is negative-tested. Against the pre-fix `downloads.md` it fails with exit 1, naming the stale Flatpak URL and both unpublished SBOM assets; against the current tree it passes. A gate that has only ever passed is not evidence of anything.
