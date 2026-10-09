@@ -79,6 +79,8 @@ The `.bak` is always at least as fresh as the primary commit that preceded the l
 
 Snapshots rotate on every commit: the last 5 committed states are kept as timestamped JSON copies, so a bad edit can be rolled back to a point in time even when `.bak` already reflects it.
 
+Since 1.16.1 the newest snapshot is reliably the one you want. Rotation prunes in the order the snapshots are listed rather than by modification time — timestamps can tie, and a tie previously let rotation delete the newest recovery point — and snapshots are listed newest first. A full commit also discards any snapshot still queued from before it, rather than writing a stale snapshot over the newer commit.
+
 ## Security notes
 
 - All state files are owner-only (`0o600`), including the backup and lock.
