@@ -7,7 +7,7 @@ These are current additive `/api/v2/*` routes, introduced in 1.8.0 and retained 
 
 ## ScreenScraper provider
 
-Per-ROM-hash metadata and media scraping against ScreenScraper. Credentials are required: `SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` in `~/.env` (optional `SCREENSCRAPER_DEV_ID`/`SCREENSCRAPER_DEV_PASSWORD`). Requests are throttled to 1/second with 429/5xx backoff and a 30-day disk cache under `cache/screenscraper/`.
+Per-ROM-hash metadata and media scraping against ScreenScraper. All four credentials are required: `SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` plus the developer pair `SCREENSCRAPER_DEV_ID`/`SCREENSCRAPER_DEV_PASSWORD` in `~/.env`. Without the developer pair the provider returns `400` and states which values are missing, because the ScreenScraper API refuses lookups without them. Requests are throttled to 1/second with 429/5xx backoff and a 30-day disk cache under `cache/screenscraper/`.
 
 <ApiEndpoint method="GET" path="/api/v2/screenscraper/status">
 

@@ -10,22 +10,22 @@ The application repository's `PARITY.md` is the maintenance source for capabilit
 
 Every workflow in `PARITY.md` is marked `done`, or carries a decision status for workflows without a Linux equivalent:
 
-- <StatusBadge status="done" /> means the workflow is usable end to end. The 1.16.x line runs on Linux (AppImage, Flatpak, source, and system installs) and on Windows x86_64, so `done` rows apply on both unless the row's note or the Linux-only list below says otherwise.
+- <StatusBadge status="done" /> means the workflow is usable end to end. The 1.17.x line runs on Linux (AppImage, Flatpak, source, and system installs) and on Windows x86_64, so `done` rows apply on both unless the row's note or the Linux-only list below says otherwise.
 - <StatusBadge status="partial" /> means a deliberate Linux equivalent exists but the Windows/premium surface is broader or unavailable.
 - <StatusBadge status="missing" /> means no usable equivalent yet.
 - Decision rows ("Not applicable", "Replaced by ...", "Use ... instead") mark Windows-only workflows with no Linux equivalent; they are documented as boundaries rather than implied support.
 
-Verified against **v1.16.1** (application `docs/PARITY.md`).
+Verified against **v1.17.0** (application `docs/PARITY.md`). The application checkout is ahead of the release and contains unreleased 1.18 rows; those rows are not part of v1.17.0 and are not listed here as shipped.
 
 ## Platform coverage
 
-The 1.16.x line runs on Linux and on Windows x86_64. Windows uses the native WebView2 host, the `install.ps1` installer with its matching `uninstall.ps1`, and verified in-place updates of `OpenBox-<arch>-windows.zip`; the platform seam lives in `pkg/platform_compat.py` (standard library only, plus `ctypes` on Windows).
+The 1.17.x line runs on Linux and on Windows x86_64. Windows uses the native WebView2 host, the `install.ps1` installer with its matching `uninstall.ps1`, and verified in-place updates of `OpenBox-<arch>-windows.zip`; the platform seam lives in `pkg/platform_compat.py` (standard library only, plus `ctypes` on Windows).
 
 These surfaces remain Linux-only and are not part of the Windows build: gamescope and Game Mode, AppImage and Flatpak packaging, XDG desktop entries, `sudo make install`, Steam Deck and handheld tuning, and Flathub-aware emulator management. See [Windows](/windows/) for the platform guide.
 
 ## Capability status
 
-The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Brazilian Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0 through 1.16.1 features plus the Windows support below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
+The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Brazilian Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0 through 1.17.0 features plus the Windows support below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
 
 | Area | Status | Notes |
 | --- | --- | --- |
@@ -73,6 +73,10 @@ The source matrix tracks the current LaunchBox-aligned capabilities, including L
 | Flatpak folder grants (v1.16.1) | <StatusBadge status="done" /> | `POST /api/v2/launch/grant` grants one folder read-only instead of telling you to reinstall, with `/launch/grant/undo` reversing it until restart; the home folder itself cannot be granted |
 | Per-game RetroArch core (v1.16.1) | <StatusBadge status="done" /> | `GET /api/v2/launch/cores` lists installed cores and `POST /api/v2/launch/core` binds one to a game; an empty core restores the definition default, and the choice applies on Windows |
 | Launch definitions for 18 more systems (v1.16.1) | <StatusBadge status="done" /> | RetroArch cores for Genesis, Master System, Game Gear, Sega CD, PC Engine, Neo Geo Pocket, Atari 2600/7800, Lynx, Jaguar, WonderSwan, Virtual Boy, C64, MSX, and Amiga, plus standalone Dreamcast (Flycast), 3DS (Azahar), and MS-DOS (DOSBox Staging). Definitions use schema 2 and a pack written for a newer schema is refused (ADR 0067) |
+| Native Windows storefront imports (v1.17.0) | <StatusBadge status="done" /> | GOG Galaxy, EA app, and Ubisoft Connect games installed on Windows are discovered read-only from the registry and launcher manifests, merged by a stable provider id, and launched directly or through the launcher's URI (ADR 0073) |
+| Game Night decks (v1.17.0) | <StatusBadge status="done" /> | A named deck stores players, minutes, and a filter query (up to 20 decks); building returns an eight-character seed, and the same seed and library reproduce the same draw (ADR 0074) |
+| Price paid and cost per hour (v1.17.0) | <StatusBadge status="done" /> | A game records price paid and currency; Play Insights shows totals per currency and cost per hour for played, priced games; no conversion is performed (ADR 0075) |
+| Translated server notices (v1.17.0) | <StatusBadge status="done" /> | Cloud sync, launch-check, definition, and webhook notices carry translation keys and parameters and render in all five locales, with the stored English text as fallback (ADR 0076) |
 
 ## Intentionally not replicated on Linux
 
@@ -83,7 +87,7 @@ Windows-only workflows without a Linux equivalent remain documented as boundarie
 | Windows shell replacement | Not applicable on Linux desktop environments |
 | LEDBlinky / cabinet LED control | Use external Linux arcade I/O tools instead |
 | Teknoparrot arcade launcher | Use Lutris/Wine launch profiles for supported titles |
-| Native Xbox PC package scanning | Use Heroic/Lutris/Xbox Cloud entries instead |
+| Native Xbox PC package scanning | Installed GOG, EA app, and Ubisoft Connect games import natively on Windows; Xbox PC packages still have no equivalent. On Linux use Heroic/Lutris or Xbox Cloud entries instead. |
 | Bundled proprietary media packs | Replaced by free bundled media packs in OpenBox |
 | LaunchBox Premium account cloud library | Replaced by OpenBox's local mounted-folder statistics sync and opt-in catalog sync plus local backups (no LaunchBox account involved) |
 | LaunchBox online theme storefront | Replaced by local CSS theme import and open-folder workflow |
@@ -144,6 +148,7 @@ The capability rows above are implemented by the current modules in `pkg/parity/
 | `parity_setup_preview.py` | Setup Center preview |
 | `parity_story.py` | Per-game Story timeline projection |
 | `parity_storefront.py` | Storefront imports |
+| `parity_storefront_windows.py` | Native GOG, EA app, and Ubisoft Connect discovery on Windows |
 | `parity_steam_bridge.py` | Steam shortcuts.vdf bridge |
 | `parity_steamgrid.py` | SteamGridDB artwork provider |
 | `parity_tracking.py` | Play tracking |

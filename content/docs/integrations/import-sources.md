@@ -3,7 +3,7 @@ title: Import sources
 description: Configure Steam, Heroic, Lutris, Gameyfin, ROM, and arcade imports.
 ---
 
-OpenBoxGL imports installed libraries and local files from the sources you already run on Linux. Every importer adds only entries that are not already present, so re-running an import never duplicates. Missing manifests, binaries, or malformed output are reported and skipped according to the source importer.
+OpenBoxGL imports installed libraries and local files from the sources you already run on Linux, plus native GOG Galaxy, EA app, and Ubisoft Connect installs on Windows. Every importer adds only entries that are not already present, so re-running an import never duplicates. Missing manifests, binaries, or malformed output are reported and skipped according to the source importer.
 
 ## Steam
 
@@ -25,6 +25,15 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 - **Source**: `lutris --list-games --installed --json` (or `flatpak run net.lutris.Lutris --list-games --installed --json`), 30-second timeout.
 - **Records**: non-installed entries skipped; numeric `id` required. Origin tagging from the service/source fields: Xbox/Game Pass -> `Xbox`, EA app/Origin -> `EA`, Ubisoft/uPlay -> `Ubisoft`, else `Lutris`. Platform defaults to the record platform, or `Windows` for wine/winesteam runners. Cover art is discovered from Lutris coverart folders when present.
 - **Prerequisite**: `lutris` or `flatpak`, else `"Lutris or Flatpak is required to import Lutris games."` Malformed JSON raises `"Lutris returned an invalid game list."`
+
+## GOG Galaxy, EA app, and Ubisoft Connect on Windows
+
+- **Discovery**: native and offline. GOG reads `HKCU\Software\GOG.com\Games` and the two `HKLM` variants plus each game's `goggame-*.info`; the EA app reads its installer manifests (`__Installer\installerdata.xml`); Ubisoft Connect reads its `Installs` registry keys. All paths are checked and all provider ids must be digits.
+- **Records**: source `GOG`/`EA`/`Ubisoft`, the matching `gog_id`/`ea_id`/`ubisoft_id`, install directory, and `platform: "PC"`.
+- **Launch**: GOG runs the executable directly and keeps it inside the install directory, so Galaxy overlay and Galaxy cloud saves do not start. EA launches through the registered `origin2://game/launch` handler; Ubisoft launches through `uplay://launch/<id>/0`.
+- **Routes**: `POST /api/v2/import/gog`, `POST /api/v2/import/ea`, and `POST /api/v2/import/ubisoft`. Re-running an import merges by provider id, so it does not duplicate a game.
+- **Limits**: installed games only. Owned-but-uninstalled catalogs and Xbox PC packages are not imported. On Windows, 1.17.0 ships the manual import only; the unreleased 1.18 build adds an opt-in **Auto-import … on startup** checkbox per source, off by default. On non-Windows hosts the routes return zero games.
+- **Failure model**: a malformed registry entry or a missing install directory is reported in `errors` and skipped; a GOG executable outside its install directory is refused. Uninstalling the EA app or Ubisoft Connect leaves the game in the library but breaks launches until the handler returns.
 
 ## Gameyfin
 

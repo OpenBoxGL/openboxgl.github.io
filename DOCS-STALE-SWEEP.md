@@ -1,271 +1,160 @@
-# OpenBoxGL Docs — Stale Content & Coverage Gap Sweep
+# OpenBoxGL Docs — Coverage and Currency Audit
 
-**Date:** 2026-10-09
-**Docs repo:** `/home/hayden/Desktop/Projects/openboxgl.github.io`
-**App source (ground truth):** `/home/hayden/Desktop/Projects/OpenBoxGL`
-**Corpus:** 104 docs pages, ~10,700 lines, 103 search-index entries
+Updated **2026-10-19** against the application's **1.17.0** release. The version
+literal lives only in `updates.py` (`VERSION = "1.17.0"`); `openbox.py` has none.
+The application checkout is past the release and carries unreleased 1.18 work,
+which this audit marks separately.
 
-## Headline
+This file records the evidence for the current docs sweep. It is an internal
+audit, not a published page. The site's own gates are the contract; this file
+explains what they cover and where a human still has to look.
 
-The docs site is **two full releases stale**. `content/docs/changelog.md:7` stops at
-**1.15.0 (2026-09-29)**; the app ships **1.16.1** (`OpenBoxGL/updates.py:30` —
-`VERSION = "1.16.1"`, confirmed by the user).
+## Current coverage
 
-The most serious defect is not a missing page — it is an **actively harmful one**:
-`content/docs/policies/security.md` tells users to upgrade to **1.15.x**, which is
-precisely the release carrying five security defects that only 1.16.0 fixes.
+| Surface | Source of truth | Current result |
+| --- | --- | --- |
+| API routes | `routes.py` and `@route` decorators | **381/381** method+path pairs documented in the current source tree (49 are 1.18-unreleased) |
+| Settings | `settings_schema.KNOWN_SETTINGS` | **150/150** settings documented (39 are 1.18-unreleased) |
+| Launch tokens | application launch-token table | **24/24** documented |
+| Webhook payloads | webhook event table | **9/9** documented |
+| Version currency | latest `##` entry in `content/docs/changelog.md` | every app-version claim reads **1.17.0** or is explicitly historical |
+| Docs pages | `content/docs/**/*.md(x)` | **106** pages scanned |
+| Built-site routes | `scripts/check-built-site.mjs` | every required route and internal link is checked after export |
 
-Structural quality is high: **0 broken internal links, 0 broken anchors, complete
-frontmatter, balanced code fences, no leaked secrets.** The drift is entirely
-*currency* — what the docs say about a product that has moved on.
+Run the three content gates directly:
 
----
-
-## P0 — Critical
-
-### 1. Security policy directs users to a vulnerable release
-
-| | Docs site | App source (truth) |
-|---|---|---|
-| Current | `\| 1.15.x \| Yes (current) \|` | `\| 1.16.x \| Yes (current) \|` |
-| 1.15.x | prose: "the 1.15.x line is the current maintained release … upgrade to 1.15.x to receive fixes" | `\| 1.15.x \| No — upgrade required (see above) \|` |
-
-- `content/docs/policies/security.md` — table row + "Only the latest release on the
-  `master` branch is maintained, and the 1.15.x line is the current maintained release."
-- `OpenBoxGL/docs/SECURITY.md` — section heading *"Fixed in 1.16.0: what 1.15.x and
-  earlier are exposed to"*, ending "None is backported, so upgrading is the fix."
-
-**None of the five 1.16.0 security fixes appear anywhere on the docs site:**
-
-1. Arbitrary `.json` read via a crafted `preview_id` (reaches `settings.json` with provider credentials).
-2. Arbitrary file write via a game's `rom_name` during high-score bundle restore.
-3. Plugin sandbox could read `library.json` / `settings.json` when `OPENBOX_DATA_DIR` pointed outside the masked paths.
-4. Unescaped game names in the Wrapped report reaching `innerHTML`.
-5. `orjson` hijack — a third-party package could change library serialization.
-
-The site's only adjacent line — *"Restores and extractions validate archive members and
-reject symlinks, absolute paths, and `..` traversal"* — describes archive extraction,
-not the `rom_name` write path, and does not cover the **read** path at all.
-
-### 2. `/api/v2/backup/diff` documents a superseded response shape
-
-Docs describe only the v1.7.2 flat contract:
-- `content/docs/reference/api/saves-and-operations/index.mdx:280-287`
-- `content/docs/reference/library-backups/index.md:69-79`
-
-Shipped code (`pkg/parity/parity_backup.py:552-585`) additionally returns:
-
-- `restore.{will_remove, will_add, will_change}` — each `{total, truncated, rows}`, with
-  per-field `{from, to}` on changed rows
-- `settings.{restored, present, would_change, differs, redacted_secrets, keys_changed}`
-- `truncated.{added, removed, changed, limit}`
-
-Note: `settings_changed` **is still returned** (line 581, kept flat per ADR 0019), so the
-docs are *incomplete rather than wrong* here. But the `restore` block is the only one the
-UI reads, and it is undocumented — as is the entire 1.16.0 "Preview changes" flow that
-gates the Restore button behind a successful preview.
-
-### 3. Version currency is wrong on the three most-trafficked surfaces
-
-| File | Claim | Truth |
-|---|---|---|
-| `content/docs/downloads.md:8` | "currently **v1.15.0**" | 1.16.1 |
-| `content/docs/roadmap.md:13` | "The current release is **1.15.0** — Finish the surface" + whole "In the current release" list | 1.16.1 |
-| `content/docs/reference/parity.mdx:18` | "Verified against **v1.15.0**" | `OpenBoxGL/docs/PARITY.md`: "latest release is **v1.16.1**" |
-
-`parity.mdx:13,22,28` additionally frame "the 1.15.0 line" as the running platform line.
-
----
-
-## P1 — High
-
-### 4. Eight v2 routes are entirely undocumented
-
-All exist in `OpenBoxGL/handlers/launch.py`; zero occurrences anywhere in `content/`:
-
-```
-GET  /api/v2/launch/audit          POST /api/v2/launch/audit/scan
-GET  /api/v2/launch/audit/status   POST /api/v2/launch/audit/refresh
-GET  /api/v2/launch/cores          POST /api/v2/launch/core
-POST /api/v2/launch/grant          POST /api/v2/launch/grant/undo
+```bash
+node scripts/check-contract-coverage.mjs
+node scripts/check-api-coverage.mjs
+node scripts/check-version-currency.mjs
 ```
 
-These are the entire 1.16 "Launch Readiness" + 1.16.1 Flatpak-grant surface.
+The app's 1.17.0 cut recorded **316 route paths / 111 settings**. The current
+source tree has **359 live paths / 381 method+path pairs / 150 settings**. The
+current 381 includes **49 method+path pairs added after 1.17.0** (43 new paths
+plus six new methods on existing paths), and 22 paths serve two methods, so
+359 paths become 381 pairs for this site gate. The 49 routes and 39 settings
+that postdate 1.17.0 are marked **1.18 unreleased** in the reference pages; do
+not read the site's total as a 1.17.0 feature list.
 
-### 5. No 1.15 or 1.16 API additions page (nor 1.13)
+The version gate also checks release assets against the real release when
+`OPENBOX_RELEASE_REPO` is set. That lookup is intentionally best-effort in
+local runs: a failed API call is reported and skipped rather than failing an
+otherwise good build. CI sets the variable.
 
-`content/docs/reference/api/` contains `overview/`, `one-eleven/`, `one-twelve/`,
-`one-fourteen/` + 6 topic pages. `reference/api/overview/index.mdx:83` states the v2
-surface covers "v1.7.0 through **v1.14.0**" and the enumerated list terminates at
-`Plugins 2.0 (v1.14.0)` (line 116). `reference/api.mdx:90` advertises 1.14 as newest.
+## What this sweep changed
 
-### 6. Headline 1.16.0 features missing from all guides
+- Added the **1.17.0 changelog entry** and the comparison links for 1.16.0,
+  1.16.1, and 1.17.0. The previous changelog ended at 1.16.1 while the app
+  shipped 1.17.0.
+- Added **`reference/api/one-seventeen`** for Game Night decks and native
+  Windows GOG, EA app, and Ubisoft Connect imports, and registered it in the
+  sidebar.
+- Closed the route-coverage gap: **55 routes** had shipped without a literal
+  mention anywhere in `content/docs`. They are now grouped by surface in the
+  API pages rather than dumped into one generated table. Of those, **49** are
+  present only in the unreleased 1.18 tree and carry a **1.18 unreleased**
+  marker.
+- Closed the settings gap: **40 keys** existed in `KNOWN_SETTINGS` but not in
+  `reference/configuration.md`. They now sit in the display/input/integration
+  table with defaults and validation limits. **39** are 1.18-unreleased; only
+  `currency` shipped in 1.17.0.
+- Updated the **current-release claims** in install, downloads, Windows, Steam
+  Deck, enterprise, compare, index, roadmap, parity, Play Insights, API
+  examples, and the theme/command-builder version badges.
+- Updated the **roadmap** so it no longer says the Game Night deck builder is
+  unshipped (it shipped in 1.17.0) and so its "coming next" list matches the
+  1.17.0 known limits.
+- Separated the **unreleased 1.18 tree** from the 1.17.0 release: 49 routes and
+  39 settings carry a 1.18-unreleased marker instead of reading as 1.17.0
+  features.
+- Corrected the **auto-import** wording: 1.17.0 is manual, but the unreleased
+  1.18 build adds opt-in startup auto-import checkboxes for GOG, the EA app,
+  and Ubisoft Connect on Windows. The false "no auto-import" claim was removed
+  from the current-behaviour guides and API page.
+- Dropped confirmed stale line-number citations in the setup-center and
+  configuration pages in favour of file-plus-symbol references.
+- Updated the **parity page** to v1.17.0 and added the four 1.17.0 capability
+  rows, plus `parity_storefront_windows.py`.
+- Updated the guides for the **1.17.0 features**: native Windows imports in
+  Import sources / Importing / Storefront Manager / Windows, decks in Big Box,
+  price and cost per hour in Play Insights, translated notices in the
+  notification guide, and the local-only fields in library sync and Time
+  Machine.
+- Corrected the **ScreenScraper** setup: all four values are required,
+  including `SCREENSCRAPER_DEV_ID`/`SCREENSCRAPER_DEV_PASSWORD`, in the
+  configuration table, provider guide, and API page.
+- Wrapped stale **1.17.0 feature history** into getting started and the FAQ,
+  which stopped at 1.15 and 1.16 respectively.
+- App repository docs: regenerated `docs/api-v2.md` with
+  `python3 scripts/gen_api_docs.py --v2`, fixed the changelog's `Unreleased`
+  comparison link and added the missing 1.16/1.17 links, corrected the archive
+  entry that still called 1.17.0 release-pending, and updated the ADR range to
+  0079.
 
-| Feature | Status |
-|---|---|
-| "Check every game" library-wide Launch Doctor (grouped causes, Install action, ready/warn/blocked totals, deep mode) | **MISSING** — no guide section |
-| Backup restore preview / "Preview changes" / Restore gating | **MISSING** from UI docs (endpoint only, stale shape) |
-| LaunchBox / ES-DE apply confirmation with exact counts | **MISSING** |
-| `.m3u` playlist ownership guard | **MISSING** |
-| Import decision queue behaviour (uncertain candidates block import) | route listed; **behaviour undocumented** |
-| Session failure via exit code | **PARTIAL** — "Session failed" covered; "Session ended" + webhook `timed_out` flag missing |
-| 60 s request timeout; 20,000-result search cap; 3-toast stacking; controller alt-tab fix; playtime-after-delete fix | **MISSING** |
+## What the gates do not prove
 
-Backing source: `OpenBoxGL/docs/archive/release-notes-1.16.0.md`.
+- **Route coverage is literal-name coverage.** A route passes when its exact
+  path appears in a doc. A wrong description, a stale body shape, or an
+  example that no longer matches the handler still passes. The reverse
+  direction catches a documented route that no longer exists.
+- **Settings coverage is key-presence coverage.** The configuration table can
+  state a wrong default and still pass. Defaults in the table were checked
+  against `handlers/settings.py` and the public projection in
+  `pkg/state/cache.py` during this sweep.
+- **Version currency is literal-driven.** It knows how to find installer
+  assignments, release URLs, asset filenames, and "current release" prose. It
+  does not understand every English sentence. Historical version mentions are
+  legitimate and deliberately not rewritten.
+- **The app repository is not covered by the site gates.** `docs/api-v2.md` is
+  generated; `docs/CHANGELOG.md`, `docs/README.md`, and `docs/PARITY.md` are
+  hand-maintained. Check them when a release changes a count, a status, or a
+  comparison link.
+- **Asset verification needs network access and a repo name.** Without
+  `OPENBOX_RELEASE_REPO`, a documented asset name is only checked for version
+  currency, not for existence on the release.
+- **Line-number citations drift.** Prefer a file plus a symbol name (for
+  example `pkg/state/cache.py`, `public_settings`) over `file.py:NNN`; the
+  confirmed stale citations in the setup-center and configuration pages were
+  reduced to file-plus-symbol form during this sweep.
 
-### 7. All of 1.16.1 is missing
+## Manual audit recipe
 
-Grid "Won't launch" / "Needs attention" badges + badge toggle, group fixes and scoped
-relink, per-game RetroArch core choice, Flatpak Grant/Remove access, **18 additional
-launch definitions** (Flycast, Azahar, DOSBox Staging, DuckStation … — 42 YAML defs now
-in `emulator_defs/`, none of Flycast/Azahar/DOSBox Staging documented), definition
-schema 2, plugin re-approval after upgrade, one-live-connection-per-tab.
+Use this when a future release adds routes, settings, or a feature surface:
 
-### 8. Search-syntax reference is missing implemented clauses
+1. Sync the route baseline from the application:
+   ```bash
+   OPENBOX_APP_DIR=/path/to/OpenBoxGL npm run routes:sync
+   ```
+2. Sync the contract baseline after every intentional surface change:
+   ```bash
+   OPENBOX_APP_DIR=/path/to/OpenBoxGL npm run contracts:sync
+   ```
+3. Run the three gates above and let them name every missing route, setting,
+   launch token, webhook event, and stale version literal.
+4. Search for current-release prose, not just the previous version number:
+   `current release`, `currently v`, `still shipped`, `latest release`.
+5. Search version literals inside fenced code blocks separately. A
+   copy-pasteable installer with a stale `VERSION=` is worse than prose.
+6. Read the new feature's guides, not only the API table: a route can be
+   documented while the screen a user actually clicks is missing.
+7. Run `npm run test`, which builds the static site, generates redirects and
+   the sitemap, and checks the built routes and links.
 
-`content/docs/reference/search-syntax/index.md` omits clauses that are implemented in
-`pkg/parity/parity_query.py:340,490` and covered only in `guides/library/backlog/index.md:14`:
+## Known limitations in the application docs
 
-- `myrating:4`
-- `unrated by me`
-- `my 4 stars`
-- `progress:unplayed` (listed, but not as a first-class clause alongside the others)
+These are stated in the release notes and are not docs defects:
 
----
-
-## P2 — Medium
-
-### 9. Interactive tools ship stale version badges and a missing theme
-
-- `components/automation-section.tsx:33` claims **"Six bundled CSS themes"** and
-  `content/docs/themes.md:13` documents **High Contrast** (shipped 1.15.0).
-  `components/tools/theme-previewer.tsx` hardcodes only **five** — High Contrast is absent.
-- `components/tools/theme-previewer.tsx:302` → `v1.15.0`
-- `components/tools/command-builder.tsx:147` → `OpenBox v1.15.0`
-- `components/tools/api-explorer.tsx:185` → `Play Insights Summary (v1.9.0)`
-
-### 10. Landing page never mentions 1.16
-
-`content/docs/index.mdx:59-61` — "New in 1.12" / "New in 1.15" / "New in 1.14" cards.
-No 1.16 entry exists.
-
-### 11. Search index carries no 1.16 content
-
-`public/docs-index.json` — 103 entries, 20 mentions of 1.15, **0** mentions of 1.16,
-0 of `launch/audit`. Site search therefore cannot surface any current feature.
-
-### 12. 29 pages are sidebar-only, reachable by no prose link
-
-Every page has valid frontmatter and a sidebar entry, but **29 have zero inbound links
-from any other content page**, including all 10 children of
-`content/docs/guides/troubleshooting/index.md` — which links to **0** of them. Notable
-orphans: `guides/troubleshooting/*` (all 9 children), `guides/library/setup-center`,
-`guides/library/backlog`, `guides/library/export`, `guides/library/insights`,
-`guides/plugins/creating-a-plugin`, `guides/sessions-saves-and-backups/activity-center`,
-`guides/sessions-saves-and-backups/quick-resume-moments`, `guides/themes/custom-themes`,
-`guides/wine-and-proton`, `roadmap`, `showcase`, `enterprise`, `localization`,
-`project/releasing`, `reference/architecture`.
-
----
-
-## Verified correct — do not "fix" these
-
-These were checked against source and are **accurate**. Recorded so a future pass doesn't
-waste effort or introduce regressions:
-
-- **Link integrity: 0 broken page links, 0 broken anchors** across all 104 pages.
-  *(My first checker reported 334 — that was a bug in the checker, not the site: it
-  collapsed whitespace runs in heading slugs. The site's `slugifyHeading` in
-  `lib/mdx.tsx:55-61` maps each whitespace char to its own hyphen, preserving the
-  deliberate `source--system` double-hyphen shape. Corroborated independently by
-  `scripts/check-built-site.mjs:80`, which already fails the build on a missing fragment.)*
-- The two `/openbox-*.png` links in `getting-started.mdx:30,76` are **valid** — both
-  assets exist in `public/`.
-- **v2 route coverage is 153/161 (95%)**; the only 8 gaps are the 1.16 launch routes.
-- **No leaked credentials.** The `<redacted>` hits are intentional prose about the app's
-  own log redaction. Commits `3d6723c` / `6732537` were a *sanitizer* mangling `$TOKEN`
-  into `<redacted>` in the 1.14 curl examples — already repaired, and benign.
-- **Keyboard shortcuts — all verified correct:** `Ctrl/Cmd+K` (`static/palette.js:185`),
-  `Ctrl/Cmd+,` (`static/app.js:383`), `Ctrl+Alt+Q`/`R` (`static/app.js:384`),
-  `M` (`static/navigation.js:64`), `F` (`static/navigation.js:94`),
-  `F11` (`static/app.js:394`), `Escape` (`static/app.js:395`).
-- **`reference/configuration.md`** — 32 `OPENBOX_*` vars documented; **0** present in
-  `.env.example` / `env_config.py` are missing. The 14 documented-but-not-in-those-files
-  vars (`OPENBOX_PYTHON`, `OPENBOX_NATIVE_HOST`, `OPENBOX_ARCH`, …) all exist in
-  launcher/C sources.
-- **`reference/cli.md`** — accurate. `--web` / `--uri` are real
-  (`pkg/parity/parity_deeplinks.py:106,115`); `--share-net` is documented where it
-  belongs, in the plugin permission docs.
-- **Search grammar aliases** — `playmode:` (`static/util.js:91`), `plat:`, `fav:`, etc.
-  all match the documented alias table.
-- **Plugin manifest contract** — `api_version`, `id`, `name`, `description`, `entry`,
-  `hooks`, `permissions`, `checksum`, `events`, `library_source` all align with `plugins.py`.
-- **Locales** — 5 (`de, en, es, fr, pt`) confirmed in `OpenBoxGL/locales/`.
-- **Themes** — 6 on disk (`Cinema Marquee, Harbor Light, High Contrast, Midnight Circuit,
-  Nordic Mist, Phosphor Terminal`) matching `themes.md`.
-- Frontmatter complete on all 104 pages; all code fences balanced.
-
----
-
-## Suggested remediation order
-
-1. **`policies/security.md`** — flip table to 1.16.x current / 1.15.x unsupported, add the
-   "Fixed in 1.16.0" section. Copy from `OpenBoxGL/docs/SECURITY.md:5-36`. *Do this first —
-   it is user-harmful today.*
-2. **`changelog.md`** — add 1.16.1 and 1.16.0 sections from
-   `OpenBoxGL/docs/archive/release-notes-1.16.0.md`.
-3. **`reference/api/one-sixteen/`** — new additions page for the 8 launch routes.
-4. **Correct `backup/diff`** in `saves-and-operations/index.mdx` and
-   `reference/library-backups/index.md` to the shipped `restore` / `settings` / `truncated`
-   shapes.
-5. **Guide sections** for Launch Readiness and Restore Preview.
-6. **Version strings** — `downloads.md`, `roadmap.md`, `parity.mdx`, `index.mdx`, and the
-   three component badges.
-7. **Add High Contrast** to `theme-previewer.tsx`.
-8. **Add `myrating:` / `unrated by me` / `my N stars`** to `search-syntax/index.md`.
-9. **Internal linking** — have `guides/troubleshooting/index.md` link its 10 children;
-   add cross-links for the other 19 orphans.
-
----
-
-## Method & confidence
-
-- **Deterministic/mechanical (high confidence, reproducible):** slug map walked from
-  `content/docs` mirroring `lib/docs.ts`; every markdown link and fragment validated with
-  an exact port of `lib/mdx.tsx`'s `slugifyHeading`; route inventory extracted from the
-  app's `@route(...)` decorators and diffed against every `/api/...` token in the docs.
-- **Source-verified (high confidence):** every shortcut, env var, CLI flag, search clause,
-  theme name, locale, and manifest field listed above was confirmed by direct read or grep
-  in `OpenBoxGL`, with file:line citations.
-- **From a delegated 1.16.x gap analysis** — independently spot-checked here: the
-  `security.md` table, the `roadmap.md`/`downloads.md`/`parity.mdx` version strings, and the
-  `backup/diff` response shape were each re-read against source before inclusion.
-- **Not verified:** I did not render the deployed site, so a redirect or uncommitted page
-  outside `content/` could in principle hide a page. The 1.16.0 changelog's full "Fixed"
-  list was not audited bullet-by-bullet — additional obscure fixes may add rows to §6.
-
-## Follow-up passes (after the initial report)
-
-The audit continued past the report above. Two methodological traps worth recording, because both produced wrong conclusions:
-
-**Version literals hide in code fences.** A plain `grep -rn "1\.15\.0"` finds them, but reading only the prose hits makes them look harmless example data. Five copy-pasteable installer blocks still pinned 1.15.0 after the first fix pass. Always parse fenced code blocks specifically, since those are what a reader actually runs.
-
-**UI labels are not all in `locales/en.json`.** Searching the locale file alone reported that `Session ended` and `Retry failed` did not exist — both are hardcoded in `static/sessions.js:157` and `index.html:364`. The real UI string surface is `locales/en.json` **plus** `index.html` **plus** `static/*.js`. Search all three before concluding a label is missing; the one genuine mismatch found this way was `Choose core`, which is actually `Choose a RetroArch core` (`library.core.title`).
-
-Current verified coverage, re-checked against source: 110/110 `KNOWN_SETTINGS`, 24/24 launch-token spellings, 9/9 webhook payloads field-for-field, 326/326 API routes, and every app-version literal in prose or code reads 1.16.1 or is explicitly historical.
-
-**UI affordances.** All 14 menu paths the docs use (`Tools → Emulators`, `Settings → About`, `Tools → Time Machine`, `Settings → Advanced → Export library`, and the rest) resolve to real element text in `index.html`. Of the UI labels asserted in prose, one was wrong — `Choose core` is `Choose a RetroArch core` (`library.core.title`) — and is fixed. Labels confirmed correct include `Check every game`, `Preview changes`, `Grant access`, `Remove access`, `Use the default core`, `Find moved files`, `Won't launch`, `Needs attention`, `Emulator definitions`, `Session failed`, `Session ended` (`static/sessions.js:157`), and `Retry failed` (`index.html:364`).
-
-A bulk extraction of bolded text from UI-context lines is **not** a usable signal on its own: roughly half the hits are prose sentence leads (`You should see:`, `Fixed:`), brand names (`MAME`, `Ludusavi`, `MangoHud`), API route names, or the reference table's own column headers rather than shipped strings. Narrow to menu paths and quoted button names before drawing conclusions, or expect false positives.
-
-## Permanent gate: `scripts/check-version-currency.mjs`
-
-The recurring theme of this audit is that version references appear in at least six shapes, and sweeping for one at a time is how they survived three separate passes. Rather than keep sweeping by hand, the check is now part of the build.
-
-It derives the current version from the newest `## X.Y.Z` heading in the changelog, so **adding the next release's changelog entry is what arms it** — it then names every place still asserting an older release and fails the build until they agree.
-
-It deliberately does *not* flag every old version and then exempt the history. That approach produced 93 false positives on correct content, because nearly every version in a changelog is legitimately old. Instead it inspects a version literal only where it claims to be current: a release URL, a published asset filename, an assigned value (`VERSION=`, `$Version =`, `OPENBOX_RELEASE_TAG=`, `-Tag`), an explicit current-release assertion, or a comparison-table header. Prose like "added in v1.14.0" is never examined.
-
-With `OPENBOX_RELEASE_REPO` set — it is in CI — it also checks every documented release asset against the real release, so a stale asset name fails the build instead of shipping as a dead download link. That is what the two `OpenBox-1.15.0-sbom.json` entries would have been. The lookup is best effort: a failed API call is reported and skipped rather than failing an otherwise-good build.
-
-The gate is negative-tested. Against the pre-fix `downloads.md` it fails with exit 1, naming the stale Flatpak URL and both unpublished SBOM assets; against the current tree it passes. A gate that has only ever passed is not evidence of anything.
+- Xbox PC package scanning and owned-but-uninstalled GOG/EA/Ubisoft catalogs
+  are not imported.
+- Native Windows storefront imports are manual in 1.17.0. The unreleased 1.18
+  build adds opt-in per-source startup auto-import checkboxes (off by default),
+  so the 1.17.0 release-note wording must not be repeated as current behaviour.
+  Owned-but-uninstalled catalogs are still not imported.
+- Cost totals are grouped by currency and are not converted. A cost-per-hour
+  rate needs a priced game with at least one minute played.
+- GOG launches its executable directly, so Galaxy overlay and cloud saves are
+  not started. EA and Ubisoft depend on their registered URI handlers.
+- Notification titles and bodies are translated; other server responses and
+  some dialog labels remain English.
+- Windows ARM64 and macOS remain out of scope.

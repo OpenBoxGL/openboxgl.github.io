@@ -80,7 +80,11 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 
 - **Frozen v1 Contract (`/api/v1/*`)**: Stable, frozen remote contract (enforced via `v1_contracts.json`, currently 61 routes; the contract pins path + methods, per-route params are manually verified).
 - **Base-only routes (`/api/*` without a `/api/v1/*` alias)**: local-workflow routes such as `GET /api/emulators/recommend`, `GET /api/plugins/catalog`, `POST /api/webhooks/test`, `POST /api/plugins/install|toggle|remove`, `/api/wine/*`, and `/api/faugus/*` are documented on the group pages as `/api/*` with no v1 alias. Treat them as local operations, not part of the frozen remote contract; v1 aliases are added only when a route becomes a stable remote dependency.
-- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through v1.16.1:
+<Callout type="warning" title="1.17.0 is the current release; 1.18 is unreleased">
+The application checkout is ahead of the 1.17.0 release. The **49 routes added after 1.17.0** are documented in the group pages with a **“1.18 unreleased”** marker; they are present in the current source tree and are not part of the 1.17.0 release. The current release's own six routes are on [API 1.17 additions](/reference/api/one-seventeen/).
+</Callout>
+
+- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through 1.17.0, plus the unreleased 1.18 build:
   - **Setup Center**: `POST /api/v2/setup/preview`, `GET /api/v2/setup/preview`, `GET /api/v2/setup/preview/items`, `POST /api/v2/setup/preview/decisions`, `POST /api/v2/setup/preview/revalidate`, `POST /api/v2/setup/commit`, `GET /api/v2/setup/summary`
   - **Launch Doctor**: `POST /api/v2/launch/preflight`, `POST /api/v2/launch/preflight/batch`
   - **Emulator Registry**: `GET /api/v2/emulators/registry` (with `?health=1` for BIOS/firmware/core status)
@@ -120,8 +124,10 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
   - **Launch badges and scoped refresh** (v1.16.1): `GET /api/v2/launch/audit/status` (per-game `blocked`/`warning` for the grid, empty when the report is stale) and `POST /api/v2/launch/audit/refresh` (re-check one group's games in-request; refuses a report that no longer matches the library).
   - **Flatpak folder grants** (v1.16.1): `POST /api/v2/launch/grant` and `POST /api/v2/launch/grant/undo` grant and remove a read-only `flatpak override --user --filesystem=<folder>:ro` entry, replacing a reinstall prompt that could not grant access.
   - **Per-game RetroArch core** (v1.16.1): `GET /api/v2/launch/cores` (installed cores) and `POST /api/v2/launch/core` (bind one to a game; an empty core restores the definition default).
+  - **Game Night decks** (v1.17.0): `GET`/`POST /api/v2/party/decks` list and upsert a named deck (players, minutes, filter query, capped at 20), and `POST /api/v2/party/decks/delete` removes one by name. The existing party queue route accepts an eight-character seed so the same seed and library reproduce the same draw.
+  - **Native Windows storefront imports** (v1.17.0): `POST /api/v2/import/gog`, `POST /api/v2/import/ea`, and `POST /api/v2/import/ubisoft` discover installed games from the launchers' registry entries and manifests. Discovery is offline and read-only; merging is by stable provider id. On non-Windows hosts the routes return zero games.
 
-See [API 1.11 additions](/reference/api/one-eleven/), [API 1.12 additions](/reference/api/one-twelve/), [API 1.14 additions](/reference/api/one-fourteen/), and [API 1.16 additions](/reference/api/one-sixteen/) for request bodies, response examples, optional-tool caveats, and stale-plan handling.
+See [API 1.11 additions](/reference/api/one-eleven/), [API 1.12 additions](/reference/api/one-twelve/), [API 1.14 additions](/reference/api/one-fourteen/), [API 1.16 additions](/reference/api/one-sixteen/), and [API 1.17 additions](/reference/api/one-seventeen/) for request bodies, response examples, optional-tool caveats, and stale-plan handling.
 - **Locale files** (public, no auth): `GET /locales/{en,es,de,fr,pt}.json` — serves JSON locale files for the i18n system (v1.7.2)
 
 ### Machine-Readable Error Codes

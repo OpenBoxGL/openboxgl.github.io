@@ -21,7 +21,7 @@ Four providers require **no credentials** and work out of the box: LaunchBox Gam
 | GOG | Cover + background for Heroic/GOG entries | None |
 | EmuMovies | Licensed media (box art) | Licensed account (`EMUMOVIES_USERNAME`/`EMUMOVIES_PASSWORD`) |
 | Bezel Project | Per-platform bezel sets for RetroArch-style presentation | None |
-| ScreenScraper | Per-ROM-hash metadata + media for emulated games (ROM hash matching) | Required (`SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` in `~/.env`) |
+| ScreenScraper | Per-ROM-hash metadata + media for emulated games (ROM hash matching) | Required (`SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` plus `SCREENSCRAPER_DEV_ID`/`SCREENSCRAPER_DEV_PASSWORD` in `~/.env`) |
 
 ## Set up metadata
 
@@ -39,7 +39,7 @@ Four providers require **no credentials** and work out of the box: LaunchBox Gam
 - **EmuMovies**: licensed account in Settings or `~/.env`, then download per game. Downloads expect an `image/` content type and cap at 32 MiB.
 - **Download bezel** fetches Bezel Project artwork per platform and extracts into `<data-dir>/bezels`; a corrupt replacement never destroys the working set (staging + swap).
 - **Capture screenshot** uses the first available of gnome-screenshot, spectacle, scrot, or ImageMagick `import`, appending to the game's screenshots.
-- **ScreenScraper** (introduced in v1.8.0, current in v1.11.0): matches emulated games by ROM hash (md5/sha1/crc, 512 MB cap) against ScreenScraper's endpoints, so ROMs with generic filenames still get correct metadata and media. Throttled to 1 request/second with 429/5xx backoff and a 30-day disk cache under `cache/screenscraper/`. Media is picked by your region priority and URLs are forced to https. Credentials are required: set `SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` in `~/.env` (there is no anonymous access path). The metadata dialog has **ScreenScraper search** and **hash-match** actions; hash-match can run as a batch (up to 100 games, cancellable) or as a durable apply job that downloads media outside the state lock.
+- **ScreenScraper** (introduced in v1.8.0, current as of v1.17.0): matches emulated games by ROM hash (md5/sha1/crc, 512 MB cap) against ScreenScraper's endpoints, so ROMs with generic filenames still get correct metadata and media. Throttled to 1 request/second with 429/5xx backoff and a 30-day disk cache under `cache/screenscraper/`. Media is picked by your region priority and URLs are forced to https. All four credentials are required: set `SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` plus the developer pair `SCREENSCRAPER_DEV_ID`/`SCREENSCRAPER_DEV_PASSWORD` in `~/.env` (there is no anonymous access path, and the API refuses lookups without the developer pair). The metadata dialog has **ScreenScraper search** and **hash-match** actions; hash-match can run as a batch (up to 100 games, cancellable) or as a durable apply job that downloads media outside the state lock.
 
 See [SteamGridDB and launcher trophies](/guides/metadata-and-media/steamgriddb-and-trophies/) for the optional 1.11.0 artwork provider and the separate local trophy case.
 

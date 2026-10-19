@@ -119,6 +119,8 @@ Settings → Controller includes a **controller bench** tab with a live SVG game
 
 **Game Night** (**Big Box → Game Night**) turns Big Box into a couch-multiplayer party screen: set players (2–8) and session length, build a queue of party-friendly games, spin the wheel to pick, launch, and advance rounds. The queue and round index persist across restarts. Control it with a gamepad or keyboard (arrows/Enter/N/Escape). Backed by `POST /api/v2/party/queue`, `GET /api/v2/party/queue`, and `POST /api/v2/party/next`.
 
+**Decks (v1.17.0)** save the setup rather than just the result. A deck stores a name, a filter query (for example `platform:SNES`), the player count, and a minute budget; up to 20 decks are kept, and **Save deck** / **Delete deck** sit under the setup controls. Loading a deck restores those values, and a build returns an eight-character seed: the same seed and library reproduce the same draw on another device. Decks live in the local library state and do not cross the library-sync protocol. Backed by `GET`/`POST /api/v2/party/decks` and `POST /api/v2/party/decks/delete`; see [API 1.17 additions](/reference/api/one-seventeen/).
+
 ## Video snaps in stage mode (v1.9.0)
 
 Big Box stage mode plays looping gameplay videos behind the selected cover when a video is available, with a 600ms debounce so fast scrolling stays smooth, background-music ducking while video audio plays, and `prefers-reduced-motion` support. Without a video it falls back to the static cover.

@@ -109,6 +109,50 @@ Partial save: merge the posted keys into existing settings and validate. See [Co
 
 </ApiEndpoint>
 
+## Integration tokens and Steam (1.18 unreleased)
+
+<ApiEndpoint method="GET" path="/api/v2/integration-tokens">
+
+Returns the supported provider ids and a masked view of saved tokens: `{"providers": ["igdb", "screenscraper", "steamgriddb", "gameyfin", "retroachievements"], "tokens": {"igdb": "abcd…yz"}}`. Full token values never leave the host; a token shorter than nine characters is shown as bullets.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/integration-tokens">
+
+Saves one provider token: `{"provider": "igdb", "token": "<secret>"}`. The provider must be one of the five ids above; the token must be non-blank, at most 4,096 characters, and free of control characters. The value is stored in `settings.integration_tokens` and is not sent back. Returns `{"provider", "saved": true}` and invalidates the settings cache. This is a local-only mutation: it does not enter catalog sync events.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/integration-tokens/remove">
+
+Removes one saved provider token: `{"provider": "igdb"}`. Removing an absent provider is a successful no-op. Returns `{"provider", "removed": true}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/integrations/steam">
+
+Returns the Steam Web API credential status: `{"configured": bool, "steam_id": "...", "key_set": bool}`. The API key itself is never returned.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/integrations/steam">
+
+Merges Steam credentials into `<data>/steam.json` (mode `0o600`): `{"api_key": "...", "steam_id": "..."}`. An omitted field keeps its stored value; an empty string clears it. Returns the same redacted status as `GET`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/integrations/steam/test">
+
+Validates the saved Steam key and Steam ID by fetching the owned-games list. Returns `{"ok": true, "games": <count>}`; missing credentials raise `400` ("Save a Steam API key and Steam ID first.") and a rejected key surfaces the provider's error.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/integrations/steam/refresh">
+
+Starts a background `steam.stats` job that refreshes owned-game statistics into the library. Requires saved credentials and returns `202 {"state": "queued", "job_id": "..."}`. Poll the job through `GET /api/v2/jobs`.
+
+</ApiEndpoint>
+
 ## Profiles
 
 <ApiEndpoint method="GET" path="/api/profiles">
@@ -173,6 +217,14 @@ The session history as a chronological timeline rather than a newest-first list,
 
 </ApiEndpoint>
 
+**1.18 unreleased.** The netplay lobby browser was added after 1.17.0.
+
+<ApiEndpoint method="GET" path="/api/v2/netplay/lobby">
+
+Read-only browser over RetroArch's public netplay lobby. Returns `{"available": true, "rows": [...]}` where each row has `host`, `port`, `nick`, `game`, `core`, `players`, and `private`. Only connectable rooms with a valid host and port are included, capped at 500 rows. A timeout, provider error, or empty result returns `{"available": false, "error": "Netplay lobby is unavailable."}` with HTTP `200`; a successful non-empty result is cached for 60 seconds. No credentials are sent and no connection is started from this route.
+
+</ApiEndpoint>
+
 ## Launch
 
 <ApiEndpoint method="POST" path="/api/launch">
@@ -186,6 +238,20 @@ Start a game. Body: `{"id": <index>}` or `{"game_id": "<stable>"}` (or both). Re
 
 
 Launch an application/version/document extra: `{"id"|"game_id", "kind": "applications"|"versions"|"documents", "index": <n>}`. Documents open with `xdg-open`; extras with a `command` substitute `{path}`; others execute directly. Missing file or `xdg-open` raises `400`.
+
+</ApiEndpoint>
+
+## Store actions (1.18 unreleased)
+
+<ApiEndpoint method="POST" path="/api/v2/steam/action">
+
+Opens a Steam store action for an app id: `{"app_id": "440", "action": "install"|"repair"}`. `repair` opens the validate dialog instead of install. The app id must be numeric and below 100,000,000; the handler opens `steam://install/<id>` or `steam://validate/<id>`. Returns `{"app_id", "action"}`; a missing or unopenable Steam handler raises `400`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/game/store-action">
+
+The same action resolved from a library game: `{"id"|"game_id", "action": "install"|"repair"}`. The game must have a `steam_app_id`. Returns `{"game_id", "app_id", "action"}`.
 
 </ApiEndpoint>
 
@@ -262,6 +328,26 @@ Replaces the manual playtime entry at positional `index` in the game's session l
 
 
 Removes the manual playtime entry at positional `index` in the game's session list, then recomputes `manual_playtime_seconds` from the remaining entries. A non-integer or out-of-range `index` returns `400`, never `404`.
+
+</ApiEndpoint>
+
+## Bulk edit and platform maintenance (1.18 unreleased)
+
+<ApiEndpoint method="POST" path="/api/v2/bulk/find-replace">
+
+Literal find-and-replace over selected games: `{"ids": ["<game_id>", ...], "field": "name", "find": "text", "replace": "new", "dry_run": true}`. Editable fields are `name`, `platform`, `genre`, `developer`, `publisher`, `region`, `source`, `notes`, `progress`, and `esrb`. Between 1 and 50,000 ids are required, and find/replace text is capped at 500 characters; replacement is literal, never a regular expression. `dry_run` defaults to `true`; only `false` writes. Returns `{"field", "matched", "games": [...], "truncated", "applied"}` with at most 100 changed games in the response.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/platform/rename">
+
+Renames a platform across games and platform-keyed settings: `{"old": "SNES", "new": "Super Nintendo", "migrate_media": false}`. Profiles, platform setting maps, emulator platform overrides, filter playlists, and filter presets move with it. `migrate_media: true` also moves the platform's media directory. Returns `{"games", "media_moved", "media_skipped"}`. A missing source platform or an already-occupied target name raises `400`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/platform/delete">
+
+Removes a platform and moves its games to the Trash: `{"name": "SNES", "confirm": "SNES", "delete_media": false}`. `confirm` must match `name` exactly. Trashed games keep their position and playlist membership and can be restored; `delete_media: true` also removes the platform media directory. Returns `{"games", "media_deleted"}`.
 
 </ApiEndpoint>
 

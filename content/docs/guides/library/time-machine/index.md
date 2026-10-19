@@ -13,7 +13,7 @@ History is bounded by the journal's retained snapshots and events. The journal k
 
 ## Browse as of a date
 
-The **Browse as of** tab materializes a read-only catalog view for a date. It is useful for answering “what did my library look like then?” without changing the current library. The view reconstructs catalog metadata and history only; it does not restore media binaries, emulator installations, launch files, or save files.
+The **Browse as of** tab materializes a read-only catalog view for a date. It is useful for answering “what did my library look like then?” without changing the current library. The view reconstructs catalog metadata and history only; it does not restore media binaries, emulator installations, launch files, or save files. Price-paid and currency changes are not journaled in 1.17.0, so they do not appear as diffs or revert candidates; use [Library backups](/reference/library-backups/) when a price history matters.
 
 ## Compare two points in time
 

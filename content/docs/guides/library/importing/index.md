@@ -3,7 +3,7 @@ title: Importing
 description: Bring storefronts, executables, ROMs, and arcade sets into one catalog.
 ---
 
-OpenBoxGL imports from installed storefront manifests, local ROM folders, standalone executables, and arcade DAT catalogs. Every importer reports how many games were found and added; entries that already exist are skipped, so re-running an import never creates duplicates. Imported games keep a stable identity (Steam App ID, Heroic App ID, Lutris ID, Gameyfin ID, or path) so later imports merge into the existing entry instead of adding a second copy.
+OpenBoxGL imports from installed storefront manifests, local ROM folders, standalone executables, and arcade DAT catalogs. Every importer reports how many games were found and added; entries that already exist are skipped, so re-running an import never creates duplicates. Imported games keep a stable identity (Steam App ID, Heroic App ID, Lutris ID, Gameyfin ID, GOG/EA/Ubisoft provider ID, or path) so later imports merge into the existing entry instead of adding a second copy.
 
 <Callout type="tip" title="Why re-importing never duplicates">
 
@@ -49,6 +49,15 @@ Click **Import Heroic**. OpenBoxGL reads Epic, GOG, and Amazon manifests from `~
 
 Click **Import Lutris**. OpenBoxGL runs `lutris --list-games --installed --json` (or the Flatpak variant) and imports installed entries. Entries tagged Xbox or Game Pass become source Xbox; Origin or EA App entries become EA; Ubisoft or Uplay entries become Ubisoft. Each entry keeps its Lutris numeric ID and launches through `lutris:rungameid/{lutris_id}`. Cover art is picked up from Lutris coverart folders when present.
 
+## GOG Galaxy, EA app, and Ubisoft Connect (Windows)
+
+On Windows, click **Import GOG**, **Import EA app**, or **Import Ubisoft Connect**. OpenBoxGL reads installed games from each launcher's registry entries and manifests, merges by the stable `gog_id`/`ea_id`/`ubisoft_id`, and never duplicates a game on a second import.
+
+- **GOG** runs the game executable directly, with the executable required to stay inside the install folder. Galaxy overlay and Galaxy cloud saves do not start.
+- **EA** launches through `origin2://game/launch`; **Ubisoft** launches through `uplay://launch/<id>/0`. If the launcher is uninstalled, the game stays in the library but will not launch until the handler returns.
+- A malformed entry or missing install directory is reported in the import's `errors` and skipped. The discovery is read-only and offline.
+- These imports cover **installed games only**. Owned-but-uninstalled catalogs and Xbox PC packages are not imported. In the unreleased 1.18 build each source has an opt-in **Auto-import … on startup** checkbox, off by default; 1.17.0 has no such checkbox.
+
 ## Faugus Launcher
 
 OpenBox integrates with **Faugus Launcher** (`/api/faugus/*`), scanning manifests and prefix directories under `~/.config/faugus-launcher`, `~/.local/share/faugus-launcher`, and `~/Faugus` (plus the matching `XDG_CONFIG_HOME`/`XDG_DATA_HOME` locations). It reads installed Wine/Proton games, detects UMU prefix identifiers, and launches via `umu-run`. Faugus is also available as a source in the Library Setup Center.
@@ -67,7 +76,7 @@ The **Storefronts** dialog configures a Gameyfin server URL, optional username a
 
 ## Storefront Manager
 
-The **Storefronts** dialog also browses owned versus installed catalogs for Steam, Heroic, Lutris, and Gameyfin. Steam's owned list comes from `userdata/*/config/localconfig.vdf`; Heroic's from `store_cache` library JSON. **Import installed** and **Import owned / uninstalled** buttons import either set, and the four **Auto-import on startup** checkboxes make the same imports run every launch (a background worker also re-imports watched folders every 10 seconds, backing off to 5 minutes when the library cannot be read). Per-source import exclusions let you keep specific titles out of future rescans.
+The **Storefronts** dialog also browses owned versus installed catalogs for Steam, Heroic, Lutris, and Gameyfin, plus installed GOG, EA app, and Ubisoft Connect games on Windows. Steam's owned list comes from `userdata/*/config/localconfig.vdf`; Heroic's from `store_cache` library JSON. **Import installed** and **Import owned / uninstalled** buttons import either set. Per-source **Auto-import on startup** checkboxes cover Steam, Heroic, Epic, Lutris, Gameyfin, and the Windows-only GOG, EA app, and Ubisoft Connect (the last three are an unreleased 1.18 addition, off by default), and a background worker also re-imports watched folders every 10 seconds, backing off to 5 minutes when the library cannot be read. The native Windows sources are installed-only and set `include_uninstalled` false. Per-source import exclusions let you keep specific titles out of future rescans.
 
 ## Failure recovery
 

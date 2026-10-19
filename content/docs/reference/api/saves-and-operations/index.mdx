@@ -65,6 +65,28 @@ Returns `{"restored": "<name>"}`.
 
 </ApiEndpoint>
 
+**1.18 unreleased.** This route was added after 1.17.0.
+
+<ApiEndpoint method="POST" path="/api/v2/resume/slot">
+
+Stores the per-game save-state slot used by Quick Resume: `{"id"|"game_id", "slot": "slot-name"}`. A slot is 1–32 letters, digits, `-`, or `_`; an empty string removes the override and restores the default capture slot. The game may be resolved by stable id or index, and the write invalidates the state cache. Returns `{"ok": true, "game_id", "slot"}`; an invalid slot returns `400 RESUME_SLOT_INVALID`.
+
+</ApiEndpoint>
+
+**1.18 unreleased.** The save-manifest and restore-preview routes below were added after 1.17.0.
+
+<ApiEndpoint method="GET" path="/api/saves/manifest">
+
+Inspects one save backup without restoring it: `?id=<index>` or `?game_id=<stable>`, plus `backup=<archive name>`. Returns `{"archive", "game", "files": [{"archive", "path", "size"}], "manifest": {...}}`. The archive is resolved strictly inside the game's backup directory, and an unsafe or missing archive returns `400`. When `save_management_enabled` is false the route returns the disabled response and writes nothing.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/saves/restore/preview">
+
+Describes what restoring one save backup would change, without writing: `{"id"|"game_id", "backup": "<name>", "selected": ["optional/archive/path", ...]}`. Returns `{"archive", "game", "add", "overwrite", "remove", "missing", "conflict", "unchanged", "counts", "truncated"}`. `add` files are absent on disk, `overwrite` files exist with a different SHA-256, `remove` is always empty because a save restore never deletes local files, and `missing` lists manifest entries the archive no longer contains. Each bucket is capped and `counts` carries the true totals. A selection must be a non-empty subset of the archive, and an empty or mismatched selection returns `400`.
+
+</ApiEndpoint>
+
 <ApiEndpoint method="POST" path="/api/saves/add">
 
 
@@ -174,6 +196,14 @@ These actions affect local files and restore is destructive: run backups before 
 
 </ApiEndpoint>
 
+**1.18 unreleased.** This route was added after 1.17.0.
+
+<ApiEndpoint method="GET" path="/api/v2/highscores/table">
+
+Returns the parsed MAME high-score table for a game: `?id=<index>` or `?game_id=<stable>`. The ROM name comes from `rom_name` or the game path stem, and the matching `<rom>.hi` file is resolved inside MAME's `hi` directory with containment enforced. Returns `{"source", "path", "name", "size", "label", "rom_name", "parsed", "scores", "message"}`. Parsing needs the optional `hi2txt` tool (10-second timeout); without it, or when no file matches, `parsed` is `false`, `scores` is empty, and `message` explains why. A missing game returns `404`.
+
+</ApiEndpoint>
+
 <ApiEndpoint method="POST" path="/api/highscores/export">
 
 
@@ -185,6 +215,44 @@ Exports matching `.hi` files plus a `highscores.json` manifest (format 1, `expor
 
 
 `{"id"|"game_id", "path": "/dir"}` restores `.hi` files from a folder (or a `highscores.json` bundle) into the MAME hi directory, prefixing filenames with the ROM name when needed, mode `0o600`. Returns `{"restored": [...]}`; no usable files raise `400`.
+
+</ApiEndpoint>
+
+## Media queue and cache (1.18 unreleased)
+
+<ApiEndpoint method="GET" path="/api/media/queue">
+
+Returns the durable media download queue snapshot: `{"items": [...], "queue": [...], "running", "paused", "completed", "failed", "counts": {"total", "queued", "failed", "completed"}}`. `items` and `queue` carry the same normalized entries. The snapshot is read from `media-queue.json` and merged with the worker's in-process counters, so a restarted server still reports queued work.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/media/queue/pause">
+
+Requests a cooperative pause of the media worker and returns the current worker state (`running`, `paused`, `cancelled`, `completed`, `failed`). The in-flight download is allowed to finish; queued items stay queued.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/media/queue/resume">
+
+Clears the pause and cancel flags and starts the worker if it is not alive. Returns the current worker state. Resuming an already-running worker is harmless.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/media/queue/cancel">
+
+Requests cancellation of the media worker and clears the pause flag. Returns the current worker state; queued items remain in the queue and can be resumed later.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/media/queue/retry">
+
+Requeues one failed download: `{"id": "<queue item id>"}`. The item's attempts and error are cleared, and the worker starts if it is idle. Returns `{"ok": true, "id"}`; a missing id or an unknown item raises `400`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/media/cache/cleanup">
+
+Deletes generated media-cache files older than `days`: `{"days": 30}` (default 30, clamped to 1–3650). Only regular files under `<data>/cache/media` are touched; user media and symlinks are never removed. Returns `{"root", "deleted", "bytes", "skipped"}`.
 
 </ApiEndpoint>
 
@@ -247,6 +315,20 @@ Write credentials into emulator configs (RetroArch `cheevos_*`, Dolphin, PCSX2) 
 
 
 `?name=<badge>&locked=0|1` serves a badge PNG, downloading it on demand from `media.retroachievements.org`. Unknown badge: `404`.
+
+</ApiEndpoint>
+
+**1.18 unreleased.** The achievement refresh and override routes below were added after 1.17.0.
+
+<ApiEndpoint method="POST" path="/api/v2/achievements/refresh">
+
+Refreshes one non-RetroAchievements achievement source for a game: `{"game_id": "<stable>", "source": "steam"}` or `"source": "plugin:<plugin-id>:<source>"`. RetroAchievements is rejected here because ROM matching uses `POST /api/ra/game`; Steam requires `steam_app_id` and saved Steam credentials. Returns `{"ok": true, "game_id", "source"}` and invalidates the state cache. A plugin source refreshes that plugin's cached statistics.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/achievements/override">
+
+Writes or clears a manual achievement override: `{"game_id", "source", "earned", "total", "mastered", "clear"}`. `source` is `retroachievements`, `steam`, `gog`, or `plugin:<id>`. Totals must satisfy `0 <= earned <= total <= 10000`; `mastered` defaults to `earned == total` when total is greater than zero. `clear: true` removes that source's override and returns `{"ok": true, "cleared": true}`. A successful write returns the stored `{"source", "earned", "total", "mastered", "manual"}` shape.
 
 </ApiEndpoint>
 

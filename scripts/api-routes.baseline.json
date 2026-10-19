@@ -1,6 +1,6 @@
 {
  "_comment": "Authoritative OpenBoxGL HTTP route table, derived from @route decorators. Regenerate with: npm run routes:sync (requires OPENBOX_APP_DIR).",
- "count": 326,
+ "count": 381,
  "routes": [
   {
    "method": "GET",
@@ -13,6 +13,10 @@
   {
    "method": "GET",
    "path": "/api/backups"
+  },
+  {
+   "method": "GET",
+   "path": "/api/bigbox/startup-video"
   },
   {
    "method": "GET",
@@ -140,6 +144,10 @@
   },
   {
    "method": "GET",
+   "path": "/api/native/battery"
+  },
+  {
+   "method": "GET",
    "path": "/api/native/capabilities"
   },
   {
@@ -161,6 +169,14 @@
   {
    "method": "GET",
    "path": "/api/platform/documents"
+  },
+  {
+   "method": "GET",
+   "path": "/api/platform/video"
+  },
+  {
+   "method": "GET",
+   "path": "/api/platform/videos"
   },
   {
    "method": "GET",
@@ -224,6 +240,10 @@
   },
   {
    "method": "GET",
+   "path": "/api/saves/manifest"
+  },
+  {
+   "method": "GET",
    "path": "/api/saves/scan"
   },
   {
@@ -237,6 +257,14 @@
   {
    "method": "GET",
    "path": "/api/tags"
+  },
+  {
+   "method": "GET",
+   "path": "/api/theme-asset"
+  },
+  {
+   "method": "GET",
+   "path": "/api/theme-sounds"
   },
   {
    "method": "GET",
@@ -284,6 +312,14 @@
   },
   {
    "method": "GET",
+   "path": "/api/v2/emulators/settings"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/highscores/table"
+  },
+  {
+   "method": "GET",
    "path": "/api/v2/history/timeline"
   },
   {
@@ -321,6 +357,14 @@
   {
    "method": "GET",
    "path": "/api/v2/insights/wrapped"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/integration-tokens"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/integrations/steam"
   },
   {
    "method": "GET",
@@ -428,7 +472,19 @@
   },
   {
    "method": "GET",
+   "path": "/api/v2/netplay/lobby"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/party/decks"
+  },
+  {
+   "method": "GET",
    "path": "/api/v2/party/queue"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/plugin-stats"
   },
   {
    "method": "GET",
@@ -437,6 +493,14 @@
   {
    "method": "GET",
    "path": "/api/v2/plugins/commands"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/plugins/credentials"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/plugins/data"
   },
   {
    "method": "GET",
@@ -493,6 +557,14 @@
   {
    "method": "GET",
    "path": "/api/v2/steamgrid/status"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/storefront/status"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/storefronts"
   },
   {
    "method": "GET",
@@ -601,6 +673,10 @@
   {
    "method": "POST",
    "path": "/api/game/delete"
+  },
+  {
+   "method": "POST",
+   "path": "/api/game/store-action"
   },
   {
    "method": "POST",
@@ -716,7 +792,27 @@
   },
   {
    "method": "POST",
+   "path": "/api/media/cache/cleanup"
+  },
+  {
+   "method": "POST",
    "path": "/api/media/cleanup"
+  },
+  {
+   "method": "POST",
+   "path": "/api/media/queue/cancel"
+  },
+  {
+   "method": "POST",
+   "path": "/api/media/queue/pause"
+  },
+  {
+   "method": "POST",
+   "path": "/api/media/queue/resume"
+  },
+  {
+   "method": "POST",
+   "path": "/api/media/queue/retry"
   },
   {
    "method": "POST",
@@ -777,6 +873,10 @@
   {
    "method": "POST",
    "path": "/api/platform/documents"
+  },
+  {
+   "method": "POST",
+   "path": "/api/platform/videos"
   },
   {
    "method": "POST",
@@ -848,6 +948,10 @@
   },
   {
    "method": "POST",
+   "path": "/api/saves/restore/preview"
+  },
+  {
+   "method": "POST",
    "path": "/api/saves/scan/apply"
   },
   {
@@ -900,11 +1004,23 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/achievements/override"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/achievements/refresh"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/arcade/kiosk/pin"
   },
   {
    "method": "POST",
    "path": "/api/v2/arcade/kiosk/verify"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/bulk/find-replace"
   },
   {
    "method": "POST",
@@ -925,6 +1041,10 @@
   {
    "method": "POST",
    "path": "/api/v2/emulators/defs/update"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/emulators/settings"
   },
   {
    "method": "POST",
@@ -960,6 +1080,10 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/import/ea"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/import/esde/apply"
   },
   {
@@ -968,11 +1092,31 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/import/gog"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/import/launchbox/apply"
   },
   {
    "method": "POST",
    "path": "/api/v2/import/launchbox/preview"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/msu1"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/pico8"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/ubisoft"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/whdload"
   },
   {
    "method": "POST",
@@ -985,6 +1129,26 @@
   {
    "method": "POST",
    "path": "/api/v2/insights/trophies/evaluate"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/integration-tokens"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/integration-tokens/remove"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/integrations/steam"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/integrations/steam/refresh"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/integrations/steam/test"
   },
   {
    "method": "POST",
@@ -1160,6 +1324,10 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/metadata/candidates/apply"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/metadata/matches/apply"
   },
   {
@@ -1192,6 +1360,14 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/party/decks"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/party/decks/delete"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/party/next"
   },
   {
@@ -1200,11 +1376,35 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/platform/delete"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/platform/rename"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/plugin-stats/refresh"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/plugins/command"
   },
   {
    "method": "POST",
+   "path": "/api/v2/plugins/credentials"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/plugins/data"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/plugins/permissions"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/plugins/repair"
   },
   {
    "method": "POST",
@@ -1225,6 +1425,10 @@
   {
    "method": "POST",
    "path": "/api/v2/resume/discard"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/resume/slot"
   },
   {
    "method": "POST",
@@ -1257,6 +1461,10 @@
   {
    "method": "POST",
    "path": "/api/v2/setup/preview/revalidate"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/steam/action"
   },
   {
    "method": "POST",
@@ -1297,6 +1505,18 @@
   {
    "method": "POST",
    "path": "/api/v2/steamgrid/test"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/storefront/scan"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/storefronts/plugin/catalog"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/storefronts/plugin/import"
   },
   {
    "method": "POST",

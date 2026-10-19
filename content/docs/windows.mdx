@@ -30,10 +30,10 @@ Download the installer and the release archive from the same tag, then run the i
 .\install.ps1
 ```
 
-To pin a specific version instead, set it explicitly. The current release is **1.16.1**:
+To pin a specific version instead, set it explicitly. The current release is **1.17.0**:
 
 ```powershell
-$Version = '1.16.1'
+$Version = '1.17.0'
 Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
 .\install.ps1 -Tag "v$Version"
@@ -189,6 +189,12 @@ Manual update: download the newer `OpenBox-x86_64-windows.zip` and run that rele
 Emulator support is not Linux-specific. Every bundled emulator definition carries its Windows executable name, so adapter detection, resume-state capture, and Launch Doctor work with Windows builds of Dolphin, RetroArch, PCSX2, RPCS3, Cemu, melonDS, PPSSPP, Vita3K, xemu, Xenia, and the others the matrix lists. See [Emulators and launching](/guides/emulators-and-launching/) and the [Hardware matrix](/reference/hardware-matrix/).
 
 Windows games launch through the game's own executable or through an emulator, exactly as on Linux. Controller support, save-state capture, screenshots, and portable library paths behave identically.
+
+## Storefronts on Windows
+
+Since 1.17.0, the **Storefronts** dialog imports installed GOG Galaxy, EA app, and Ubisoft Connect games natively, alongside the existing Steam and Epic imports. **Import GOG**, **Import EA app**, and **Import Ubisoft Connect** read each launcher's registry entries and manifests offline, merge by the launcher's provider id, and never duplicate a game on a second import.
+
+GOG runs the executable directly (with the executable required to stay inside the install folder), so the Galaxy overlay and Galaxy cloud saves do not start. EA and Ubisoft launch through their registered `origin2://` and `uplay://` handlers; if the launcher is uninstalled, the game stays in the library but will not launch until the handler returns. These imports cover installed games only: owned-but-uninstalled catalogs and Xbox PC package scanning are not included. In the unreleased 1.18 build each source has an opt-in **Auto-import … on startup** checkbox, off by default; 1.17.0 has no such checkbox. See [Import sources](/integrations/import-sources/) and [Storefront Manager](/guides/storefront-manager/).
 
 ## Troubleshooting
 

@@ -11,14 +11,14 @@ Since 1.13.0 OpenBoxGL runs on **Linux and Windows x86_64**, so the comparison b
 
 ## At a glance
 
-| Topic | OpenBox 1.16.1 | LaunchBox |
+| Topic | OpenBox 1.17.0 | LaunchBox |
 | --- | --- | --- |
 | License | AGPL-3.0, full source on GitHub | Proprietary |
 | Cost | Free, no subscription | Premium paywall for advanced workflows |
 | Platform | Linux x86_64 and aarch64; Windows x86_64 | Windows first, no Linux build |
 | Install | AppImage, Flatpak, or source on Linux; signed portable package via `install.ps1` on Windows | Windows installer only |
 | Data | Local JSON at `~/.local/share/openbox-game-launcher/library.json` on Linux, `%LOCALAPPDATA%\openbox-game-launcher\library.json` on Windows; no account | Cloud library for Premium |
-| Game sources | Steam, Heroic, Lutris, Faugus, RetroArch, ROMs, Arcade, ScummVM, RPCS3, Vita3K, Eden | Windows-first imports |
+| Game sources | Steam, Heroic, Lutris, Faugus, RetroArch, ROMs, Arcade, ScummVM, RPCS3, Vita3K, Eden; native installed GOG, EA app, and Ubisoft Connect on Windows | Windows-first imports |
 | Native window | WebKitGTK on Linux; WebView2 on Windows, shipped compiled in the portable release (source checkouts build it with `scripts/build_native_host_windows.ps1`) | Windows-only desktop app |
 | Automation | Local REST API on loopback with per-launch token auth | Limited external automation surface |
 | Handheld | Big Box Stage, Hybrid, CoverFlow with controller mapping, AppImage on immutable systems, `--game-mode` guest under gamescope — Linux only | Big Box exists, handheld flows are secondary |
@@ -39,14 +39,14 @@ Every LaunchBox Premium equivalent ships without a subscription in OpenBoxGL: cu
 | Windows shell replacement | Not applicable: OpenBox is a launcher, not a shell replacement on either platform |
 | LEDBlinky and cabinet LED control | Use external arcade I/O tools instead of a bundled integration |
 | Teknoparrot arcade launcher | Use Lutris and Wine launch profiles on Linux, or a per-game launch profile pointing at the title's own launcher |
-| Native Xbox PC package scanning | Use Heroic and Lutris on Linux, or import the installed executable as a standalone game |
+| Native Xbox PC package scanning | Installed GOG, EA app, and Ubisoft Connect games import natively on Windows; Xbox PC packages still have no equivalent. On Linux use Heroic and Lutris, or import the installed executable as a standalone game. |
 | Bundled proprietary media packs | Replaced by free bundled media packs in OpenBox |
 | LaunchBox Premium cloud library | Replaced by OpenBox's local mounted-folder statistics sync and opt-in catalog sync plus local backups (no LaunchBox account involved) |
 | LaunchBox online theme storefront | Replaced by local CSS theme import and open folder workflow |
 
 ## How to verify
 
-- Check the current release tag at [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest), currently v1.16.1.
+- Check the current release tag at [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest), currently v1.17.0.
 - For Windows, the same release publishes `OpenBox-x86_64-windows.zip` with its `.sha256` and `.sig`, plus `install.sh` and `install.ps1` as standalone assets; the installer verifies the key, checksum, and signature before extracting. The uninstaller is not a standalone asset — it ships **inside** the zip and the installed tree, where the installer also puts it, so it is run from the install at `scripts\uninstall.ps1` (for a default install, `%LOCALAPPDATA%\OpenBox\share\openbox\scripts\uninstall.ps1`). It removes exactly what the installer created while leaving your library in place. The full path is in [Windows](/windows/).
 - Open PARITY.md in the application repository and confirm the acceptance check for any row before relying on it.
 - For pricing, LaunchBox Premium pricing is published by Unbroken Software. OpenBox cost is zero and source is AGPL-3.0 at [LICENSE](https://github.com/vindeckyy/OpenBoxGL/blob/master/LICENSE).

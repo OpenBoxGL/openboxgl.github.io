@@ -35,6 +35,8 @@ The Tags dialog lists tag counts (visible, non-hidden games only, sorted by coun
 
 The Notification Center stores up to **200 entries**, newest first. Titles are capped at 200 characters, bodies at 2000. Notifications are deduplicated within 10 minutes when the kind and title match, or immediately when an explicit `dedupe_key` matches (webhook delivery failures reuse a per-event key). **Mark all read** and **Clear** act on the whole list or selected IDs. Webhook delivery failures surface here as error-level notifications so you can notice them without polling.
 
+Since 1.17.0, notices raised by the server — cloud sync results, launch-check changes, rejected emulator-definition packs, and webhook failures — also carry `title_key`, `body_key`, and their parameters. The Notification Center resolves those keys in the active locale (English, Spanish, German, French, or Portuguese); notifications stored by older versions keep their English title and body and still render normally.
+
 ## Webhooks
 
 Webhooks deliver signed, best-effort JSON events to your own endpoints. Configure up to **32 webhooks**, each with a URL, a secret (at least 8 characters), and a comma-separated event list. Available events:

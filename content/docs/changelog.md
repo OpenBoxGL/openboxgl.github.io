@@ -4,6 +4,28 @@ description: Release notes for OpenBox, from the latest release back to the firs
 sidebar: false
 ---
 
+## 1.17.0 (2026-10-18) — More of your library, and what it cost
+
+This release brings GOG Galaxy, the EA app, and Ubisoft Connect into a Windows library, saves Game Night setups as reusable decks, records what each game cost, and translates server notices. No v1 route is removed or changed. Six routes are added: `GET`/`POST /api/v2/party/decks`, `POST /api/v2/party/decks/delete`, and `POST /api/v2/import/gog`, `POST /api/v2/import/ea`, and `POST /api/v2/import/ubisoft`.
+
+- **Native Windows storefront imports.** Games installed by GOG Galaxy, the EA app, and Ubisoft Connect are found from their registry entries and launcher manifests, then merged by a stable provider id. GOG launch tasks stay inside the install directory and run the executable directly; EA and Ubisoft launch through their registered `origin2://` and `uplay://` handlers. Every id is digit-validated, every path is checked, and a malformed entry is reported and skipped rather than crashing the import. 1.17.0 ships the import as a manual action, and owned-but-uninstalled catalogs are not imported. The unreleased 1.18 build adds opt-in Auto-import checkboxes for these three sources. See [API 1.17 additions](/reference/api/one-seventeen/) and [Import sources](/integrations/import-sources/).
+- **Game Night decks.** A deck stores players, a minute budget, and a filter query, so a couch setup can be saved and reused. Saving is bounded to 20 decks, and the deck dialog can save, load, and delete them. Building a queue returns an eight-character seed, and the same seed and library reproduce the same draw on another device. See [Big Box and handhelds](/guides/big-box-and-handhelds/).
+- **What the library cost.** A game can record a price paid and its currency. Play Insights shows totals grouped by currency plus cost per hour for games with at least a minute played, and the detail pane shows the price and rate. Bulk edit can set or clear a price. No exchange-rate source is involved and no conversion is performed, so currencies are never silently added together. The new `currency` setting chooses the default for new prices.
+- **Translated server notices.** Cloud sync, launch-check changes, rejected definition packs, and webhook failures now carry `title_key`/`body_key` plus parameters, and the notification center translates them in all five locales. Older stored notifications keep their English text and still render.
+- **A currency setting.** Settings → Library selects the default currency for new prices. It is a three-letter code and does not convert existing values.
+- **Fixed: ScreenScraper lookups failed with HTTP 400 (#52).** Requests used parameter names the API does not read: the login went out as `user=`, the ROM hashes as `rommd5`/`romsha1`/`romcrc`, and archives as `romtype=zip`, a value the API does not document. Requests now send `ssid`/`sspassword` and `softname`, the hashes as `md5`/`sha1`/`crc` with `romtaille`, and `romtype` as `rom` or `iso`. The Test button called `userInfos.php`, which does not exist; it now calls `ssuserInfos.php`. Errors carry the server's own reason, and refusals the server sends as plain text are no longer retried. A ScreenScraper developer ID and password are now required (`SCREENSCRAPER_DEV_ID` and `SCREENSCRAPER_DEV_PASSWORD`), because the API refuses lookups without them; they were previously documented as optional. See [Configuration](/reference/configuration/).
+
+### Known limits in 1.17.0
+
+- Xbox PC package scanning and owned-but-uninstalled GOG/EA/Ubisoft catalogs are not imported. Native storefront imports are manual in 1.17.0; the unreleased 1.18 build adds opt-in startup auto-import for them.
+- Provider ids, price paid, and decks stay local. They do not cross the library-sync protocol, and Time Machine does not journal price changes; adding them would make a mixed-version peer reject the whole event.
+- Cost totals are grouped by currency and are not converted. A rate is shown only for a priced game with at least one minute of playtime.
+- GOG games launch their executable directly, so Galaxy overlay and cloud-save features are not started. EA and Ubisoft games launch through their launcher URI; uninstalling the launcher breaks those launches until it returns.
+- Notification titles and bodies are translated. Other server responses and some dialog labels remain English.
+- Windows ARM64 and macOS remain out of scope. The Flatpak RetroArch check still covers one Flathub build and one core, as recorded in the 1.16.1 limits.
+
+[Full OpenBox 1.17.0 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.17.0) · [Compare v1.16.1...v1.17.0](https://github.com/vindeckyy/OpenBoxGL/compare/v1.16.1...v1.17.0) · [1.17 API reference](/reference/api/one-seventeen/)
+
 ## 1.16.1 (2026-10-08) — Launch readiness everywhere
 
 A fix release on the [1.16.0](#1160-2026-10-05--make-it-true) line. It finishes launch readiness, adds launch definitions for 18 more systems, and keeps the library live and responsive. No route is removed or changed. Five routes are added: `GET /api/v2/launch/audit/status`, `POST /api/v2/launch/grant`, `POST /api/v2/launch/grant/undo`, `GET /api/v2/launch/cores`, and `POST /api/v2/launch/core`. See [API 1.16 additions](/reference/api/one-sixteen/).

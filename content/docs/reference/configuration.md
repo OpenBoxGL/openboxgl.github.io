@@ -85,8 +85,8 @@ Python is located as `python.exe` or `py.exe` on `PATH`, or through `OPENBOX_PYT
 | `STEAMGRIDDB_API_KEY` | SteamGridDB artwork provider: search, apply, and bulk matching | `OPENBOX_STEAMGRIDDB_API_KEY` |
 | `SCREENSCRAPER_USER` | ScreenScraper per-ROM-hash scraping (required for that provider) | `OPENBOX_SCREENSCRAPER_USER` |
 | `SCREENSCRAPER_PASSWORD` | ScreenScraper per-ROM-hash scraping (required for that provider) | `OPENBOX_SCREENSCRAPER_PASSWORD` |
-| `SCREENSCRAPER_DEV_ID` | ScreenScraper developer credentials (optional) | `OPENBOX_SCREENSCRAPER_DEV_ID` |
-| `SCREENSCRAPER_DEV_PASSWORD` | ScreenScraper developer credentials (optional) | `OPENBOX_SCREENSCRAPER_DEV_PASSWORD` |
+| `SCREENSCRAPER_DEV_ID` | ScreenScraper developer credentials (required for that provider; the API refuses lookups without them) | `OPENBOX_SCREENSCRAPER_DEV_ID` |
+| `SCREENSCRAPER_DEV_PASSWORD` | ScreenScraper developer credentials (required for that provider) | `OPENBOX_SCREENSCRAPER_DEV_PASSWORD` |
 
 Each credential lookup checks the aliases in order using `env_value()` from `env_config.py`, it iterates through the listed names for a variable and uses the first non-empty value found. If an empty string is returned for any required variable, the route returns a specific `400` error naming exactly which variable is missing. For example, IGDB requires both `IGDB_CLIENT_ID` **and** `IGDB_CLIENT_SECRET`; without either the IGDB routes return `400 {"error":"Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET in ~/.env to use IGDB."}`. Without RetroAchievements credentials, the `/api/ra/*` routes return `400 {"error":"Configure RetroAchievements first."}`.
 
@@ -100,7 +100,7 @@ Credentials supplied through the Settings dialog are persisted in the data direc
 
 ## Persisted settings
 
-The Settings dialog saves into `library.json` under `settings`. The save handler (`SettingsHandlers._save_settings_locked` in `handlers/settings.py:646`) validates each field before committing; an invalid value aborts the whole save with a `400` error. Keys must exist in the `settings_schema.py` registry: unknown keys are dropped with a diagnostic log warning rather than persisted. `GET /api/settings` returns the public projection of the settings, which is a curated subset of the registry (a few internal and separately-owned keys are not part of it). Notable validated limits:
+The Settings dialog saves into `library.json` under `settings`. The save handler (`SettingsHandlers._save_settings_locked` in `handlers/settings.py`) validates each field before committing; an invalid value aborts the whole save with a `400` error. Keys must exist in the `settings_schema.py` registry: unknown keys are dropped with a diagnostic log warning rather than persisted. `GET /api/settings` returns the public projection of the settings, which is a curated subset of the registry (a few internal and separately-owned keys are not part of it). Notable validated limits:
 
 | Setting | Default | Validation |
 | --- | --- | --- |
@@ -153,10 +153,10 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `memories_import_roots` | `[]` | At most 32 absolute, existing directories allowed as Memories import sources (v1.11.0+) |
 | `steamgrid_enabled` | `true` | Boolean; enables the SteamGridDB artwork provider (still requires `STEAMGRIDDB_API_KEY`) (v1.11.0+) |
 | `scrape_after_import` | `true` | Master toggle for the automatic post-import scrape. Owned by the metadata routes rather than the Settings dialog: read/written through `GET`/`POST /api/v2/metadata/scrape-settings` |
-| `scrape_screenscraper_enabled` | `false` | ScreenScraper opt-in for the post-import scrape. Requires `SCREENSCRAPER_USER`/`SCREENSCRAPER_PASSWORD` |
+| `scrape_screenscraper_enabled` | `false` | ScreenScraper opt-in for the post-import scrape. Requires all four ScreenScraper values: user, password, developer ID, and developer password |
 | `scrape_igdb_enabled` | `false` | IGDB opt-in for the post-import scrape. Requires `IGDB_CLIENT_ID`/`IGDB_CLIENT_SECRET` |
 | `scrape_steamgrid_enabled` | `false` | SteamGridDB opt-in for the post-import scrape. Requires `STEAMGRIDDB_API_KEY` |
-| `steamgrid_key_configured` | `(derived)` | Read-only projection in `public_settings`: true when a SteamGridDB API key is configured (`pkg/state/cache.py:488`); not writable via Settings |
+| `steamgrid_key_configured` | `(derived)` | Read-only projection in `public_settings` (`pkg/state/cache.py`): true when a SteamGridDB API key is configured; not writable via Settings |
 | `obs_replay_enabled` | `false` | Boolean; enables Record That clip capture via the OBS replay buffer (v1.11.0+) |
 | `obs_websocket_url` | `""` | OBS WebSocket endpoint for replay-buffer capture (v1.11.0+) |
 | `obs_websocket_timeout` | 5.0 | 0.1 to 30 seconds for OBS WebSocket calls (v1.11.0+) |
@@ -214,6 +214,55 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `last_update_check` | `""` | Internal, auto-managed timestamp; do not edit |
 | `gameyfin_password_set` | `false` | Internal, boolean indicator of whether password is set |
 | `gamescope_guest` | `false` | Internal, auto-detected guest mode under Gamescope |
+
+### Display, input, and integration settings
+
+**Unreleased 1.18 note:** every key in this table except `currency` was added after the 1.17.0 release and exists only in the unreleased 1.18 build. `currency` shipped in 1.17.0. The reference documents the current source tree, so these keys are listed with their validation, but they are not part of the 1.17.0 release.
+
+The Settings dialog also persists the following keys. They use the same validation path as the table above; a value that fails validation aborts the whole save.
+
+| Setting | Default | Validation |
+| --- | --- | --- |
+| `auto_import_excluded_platforms` | `[]` | Up to 100 platform names, each at most 80 characters; matching is case-insensitive. Storefront and watched-folder auto-import skips these platforms. |
+| `battery_indicator` | `true` | Boolean; shows the battery percentage in the Big Box status area on handheld hardware. |
+| `bigbox_back_hold_seconds` | 0.8 | 0 to 2 seconds; how long Back must be held in Big Box before it acts. |
+| `bigbox_hidden_categories` | `[]` | Up to 500 category names, each at most 200 characters; hidden from Big Box category browsing. |
+| `bigbox_hidden_platforms` | `[]` | Up to 500 platform names, each at most 200 characters; hidden from Big Box platform browsing. |
+| `bigbox_hidden_playlists` | `[]` | Up to 500 playlist names, each at most 200 characters; hidden from Big Box playlist browsing. |
+| `bigbox_sounds_enabled` | `true` | Boolean; plays Big Box navigation and confirmation sounds. |
+| `bigbox_startup_video_loop` | `false` | Boolean; loops the startup video instead of playing it once. |
+| `bigbox_video_backdrop` | `false` | Boolean; uses the selected game video as a Big Box backdrop. |
+| `bigbox_video_controls` | `true` | Boolean; shows playback controls over Big Box video. |
+| `bigbox_video_volume` | 0.8 | 0.0 to 1.0. |
+| `bigbox_wheel_speed` | 1.0 | 0.25 to 3.0; multiplies the cover-wheel scroll rate. |
+| `controller_types` | Built-in 10-entry list | At most 40 objects with unique lowercase `id` (32 characters), `name` (60 characters), and a known `kind`: gamepad, arcade_stick, racing_wheel, light_gun, paddle, trackball, spinner, keyboard, mouse, or vr. An empty list restores the built-in set. |
+| `cover_model` | `"box"` | One of `box`, `jewel`, `long_jewel`, `double_jewel`, `cassette`, or `none`. |
+| `cover_model_by_platform` | `{}` | At most 200 platform-to-model entries; each value must be one of the `cover_model` choices. |
+| `currency` | `"USD"` | Three-letter uppercase currency code (ISO-4217 shape). Used as the default for new price-paid values; no exchange-rate conversion is performed. |
+| `emulator_platform_settings` | `{}` | At most 500 platform entries. Each entry accepts `adapter_id` (120 characters), a validated `retroarch_core` name, and up to 2,000 characters of `extra_args`. |
+| `emulator_update_checks` | `[]` | Up to 100 emulator app ids whose update check is skipped. |
+| `font_family` | `"system"` | One of `system`, `serif`, `mono`, or `humanist`. |
+| `integration_tokens` | `{}` | Provider-to-token object for `igdb`, `screenscraper`, `steamgriddb`, `gameyfin`, and `retroachievements`; each token is at most 4,096 characters and is masked in the public settings projection. |
+| `keyboard_map` | `{}` | Action-to-key object. Actions are `play`, `back`, `favorite`, `random`, `page_left`, `page_right`, `pause`, `menu`, `search`, `settings`, `reader_prev`, and `reader_next`; key specs are validated and no two actions may share a binding. |
+| `last_health_rescan` | `""` | Internal ISO-8601 timestamp of the last scheduled library health scan; do not edit. |
+| `library_journal_enabled` | `true` | Read-only in 1.17.0. The journal records local catalog events for Time Machine even when cloud sync is off; an explicit `false` already present in `library.json` disables it. The current Settings save path does not write this key. |
+| `media_download_limit_per_group` | 0 (unlimited) | 0 to 100; caps queued media downloads per platform-and-kind group. `media_download_limit` still caps the whole queue. |
+| `metadata_provider_priority` | `[]` (built-in order) | Up to 20 known provider ids or `plugin:<id>` values. Empty uses launchbox, screenscraper, igdb, steamgriddb, then enabled plugin providers; unknown ids are dropped. |
+| `model_back_by_platform` | `{}` | At most 200 platform-to-style entries; each value is `straight` or `angled`. |
+| `model_case_by_platform` | `{}` | At most 200 platform-to-case entries; each value is `clear` or `solid`. |
+| `model_rotation_lock` | `"free"` | One of `free`, `horizontal`, or `vertical`. |
+| `model_rotation_lock_by_platform` | `{}` | At most 200 platform-to-lock entries; each value is `free`, `horizontal`, or `vertical`. |
+| `mouse_wheel_nav` | `true` | Boolean; allows the mouse wheel to move through the library and Big Box. |
+| `platform_videos` | `{}` | At most 200 platform-to-path entries; each path must be absolute and point to an existing file. The platform-video route additionally accepts only `.mp4`, `.webm`, `.ogv`, `.ogg`, or `.mkv`. |
+| `plugin_metadata_priority` | `false` | Boolean; places enabled plugin metadata providers ahead of built-in providers in the effective priority order. |
+| `pointer_nav_enabled` | `true` | Boolean; enables pointer and touch navigation. |
+| `progress_values` | Unplayed, Playing, Paused, Beaten, Completed, Mastered, Abandoned | A list of known progress labels, de-duplicated in the order given. It controls the progress choices and which automatic progress changes are allowed. |
+| `ra_hardcore` | `false` | Boolean; requests hardcore mode when RetroAchievements credentials are injected. |
+| `reader_spread` | `"single"` | One of `single` or `spread`; the document reader page layout. |
+| `reader_theme` | `"light"` | One of `light` or `dark`; the document reader colour scheme. |
+| `retroachievements_enabled` | `false` (effective) | Read-only effective flag read by Play Insights; when true and a RetroAchievements cache exists, mastery totals include it. The current Settings save path does not write this key. |
+| `save_management_enabled` | `true` | Boolean; when false, save backup, restore, and manifest routes refuse writes and report the feature as disabled. |
+| `spinner_sensitivity` | 6 | 1 to 20; spinner input sensitivity in Big Box. |
 
 Two naming details worth knowing:
 

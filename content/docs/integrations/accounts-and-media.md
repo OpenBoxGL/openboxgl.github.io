@@ -33,6 +33,17 @@ RetroAchievements, IGDB, EmuMovies, and Bezel Project integrations are optional.
 - Credentials are stored in `emumovies.json` (mode `0o600`) and sent as HTTP Basic auth to `api.emumovies.com`. Downloads enforce image content types and a 32 MiB cap.
 - A licensed EmuMovies account is required; the service rejects unlicensed credentials.
 
+## ScreenScraper
+
+- **What it does**: optional per-ROM-hash metadata and media provider for emulated games. It matches by content hash rather than filename, so generic ROM names still resolve to the right game.
+- **Setup**: environment variables in `~/.env`:
+ - `SCREENSCRAPER_USER` (alias `OPENBOX_SCREENSCRAPER_USER`)
+ - `SCREENSCRAPER_PASSWORD` (alias `OPENBOX_SCREENSCRAPER_PASSWORD`)
+ - `SCREENSCRAPER_DEV_ID` (alias `OPENBOX_SCREENSCRAPER_DEV_ID`)
+ - `SCREENSCRAPER_DEV_PASSWORD` (alias `OPENBOX_SCREENSCRAPER_DEV_PASSWORD`)
+- All four values are required. The provider returns `400` and names the missing values when any is absent; the ScreenScraper API refuses lookups without the developer pair, so there is no anonymous path.
+- Requests send `ssid`/`sspassword` and `softname`, the ROM hashes as `md5`/`sha1`/`crc` with `romtaille`, and `romtype` as `rom` or `iso`. They are throttled to 1 request/second with 429/5xx backoff, and results are cached for 30 days under `cache/screenscraper/`. Media URLs are forced to HTTPS and chosen by your region priority.
+
 ## Bezel Project
 
 - **What it does**: download and install community bezel sets per platform for RetroArch-style presentation.

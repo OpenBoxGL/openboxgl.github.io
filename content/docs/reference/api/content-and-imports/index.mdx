@@ -154,6 +154,14 @@ Start a background sync of the LaunchBox Games Database (`https://gamesdb.launch
 
 </ApiEndpoint>
 
+**1.18 unreleased.** This route was added after 1.17.0.
+
+<ApiEndpoint method="POST" path="/api/v2/metadata/candidates/apply">
+
+Applies one reviewed metadata candidate to one game: `{"game_id": "<stable>", "candidate": {...}, "overwrite": false}`. `candidate` must be an object; a candidate with `plugin_id` is applied through that plugin's metadata provider, otherwise the built-in candidate shape is used. Only metadata fields are written (name, platform, genre, year, developer, publisher, series, description, ESRB, max players, rating, region, sort title), and with `overwrite: false` an existing non-empty field is kept. A non-object body or candidate returns `400`, and a missing game returns `400`. Returns `{"ok": true, "game_id"}`.
+
+</ApiEndpoint>
+
 <ApiEndpoint method="POST" path="/api/v1/metadata/match">
 
 `POST /api/v1/metadata/match` (aliased at `POST /api/metadata/match`) triggers a background job (`"metadata-match"`) to batch auto-match library titles against the local LaunchBox database for all games currently missing `launchbox_db_id`. Missing database raises `409 Conflict`.
@@ -394,6 +402,20 @@ Saves a scan configuration (`folder`, `emulator_id`, `auto_update`). Returns `{"
 
 </ApiEndpoint>
 
+**1.18 unreleased.** The emulator-settings read and write routes below were added after 1.17.0.
+
+<ApiEndpoint method="GET" path="/api/v2/emulators/settings">
+
+Returns the managed-emulator settings model: each emulator's `emulator_id`, `app_id`, `label`, `managed` flag, option `schema`, effective `global` values, per-platform `platforms` overrides, `skip_update_check`, and detected `version`. Plugin-declared emulator settings are returned in `plugins`. Values are the effective ones, not just stored overrides.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/emulators/settings">
+
+Saves one emulator's settings: `{"emulator_id": "...", "platform": "SNES", "values": {...}}`. Omit `platform` to write the global values; `reset: true` removes the platform override (or every override when `platform` is omitted). `managed: true|false` controls whether OpenBox writes the emulator config, and `skip_update_check` adds or removes the emulator's app id from `emulator_update_checks`. Values are normalised against the emulator's schema before the state transaction, so an invalid option raises `400` and writes nothing. A `plugin_id` payload saves a plugin-declared emulator instead, and the plugin must declare that emulator and scope. Returns the updated effective model.
+
+</ApiEndpoint>
+
 <ApiEndpoint method="GET" path="/api/v2/emulators/registry">
 
 Returns the emulator registry with platform coverage, adapter types, and installed status. Add `?health=1` to include per-adapter health status: `bios_ok` (BIOS file exists and SHA1 matches if expected), `firmware_ok`, and `core_ok`. The health check also reports `BIOS_SHA1_DRIFT` when a BIOS file exists but its hash doesn't match the expected value from the emulator definition. (v1.7.2+ for `?health=1`)
@@ -421,6 +443,59 @@ Installs the newest signed community definition pack. The archive is verified wi
 <ApiEndpoint method="POST" path="/api/v2/emulators/defs/rollback">
 
 Removes exactly what the update channel installed and restores the bundled definition set. Never touches definitions the user created or edited.
+
+</ApiEndpoint>
+
+## Storefront plugins and scan status (1.18 unreleased)
+
+<ApiEndpoint method="GET" path="/api/v2/storefronts">
+
+
+Lists the built-in sources (`steam`, `heroic`, `lutris`, `gameyfin`, `gog`, `ea`, `ubisoft`) with `id`, `name`, `kind: "builtin"`, and `installed: true`, followed by enabled plugin storefronts with `kind: "plugin"` and redacted settings. Returns `{"storefronts": [...]}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/storefront/status">
+
+Returns the last storefront scan status: `{"sources": [...]}`. Each source records its own result, so one provider failure does not erase the previous successful scan.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/storefront/scan">
+
+Starts an asynchronous scan that refreshes installed state without deleting games: `{"sources": ["steam", "gog"], "include_uninstalled": true}`. `sources` is optional (defaults to every built-in and enabled plugin source), limited to 20 known ids; an empty list is rejected. Returns `202 {"job_id", "sources"}`. Poll the job through `GET /api/v2/jobs`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/storefronts/plugin/catalog">
+
+Pages through one plugin storefront's catalog: `{"plugin_id": "<id>", "installed_only": false, "uninstalled_only": false}`. The plugin must declare the `storefront` capability. Returns `{"plugin_id", "entries": [...]}` with at most 2,000 validated entries; malformed entries are skipped and a hook failure raises `400`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/storefronts/plugin/import">
+
+Imports one plugin storefront: `{"plugin_id": "<id>", "installed_only": false, "uninstalled_only": false}`. Games are merged by plugin id and game id, never deleted. Returns `{"added", "found", "imported", "plugin_id"}`.
+
+</ApiEndpoint>
+
+## PICO-8, MSU-1, and WHDLoad imports (1.18 unreleased)
+
+<ApiEndpoint method="POST" path="/api/v2/import/pico8">
+
+`{"folder": "/absolute/path"}` recursively imports PICO-8 `.p8` carts and exported `.p8.png` cartridges as platform `PICO-8`. Returns `{"added", "found", "errors": [...]}`; unreadable paths are reported rather than skipped silently.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/import/msu1">
+
+`{"folder": "/absolute/path"}` imports SNES ROMs that have a sibling `*.msu` audio-pack folder. A folder with no matching `.sfc` or `.smc` ROM is reported in `errors` and skipped. Returns `{"added", "found", "errors": [...]}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/import/whdload">
+
+`{"folder": "/absolute/path"}` recursively imports Amiga WHDLoad installs (`.lha`, `.slave`, `.hdf`) while skipping the WHDLoad system drawer. Returns `{"added", "found", "errors": [...]}`.
 
 </ApiEndpoint>
 

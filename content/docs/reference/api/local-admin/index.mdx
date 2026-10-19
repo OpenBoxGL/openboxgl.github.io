@@ -15,8 +15,8 @@ Check for a new release. Queries the GitHub releases API for `vindeckyy/OpenBoxG
 
 ```json
 {
-  "current": "1.16.1",
-  "latest": "1.16.1",
+  "current": "1.17.0",
+  "latest": "1.17.0",
  "available": false,
  "last_checked": "<timestamp or empty>",
  "notes": "...",
@@ -85,6 +85,38 @@ Write the desktop entry and icon for the running AppImage: `~/.local/share/appli
 
 </ApiEndpoint>
 
+## Native status and display video (1.18 unreleased)
+
+<ApiEndpoint method="GET" path="/api/native/battery">
+
+Reports battery state for the native window: `{"present": bool, "percent": 0-100, "charging": bool}`. On Linux the first `BAT*` device under `/sys/class/power_supply` is read; the response never exposes the device path. Other platforms return `{"present": false, "percent": 0, "charging": false}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/bigbox/startup-video">
+
+Streams the configured `bigbox_startup_video` when it is an existing `.mp4`, `.webm`, `.ogv`, `.ogg`, or `.mkv` file. An empty setting, a missing file, or an unsupported suffix returns `404 {"error": "Startup video not found"}`. The video path itself is not echoed in the response.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/platform/videos">
+
+Returns the configured per-platform video map: `{"videos": {"SNES": "/absolute/path.mp4", ...}}`. A malformed stored value is treated as an empty map.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/platform/video">
+
+Streams one platform video: `?platform=<name>`. The stored path must still be an existing supported video file; a missing platform, path, or file returns `404 {"error": "Platform video not found"}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/platform/videos">
+
+Sets or clears one platform video: `{"platform": "SNES", "path": "/absolute/video.mp4"}` or `{"platform": "SNES", "clear": true}`. The platform is required and capped at 80 characters; the path must be absolute, existing, and end in `.mp4`, `.webm`, `.ogv`, `.ogg`, or `.mkv`. Returns `{"platform", "path"}` with an empty path after a clear.
+
+</ApiEndpoint>
+
 ## Themes
 
 <ApiEndpoint method="GET" path="/api/themes">
@@ -112,6 +144,20 @@ Write the desktop entry and icon for the running AppImage: `~/.local/share/appli
 
 
 Open the themes folder in the file manager via `xdg-open` (missing `xdg-open`: `400`). Returns `{"path"}`.
+
+</ApiEndpoint>
+
+**1.18 unreleased.** The theme sound and asset routes below were added after 1.17.0.
+
+<ApiEndpoint method="GET" path="/api/theme-sounds">
+
+`?name=<theme stem>` reads the theme's optional `<theme>.json` sidecar and returns `{"music": "<relative path>", "sounds": {"move": "...", "select": "...", "back": "..."}}`. Only relative `.ogg`, `.mp3`, and `.wav` paths inside the theme folder are accepted; a missing theme, missing sidecar, malformed JSON, or oversized sidecar returns empty values rather than an error.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/theme-asset">
+
+Streams one theme audio asset: `?name=<theme stem>&path=<relative audio path>`. The path is contained to the theme folder, must be an existing `.ogg`, `.mp3`, or `.wav` file no larger than 20 MiB, and is served with a private one-hour cache. A missing theme, non-audio suffix, escape attempt, or oversized file returns `404 {"error": "Theme sound asset not found."}`.
 
 </ApiEndpoint>
 
@@ -219,6 +265,50 @@ The catalog enriched per entry with `installed`, `installed_version`, and `updat
 </ApiEndpoint>
 
 
+### Plugin storage, statistics, and repair (1.18 unreleased)
+
+<ApiEndpoint method="GET" path="/api/v2/plugins/credentials">
+
+`?id=<plugin id>` returns credential **key names only**: `{"id", "credentials": {"keys": [...], "set": {"key": true}}}`. Values are stored in a `0o600` file and never travel back to the browser. A missing or malformed store yields empty keys.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/plugins/credentials">
+
+Merges capability credentials: `{"id": "<plugin id>", "values": {"key": "secret"}, "clear": ["old-key"]}`. An empty string or `null` value deletes that key, as does an entry in `clear`. Names are short strings, values are at most 4,096 characters, and a plugin may store at most 128 credentials. Returns `{"id", "credentials": {"keys": [...], "set": {...}}}`; values are never echoed.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/plugins/data">
+
+`?id=<plugin id>` returns one plugin's bounded data bag: `{"id", "data": {...}}`. This is plugin-owned state, not credentials. A missing or invalid store yields `{}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/plugins/data">
+
+Shallow-merges a patch into one plugin's data bag: `{"id": "<plugin id>", "values": {...}}`. The merged bag must stay under 1 MiB and four levels deep; an invalid key, excessive depth, or oversized result raises `400` and writes nothing. Returns `{"id", "data": {...}}`.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="GET" path="/api/v2/plugin-stats">
+
+Returns the latest cached statistics supplied by enabled plugins: `{"sources": [...]}`. Each source is the plugin's validated summary; a plugin that has never refreshed reports no rows rather than an error.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/plugin-stats/refresh">
+
+Refreshes plugin statistics: `{"plugin_ids": ["<id>", ...]}` (at most 64) or the single-key shorthand `{"plugin_id": "<id>"}`. Unknown or failing plugins are reported per id in `{"results": [...]}`, so one failure does not abort the batch. Each hook is bounded to 15 seconds.
+
+</ApiEndpoint>
+
+<ApiEndpoint method="POST" path="/api/v2/plugins/repair">
+
+Reinstalls one plugin from its catalog entry without touching its data, credentials, trust, or settings: `{"id": "<plugin id>"}`. A local-only or unavailable catalog entry leaves the installed package in place. Returns `{"plugin": {...}, "repaired": true}`.
+
+</ApiEndpoint>
+
 ## Premium read models
 
 <ApiEndpoint method="GET" path="/api/premium/strings">
@@ -273,7 +363,7 @@ The catalog enriched per entry with `installed`, `installed_version`, and `updat
 
 ```json
 {
-  "report": "{\"version\": \"1.16.1\", \"python\": \"3.12.3\", \"platform\": \"Linux-...\", \"data_dir\": \"~/.local/share/openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
+  "report": "{\"version\": \"1.17.0\", \"python\": \"3.12.3\", \"platform\": \"Linux-...\", \"data_dir\": \"~/.local/share/openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
 }
 ```
 
@@ -281,7 +371,7 @@ The same report on Windows carries the Windows host and data directory:
 
 ```json
 {
-  "report": "{\"version\": \"1.16.1\", \"python\": \"3.12.3\", \"platform\": \"Windows-...\", \"data_dir\": \"C:\\\\Users\\\\<you>\\\\AppData\\\\Local\\\\openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
+  "report": "{\"version\": \"1.17.0\", \"python\": \"3.12.3\", \"platform\": \"Windows-...\", \"data_dir\": \"C:\\\\Users\\\\<you>\\\\AppData\\\\Local\\\\openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
 }
 ```
 
@@ -323,7 +413,7 @@ Returns native host capabilities detected by the backend when running inside the
   "gamepad": "webkit",
   "fullscreen": true,
   "clipboard": true,
-  "version": "1.16.1",
+  "version": "1.17.0",
   "platform": "win32",
   "data_dir": "C:\\Users\\<you>\\AppData\\Local\\openbox-game-launcher"
 }
