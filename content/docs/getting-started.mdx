@@ -23,7 +23,7 @@ The goal is a full loop: install, import one game, see it in the library, launch
 echo "OpenBox launch works" && sleep 3
 ```
 
-Make it executable (`chmod +x`). On Windows, `scripts\install.ps1` already placed the runtime under `%LOCALAPPDATA%\OpenBox\share\openbox`, so any small `.exe` on your machine works as the test target. A non-executable file with no launch command is the most common first-launch failure, and the app now reports it explicitly instead of silently failing.
+Make it executable (`chmod +x`). On Windows, `install.ps1` already placed the runtime under `%LOCALAPPDATA%\OpenBox\share\openbox`, so any small `.exe` on your machine works as the test target. A non-executable file with no launch command is the most common first-launch failure, and the app now reports it explicitly instead of silently failing.
 
 The workspace looks like this once you have a library entry: filters on the left, the grouped cover grid in the center, and the selected game's detail pane on the right.
 
@@ -33,15 +33,15 @@ The workspace looks like this once you have a library entry: filters on the left
 
 <Steps>
 
-<li><strong>Install and start OpenBox.</strong> From the AppImage, Flatpak, or source on Linux, or from the signed portable package on Windows, as described on the [Installation](/install/) page and in [Windows](/windows/). When the library is empty, the **Library Setup Center** appears; you can close it and use the topbar buttons, or start from its guided **Set up library** preview-before-commit scan.</li>
+<li><strong>Install and start OpenBox.</strong> From the AppImage, Flatpak, or source on Linux, or from the signed portable package on Windows, as described on the [Installation](/install/) page and in [Windows](/windows/). When the library is empty, the setup dialog (**Set up your library**) opens on a six-step quick path, with the longer optional steps behind an **advanced** toggle. You can close it and start from the top bar's **Add games** menu at any time, or follow its preview-before-commit scan.</li>
 
 <Callout type="note">
 
-**You should see:** An empty cover grid in the center. The Library Setup Center suggests scanning game folders or connecting storefronts with a safe, non-destructive preview before committing to your library. If the window did not open, start OpenBox from a terminal (`./openbox` or `python3 web_app.py` on Linux; `powershell -File .\openbox.ps1` on Windows) and read the printed error. In `--web` mode OpenBoxGL prints `http://127.0.0.1:PORT/?token=...`; open that URL yourself.
+**You should see:** An empty cover grid in the center with a single illustrated start card offering **Scan a folder**, **Connect a game store**, and **Add one game**. The setup dialog suggests scanning game folders or connecting storefronts with a safe, non-destructive preview before committing to your library. If the window did not open, start OpenBox from a terminal (`./openbox` or `python3 web_app.py` on Linux; `powershell -File .\openbox.ps1` on Windows) and read the printed error. In `--web` mode OpenBoxGL prints `http://127.0.0.1:PORT/?token=...`; open that URL yourself.
 
 </Callout>
 
-<li><strong>Choose Set up library or Import Folder.</strong> Click **Set up library** in the topbar (or **Import Folder**). In the native window a folder picker dialog opens to select your games folder. In the browser fallback (`--web`) the app prompts for the absolute path, for example `/home/you/test-game` on Linux or `C:\Games\test-game` on Windows.</li>
+<li><strong>Choose Scan a folder or Guided setup.</strong> Open the **Add games** menu in the top bar and choose **Scan a folder…** to go straight to the import, or **Guided setup…** to follow the six-step path. In the native window a folder picker dialog opens to select your games folder. In the browser fallback (`--web`) the app prompts for the absolute path, for example `/home/you/test-game` on Linux or `C:\Games\test-game` on Windows.</li>
 
 <Callout type="note">
 
@@ -49,7 +49,7 @@ The workspace looks like this once you have a library entry: filters on the left
 
 </Callout>
 
-<li><strong>Select a folder containing one launchable file.</strong> That is the executable `.sh` on Linux or the `.exe` on Windows from the previous section. Setup Center performs a read-only scan for supported files (`.sh`, `.appimage`, `.exe`, `.iso`, `.rom`, console extensions, and archives), presents a preview with storytelling progress, checks for duplicates, and commits cleanly without side effects.</li>
+<li><strong>Select a folder containing one launchable file.</strong> That is the executable `.sh` on Linux or the `.exe` on Windows from the previous section. The setup dialog performs a read-only scan for supported files (`.sh`, `.appimage`, `.exe`, `.iso`, `.rom`, console extensions, and archives), presents a preview with storytelling progress, checks for duplicates, and commits cleanly without side effects.</li>
 
 <Callout type="note">
 
@@ -65,7 +65,7 @@ The workspace looks like this once you have a library entry: filters on the left
 
 </Callout>
 
-<li><strong>Open the game card to view its details.</strong> Selecting the card opens its detail pane: the launch command, the launch profile for its platform, per-game overrides, save locations, and history stay together here. Launch Doctor validates the executable and dependencies before launch.</li>
+<li><strong>Open the game card to view its details.</strong> Selecting the card opens its detail pane: the launch command, the launch profile for its platform, per-game overrides, save locations, and history stay together here. Launch check validates the executable and dependencies before launch.</li>
 
 <Callout type="note">
 
@@ -79,7 +79,7 @@ The workspace looks like this once you have a library entry: filters on the left
 
 <Callout type="note">
 
-**You should see:** If the path or permissions are wrong, Launch Doctor flags the issue with an actionable fix button. If correct, a small "Starting…" banner appears at the top, then "Session ended" with the play time and a link to the History view. The game card's "Play count" increments to 1 and "Play time" grows to match the script's duration.
+**You should see:** If the path or permissions are wrong, Launch check flags the issue with an actionable fix button. If correct, a small "Starting…" banner appears at the top, then "Session ended" with the play time and a link to the History view. The game card's "Play count" increments to 1 and "Play time" grows to match the script's duration.
 
 </Callout>
 
@@ -91,7 +91,7 @@ The workspace looks like this once you have a library entry: filters on the left
 - One completed session in the History view with a non-zero-free exit code and a play time of a few seconds.
 - `play_count` incremented and `playtime_seconds` grown on the game card.
 
-ROMs are the deliberate exception: they require a configured platform emulator profile before they can launch. An `.nes` file with no emulator profile produces a Launch Doctor preflight notification until you set one, by design, so nothing half-configured ever runs.
+ROMs are the deliberate exception: they require a configured platform emulator profile before they can launch. An `.nes` file with no emulator profile produces a Launch check preflight notification until you set one, by design, so nothing half-configured ever runs.
 
 ## Common failures and recovery
 
@@ -101,11 +101,11 @@ Check the folder path you selected. The import resolves `~` on Linux but does no
 
 ### PLAY is disabled or launch fails with a validation error
 
-Open the game detail view or check Launch Doctor preflight notifications. Launch Doctor provides actionable fix buttons:
+Open the game detail view or check Launch check preflight notifications. Launch check provides actionable fix buttons:
 
-- **"has no launch command and its file is not executable"**: make the file executable (`chmod +x` on Linux; a Windows `.exe` needs no permission bit), or assign an emulator profile. Launch Doctor displays an explanation and fix options.
+- **"has no launch command and its file is not executable"**: make the file executable (`chmod +x` on Linux; a Windows `.exe` needs no permission bit), or assign an emulator profile. Launch check displays an explanation and fix options.
 - **"The configured path no longer exists"**: the imported file was moved or deleted. Point the game at the new path under Edit game, or re-import the folder.
-- **"Set a launch command for the platform"**: the platform has no profile. See [Emulators and launching](/guides/emulators-and-launching/). On Linux, Launch Doctor can automatically install missing Flathub emulators; on Windows you install the Windows build of the emulator yourself and point the profile at its executable.
+- **"Set a launch command for the platform"**: the platform has no profile. See [Emulators and launching](/guides/emulators-and-launching/). On Linux, Launch check can automatically install missing Flathub emulators; on Windows you install the Windows build of the emulator yourself and point the profile at its executable.
 
 ### The session reports a failure
 
@@ -137,7 +137,7 @@ Nothing is sent anywhere: no account, no telemetry, and no network traffic unles
 - [Interfaces and data](/interfaces-and-data/) for where every file lives.
 - [Metadata and media](/guides/metadata-and-media/) for enrichment after the first import.
 
-## What's new in 1.11 through 1.17
+## What's new in 1.11 through 1.18
 
 - **1.11 — Every Second Counts:** Quick Resume, Moments, clips/reels, Time Machine, Backlog Radio + natural query, Arcade Room/Museum kiosk, Household, Steam Bridge, ES-DE migration, SteamGridDB artwork, and local launcher trophies. Start with [API 1.11 additions](/reference/api/one-eleven/).
 - **1.12 — Living Library:** smart collections, per-game Story timelines (1h–100h milestones), per-game `launch_env`/`launch_confirm`, opt-in weekly backups, SQLite self-enable at 5,000 games, and command-palette recents. Start with [API 1.12 additions](/reference/api/one-twelve/).
@@ -148,3 +148,4 @@ Nothing is sent anywhere: no account, no telemetry, and no network traffic unles
 - **1.16 — Make it true:** [Check every game](/guides/emulators-and-launching/#check-every-game-v1160) runs the Launch Doctor across the whole library and groups failures by cause; [Preview changes](/guides/sessions-saves-and-backups/#preview-a-restore-before-you-restore) shows what a backup restore would remove, bring back, and overwrite before it runs; a failed launch reports its exit code; import decisions wait for you; and five security defects are fixed (not backported).
 - **1.16.1 — Launch readiness everywhere:** **Won't launch** and **Needs attention** badges on the grid, one-button fixes for a group that shares a cause, a read-only Flatpak folder grant, a per-game RetroArch core, and launch definitions for 18 more systems. See [API 1.16 additions](/reference/api/one-sixteen/).
 - **1.17 — More of your library, and what it cost:** native installed-game imports for GOG Galaxy, the EA app, and Ubisoft Connect on Windows; Game Night decks with a reproducible seed; price paid and cost-per-hour insights grouped by currency; translated server notices; and the ScreenScraper fix. See [API 1.17 additions](/reference/api/one-seventeen/).
+- **1.18 — A clearer, deeper library:** the first run is shorter (one **Add games** menu, a six-step setup dialog, **Help & shortcuts** on `F1` or `?`, a single empty-library card, an onboarding checklist, and **Jump back in**); a platform can be renamed or deleted in one place; the media queue survives a restart and adds EmuMovies; backups describe every file and restore only what you check; plugins declare capabilities; the **Emulators & controllers** entry in Tools manages installs; and Big Box gains more input and presentation controls. See [API 1.18 additions](/reference/api/one-eighteen/) and the [changelog](/changelog/).

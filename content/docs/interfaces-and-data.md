@@ -24,7 +24,7 @@ Starting `openbox` (or `openbox-native`) does three things in order:
 
 On window close the host shuts the server down cleanly. When WebKitGTK is missing, the launcher prints an install hint and falls back to the system-browser app window, so no install bricks.
 
-The bridge surface is `window.openboxNative` (`native_host.c:1211-1541`):
+The bridge surface is `window.openboxNative`, injected by `native_host.c` on Linux and `native_host_win.c` on Windows:
 
 | Member | Purpose |
 | --- | --- |
@@ -50,18 +50,20 @@ The default data directory is `~/.local/share/openbox-game-launcher`. Everything
 | `library.json.bak` | Last-known-good copy, rewritten before every commit |
 | `.library.json.lock` | Cross-process lock file coordinating concurrent writes |
 | `operations.json` | Durable background operations and task lifecycle states |
-| `setup_previews/` | Transient scan preview documents before commit |
+| `operations_items/` | Per-operation item lists (for example one row per game in a bulk download) |
+| `previews/` | Transient Setup Center scan preview documents before commit |
 | `server.token`, `server.port` | Per-launch credentials for the running app; deleted on exit |
-| `native-host.lock`, `window-geometry`, `native-host-flags` | Native host single-instance lock, last window geometry, and tray flags |
+| `openbox.sock` (Linux) / named pipe (Windows), `window-geometry`, `native-host-flags` | Native host single-instance endpoint, last window geometry, and tray flags |
+| `native-host-recent` | Private recent-game list, one `name<TAB>game id` line per entry, written at boot and after sessions so the Linux and Windows tray menus can launch the eight most recent games |
+| `save-backups/` | Versioned per-game save backups with retention limits; each archive carries its own `manifest.json` (size, mode, mtime, and SHA-256 per file), not a separate manifest file elsewhere |
 | `backups/` | Library backup archives (`OpenBoxBackup-*.zip`) |
-| `save-backups/` | Versioned per-game save backups with retention limits |
 | `media/` | Downloaded artwork, screenshots, video, and metadata media, grouped by source (`media/memories/` holds imported Memories gallery items, `media/clips/` holds Record That captures) |
 | `exports/` | Library export files (JSON/CSV); the newest 10 are kept (v1.8.0+) |
 | `themes/` | Stock themes plus locally imported CSS themes |
 | `plugins/` | Installed local plugin packages |
 | `metadata/` | The synced LaunchBox Games Database file |
-| `cache/` | Rebuildable working files: archive extraction, RetroAchievements lookups, and the Launch Audit report (`launch_audit.json`). Safe to delete — OpenBoxGL rebuilds it, though deleting the audit discards the grid readiness badges until the next check |
-| `media-queue.json` | Pending media download jobs |
+| `cache/` | Rebuildable working files: archive extraction, RetroAchievements lookups, the Launch Audit report (`launch_audit.json`), its rolling history (`launch_audit.jsonl`, rotated at 5 MiB), generated media, and the Steam cache. Safe to delete — OpenBoxGL rebuilds it, though deleting the audit discards the grid readiness badges until the next check. `POST /api/media/cache/cleanup` removes generated media cache files older than a requested number of days (1-3650, default 30) without touching user media |
+| `media-queue.json` | Durable media download queue: owner-only JSON with at most 5,000 items, written atomically under `.media-queue.json.lock` |
 | `highscores/`, `bezels/` | MAME high-score exports and bezel downloads |
 
 The library file itself is schema-versioned JSON with stable game IDs derived from game identity, never from list position. That is why playtime, queue entries, and save links survive reordering or deleting other entries.
@@ -95,7 +97,7 @@ When `OPENBOX_DATA_DIR` is not set and no `library.json` exists yet, OpenBoxGL l
 
 Credentials and tokens can come from three places, in order: the process environment, discovered `.env` files, and persisted application settings (Settings dialog). The `.env` search order is an explicit `OPENBOX_ENV_FILE` path if set, the data directory and its parent, your home directory (`~/.env`), and `~/.config/openbox-game-launcher/.env`. The current working directory is not searched. Values already in the environment are never overridden by `.env`.
 
-Supported variables are documented in `.env.example` and [Configuration](/reference/configuration/); they cover RetroAchievements (`RETROACHIEVEMENTS_USERNAME`, `RETROACHIEVEMENTS_API_KEY`), EmuMovies, IGDB, and `GITHUB_TOKEN` for release-API rate limits. Keep these files private; the API and the diagnostic log redact the values, but a `.env` file itself is plaintext.
+Supported variables are documented in `.env.example` and [Configuration](/reference/configuration/); they cover RetroAchievements (`RETROACHIEVEMENTS_USERNAME`, `RETROACHIEVEMENTS_API_KEY`), EmuMovies, IGDB, SteamGridDB, ScreenScraper (including its developer credentials), and `GITHUB_TOKEN` for release-API rate limits. Optional service keys can also be stored locally as `integration_tokens` and are returned only masked. Keep these files private; the API and the diagnostic log redact the values, but a `.env` file itself is plaintext.
 
 ## Security model
 

@@ -7,7 +7,7 @@ The **Time Machine** makes catalog history visible without replacing the canonic
 
 ## Open the timeline
 
-Choose **Tools → Time Machine**, then use **Timeline** to browse retained events. Filter by days, event kind, or game. Events can include catalog edits, imports, deletes/restores, sessions, and Moments. The journal is local and may be enabled even when catalog synchronization is off.
+Choose **Tools → Library history**, then use **Timeline** to browse retained events. Filter by days, event kind, or game. Events can include catalog edits, imports, deletes/restores, sessions, and Moments. The journal is local and may be enabled even when catalog synchronization is off.
 
 History is bounded by the journal's retained snapshots and events. The journal keeps at most **25,000 events** (`JOURNAL_MAX_EVENTS`) over a **400-day retention window** (`JOURNAL_RETENTION_DAYS` in `pkg/parity/parity_time_machine.py:55-60`), compacting to a horizon when over budget. If compaction created a horizon, a gap, or a corruption marker, the UI reports that boundary; it does not invent the missing state. Use [Library backups](/reference/library-backups/) when you need a complete archive of files and settings.
 

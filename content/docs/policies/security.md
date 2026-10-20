@@ -23,7 +23,8 @@ If you run 1.15.x or older, these are the security defects 1.16.0 closes. **None
 
 | Version | Support |
 | --- | --- |
-| 1.17.x | Yes (current) |
+| 1.18.x | Yes (current) |
+| 1.17.x | No — upgrade required |
 | 1.16.x | No — upgrade required |
 | 1.15.x | No — upgrade required (see above) |
 | 1.14.x | No — upgrade required |
@@ -49,7 +50,7 @@ If you run 1.15.x or older, these are the security defects 1.16.0 closes. **None
 | 0.4.x | Best effort |
 | < 0.4.0 | No |
 
-Only the latest release on the `master` branch is maintained, and the 1.17.x line is the current maintained release. The older rows document the historical support policy and do not promise backports; upgrade to 1.17.x to receive fixes.
+Only the latest release on the `master` branch is maintained, and the 1.18.x line is the current maintained release. The older rows document the historical support policy and do not promise backports; upgrade to 1.18.x to receive fixes.
 
 ## Protecting local data
 
@@ -58,6 +59,7 @@ Only the latest release on the `master` branch is maintained, and the 1.17.x lin
 - The diagnostic log (`openbox.log`, rotating at 2 MiB x 4) redacts tokens, passwords, API keys, and authorization headers, but can include game names and local file paths; review it before sharing it.
 - State files, backups, credentials, and the session token are written with owner-only permissions (`0o600`). A `.env` file is plaintext: keep it out of version control.
 - Webhooks refuse plain HTTP by default (`OPENBOX_ALLOW_HTTP_WEBHOOKS=1` enables it only for trusted local tests), reject reserved/loopback-self addresses, and sign deliveries with HMAC-SHA256.
+- Plugin capability services are read-only projections (library, achievements, profiles, activity, leaderboards, catalog, metadata, media) and each hook gets a bounded data bag. A plugin cannot write library state through a service, and media service URLs are limited to public HTTPS hosts.
 - Restores and extractions validate archive members and reject symlinks, absolute paths, and `..` traversal.
 
 ## Scope and warranty

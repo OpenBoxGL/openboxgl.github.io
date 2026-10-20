@@ -1,6 +1,6 @@
 ---
 title: Creating an OpenBox Plugin
-description: Build, sandbox, and distribute plugins using standard JSON lifecycle hooks and Bubblewrap isolation.
+description: Build, sandbox, and distribute plugins using standard JSON lifecycle hooks and capability declarations.
 ---
 
 OpenBox plugins extend launcher functionality through decoupled lifecycle hooks. Each hook invocation runs as an isolated subprocess in a Bubblewrap sandbox (`bwrap`) when available, communicating via one JSON object on standard input and one on standard output.
@@ -32,18 +32,70 @@ Every plugin requires a `plugin.json` manifest placed in its directory under `~/
 | `id` | string | Unique plugin identifier matching `^[a-z0-9][a-z0-9._-]{1,63}$` (lowercase start, 2-64 characters). This is the install directory name. |
 | `name` | string | Display name shown in the Plugins dialog. |
 | `version` | string | Non-empty version string (e.g. `1.0.0`). |
-| `description` | string | Optional short summary of plugin capabilities. |
-| `author` | string | Ignored by the runtime — it is not read by OpenBoxGL; keep it only for your own tooling. |
+| `description` | string | Optional short summary of plugin capabilities (500 characters). |
+| `author` | string | Optional author name (80 characters) shown with the plugin. |
+| `homepage` | string | Optional HTTPS project URL (300 characters). |
 | `entry` | string | Entry point Python file inside the package (defaults to `plugin.py`; must resolve inside the package, no symlinks or `..`). |
-| `hooks` | array | List of subscribed lifecycle hooks (`before_launch`, `after_session`, `library`, `command`, `library_source`, `events`). |
+| `hooks` | array | Subscribed hooks: the six base hooks (`before_launch`, `after_session`, `library`, `command`, `library_source`, `events`) plus the six capability hooks (`storefront`, `metadata`, `media`, `stats`, `emulator`, `discovery`). |
 | `api_version` | integer | Plugin API version targeted (defaults to `1`); newer versions are refused. |
 | `commands` | array | Up to 32 `{id, label, description?}` entries, exposed in the command palette under the `>` prefix. |
-| `permissions` | array | Declared permissions; in 1.14.0 only `network`, granted by the user in the Plugins manager at install/enable time. |
-| `settings` | object | JSON Schema subset for per-plugin settings; the Plugins manager renders a form and injects stored values into hook payloads. |
+| `permissions` | array | Declared permissions; in 1.x only `network`, granted by the user in the Plugins manager. |
+| `settings` | object | JSON Schema subset for per-plugin settings; the Plugins manager and Settings > Plugins render a form and inject stored values into hook payloads. |
+| `capabilities` | object | Capability declarations (1.18.0+). Each requires its matching hook and is what makes a plugin act like a built-in source. |
+| `messages` | object | Localized notification templates (1.18.0+), resolved against the active locale. |
+
+### Capabilities
+
+A capability is additive on top of the base hooks and is accepted only when the plugin also declares its implementing hook:
+
+```json
+{
+  "id": "vendor.switch-store",
+  "name": "Vendor Switch Store",
+  "version": "1.0.0",
+  "api_version": 1,
+  "hooks": ["storefront", "metadata"],
+  "permissions": ["network"],
+  "capabilities": {
+    "storefront": {"id": "vendor.store", "name": "Vendor store"},
+    "metadata": {"id": "vendor.metadata", "name": "Vendor metadata", "platform": "Nintendo Switch"}
+  }
+}
+```
+
+| Capability | Hook | Extra fields | Timeout |
+| --- | --- | --- | --- |
+| `storefront` | `storefront` | optional `platform` | 30 s |
+| `metadata` | `metadata` | optional `platform` | 15 s |
+| `media` | `media` | optional `media_kinds` (default `["cover", "background"]`) | 15 s |
+| `stats` | `stats` | — | 15 s |
+| `emulator_settings` | `emulator` | list of `{emulator_id, label, schema, scopes}` | 10 s |
+| `discovery` | `discovery` | — | 10 s |
+
+Capability hooks receive three extra payload keys: `plugin_data` (the bounded 1 MiB data bag), `settings` (non-secret values), and `credentials` (the capability credential store). They may return `data`, `notification`, and `service_requests`. A capability hook can ask the host for up to eight read-only services in one round — `library.query`, `achievements`, `profile`, `activity`, `leaderboards`, `catalog.search`, `metadata.search`, `media.search` — and is invoked once more with `service_results`. There is no separate `services` hook.
+
+Storefront, metadata, media, and stats capabilities require a declared and granted `network` permission; the host refuses to call them otherwise. See [Plugin hooks](/reference/plugins/hooks/#capability-hooks) for each payload and result shape, and [Plugin manifest](/reference/plugins/manifest/#capabilities) for validation rules.
+
+### Localized notifications
+
+Declare message templates and reference them from any hook result:
+
+```json
+"messages": {
+  "sync_done": {"en": "{count} games synced", "de": "{count} Spiele synchronisiert"}
+}
+```
+
+```python
+def command(payload):
+    return {"notification": {"level": "success", "key": "sync_done", "params": {"count": len(payload["library"])}}}
+```
+
+Supported locales are `en`, `es`, `de`, `fr`, and `pt`. The host resolves the active locale, then English, then the raw key; each template is capped at 500 characters and the resolved message at 2,000.
 
 ## Hook Lifecycles & JSON Protocol
 
-OpenBox runs each hook as a child process: `python3 plugin_runner.py <entry> <hook>` (wrapped in `bwrap` when available). The runner loads the entry file as a module and calls the function named after the hook: `def library(payload)`, `def before_launch(payload)`, `def after_session(payload)`, `def command(payload)`, `def library_source(payload)`, or `def events(payload)`. The payload arrives as one decoded JSON dict argument, and the function's return value (a dict) is written to stdout as JSON. If the module does not define the hook function, the payload passes through unchanged.
+OpenBox runs each hook as a child process: `python3 plugin_runner.py <entry> <hook>` (wrapped in `bwrap` when available). The runner loads the entry file as a module and calls the function named after the hook: `def library(payload)`, `def before_launch(payload)`, `def after_session(payload)`, `def command(payload)`, `def library_source(payload)`, `def events(payload)`, `def storefront(payload)`, `def metadata(payload)`, `def media(payload)`, `def stats(payload)`, `def emulator(payload)`, or `def discovery(payload)`. The payload arrives as one decoded JSON dict argument, and the function's return value (a dict) is written to stdout as JSON. If the module does not define the hook function, the payload passes through unchanged.
 
 ### Supported Hooks
 
@@ -58,13 +110,14 @@ OpenBox runs each hook as a child process: `python3 plugin_runner.py <entry> <ho
    - **Output Result**: `{"games": [...]}` — a dict whose `games` list has the same length as the input, every element a dict. Anything else is ignored and the pre-plugin list wins.
 4. **`command`**: Invoked from the command palette (`>` prefix) or `POST /api/v2/plugins/command` for a manifest-declared command.
    - **Input Payload**: `{"command": "<command id>", "library": [...]}` — the library summary is bounded to 500 entries with only `game_id`, `name`, `platform`, `progress`, `favorite`, and `playtime_seconds`.
-   - **Output Result**: any dict; may include `{"notification": {"level": "info" | "success" | "warning" | "error", "message": "..."}}` to show a UI notification. Hook errors are surfaced to the caller.
+   - **Output Result**: any dict; may include `{"notification": {"level": "info" | "success" | "warning" | "error", "message": "..."}}` (or a `key`/`params` reference) to show a UI notification. Hook errors are surfaced to the caller.
 5. **`library_source`**: Runs on every library state build, making the plugin a library importer.
    - **Input Payload**: `{"api_version": 1}` (plus `settings` when the manifest declares a settings schema).
-   - **Output Result**: `{"games": [...]}` — a bare list or any other shape is rejected with a warning. Entries are namespaced as `plugin:<plugin_id>:<their_id>` and shown with a source badge; disabling or removing the plugin drops its games on the next rebuild.
+   - **Output Result**: `{"games": [...]}` — a bare list or any other shape is rejected with a warning. Entries are namespaced as `plugin:<plugin_id>:<their_id>` and shown with a source badge; disabling or removing the plugin drops its games.
 6. **`events`**: Fan-out for lifecycle events — `app_startup`, `app_shutdown`, `scan_finished`, `playtime_milestone`, `game_added`, `game_removed`, `game_updated`.
    - **Input Payload**: `{"event": "<name>", ...}` with a small bounded payload (e.g. `game_added` carries `game_ids`, up to 500; `game_updated` carries `changes`, up to 100).
    - **Output Result**: any dict; failures never break the host operation.
+7. **Capability hooks**: `storefront`, `metadata`, `media`, `stats`, `emulator`, and `discovery`. Each has a purpose-built payload and result, documented in [Plugin hooks](/reference/plugins/hooks/#capability-hooks). A capability hook is invoked directly (not chained) and gets the data bag, capability settings, and credentials.
 
 ## Minimal Python Plugin (`plugin.py`)
 
@@ -96,13 +149,46 @@ def library(payload):
 
 The entry module is loaded by the runner, not executed directly, so it does not need a shebang or executable permissions.
 
+A capability plugin follows the same shape, with the capability declared in the manifest:
+
+```python
+def discovery(payload):
+    # On the first call ask the host for a bounded library slice; the host
+    # re-invokes the hook once with `service_results` filled in.
+    results = payload.get("service_results")
+    if results is None:
+        return {"service_requests": [{"id": "lib", "action": "library.query", "params": {"limit": 10}}]}
+    games = results.get("lib", {}).get("games", [])
+    return {
+        "lists": [
+            {"id": "short", "name": "Short games", "game_ids": [row["game_id"] for row in games[:5]]},
+        ]
+    }
+```
+
+```python
+def stats(payload):
+    # payload["games"] holds up to 500 {game_id, name, platform, ...} rows.
+    return {
+        "games": [
+            {
+                "game_id": row["game_id"],
+                "playtime_seconds": 3600,
+                "last_played": "2026-10-19T12:00:00",
+                "achievements": {"source": "vendor", "name": "Vendor", "earned": 3, "total": 10},
+            }
+            for row in payload["games"]
+        ]
+    }
+```
+
 ## Bubblewrap Sandboxing
 
 OpenBox isolates plugin execution using **Bubblewrap** (`bwrap`) when available on Linux systems:
 - Read-only root filesystem bind (`--ro-bind / /`)
 - Isolated process namespace (`--unshare-all`)
 - Private empty `tmpfs` mounts for `/home`, `/tmp`, `/run`, `/mnt`, `/media`
-- Network isolation (disabled by default)
+- Network isolation (disabled by default; `--share-net` only after a `network` grant)
 
 When the sandbox cannot be created, enabled plugins are **skipped** with a warning. To run trusted local plugins without the sandbox, either trust the plugin in the Plugins manager (**Trust and run** — the grant is bound to the package's SHA-256, so updates re-prompt) or set `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` in the process environment (not `.env`). To disable all plugin execution for troubleshooting, launch OpenBox with `OPENBOX_SAFE_MODE=1`.
 
@@ -113,5 +199,7 @@ Windows has no `bwrap`, so plugin hooks cannot be isolated there: enabled plugin
 1. Create directory `~/.local/share/openbox-game-launcher/plugins/my-plugin/` on Linux, or `%LOCALAPPDATA%\openbox-game-launcher\plugins\my-plugin\` on Windows.
 2. Add `plugin.json` and `plugin.py`.
 3. Open OpenBox → **Tools** → **Plugins**.
-4. Enable your plugin in the list.
-5. Check the diagnostic log (`openbox.log` beside that data directory) for plugin warnings (skipped plugins, timeouts, oversized output, and the last 400 bytes of stderr on a nonzero exit). **Settings → Copy diagnostic log** copies a redacted summary to the clipboard.
+4. Enable your plugin in the list. Trust it if the host reports the sandbox is unavailable, and grant `network` if it declares that permission.
+5. If the manifest declares `settings`, check the form under **Settings → Plugins**; values are validated on save and passed to the hook as `payload["settings"]`.
+6. Check the diagnostic log (`openbox.log` beside that data directory) for plugin warnings (skipped plugins, timeouts, oversized output, and the last 400 bytes of stderr on a nonzero exit). **Settings → Copy diagnostic log** copies a redacted summary to the clipboard.
+7. Use **Reinstall** in the Plugins manager to repair an installed package without losing settings, stats, or trust.

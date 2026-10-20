@@ -7,7 +7,7 @@ OpenBoxGL merges play statistics between machines through any mounted folder, Sy
 
 ## Set it up
 
-1. In **Settings**, set **Mounted cloud folder** to the absolute path of the mounted folder (for example `/mnt/cloud/openbox`).
+1. In **Settings → Integrations**, set **Mounted cloud folder** to the absolute path of the mounted folder (for example `/mnt/cloud/openbox`).
 2. Click **Sync statistics now** to run a merge immediately, or let it run automatically, sync runs automatically after each session ends, so play time propagates without manual action.
 3. Configure the same folder on another machine to merge stats there.
 
@@ -32,6 +32,12 @@ Deleted local games are **never resurrected**: games present only in the cloud f
 | Sync does nothing after a session | Check the folder is mounted and the file is writable; look for sync errors in the diagnostic log. |
 | Stats reappear after deleting a game | Deletion does not remove the cloud file's entry for that game. Run a sync after deletion so the merged output drops it. |
 
+## Catalog sync
+
+Statistics sync above covers play stats only. Catalog metadata travels through a separate opt-in transport: turn on **Enable opt-in library catalog sync** under Settings → Integrations after setting the mounted folder, then use **Preview catalog changes** (`POST /api/v2/library/sync/preview`), **Apply reviewed changes** (`POST /api/v2/library/sync/apply`), and **Publish local changes** (`POST /api/v2/library/sync/publish`). Launch paths, commands, credentials, play statistics, installed files, saves, and media stay on each device; the legacy whole-library publish/pull routes return `503 LIBRARY_SYNC_UNAVAILABLE`.
+
+See [Library catalog sync](/guides/sessions-saves-and-backups/library-sync/) for the workflow, conflict review, and the exact field allowlist.
+
 ## See also
 
 - [Library catalog sync](/guides/sessions-saves-and-backups/library-sync/), opt-in catalog metadata sync (v1.10.0)
@@ -39,8 +45,3 @@ Deleted local games are **never resurrected**: games present only in the cloud f
 - [API saves and operations](/reference/api/saves-and-operations/), `POST /api/cloud/sync`
 - [Data and recovery](/reference/data-and-recovery/), where local state lives
 
-## Catalog sync (v1.10.0)
-
-Statistics sync above covers play stats only. OpenBox 1.10.0 also includes an explicit, opt-in catalog transport for games and shared metadata. Enable **Library synchronization**, then use `POST /api/v2/library/sync/preview` to inspect incoming events and `POST /api/v2/library/sync/apply` to apply a reviewed plan. Publish local events with `POST /api/v2/library/sync/publish` and the JSON body `{"protocol":"v3"}`.
-
-The v3 transport stores immutable, content-addressed events under `openbox-library-v3`, tracks device identity and ancestry, propagates tombstones, preserves a recovery snapshot before apply, and lets you choose conflicts explicitly. Launch paths, commands, credentials, play statistics, installed files, saves, and media remain local to each device. The former whole-library `publish` payload and `POST /api/v2/library/sync/pull` return `503 LIBRARY_SYNC_UNAVAILABLE` before mutation; they do not perform last-writer-wins replacement.

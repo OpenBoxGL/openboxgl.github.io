@@ -1,5 +1,10 @@
 # OpenBoxGL Docs — Coverage and Currency Audit
 
+> **Superseded.** This file audits the **1.17.0** release. The current audit is
+> **[DOCS-SWEEP-2026-10-19.md](./DOCS-SWEEP-2026-10-19.md)**, against **1.18.0**; it
+> records the 1.18.0 findings, the P0/P1 defects, and the sweep recipe. Keep this file
+> for the 1.17.0 evidence trail.
+
 Updated **2026-10-19** against the application's **1.17.0** release. The version
 literal lives only in `updates.py` (`VERSION = "1.17.0"`); `openbox.py` has none.
 The application checkout is past the release and carries unreleased 1.18 work,

@@ -10,10 +10,10 @@ OpenBox targets Steam Deck, Bazzite, and other Linux handheld PCs. On the deskto
 
 ## Install
 
-Prefer the signed AppImage on SteamOS, Bazzite, and other immutable images. The AppImage bundles its own Python runtime, works without installing anything system-wide, and receives the built-in verified updater. For a reproducible install, download the v1.17.0 script, inspect it, then run it:
+Prefer the signed AppImage on SteamOS, Bazzite, and other immutable images. The AppImage bundles its own Python runtime, works without installing anything system-wide, and receives the built-in verified updater. For a reproducible install, download the v1.18.0 script, inspect it, then run it:
 
 ```bash
-VERSION=1.17.0
+VERSION=1.18.0
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output install.sh \
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -42,7 +42,7 @@ OpenBox detects the gamescope guest via environment (`GAMESCOPE_WAYLAND_DISPLAY`
 
 Steam titles launched from OpenBox still go through Steam (`steam -applaunch` / `steam://`), so Steam Input and overlays keep working. Non-Steam games get a stable synthetic `STEAM_GAME` id derived from their identity, in the range 700,000,000 to 899,999,999. The tagging is a window property only; it does not change how the game runs.
 
-OpenBox does not control TDP; use Steam's QAM or your image's handheld tools. Developers can approximate Deck/Bazzite Game Mode on a desktop with `./scripts/emulate_deck_gamemode.sh` (requires gamescope; runs a nested session with `SteamDeck=1` advertising).
+OpenBox does not provide live in-game TDP controls — use Steam's QAM or your image's handheld tools for changes during a session. It can apply an optional per-launch TDP cap through `ryzenadj`, with an optional restore value when the session ends; see [Handheld performance profiles](#handheld-performance-profiles) below. Developers can approximate Deck/Bazzite Game Mode on a desktop with `./scripts/emulate_deck_gamemode.sh` (requires gamescope; runs a nested session with `SteamDeck=1` advertising).
 
 ## Handheld performance profiles
 

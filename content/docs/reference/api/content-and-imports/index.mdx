@@ -25,7 +25,7 @@ Like `/api/import` but also installs each chosen emulator and returns `{"added",
 <ApiEndpoint method="POST" path="/api/import/watch">
 
 
-Rescan all configured watch folders once. Returns `{"added", "found", "errors": [...]}`. The background auto-import worker rescans every 10 seconds (backing off to at most 300 on state errors) when the server runs.
+Rescan all configured watch folders once. Returns `{"added", "found", "errors": [...]}`. The background auto-import worker rescans every 10 seconds when the server runs, but any tick that imports nothing doubles the delay up to a 300-second ceiling, and the delay resets to 10 seconds after a successful import. A newly added file can therefore wait up to five minutes.
 
 </ApiEndpoint>
 
@@ -154,7 +154,7 @@ Start a background sync of the LaunchBox Games Database (`https://gamesdb.launch
 
 </ApiEndpoint>
 
-**1.18 unreleased.** This route was added after 1.17.0.
+**Added in 1.18.0.**
 
 <ApiEndpoint method="POST" path="/api/v2/metadata/candidates/apply">
 
@@ -309,7 +309,7 @@ Start a background media download for every game with a `launchbox_db_id`: `{"me
 <ApiEndpoint method="GET" path="/api/media/queue">
 
 
-`{"queue": [...]}` from `media-queue.json` (pending media jobs).
+Returns the durable media queue from `media-queue.json` plus the worker state: `{"items": [...], "queue": [...], "running": bool, "paused": bool, "completed": <n>, "failed": <n>, "cancelled": bool, "counts": {"total", "queued", "failed", "completed", "cancelled"}}`. See [API 1.18 additions](/reference/api/one-eighteen/) for the full response shape.
 
 </ApiEndpoint>
 
@@ -402,17 +402,17 @@ Saves a scan configuration (`folder`, `emulator_id`, `auto_update`). Returns `{"
 
 </ApiEndpoint>
 
-**1.18 unreleased.** The emulator-settings read and write routes below were added after 1.17.0.
+**Added in 1.18.0.**
 
 <ApiEndpoint method="GET" path="/api/v2/emulators/settings">
 
-Returns the managed-emulator settings model: each emulator's `emulator_id`, `app_id`, `label`, `managed` flag, option `schema`, effective `global` values, per-platform `platforms` overrides, `skip_update_check`, and detected `version`. Plugin-declared emulator settings are returned in `plugins`. Values are the effective ones, not just stored overrides.
+Returns the managed-emulator settings model: each emulator's `emulator_id`, `app_id`, `label`, `managed` flag, option `schema`, effective `global` values, per-platform `platforms` overrides, `skip_update_check`, and detected `version`. Plugin-declared emulator settings are returned in `plugins`. Only `global` is effective (the stored override merged over the schema defaults); each `platforms` entry is the raw partial stored override for that platform.
 
 </ApiEndpoint>
 
 <ApiEndpoint method="POST" path="/api/v2/emulators/settings">
 
-Saves one emulator's settings: `{"emulator_id": "...", "platform": "SNES", "values": {...}}`. Omit `platform` to write the global values; `reset: true` removes the platform override (or every override when `platform` is omitted). `managed: true|false` controls whether OpenBox writes the emulator config, and `skip_update_check` adds or removes the emulator's app id from `emulator_update_checks`. Values are normalised against the emulator's schema before the state transaction, so an invalid option raises `400` and writes nothing. A `plugin_id` payload saves a plugin-declared emulator instead, and the plugin must declare that emulator and scope. Returns the updated effective model.
+Saves one emulator's settings: `{"emulator_id": "...", "platform": "SNES", "values": {...}}`. Omit `platform` to write the global values; `reset: true` removes the platform override (or every override when `platform` is omitted). `managed: true|false` controls whether OpenBox writes the emulator config, and `skip_update_check` adds or removes the emulator's app id from `emulator_update_checks`. Values are normalised against the emulator's schema before the state transaction, so an invalid option raises `400` and writes nothing. A `plugin_id` payload saves a plugin-declared emulator instead, and the plugin must declare that emulator and scope. Returns the updated model: effective `global` values and the updated stored platform overrides.
 
 </ApiEndpoint>
 
@@ -446,7 +446,7 @@ Removes exactly what the update channel installed and restores the bundled defin
 
 </ApiEndpoint>
 
-## Storefront plugins and scan status (1.18 unreleased)
+## Storefront plugins and scan status
 
 <ApiEndpoint method="GET" path="/api/v2/storefronts">
 
@@ -463,13 +463,13 @@ Returns the last storefront scan status: `{"sources": [...]}`. Each source recor
 
 <ApiEndpoint method="POST" path="/api/v2/storefront/scan">
 
-Starts an asynchronous scan that refreshes installed state without deleting games: `{"sources": ["steam", "gog"], "include_uninstalled": true}`. `sources` is optional (defaults to every built-in and enabled plugin source), limited to 20 known ids; an empty list is rejected. Returns `202 {"job_id", "sources"}`. Poll the job through `GET /api/v2/jobs`.
+Starts an asynchronous scan that refreshes installed state without deleting games: `{"sources": ["steam", "heroic"], "include_uninstalled": true}`. `sources` is optional (defaults to the four built-in sources `steam`, `heroic`, `lutris`, and `gameyfin` plus enabled plugin sources), limited to 20 known ids; an empty list is rejected. Returns `202 {"job_id", "sources"}`. Poll the job through `GET /api/v2/jobs`.
 
 </ApiEndpoint>
 
 <ApiEndpoint method="POST" path="/api/v2/storefronts/plugin/catalog">
 
-Pages through one plugin storefront's catalog: `{"plugin_id": "<id>", "installed_only": false, "uninstalled_only": false}`. The plugin must declare the `storefront` capability. Returns `{"plugin_id", "entries": [...]}` with at most 2,000 validated entries; malformed entries are skipped and a hook failure raises `400`.
+Pages through one plugin storefront's catalog: `{"plugin_id": "<id>", "installed_only": false, "uninstalled_only": false}`. The plugin must declare the `storefront` capability and declare the `network` permission with that permission granted, otherwise the request fails with `400 "Plugin does not declare network access."` or `400 "Grant network access to this plugin first."`. Returns `{"plugin_id", "entries": [...]}` with at most 2,000 validated entries; malformed entries are skipped and a hook failure raises `400`.
 
 </ApiEndpoint>
 
@@ -479,7 +479,7 @@ Imports one plugin storefront: `{"plugin_id": "<id>", "installed_only": false, "
 
 </ApiEndpoint>
 
-## PICO-8, MSU-1, and WHDLoad imports (1.18 unreleased)
+## PICO-8, MSU-1, and WHDLoad imports
 
 <ApiEndpoint method="POST" path="/api/v2/import/pico8">
 

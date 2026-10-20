@@ -10,10 +10,10 @@ OpenBox is engineered with a strict **local-first, dependency-free runtime** arc
 ```mermaid
 flowchart TB
     subgraph UI["User Interface Layer"]
-        WebApp["Desktop Web App<br/>Vanilla JS and CSS, 35 modules"]
+        WebApp["Desktop Web App<br/>Vanilla JS and CSS, 51 modules"]
         BigBox["Big Box Kiosk UI<br/>Gamepad, Stage and CoverFlow"]
     end
-    NativeHost["WebKitGTK Native Host<br/>C host, hardware-accelerated view"]
+    NativeHost["Native Host<br/>WebKitGTK on Linux, WebView2 on Windows"]
     WebApp --> NativeHost
     BigBox --> NativeHost
     NativeHost <-->|Local HTTP and JSON REST<br/>127.0.0.1, token auth| Core
@@ -21,7 +21,7 @@ flowchart TB
         Router["Route tables plus @route registry<br/>frozen v1, additive v2"]
         Handlers["handlers/*<br/>one module per domain"]
         Jobs["JobManager<br/>background worker threads"]
-        Parity["pkg/parity/* — 46 feature modules<br/>imports, media, saves, emulators"]
+        Parity["pkg/parity/* — 72 feature modules<br/>imports, media, saves, emulators"]
         StatePkg["pkg/state<br/>cache, operations, SSE bus, SQLite read model"]
         Store["Atomic State Store<br/>library.json, atomic writes, snapshots"]
         Router --> Handlers
@@ -42,20 +42,20 @@ The runtime engine uses Python 3's built-in standard library (`http.server`, `ur
 
 <ApiExplorer />
 
-## 2. WebKitGTK Native Host & IPC Bridge
+## 2. Native Host & IPC Bridge
 
-When launched via native binary or AppImage, OpenBox spawns a native C/WebKitGTK host process:
+When launched via the native binary or AppImage, OpenBox spawns a native C/WebKitGTK host process; on Windows the same role is played by the WebView2 host `native_host_win.c`:
 - Hardware-accelerated WebGL and 2D canvas rendering
 - Native window management, borderless fullscreen, and Wayland/X11 display protocol compatibility
-- Controller input uses the browser's Web Gamepad API inside the WebKitGTK view (the injected `onGamepad` bridge is a deliberate no-op stub; see `docs/native-host-contract.md`)
+- Controller input uses the browser's Web Gamepad API inside the native view (the injected `onGamepad` bridge is a deliberate no-op stub in both hosts; see `docs/native-host-contract.md`)
 
 ## 3. Atomic State Store & Recovery
 
 OpenBox treats library state as critical user data:
 - **Atomic File Writes**: Mutations are written to temporary staging files (`.<path>.tmp`), flushed with `fsync`, and swapped into place using POSIX `rename(2)` / `os.replace` to prevent corruption on sudden power loss.
-- **Automated Snapshot Rotation**: Rotating snapshots (`library.json.snapshots/<stamp>-<token>.json`) are retained automatically on committed mutations using zero-copy hardlinks and debouncing.
+- **Automated Snapshot Rotation**: Rotating snapshots (`library.json.snapshots/<stamp>-<sequence>-<token>.json`) are retained automatically on committed mutations using zero-copy hardlinks. The sequence number in the name is what makes the newest-first listing deterministic. Writes are debounced only when `OPENBOX_SNAPSHOT_DEBOUNCE` is set; the debounce is off by default.
 - **Deduplication Engine**: Canonical identity hashing prevents duplicate entries when games exist simultaneously across Steam, Heroic, and ROM folders.
 
 ## 4. Asynchronous Background Job System
 
-Heavy operations (metadata database synchronization, bulk save backups, full emulator catalog scans) run in non-blocking worker threads managed by `JobManager`. Progress, speed, and error telemetry are polled via `GET /api/jobs`.
+Heavy operations (metadata database synchronization, bulk save backups, full emulator catalog scans) run in non-blocking worker threads. The durable **Operation Service** (`pkg/state/operations.py`) records each job in `operations.json`, so progress, errors, retry, resume, and cancellation survive a restart. The browser polls `GET /api/v2/jobs` (with per-operation items at `GET /api/v2/jobs/items`) and receives `job.*` progress events over `/api/events`; the legacy `GET /api/jobs` route remains for compatibility.

@@ -7,9 +7,9 @@ OpenBoxGL can synchronize your **game catalog** — names, platforms, metadata, 
 
 <Callout type="note" title="What catalog sync never shares">
 
-Only an explicit allowlist of catalog fields travels: names, sort titles, alternate names, platform, genre, year, developer, publisher, series, region, ESRB, max players, description, notes, store/provider IDs (Steam, Heroic, Lutris, Gameyfin, IGDB, RetroAchievements, LaunchBox), disc count, ROM name, set type, manual-entry flag, and tags. **File paths, launch commands, install configuration, credentials, play statistics, and unknown custom fields always stay local.** Syncing a catalog does not copy games, ROMs, saves, or media — a game that arrives from another machine needs its own local launch setup.
+Only an explicit allowlist of catalog fields travels: the stable `game_id`, names, sort titles, alternate names, platform, genre, year, developer, publisher, series, region, ESRB, max players, description, notes, Wikipedia URL, `source`, store/provider IDs (Steam, Heroic, Lutris, Gameyfin, IGDB, RetroAchievements, LaunchBox), disc count, ROM name, `clone_of`, set type, manual-entry flag, tags, and the sync identity field (`library_sync_id`). **File paths, launch commands, install configuration, credentials, play statistics, unknown custom fields, and user metadata always stay local.** Syncing a catalog does not copy games, ROMs, saves, or media — a game that arrives from another machine needs its own local launch setup.
 
-GOG, EA, and Ubisoft provider IDs, price paid, currency, and Game Night decks are **not** in the allowlist and stay local. A mixed-version peer would reject an event carrying fields it does not know, so these 1.17.0 values are deliberately kept out of the protocol rather than risking the whole event.
+GOG, EA, and Ubisoft provider IDs, price paid, currency, and Game Night decks are **not** in the allowlist and stay local. A mixed-version peer would reject an event carrying fields it does not know, so those values are deliberately kept out of the protocol rather than risking the whole event.
 
 </Callout>
 

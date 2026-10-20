@@ -49,7 +49,7 @@ const PRESETS: EmulatorPreset[] = [
     id: "rpcs3",
     name: "RPCS3 (PS3)",
     platform: "PlayStation 3",
-    template: 'rpcs3 --no-gui "{ImagePath}"',
+    template: 'rpcs3 "{ImagePath}"',
     samplePath: "/home/deck/Emulation/roms/ps3/Demon'\''s Souls/USRDIR/EBOOT.BIN",
     sampleEmulatorDir: "/usr/bin",
   },
@@ -144,7 +144,7 @@ export function CommandBuilder() {
           </div>
         </div>
         <span className="rounded border border-border bg-secondary px-2 py-0.5 font-mono text-[11px] text-cyan">
-          OpenBox v1.17.0
+          OpenBox v1.18.0
         </span>
       </div>
 

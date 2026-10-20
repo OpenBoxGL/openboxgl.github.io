@@ -32,7 +32,7 @@ Scan every library game for save paths. Returns `{"games": {"<game_id>": [paths]
 <ApiEndpoint method="POST" path="/api/saves/scan/apply">
 
 
-Add all scanned save paths to each game. Returns `{"updated": <count>, "games": <n>}`.
+Add all scanned save paths to each game. Returns `202 {"state": "queued", "job_id": "<id>"}` — the scan runs as a durable background job. Poll the job via `GET /api/v2/jobs`; the worker result carries `{"updated": <count>, "games": <n>}`.
 
 </ApiEndpoint>
 
@@ -65,7 +65,7 @@ Returns `{"restored": "<name>"}`.
 
 </ApiEndpoint>
 
-**1.18 unreleased.** This route was added after 1.17.0.
+**Added in 1.18.0.**
 
 <ApiEndpoint method="POST" path="/api/v2/resume/slot">
 
@@ -73,7 +73,7 @@ Stores the per-game save-state slot used by Quick Resume: `{"id"|"game_id", "slo
 
 </ApiEndpoint>
 
-**1.18 unreleased.** The save-manifest and restore-preview routes below were added after 1.17.0.
+**Added in 1.18.0.**
 
 <ApiEndpoint method="GET" path="/api/saves/manifest">
 
@@ -158,7 +158,7 @@ Merge statistics with the mounted cloud folder (`settings.cloud_folder`). No fol
 - Deleted local games are never resurrected.
 - The file is written atomically with mode `0o600`.
 
-Returns `{"path", "games", "merged", "synced_at"}`.
+Returns `202 {"state": "queued", "job_id": "<id>"}` — the merge runs as a durable background job. Poll the job via `GET /api/v2/jobs`; the worker result carries `{"path", "games", "merged", "synced_at"}`.
 
 </ApiEndpoint>
 
@@ -196,7 +196,7 @@ These actions affect local files and restore is destructive: run backups before 
 
 </ApiEndpoint>
 
-**1.18 unreleased.** This route was added after 1.17.0.
+**Added in 1.18.0.**
 
 <ApiEndpoint method="GET" path="/api/v2/highscores/table">
 
@@ -218,11 +218,11 @@ Exports matching `.hi` files plus a `highscores.json` manifest (format 1, `expor
 
 </ApiEndpoint>
 
-## Media queue and cache (1.18 unreleased)
+## Media queue and cache
 
 <ApiEndpoint method="GET" path="/api/media/queue">
 
-Returns the durable media download queue snapshot: `{"items": [...], "queue": [...], "running", "paused", "completed", "failed", "counts": {"total", "queued", "failed", "completed"}}`. `items` and `queue` carry the same normalized entries. The snapshot is read from `media-queue.json` and merged with the worker's in-process counters, so a restarted server still reports queued work.
+Returns the durable media download queue snapshot: `{"items": [...], "queue": [...], "running", "paused", "completed", "failed", "cancelled", "counts": {"total", "queued", "failed", "completed", "cancelled"}}`. `items` and `queue` carry the same normalized entries. The snapshot is read from `media-queue.json` and merged with the worker's in-process counters, so a restarted server still reports queued work.
 
 </ApiEndpoint>
 
@@ -318,7 +318,7 @@ Write credentials into emulator configs (RetroArch `cheevos_*`, Dolphin, PCSX2) 
 
 </ApiEndpoint>
 
-**1.18 unreleased.** The achievement refresh and override routes below were added after 1.17.0.
+**Added in 1.18.0.**
 
 <ApiEndpoint method="POST" path="/api/v2/achievements/refresh">
 

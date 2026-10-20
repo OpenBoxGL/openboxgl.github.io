@@ -136,6 +136,9 @@ APP_DIR/
 ├── server.port
 ├── server.token
 ├── openbox.log
+├── operations.json
+├── operations_items/
+├── native-host-recent
 ├── backups/
 ├── save-backups/
 ├── media/
@@ -171,7 +174,11 @@ The environment variable must be available before startup selects `DATA`. An `.e
  "queue": [],
  "notifications": [],
  "ui_state": {},
- "active_sessions": []
+ "active_sessions": [],
+ "trash": [],
+ "party_decks": [],
+ "emulator_settings": {},
+ "achievement_overrides": {}
 }
 ```
 
@@ -218,7 +225,7 @@ mutator
  -> in-memory cache refreshed
 ```
 
-Files below the compact serialization threshold are pretty-printed. A payload whose compact form exceeds 1 MiB (or library with >500 games) is written compactly. The file ends with a newline in either case. The backup is staged into a temporary file and committed via `os.replace()` before the primary replacement, ensuring the backup write is atomic without risking corruption to the existing `.bak`. The `chmod 0600` steps are POSIX ownership hardening; on Windows `os.chmod` only toggles the read-only attribute, so the data directory's ACL is what limits access there.
+Files below the compact serialization threshold are pretty-printed. A payload whose pretty-printed form exceeds 1 MiB (or library with >500 games) is written compactly. The file ends with a newline in either case. The backup is staged into a temporary file and committed via `os.replace()` before the primary replacement, ensuring the backup write is atomic without risking corruption to the existing `.bak`. The `chmod 0600` steps are POSIX ownership hardening; on Windows `os.chmod` only toggles the read-only attribute, so the data directory's ACL is what limits access there.
 
 ### Recovery
 
@@ -296,6 +303,7 @@ Storefront adapters inspect installed manifests and convert them into the same b
 | Heroic | Reads Epic, GOG, and Amazon JSON manifests. On Windows it reads them from `%APPDATA%\heroic` and launches the recorded executable directly. |
 | Lutris | Invokes the native or Flatpak Lutris command with a bounded subprocess timeout and classifies sources such as Xbox, EA, Ubisoft, and generic Lutris. Lutris is a Linux launcher, so this adapter has no Windows equivalent. |
 | Gameyfin | Uses the Gameyfin integration and distinguishes catalog entries from installed entries. |
+| GOG, EA app, Ubisoft Connect (Windows) | Reads the registry and each launcher's manifests, merges by a stable provider id, and launches the executable directly (GOG) or through the launcher URI (EA, Ubisoft). |
 | ROM and emulator layouts | Uses extension, directory, multi-disc, and platform rules in `parity_import.py`. |
 
 The catalog model can represent an owned or available storefront entry before its files are installed. Fields such as `store_catalog`, `store_installed`, and `owned` let the UI distinguish a catalog record from a launchable local path.
@@ -392,23 +400,25 @@ There are two practical limits to remember. First, although live session records
 
 ## Background jobs
 
-OpenBoxGL has a generic `JobManager` plus feature-specific progress maps. Treating them as one universal job API would misdescribe the current implementation.
+OpenBoxGL separates execution from bookkeeping: an in-process `JobManager` runs the work, and the durable **Operation Service** (`pkg/state/operations.py`) records it. Treating either alone as the whole job API would misdescribe the implementation.
 
-### Generic job manager
+### Job manager and durable operations
 
 `job_manager.py` uses a four-worker `ThreadPoolExecutor`. A logical job is keyed by name, while each submission has its own job ID. Submitting the same name while a job is queued or running returns the current job unless `replace=True`. Replacement sets the previous cancellation event and installs a fresh logical record.
 
-The normal states are:
+The operation record adds a dotted type, a state, progress, retry/resume policy, and a result or error. The normal operation states are:
 
 ```text
 queued -> running -> done
-         -> error
-         -> cancelled
+                  -> partial
+                  -> error
+         -> cancelling -> cancelled
+(on restart)       -> interrupted -> (resumed or retried)
 ```
 
-Retries are capped at five attempts and use exponential backoff from the configured base delay. Cancellation is cooperative. Setting the event does not terminate arbitrary code; the worker must observe the event or reach a cancellation-aware boundary. A stale worker cannot overwrite a newer replacement job because updates check the submission ID before changing the logical record.
+The service persists operations to `operations.json` and per-operation items to `operations_items/`, streams `job.queued`, `job.progress`, `job.cancelling`, `job.finished`, and `job.interrupted` over `/api/events`, and marks any operation left queued or running by a restart as `interrupted`. Interrupted and failed operations can be retried or resumed through `POST /api/v2/jobs/retry` and `/resume`; finished work is not duplicated.
 
-Job records and cancellation events are in memory. They disappear on restart, and queued work does not resume automatically. Workers may commit durable files or state before reporting `done`, so a restart can leave valid partial results even though the transient job record is gone.
+The manager's own job records and cancellation events are in memory. The durable operation is what survives a restart, and workers may commit durable files or state before reporting `done`, so a restart can leave valid partial results.
 
 ### Feature-specific status
 
@@ -434,15 +444,21 @@ OpenBoxGL has three distinct extension styles. Python plugins can change selecte
 
 Plugins are packages under `APP_DIR/plugins/`. `plugins.py` validates the manifest, plugin ID, supported hook names, entry-file containment, Python extension, package links, and package archive safety. Installation stages the package, moves an existing version into a backup area, swaps the new version into place, and restores the previous version if the swap fails. Removing a plugin moves it to a recoverable `.removed` directory.
 
-Supported hooks are:
+Supported hooks are the base hooks plus the capability hook required by a declared capability:
 
 | Hook | Called from | Contract |
 | --- | --- | --- |
 | `library` | Public library projection | May rewrite the games list. Cached briefly and skipped in safe mode. |
 | `before_launch` | After command and profile resolution | May rewrite `args` and `cwd`, or cancel. Invalid structure aborts launch. |
 | `after_session` | After session bookkeeping and stop event | Observes the completed session. Its return value is discarded. |
+| `command` | Palette and command surfaces | Runs an interactive command; its output is shown to the caller. |
+| `library_source` | Import surfaces | Publishes a library importer that returns games for the shared import flow. |
+| `events` | Lifecycle events | Receives the plugin lifecycle event stream. |
+| `storefront`, `metadata`, `media`, `stats`, `emulator`, `discovery` | Capability surfaces | Each backs a declared capability (catalog/import, metadata, media, stats, emulator settings, or discovery lists) and opts into the bounded host-service contract. |
 
-Each invocation starts `plugin_runner.py` as a separate Python process. JSON travels over stdin and stdout. Input and output are capped at 2 MiB, execution is limited to five seconds, and the child environment removes `PYTHONPATH`, `PYTHONHOME`, `LD_PRELOAD`, and `LD_LIBRARY_PATH` while setting `PYTHONNOUSERSITE=1`.
+Capability hooks receive a bounded data bag, plugin settings, and a credential store, and may request read-only library, achievement, profile, activity, leaderboard, catalog, metadata, and media services. The host executes those requests and re-invokes the hook once; there is no standalone `services` hook. Backups exclude the capability credential store.
+
+Each invocation starts `plugin_runner.py` as a separate Python process. JSON travels over stdin and stdout. Input and output are capped at 2 MiB, legacy hooks have a five-second budget (capability hooks get 10 to 30 seconds depending on the capability), and the child environment removes `PYTHONPATH`, `PYTHONHOME`, `LD_PRELOAD`, and `LD_LIBRARY_PATH` while setting `PYTHONNOUSERSITE=1`.
 
 This boundary isolates crashes, timeouts, malformed output, and nonzero exits from the main process. It does not sandbox a trusted local plugin. The child still has the user's privileges and can read or modify files available to that account. On Linux the runner is additionally wrapped in a bubblewrap sandbox when `bwrap` is available; on Windows `bwrap` does not exist, so plugins are skipped with a warning unless `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1`, which runs them unsandboxed as a plain subprocess. `OPENBOX_SAFE_MODE=1` skips plugin hooks and disables the webhook dispatcher, making it the first diagnostic setting for plugin-caused failures.
 

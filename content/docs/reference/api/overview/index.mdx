@@ -70,21 +70,22 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 | 403 | `{"error":"Request host is not allowed.","code":"BAD_HOST","request_id":"…"}` | Host header mismatch or foreign network host rejected |
 | 429 | `{"error":"Too many authentication failures. Try again later.","code":"RATE_LIMITED","retry_after":n}` | Rate limited after repeated auth failures (`Retry-After` header sent) |
 | 400 | `{"error": "<message>", "code": "BAD_REQUEST", "request_id": "…"}` | Validation failures, missing prerequisites surfaced by handlers, provider errors, unknown queue/notification actions, malformed payloads |
-| 404 | `{"error":"Not found","code":"ROUTE_NOT_FOUND","request_id":"…"}` | Unknown route after the request body has been accepted (for POST) |
+| 404 | `{"error":"Not found","code":"ROUTE_NOT_FOUND","request_id":"…"}` | Unknown route. GET checks this before authentication; POST checks it after the body is accepted. |
 | 404 | `GAME_NOT_FOUND` / `MEDIA_NOT_FOUND` / `DOCUMENT_NOT_FOUND` / `PLATFORM_DOCUMENT_NOT_FOUND` / `BADGE_NOT_FOUND` | Lookups that miss |
-| 409 | `{"error":"Download the LaunchBox metadata database first."}` | Metadata routes before the database exists |
+| 409 | `{"error":"Download the LaunchBox metadata database first.","code":"CONFLICT","request_id":"…"}` | Metadata routes that need the LaunchBox database (for example `GET /api/metadata/search`) before it is downloaded |
 | 503 | `{"error":"OpenBox library data needs recovery before this operation can continue.","code":"STATE_UNAVAILABLE"}` | Corrupt state file |
+| 503 | `{"error":"Server is busy. Close an unused tab and try again.","code":"SSE_BUSY","retry_after":5}`, with `Retry-After: 5` | `GET /api/events` already has its 16 subscribers |
 | 500 | `{"error":"Unexpected server error. Copy the diagnostic log from Settings and include it in your report.","code":"INTERNAL_ERROR"}` | Unhandled exception |
 
 ## Versioned surface
 
 - **Frozen v1 Contract (`/api/v1/*`)**: Stable, frozen remote contract (enforced via `v1_contracts.json`, currently 61 routes; the contract pins path + methods, per-route params are manually verified).
 - **Base-only routes (`/api/*` without a `/api/v1/*` alias)**: local-workflow routes such as `GET /api/emulators/recommend`, `GET /api/plugins/catalog`, `POST /api/webhooks/test`, `POST /api/plugins/install|toggle|remove`, `/api/wine/*`, and `/api/faugus/*` are documented on the group pages as `/api/*` with no v1 alias. Treat them as local operations, not part of the frozen remote contract; v1 aliases are added only when a route becomes a stable remote dependency.
-<Callout type="warning" title="1.17.0 is the current release; 1.18 is unreleased">
-The application checkout is ahead of the 1.17.0 release. The **49 routes added after 1.17.0** are documented in the group pages with a **“1.18 unreleased”** marker; they are present in the current source tree and are not part of the 1.17.0 release. The current release's own six routes are on [API 1.17 additions](/reference/api/one-seventeen/).
+<Callout type="note" title="1.18.0 is the current release">
+OpenBox 1.18.0 adds **49 method and path pairs across 43 routes** without removing or changing a v1 route. They are documented in the group pages and collected on [API 1.18 additions](/reference/api/one-eighteen/), with request bodies, response shapes, validation, and state effects. The previous release's six routes remain on [API 1.17 additions](/reference/api/one-seventeen/).
 </Callout>
 
-- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through 1.17.0, plus the unreleased 1.18 build:
+- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through 1.18.0:
   - **Setup Center**: `POST /api/v2/setup/preview`, `GET /api/v2/setup/preview`, `GET /api/v2/setup/preview/items`, `POST /api/v2/setup/preview/decisions`, `POST /api/v2/setup/preview/revalidate`, `POST /api/v2/setup/commit`, `GET /api/v2/setup/summary`
   - **Launch Doctor**: `POST /api/v2/launch/preflight`, `POST /api/v2/launch/preflight/batch`
   - **Emulator Registry**: `GET /api/v2/emulators/registry` (with `?health=1` for BIOS/firmware/core status)
@@ -98,9 +99,9 @@ The application checkout is ahead of the 1.17.0 release. The **49 routes added a
   - **Constellation** (v1.9.0): `GET /api/v2/library/constellation` (capped deterministic nodes/edges)
   - **Wrapped + Timeline + Mastery** (v1.9.0): `GET /api/v2/insights/wrapped?year=YYYY`, `GET /api/v2/history/timeline?days=90`, `GET /api/v2/insights/mastery`
   - **Game Night** (v1.9.0): `POST /api/v2/party/queue`, `GET /api/v2/party/queue`, `POST /api/v2/party/next`
-  - **LaunchBox Migration** (v1.10.0): `POST /api/v2/import/launchbox/preview`, `POST /api/v2/import/launchbox/apply`
-  - **Manual Entries** (v1.10.0): `POST /api/v2/library/manual-entry`, `POST /api/v2/library/manual-entry/update`, `POST /api/v2/library/manual-entry/convert`
-  - **Causal Catalog Sync** (v1.10.0): `POST /api/v2/library/sync/preview`, `POST /api/v2/library/sync/apply`, and `POST /api/v2/library/sync/publish` with `{"protocol":"v3"}`. Preview is read-only; apply requires the reviewed plan and creates a recovery backup; publish acknowledges the local outbox after a stale-state check. The old full-library publish payload and `POST /api/v2/library/sync/pull` return `503 LIBRARY_SYNC_UNAVAILABLE` before mutation.
+  - **LaunchBox Migration** (v1.9.0): `POST /api/v2/import/launchbox/preview`, `POST /api/v2/import/launchbox/apply`
+  - **Manual Entries** (v1.9.0; update and convert in v1.10.0): `POST /api/v2/library/manual-entry`, `POST /api/v2/library/manual-entry/update`, `POST /api/v2/library/manual-entry/convert`
+  - **Causal Catalog Sync** (publish and pull from v1.9.0; preview and apply from v1.10.0): `POST /api/v2/library/sync/preview`, `POST /api/v2/library/sync/apply`, and `POST /api/v2/library/sync/publish` with `{"protocol":"v3"}`. Preview is read-only; apply requires the reviewed plan and creates a recovery backup; publish acknowledges the local outbox after a stale-state check. The old full-library publish payload and `POST /api/v2/library/sync/pull` return `503 LIBRARY_SYNC_UNAVAILABLE` before mutation.
   - **SQLite Search** (v1.9.0): `GET /api/v2/library/search?q=&limit=` (FTS5 or LIKE fallback; `OPENBOX_ENABLE_SQLITE_READ=1` opts in, and the read model self-enables at 5,000+ games since v1.12.0 unless opted out)
   - **Quick Resume, Moments, and session context** (v1.11.0): `GET /api/v2/resume/status`, `POST /api/v2/resume`, `POST /api/v2/resume/discard`, `GET /api/v2/moments`, `POST /api/v2/moments`, `POST /api/v2/moments/resume`, `POST /api/v2/moments/update`, `POST /api/v2/moments/delete`, `GET /api/v2/sessions/recap`, `GET /api/v2/clips`, `POST /api/v2/clips/capture`, `GET /api/v2/reels`, and `POST /api/v2/reels/create`. Resume is adapter-capability and state-fingerprint aware; clips use an optional OBS replay buffer with a local screenshot fallback; reel creation is a durable local operation.
   - **Memory gallery** (v1.11.0): `GET /api/v2/memories`, `GET /api/v2/memories/status`, `GET /api/v2/memories/media`, and `POST /api/v2/memories/import`. Import is opt-in and queued; the read routes never scan configured folders themselves.
@@ -126,8 +127,11 @@ The application checkout is ahead of the 1.17.0 release. The **49 routes added a
   - **Per-game RetroArch core** (v1.16.1): `GET /api/v2/launch/cores` (installed cores) and `POST /api/v2/launch/core` (bind one to a game; an empty core restores the definition default).
   - **Game Night decks** (v1.17.0): `GET`/`POST /api/v2/party/decks` list and upsert a named deck (players, minutes, filter query, capped at 20), and `POST /api/v2/party/decks/delete` removes one by name. The existing party queue route accepts an eight-character seed so the same seed and library reproduce the same draw.
   - **Native Windows storefront imports** (v1.17.0): `POST /api/v2/import/gog`, `POST /api/v2/import/ea`, and `POST /api/v2/import/ubisoft` discover installed games from the launchers' registry entries and manifests. Discovery is offline and read-only; merging is by stable provider id. On non-Windows hosts the routes return zero games.
+  - **Platform, media, saves, and plugin services** (v1.18.0): `POST /api/v2/platform/rename` and `POST /api/v2/platform/delete`; `GET /api/media/queue` with `POST /api/media/queue/pause|resume|cancel|retry` and `POST /api/media/cache/cleanup`; `GET /api/saves/manifest` and `POST /api/saves/restore/preview`; `POST /api/v2/resume/slot`; `POST /api/v2/achievements/refresh` and `POST /api/v2/achievements/override`; `GET /api/v2/highscores/table`; `POST /api/v2/bulk/find-replace`; `GET`/`POST /api/v2/plugins/credentials`, `GET`/`POST /api/v2/plugins/data`, `GET /api/v2/plugin-stats`, `POST /api/v2/plugin-stats/refresh`, and `POST /api/v2/plugins/repair`.
+  - **Storefronts, credentials, imports, and native surfaces** (v1.18.0): `GET /api/v2/storefronts`, `GET /api/v2/storefront/status`, `POST /api/v2/storefront/scan`, `POST /api/v2/storefronts/plugin/catalog`, and `POST /api/v2/storefronts/plugin/import`; `GET`/`POST /api/v2/integration-tokens`, `POST /api/v2/integration-tokens/remove`, `GET`/`POST /api/v2/integrations/steam`, `POST /api/v2/integrations/steam/test`, and `POST /api/v2/integrations/steam/refresh`; `POST /api/v2/import/pico8`, `POST /api/v2/import/msu1`, and `POST /api/v2/import/whdload`; `GET`/`POST /api/v2/emulators/settings`; `GET /api/v2/netplay/lobby`; `GET /api/native/battery`; `POST /api/v2/steam/action` and `POST /api/game/store-action`; and `POST /api/v2/metadata/candidates/apply`.
+  - **Presentation assets** (v1.18.0): `GET /api/bigbox/startup-video`, `GET`/`POST /api/platform/videos`, `GET /api/platform/video`, `GET /api/theme-sounds`, and `GET /api/theme-asset`.
 
-See [API 1.11 additions](/reference/api/one-eleven/), [API 1.12 additions](/reference/api/one-twelve/), [API 1.14 additions](/reference/api/one-fourteen/), [API 1.16 additions](/reference/api/one-sixteen/), and [API 1.17 additions](/reference/api/one-seventeen/) for request bodies, response examples, optional-tool caveats, and stale-plan handling.
+See [API 1.11 additions](/reference/api/one-eleven/), [API 1.12 additions](/reference/api/one-twelve/), [API 1.14 additions](/reference/api/one-fourteen/), [API 1.16 additions](/reference/api/one-sixteen/), [API 1.17 additions](/reference/api/one-seventeen/), and [API 1.18 additions](/reference/api/one-eighteen/) for request bodies, response examples, optional-tool caveats, and stale-plan handling.
 - **Locale files** (public, no auth): `GET /locales/{en,es,de,fr,pt}.json` — serves JSON locale files for the i18n system (v1.7.2)
 
 ### Machine-Readable Error Codes
@@ -137,8 +141,7 @@ See [API 1.11 additions](/reference/api/one-eleven/), [API 1.12 additions](/refe
 | `PREVIEW_NOT_FOUND` / `PREVIEW_STALE` / `PREVIEW_EXPIRED` / `PREVIEW_LIBRARY_CHANGED` | Setup preview session expired, stale, or invalidated by a library change |
 | `PREVIEW_LIMIT_EXCEEDED` / `PREVIEW_ENTRY_LIMIT_EXCEEDED` | Preview exceeds the entry or payload limit |
 | `UNRESOLVED_CANDIDATES` | Commit attempted while ambiguous candidates remain unresolved |
-| `INVALID_DECISION` | Invalid platform or emulator assignment submitted |
-| `EMULATOR_REQUIRED` / `AMBIGUOUS_PLATFORM` / `MISSING_BIOS` | Launch Doctor preflight failure conditions |
+| `EMULATOR_REQUIRED` / `AMBIGUOUS_PLATFORM` / `BIOS_MISSING` | Launch Doctor preflight check codes (returned in `checks`, not as HTTP error codes) |
 | `JOB_STATE_CONFLICT` | Durable operation scheduling or state conflict |
 | `JOB_NOT_CANCELLABLE` / `JOB_NOT_RESUMABLE` | Operation transition disallowed in current state |
 | `LIBRARY_SYNC_UNAVAILABLE` | Legacy full-library publish/pull is disabled; use the v3 preview/apply/publish catalog transport |

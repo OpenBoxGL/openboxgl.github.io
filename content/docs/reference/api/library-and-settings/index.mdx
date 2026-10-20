@@ -75,14 +75,14 @@ Apply the same change to many games. Body: `{"ids": [...], "changes": {...}}`. A
 - `ids` accept numeric indexes or stable game ids, including legacy aliases.
 - `tags` cannot be combined with `tags_add`/`tags_remove`; a tag cannot be added and removed in the same request.
 - `favorite`/`hidden`/`reset_stats` must be booleans; `play_count` and `playtime_seconds` must be non-negative integers; `progress` must be a known value; `rating` between 0 and 5.
-- `reset_stats: true` clears `play_count`, `playtime_seconds`, and `last_played` on each selected game. Returns `{"updated": <count>}`.
+- `reset_stats: true` clears `play_count`, `playtime_seconds`, and `last_played` on each selected game. Returns `{"updated": <count>, "media_moved": <count>, "media_errors": [...]}`; the media counters cover the optional media migration and each `media_errors` entry names the source platform and the error.
 
 </ApiEndpoint>
 
 <ApiEndpoint method="POST" path="/api/games/bulk-wizard">
 
 
-Same as bulk edit but validates against the bulk wizard fields (`platform`, `genre`, `progress`, `rating`, `favorite`, `hidden`, `esrb`, `custom_fields`). The wizard route is for guided edits and does not accept `reset_stats`, play counts, raw tags, or arbitrary fields. Returns `{"updated": <count>, "fields": [...]}`.
+Same as bulk edit but validates against the bulk wizard fields (`platform`, `genre`, `progress`, `rating`, `favorite`, `hidden`, `esrb`, `custom_fields`). The wizard route is for guided edits and does not accept `reset_stats`, play counts, raw tags, or arbitrary fields. Returns `{"updated": <count>, "fields": [...], "media_moved": <count>, "media_errors": [...]}`.
 
 </ApiEndpoint>
 
@@ -109,7 +109,7 @@ Partial save: merge the posted keys into existing settings and validate. See [Co
 
 </ApiEndpoint>
 
-## Integration tokens and Steam (1.18 unreleased)
+## Integration tokens and Steam
 
 <ApiEndpoint method="GET" path="/api/v2/integration-tokens">
 
@@ -217,7 +217,7 @@ The session history as a chronological timeline rather than a newest-first list,
 
 </ApiEndpoint>
 
-**1.18 unreleased.** The netplay lobby browser was added after 1.17.0.
+**Added in 1.18.0.**
 
 <ApiEndpoint method="GET" path="/api/v2/netplay/lobby">
 
@@ -241,11 +241,11 @@ Launch an application/version/document extra: `{"id"|"game_id", "kind": "applica
 
 </ApiEndpoint>
 
-## Store actions (1.18 unreleased)
+## Store actions
 
 <ApiEndpoint method="POST" path="/api/v2/steam/action">
 
-Opens a Steam store action for an app id: `{"app_id": "440", "action": "install"|"repair"}`. `repair` opens the validate dialog instead of install. The app id must be numeric and below 100,000,000; the handler opens `steam://install/<id>` or `steam://validate/<id>`. Returns `{"app_id", "action"}`; a missing or unopenable Steam handler raises `400`.
+Opens a Steam store action for an app id: `{"app_id": "440", "action": "install"|"repair"}`. `repair` opens the validate dialog instead of install. The app id must be a positive integer below 100,000,000; the handler opens `steam://install/<id>` or `steam://validate/<id>`. Returns `{"app_id", "action"}`; a missing or unopenable Steam handler raises `400`.
 
 </ApiEndpoint>
 
@@ -331,7 +331,7 @@ Removes the manual playtime entry at positional `index` in the game's session li
 
 </ApiEndpoint>
 
-## Bulk edit and platform maintenance (1.18 unreleased)
+## Bulk edit and platform maintenance
 
 <ApiEndpoint method="POST" path="/api/v2/bulk/find-replace">
 

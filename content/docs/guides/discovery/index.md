@@ -7,7 +7,7 @@ The **Discovery** button (top bar) curates your library into ready-to-play views
 
 <Callout type="note" title="How discovery recomputes automatically">
 
-Discovery doesn't store pre-computed lists. Each click regenerates the six views by filtering and sorting against `play_count`, `playtime_seconds`, `last_played`, and rating, the same counters used for session tracking. That means a game moved from "Continue playing" to the bottom of "Highly rated" the moment it gets marked Completed, without any manual refresh. See [Sessions, saves, and backups](/guides/sessions-saves-and-backups/) for what feeds these counters.
+Discovery doesn't store pre-computed lists. Each click regenerates the seven built-in views by filtering and sorting against `play_count`, `playtime_seconds`, `last_played`, `achievement_sources`, and rating, the same counters used for session tracking. That means a game moved from "Continue playing" to the bottom of "Highly rated" the moment it gets marked Completed, without any manual refresh. See [Sessions, saves, and backups](/guides/sessions-saves-and-backups/) for what feeds these counters.
 
 </Callout>
 
@@ -20,9 +20,12 @@ Discovery doesn't store pre-computed lists. Each click regenerates the six views
 | Continue playing | In-progress games you returned to recently |
 | Highly rated | Top-rated games in your library |
 | Short sessions | Games whose past sessions were short, good for a quick play |
+| Games with achievements | Games that have an achievement set with a total or earned count; includes RetroAchievements, Steam, and plugin sources |
 | Random picks | A rotating set of surprise titles |
 
-Each view lists up to 12 games and is regenerated as the library changes.
+Each view lists up to 12 games and is regenerated as the library changes. **Games with achievements** uses the same `achievement_sources` totals the achievement tabs show, then sorts by RetroAchievements progress and name, so a game does not need a RetroAchievements match to appear.
+
+Enabled discovery plugins add their own shelves to the same dialog. A plugin may publish up to ten lists of up to 50 game ids each; they appear under their declared names, and a failing plugin is skipped rather than breaking the built-in views. The response keys are `plugin:<plugin_id>:<list_id>`, with labels in `discovery_names`.
 
 ## Explorer rail
 
@@ -61,4 +64,4 @@ The top pick renders with an explanatory reason plus quick **Launch**, **Details
 
 ## Constellation
 
-**Tools → Constellation** opens a full-screen, pan/zoomable relationship graph of your library. Nodes are games; edges link shared series, developers, publishers, genres, platform family, and co-play history, so clusters reveal what your collection is really about. Clicking a node selects it in the library. Backed by `GET /api/v2/library/constellation`.
+**Tools → Game connections** opens a full-screen, pan/zoomable relationship graph of your library. Nodes are games; edges link shared series, developers, publishers, genres, platform family, and co-play history, so clusters reveal what your collection is really about. Clicking a node selects it in the library. Backed by `GET /api/v2/library/constellation`.

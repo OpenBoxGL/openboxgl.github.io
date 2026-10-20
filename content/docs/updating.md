@@ -11,6 +11,13 @@ The Tk interface was removed as of 1.0.0; the app opens a native WebKitGTK windo
 
 The one behavioral change to expect is the window itself: instead of a browser tab, `openbox` opens the native window. `openbox --web` still opens the loopback web UI in a browser for development, and if WebKitGTK is missing the launcher falls back to a chrome-less app window rather than failing.
 
+## Upgrading from 1.17.x
+
+1.18.0 installs over any 1.17.x release. No v1 API route is removed or changed, and the library schema stays at version 6, so an existing library opens without a re-import or re-download. Two behavior changes are worth knowing:
+
+- `storefront_auto_import` entries become `{enabled, platform, include_uninstalled}` objects. Older boolean entries keep working until the next settings save migrates them, so an enabled store keeps importing across the upgrade.
+- Optional IGDB, ScreenScraper, SteamGridDB, Gameyfin, and RetroAchievements tokens are stored in `integration_tokens` and kept out of the public settings projection; the settings API returns only masked values. New 1.18.0 settings arrive with their defaults.
+
 ## Which installs get the built-in updater
 
 | Installation | Updater | How to update |
@@ -37,7 +44,7 @@ That is why the Settings dialog says "The current AppImage will be retained as a
 
 ### What you see
 
-- **Update status line** in Settings shows the running version and the install kind: an AppImage ("AppImage"), a Windows portable install, or a source checkout.
+- **Update status line** in Settings shows the running version and an install label: `· AppImage` for an AppImage, or `· source checkout` otherwise.
 - After a successful install, the status line reports the installed version and the backup path. **You must restart OpenBoxGL to use the update**; the running process still executes the old file (on Windows the swap only happens once the app exits).
 - The desktop entry does not change because it points at the same path; only the file contents at that path were replaced. On Windows the Start Menu shortcut points at `openbox.cmd` inside the install tree, which the swap replaces in place.
 
@@ -94,7 +101,7 @@ mv OpenBox-x86_64.previous.AppImage OpenBox-x86_64.AppImage
 chmod +x OpenBox-x86_64.AppImage
 ```
 
-then report the failure with the diagnostic log (Settings > Copy diagnostic log), which redacts tokens and passwords but can include game names and file paths.
+then report the failure with the diagnostic log (Settings > Advanced > Copy diagnostic log), which redacts tokens and passwords but can include game names and file paths.
 
 ## Data safety during updates
 

@@ -97,7 +97,7 @@ All three return `{"added": <n>, "found": <n>, "errors": [...]}`:
 
 For EA and Ubisoft, a game whose launcher has been uninstalled stays in the library but cannot launch until the handler is registered again. GOG IDs, EA content IDs, and Ubisoft install IDs are validated as digits, install directories must exist, and an executable taken from a GOG manifest must stay inside that game's install directory.
 
-In 1.17.0 these imports are manual. The unreleased 1.18 build adds the opt-in **Auto-import GOG on startup**, **Auto-import EA app on startup**, and **Auto-import Ubisoft Connect on startup** checkboxes in the Windows Storefronts dialog, off by default. `include_uninstalled` stays false for these three sources, so owned-but-uninstalled catalogs are still not imported. The ordinary storefront scan (`POST /api/v2/storefront/scan`) can refresh installed state for the built-in ids after the first import.
+In 1.17.0 these imports are manual. OpenBox 1.18.0 adds the opt-in **Auto-import GOG on startup**, **Auto-import EA app on startup**, and **Auto-import Ubisoft Connect on startup** checkboxes in the Windows Storefronts dialog, off by default. `include_uninstalled` stays false for these three sources, so owned-but-uninstalled catalogs are still not imported. The storefront scan added in 1.18.0 (`POST /api/v2/storefront/scan`) can refresh installed state for the built-in ids after the first import; see [API 1.18 additions](/reference/api/one-eighteen/).
 
 ## Related changes in 1.17.0
 
@@ -108,7 +108,7 @@ In 1.17.0 these imports are manual. The unreleased 1.18 build adds the opt-in **
 ## Known limits in 1.17.0
 
 - Xbox PC package scanning and owned-but-uninstalled GOG/EA/Ubisoft catalogs are not imported.
-- Native storefront imports are manual in 1.17.0; opt-in startup auto-import for them arrives in the unreleased 1.18 build.
+- Native storefront imports are manual in 1.17.0; 1.18.0 adds opt-in startup auto-import for them.
 - Provider ids, price paid, and decks stay local. They do not cross the library-sync protocol, and Time Machine does not journal price changes.
 - Cost totals are grouped by currency and are not converted. A rate is shown only for a priced game with at least one minute of playtime.
 - GOG games launch their executable directly, so Galaxy overlay and cloud saves are not started.

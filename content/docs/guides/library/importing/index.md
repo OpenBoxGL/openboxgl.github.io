@@ -13,7 +13,7 @@ Each imported game gets a `game_id` derived from a SHA-256 over its *identity* (
 
 ## Library Setup Center (Recommended)
 
-Click **Set up library** (`#setupLibraryButton`) in the top bar to launch the guided **Library Setup Center**:
+Click **Add games → Guided setup…** in the top bar to launch the guided **Library Setup Center**. Its quick path is six steps — **Where are your games?**, **Check what we found**, **Review matches**, **Choose emulators**, **Import games**, **You're done** — with **Welcome** and **Artwork & details** available behind **Show advanced options**:
 
 1. **Preview Before Commit**: Setup Center performs a read-only scan of folders and storefronts (`POST /api/v2/setup/preview`). No changes are written to `library.json` until you approve them.
 2. **Storytelling Progress**: Scans report discovered games, platforms, and actionable decision counts.
@@ -22,14 +22,14 @@ Click **Set up library** (`#setupLibraryButton`) in the top bar to launch the gu
 
 ## Direct Folder Import
 
-Click **Import Folder** in the top bar (or **Add Game** for a single entry) and select an absolute path. OpenBoxGL scans recursively by extension and assigns a platform from the extension table:
+Click **Add games → Scan a folder…** (or **Add one game…** for a single entry) and select an absolute path. OpenBoxGL scans recursively by extension and assigns a platform from the extension table:
 
 - `.nes` NES, `.sfc`/`.smc` SNES, `.gba` Game Boy Advance, `.gb` Game Boy, `.gbc` Game Boy Color, `.n64`/`.z64`/`.v64` Nintendo 64, `.nds` Nintendo DS, `.3ds`/`.cia` Nintendo 3DS, `.wbfs`/`.wia`/`.wad` Wii / WiiWare, `.rvz`/`.gcm`/`.gcz` GameCube, `.xci`/`.nsp` Nintendo Switch, `.pbp` PSP, `.vpk` PlayStation Vita, `.xex` Xbox 360, `.cue`/`.chd`/`.ciso`/`.m3u` Disc image
 - `.sh`, `.appimage`, `.exe`, `.rom`, `.zip`, `.7z`, `.rar` also import as-is.
 
 ### Ambiguous Extension Resolution
 
-Per ADR 0012, shared disc extensions (such as `.iso`) no longer guess platforms silently. OpenBox flags ambiguous multi-platform extensions (`AMBIGUOUS_PLATFORM`) and presents explicit platform candidates for user resolution in Setup Center and Launch Doctor. Since 1.16.1, `.bin`, `.cue`, and `.iso` files that several systems share **wait for you to choose** in the import wizard, and a file cannot import until it has a platform — a guess is never made on your behalf.
+Per ADR 0012, shared disc extensions (such as `.iso`) no longer guess platforms silently. OpenBox flags ambiguous multi-platform extensions (`AMBIGUOUS_PLATFORM`) and presents explicit platform candidates for user resolution in Setup Center and the launch check. Since 1.16.1, `.bin`, `.cue`, and `.iso` files that several systems share **wait for you to choose** in the import wizard, and a file cannot import until it has a platform — a guess is never made on your behalf.
 
 When several files share a base name with a `(Disc 1)`, `(Disc 2)`, `(CD 1)`, `(Side A)` style marker, they are grouped into one entry with a generated `.m3u` and the game name without the disc marker. Since 1.16.0 OpenBox **never overwrites a playlist it did not create**: if you had made your own `.m3u` next to the disc images, an import leaves it alone and imports the game exactly once, rather than replacing your playlist and losing the game it pointed to. When several files map to the same platform and name, only the best-ranked ROM is imported; the runner-up candidates are kept on the entry as `version_candidates`. Ranking prefers clean regional names (World and USA above Europe, then Japan), penalizes `(Beta)`, `(Proto)`, `(Demo)`, `(Sample)`, `(Unl)`, `(Pirate)`, `(Hack)`, and `(Translation)` tags, favors `.chd`, `.cue`, and `.m3u`, and treats a missing or unreadable file as the worst score.
 
@@ -40,6 +40,8 @@ You can also drag a folder onto the **drop zone** ("Drop ROM folders or game fil
 ## Steam
 
 Click **Import Steam**. OpenBoxGL reads installed libraries from standard Steam roots: `~/.local/share/Steam`, `~/.steam/steam`, and `~/.var/app/com.valvesoftware.Steam/.local/share/Steam`, plus every library folder listed in `steamapps/libraryfolders.vdf`. It parses `appmanifest_*.acf` files for the App ID, name, and install directory, and launches through `steam -applaunch {app_id}` (or the Flatpak equivalent, falling back to `xdg-open steam://rungameid/{app_id}`).
+
+Each imported Steam game records whether its install folder still exists. A game whose folder has gone missing shows a red **Missing** badge and turns its Play button into **INSTALL**, while an installed game offers **Verify Steam files** (`steam://validate/<id>`). See [Storefront Manager](/guides/storefront-manager/) for both states and how a rescan refreshes them.
 
 ## Heroic
 
@@ -56,7 +58,7 @@ On Windows, click **Import GOG**, **Import EA app**, or **Import Ubisoft Connect
 - **GOG** runs the game executable directly, with the executable required to stay inside the install folder. Galaxy overlay and Galaxy cloud saves do not start.
 - **EA** launches through `origin2://game/launch`; **Ubisoft** launches through `uplay://launch/<id>/0`. If the launcher is uninstalled, the game stays in the library but will not launch until the handler returns.
 - A malformed entry or missing install directory is reported in the import's `errors` and skipped. The discovery is read-only and offline.
-- These imports cover **installed games only**. Owned-but-uninstalled catalogs and Xbox PC packages are not imported. In the unreleased 1.18 build each source has an opt-in **Auto-import … on startup** checkbox, off by default; 1.17.0 has no such checkbox.
+- These catalog imports cover **installed games only**, and Xbox PC packages are not imported. Each source does have an opt-in **Auto-import on startup** checkbox (off by default), which re-runs the same installed-only scan every launch.
 
 ## Faugus Launcher
 
@@ -68,15 +70,27 @@ Click **Import Arcade**, then enter the ROM folder, the source (**MAME** or **Fi
 
 ## ScummVM, RPCS3, Vita3K
 
-From the **Storefronts** dialog: **Import ScummVM** reads `scummvm.ini` and imports each configured game with its section ID as the launch target. **Import RPCS3** reads `dev_hdd0/game` folders and titles from `PARAM.SFO`. **Import Vita3K** reads `ux0/app` folders and titles, preferring the `Title` value from `param.sfo` when it differs from the folder ID.
+From the **Storefront Manager** dialog: **Import ScummVM** reads `scummvm.ini` and imports each configured game with its section ID as the launch target. **Import RPCS3** reads `dev_hdd0/game` folders and titles from `PARAM.SFO`. It also reads RPCS3's `games.yml` — and the `games:` list of `config.yml`, in both the native and Flatpak config directories — so external game folders and `.iso` files installed outside the virtual HDD are imported too; an inaccessible entry is reported and skipped without aborting the scan. **Import Vita3K** reads `ux0/app` folders and titles, preferring the `Title` value from `param.sfo` when it differs from the folder ID.
+
+## PICO-8, MSU-1, and WHDLoad
+
+Three small-format importers live in the same Tools > Imports & extras group:
+
+- **Import PICO-8** scans a folder recursively for `.p8` carts and exported `.p8.png` builds, importing each as a PICO-8 title on the `pico8-pico8` emulator adapter.
+- **Import MSU-1** pairs a SNES ROM with its sibling `*.msu` audio-pack folder. The `.msu` folder is what makes the ROM an MSU-1 title; a pack with no matching `.sfc`/`.smc` ROM is reported instead of imported. Each entry records `msu1: true` and its `msu_path`.
+- **Import WHDLoad** scans an Amiga folder for `.lha`, `.slave`, and `.hdf` installs, skipping the WHDLoad system drawers.
+
+Each is also a `POST /api/v2/import/pico8`, `/msu1`, and `/whdload` route taking the folder to scan.
 
 ## Gameyfin
 
-The **Storefronts** dialog configures a Gameyfin server URL, optional username and password, and a local install folder (empty by default; the field shows a `~/Games/Gameyfin` placeholder). **Test Gameyfin connection** lists the server's games and download providers. The catalog marks each title owned or installed; **Import owned / uninstalled** adds owned entries as placeholders with a note, and the Play button on such an entry becomes **INSTALL**, downloading through the configured provider into the install folder. Install staging protects existing files: a failed download keeps the previous copy, and uninstall refuses paths outside the install directory.
+The **Storefront Manager** dialog configures a Gameyfin server URL, optional username and password, and a local install folder (empty by default; the field shows a `~/Games/Gameyfin` placeholder). **Test Gameyfin connection** lists the server's games and download providers. The catalog marks each title owned or installed; **Import owned / uninstalled** adds owned entries as placeholders with a note, and the Play button on such an entry becomes **INSTALL**, downloading through the configured provider into the install folder. Install staging protects existing files: a failed download keeps the previous copy, and uninstall refuses paths outside the install directory.
+
+Gameyfin honors the same exclusion rules as every other storefront: a per-title **import exclusion** keeps a game out of future imports and rescans, and the shared **excluded platforms** list and **include owned-but-uninstalled** option apply to its startup auto-import.
 
 ## Storefront Manager
 
-The **Storefronts** dialog also browses owned versus installed catalogs for Steam, Heroic, Lutris, and Gameyfin, plus installed GOG, EA app, and Ubisoft Connect games on Windows. Steam's owned list comes from `userdata/*/config/localconfig.vdf`; Heroic's from `store_cache` library JSON. **Import installed** and **Import owned / uninstalled** buttons import either set. Per-source **Auto-import on startup** checkboxes cover Steam, Heroic, Epic, Lutris, Gameyfin, and the Windows-only GOG, EA app, and Ubisoft Connect (the last three are an unreleased 1.18 addition, off by default), and a background worker also re-imports watched folders every 10 seconds, backing off to 5 minutes when the library cannot be read. The native Windows sources are installed-only and set `include_uninstalled` false. Per-source import exclusions let you keep specific titles out of future rescans.
+The **Storefront Manager** dialog also browses owned versus installed catalogs for Steam, Heroic, Lutris, and Gameyfin, plus installed GOG, EA app, and Ubisoft Connect games on Windows, with **Import installed** and **Import owned / uninstalled** buttons for either set. Per-source import exclusions keep specific titles out of future rescans. The dialog, its per-source auto-import options, and storefront scanning are covered in [Storefront Manager](/guides/storefront-manager/).
 
 ## Failure recovery
 

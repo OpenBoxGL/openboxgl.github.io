@@ -27,6 +27,8 @@ make check      # scripts/check_tests.py runs the repository's current lint, run
 
 Each `test_*.py` is a standalone contract test (plain asserts or unittest) run directly with `python3 -B <file>`. Iterate on one module with `python3 -B tests/test_catalog.py`. Packaging checks use `./build_appimage.sh` and `python3 -B tests/test_packaging.py`. All tests must pass on CI before a PR merges.
 
+The version-sync gate (`scripts/check_version_sync.py`, also `make version-check`) compares the single version declared in `updates.py` against every published spot: the README release badge and its installer `VERSION=` line, the latest release in `openbox.metainfo.xml`, the lead paragraph of `docs/PARITY.md`, the advertised `current release is [vX.Y.Z]` in the bug report template, the `SUPPORT.md`, `SECURITY.md`, and Flathub checklist markers, the `CHANGELOG.md` section for that version, and the shipped-release line in `docs/README.md`. A stale claim in any of them fails the gate, so bump them together with `updates.py`.
+
 ## Windows development
 
 On Windows the source tree, tests, and configuration steps are the same, but there is no bash or `make`, so the test and gate commands below replace the Linux ones above. Python 3.10 or newer is required, as `python.exe` or `py.exe` on `PATH` (CI runs the Windows job on 3.12); there is no `python3` on Windows — the name is a Microsoft Store alias that does not run scripts — so the examples use `python`.
@@ -77,11 +79,11 @@ powershell -ExecutionPolicy Bypass -File scripts\build_native_host_windows.ps1
 
 ## Plugins
 
-Plugins require a manifest (`plugin.json` with `id`, `name`, `version`, optional `entry`, `hooks`) and an entry Python module that exports one function per declared hook (each takes the decoded JSON payload and returns a dict; the runner handles stdin/stdout). Supported hooks: `library`, `before_launch`, `after_session`. See [Plugins](/reference/plugins/) for the full contract.
+Plugins require a manifest (`plugin.json` with `id`, `name`, `version`, optional `entry`, `hooks`, and optional `capabilities`) and an entry Python module that exports one function per declared hook (each takes the decoded JSON payload and returns a dict; the runner handles stdin/stdout). Base hooks are `library`, `before_launch`, `after_session`, `command`, `library_source`, and `events`. Since 1.18.0 a manifest can also declare storefront, metadata, media, stats, emulator-settings, and discovery capabilities alongside their hooks; capability hooks receive a bounded data bag, plugin settings, and a credential store, and may request read-only library, achievement, profile, activity, leaderboard, catalog, metadata, and media services in one round. See [Plugins](/reference/plugins/) for the full contract.
 
 ## Documentation site
 
-Documentation changes live in the [OpenBoxGL Pages repository](https://github.com/OpenBoxGL/openboxgl.github.io) and are checked with `bun run test` (`bun install --frozen-lockfile` first). Keep technical literals exact, use placeholders for secrets, and cite the source module or test for every claim.
+Documentation changes live in the [OpenBoxGL Pages repository](https://github.com/OpenBoxGL/openboxgl.github.io) and are checked with `bun run test` — `package.json` defines the same `test` and `build` scripts for npm, so `npm test` works too. Install dependencies first with `bun install --frozen-lockfile` (or `npm install`). Keep technical literals exact, use placeholders for secrets, and cite the source module or test for every claim.
 
 ## Licensing and security
 

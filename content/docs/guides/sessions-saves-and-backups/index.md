@@ -21,7 +21,7 @@ Since 1.16.0 the long-run case is distinguished too: a game that ran for a while
 
 ## Save discovery
 
-Per game, **Save management** offers **Discover locations**, **Back up now**, Ludusavi and Hoard actions, and **Scan library for saves** (in the Health dialog) which applies discovered paths to every game at once. Discovery knows the common locations:
+Per game, **Save management** offers **Discover locations**, **Back up now**, **Version history**, a state slot, Ludusavi and Hoard actions, and **Scan library for saves** (in the Library checkup dialog) which applies discovered paths to every game at once. Discovery knows the common locations:
 
 - **Steam Cloud**: `~/.local/share/Steam/userdata/*/<appid>/remote` (also `.steam/steam` and the Flatpak path).
 - **PlayStation 2**: PCSX2 `memcards` (native and Flatpak).
@@ -35,17 +35,19 @@ Per game, **Save management** offers **Discover locations**, **Back up now**, Lu
 
 Discovered paths can be confirmed per game or applied library-wide; configured paths persist on the game (`save_paths`), and the library's "Has saves" view reflects them.
 
+The same **Save management** card stores a **State slot** for RetroArch save states. The slot (1–32 letters, digits, `-`, or `_`) is saved on the game as `resume_slot` and used by Quick Resume wherever the adapter's state template names a slot; blank means the default slot. See [Quick Resume and Moments](/guides/sessions-saves-and-backups/quick-resume-moments/).
+
 ## Save backups
 
-**Back up now** creates a ZIP per game under `<data-dir>/save-backups/<hash>/` named `YYYYmmdd-HHMMSS-<label>.zip` containing a `manifest.json` and the configured save roots. Files backup individually; directories are walked. Symlinks in save paths or in the backup directory are refused, so backups cannot follow or create links. The **Save backup retention limit** (0-500, default 10) trims oldest archives after each backup.
+**Back up now** creates a ZIP per game under `<data-dir>/save-backups/<hash>/` named `YYYYmmdd-HHMMSS-<label>.zip` containing a `manifest.json` and the configured save roots. Since 1.18.0 the manifest describes every file with its size, permission mode, modification time, and SHA-256, which is what lets a restore preview tell unchanged files from overwritten ones. Files backup individually; directories are walked. Symlinks in save paths or in the backup directory are refused, so backups cannot follow or create links. The **Save backup retention limit** (0-500, default 10) trims oldest archives after each backup.
 
-Restore validates hard: the archive must belong to this game (manifest roots must match the current configured paths exactly), member paths must be safe (no absolute paths, no `..`, no duplicates, no symlinked destinations, re-checked after creating missing directories), and members are capped at 4 GiB each and 32 GiB total. Before writing anything, restore creates a `before-restore` safety backup of the current saves. If the archive's roots no longer match the game's configured save paths, restore refuses.
+**Version history** on the Save management card lists every backup for the game and previews it against your current saves: new, overwritten, unchanged, and missing-from-archive counts. The restore dialog lists the archive contents with checkboxes, supports a dry run, and restores only the checked files after creating a `before-restore` safety backup — that safety copy is skipped when the game has no save root yet. A restore that would overwrite a local file asks for explicit confirmation; the API returns `409` with the preview unless `confirm_conflict` is set. See [Save discovery and restore](/guides/sessions-saves-and-backups/saves/).
 
-Ludusavi and Hoard are optional command-line tools found on PATH; **Ludusavi backup/restore** and **Hoard backup** run with `--api` JSON output (Ludusavi) and report results in the UI. Restoring with either tool overwrites local files, so it is treated as a destructive operation.
+Restore validates hard: the archive must belong to this game (its manifest roots must still be among the current configured paths, matched as a subset in manifest order), member paths must be safe (no absolute paths, no `..`, no duplicates, no symlinked destinations, re-checked after creating missing directories), and members are capped at 4 GiB each, 32 GiB total, and 50,000 files. If a saved root's live file/directory type changed, restore refuses. Restores never delete local files. Ludusavi and Hoard are optional command-line tools found on PATH; **Ludusavi backup/restore** and **Hoard backup** run with `--api` JSON output (Ludusavi) and report results in the UI. Restoring with either tool overwrites local files, so it is treated as a destructive operation.
 
 ## Library backups
 
-The **Backup** dialog creates a ZIP under `<data-dir>/backups/` named `OpenBoxBackup-<timestamp>.zip` containing a manifest plus any of: settings, library, media, plugins, themes, and extension data. The dialog defaults to library + settings with optional media/plugins/themes (extension data is opt-in); the UI's **Create backup** uses a rotation of 7. The opt-in weekly automatic backup covers library, settings, media, plugins, and themes (no extension data). Rotation keeps the newest N archives (`keep`), deleting older ones.
+The **Backup** dialog (Tools → Backup) creates a ZIP under `<data-dir>/backups/` named `OpenBoxBackup-<timestamp>.zip` containing a manifest plus any of: settings, library, media, plugins, themes, and extension data. The dialog has no item picker and no rotation control: **Create backup** always archives the library, settings, media, plugins, and themes, and it keeps the newest 7 archives, deleting older ones. `extension_data` is opt-in through the API or the CLI only (`--backup --items ...,extension_data`); when `items` is omitted, the API and the CLI default to library + settings. The opt-in weekly automatic backup covers library, settings, media, plugins, and themes (no extension data).
 
 Restore is guarded:
 
@@ -55,6 +57,8 @@ Restore is guarded:
 - If the backup's manifest timestamp is older than the current library's mtime, restore refuses unless forced (the API `force` flag; the UI asks before any restore and a "force" path exists for older archives).
 - Restored settings merge into the restored library state.
 - Media, plugins, themes, and extension data restore only entries inside their own prefix, re-validating symlinks after each directory is created.
+
+Plugin archives deliberately exclude the capability credential store (`plugins/credentials/`) and blank password-format plugin setting values. The password values are written back as empty strings so required settings still validate on restore, and the local values are merged back in. See [Library backups](/reference/library-backups/#security-notes).
 
 Backup archives can be inspected from the API (manifest listing); the CLI also offers `--backup --items a,b --keep N` and `--restore-backup <file>`.
 

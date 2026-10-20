@@ -16,7 +16,9 @@ Themes are plain CSS files with instant apply: changing the active theme re-appl
 
 ## Apply a theme
 
-Click **Themes** in the top bar. Choose a scope: **All platforms** or one specific platform, then pick the theme from **Active theme** (Default resets). **Apply** saves the choice; per-platform themes override the global one when viewing that platform. The theme is served from the user themes folder (`<data-dir>/themes`) with revalidation headers, so editing a CSS file on disk shows up after reload.
+Open **Tools → Themes**. Choose a scope: **All platforms** or one specific platform, then pick the theme from **Active theme** (Default resets). **Apply** saves the choice; per-platform themes override the global one when viewing that platform. The theme is served from the user themes folder (`<data-dir>/themes`) with revalidation headers, so editing a CSS file on disk shows up after reload.
+
+The dialog is a swatch gallery rather than a bare list: each card, including Default, shows five color chips sampled from `--bg`, `--surface-card`, `--brand`, `--text`, and `--muted`, so the palette is visible before you apply it. A custom theme should define all five (see [token requirements](/guides/themes/custom-themes/#design-system-tokens)).
 
 ## Import your own CSS
 
@@ -24,9 +26,13 @@ Click **Themes** in the top bar. Choose a scope: **All platforms** or one specif
 
 Stock themes carry a `/* OpenBox Stock Theme:` marker. On startup, missing stock themes are re-installed, but user edits to a stock file are preserved, and user-imported files without the marker are never touched.
 
+## Theme music and sounds (v1.18.0)
+
+A theme may ship background music and move/select/back sounds through a sidecar JSON file next to its CSS. **Play theme music and navigation sounds in Big Box** (`bigbox_sounds_enabled`, default on) enables them; music starts when Big Box opens and stops when it closes. A missing or malformed sidecar is silent. See [Theme music and sounds](/guides/themes/custom-themes/#theme-music-and-sounds-v1180) for the file format and route details.
+
 ## Authoring guidance
 
-The public design tokens live in the [Design system](/project/design-system/) page. In short: the default look is dark, warm surfaces, off-white text, and a brand orange (`#f06000`) focus/selection signal with orange-gold (`#e08a3c`) launch actions. Themes may change palette and surface treatment while preserving the interaction structure; do not rely on undocumented theme-specific font-family claims. Keep readable contrast on both light and dark surfaces, visible focus states (the base stylesheet outlines focused controls), and legible controls; avoid permanent glow, deep shadows on every component, and low-contrast text. The base CSS defines variables such as `--bg`, `--panel`, `--text`, `--muted`, `--focus`, `--active`, `--action`, `--action-ink`, `--danger`, `--surface-card`, `--surface-field`, and `--border-card`; themes that override these variables inherit consistent behavior across dialogs and Big Box. `--accent` is defined by the base stylesheet as an alias of `--active` (`--accent: var(--active)`) and is consumed for focus rings, skeleton shimmer, and `--mood-secondary`; themes may override it directly.
+The public design tokens live in the [Design system](/project/design-system/) page. In short: the default look is dark, warm surfaces, off-white text, a **brand-orange action ramp** (`--brand` and `--active` `#FF7A1A`, `--action` `#F58A2E`, `--action-ink` `#1A120A`) and a **teal focus signal** (`--focus` `#5FD3C4`). Themes may change palette and surface treatment while preserving the interaction structure; do not rely on undocumented theme-specific font-family claims. Keep readable contrast on both light and dark surfaces, visible focus states (the base stylesheet outlines focused controls), and legible controls; avoid permanent glow, deep shadows on every component, and low-contrast text. The base CSS defines variables such as `--bg`, `--panel`, `--text`, `--muted`, `--focus`, `--active`, `--brand`, `--action`, `--action-ink`, `--danger`, `--surface-card`, `--surface-field`, and `--border-card`; themes that override these variables inherit consistent behavior across dialogs and Big Box. `--accent` is defined by the base stylesheet as an alias of `--active` (`--accent: var(--active)`) and is consumed for focus rings, skeleton shimmer, and `--mood-secondary`; themes may override it directly.
 
 <Callout type="tip" title="Author your first theme">
 
@@ -40,6 +46,7 @@ A theme is a plain `.css` file that overrides the design tokens. The smallest us
  --text: #f5eef7;
  --focus: #c77dff;
  --active: #c77dff;
+ --brand: #c77dff;
  --action: #c77dff;
  --action-ink: #1a1020;
 }

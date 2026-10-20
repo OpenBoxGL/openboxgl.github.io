@@ -20,6 +20,10 @@ To use it:
 
 `state_retention` controls how many archived state files are retained (1–20). Starting a game clean does not silently delete the stored resume state; use **Discard resume state** or `POST /api/v2/resume/discard` when you want to remove it.
 
+### Per-game state slot
+
+The game's **Save management** card stores an optional **State slot** (`resume_slot`). Enter 1–32 letters, digits, `-`, or `_`; the value is saved through `POST /api/v2/resume/slot` and used wherever the selected adapter's state template names a slot, both when OpenBox arms capture and when it reloads the state. Leaving the field blank uses the default names (`openbox-session` for capture, `openbox-resume` for reload, which is what MAME expects). An invalid value is rejected with `RESUME_SLOT_INVALID` and the field reverts to the stored value, so a typo cannot silently change which slot an emulator writes.
+
 ## Moments
 
 Press **M** in the desktop library, use the capture action in the pause/recap surface, or create a Moment from the API. A Moment can contain:

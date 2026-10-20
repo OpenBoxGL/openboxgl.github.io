@@ -3,7 +3,7 @@ title: Play Insights
 description: Local-first gameplay analytics, 366-day activity heatmap, streaks, and momentum tracking with zero telemetry.
 ---
 
-OpenBox 1.9.0 introduced the built-in, local-first **Play Insights** dashboard. It is still shipped in the current 1.17.0 release, and it turns your recorded play sessions into meaningful analytics without external services, accounts, or telemetry.
+OpenBox 1.9.0 introduced the built-in, local-first **Play Insights** dashboard, still shipped in 1.18.0. It turns your recorded play sessions into meaningful analytics without external services, accounts, or telemetry.
 
 ## Features
 
@@ -15,9 +15,11 @@ OpenBox 1.9.0 introduced the built-in, local-first **Play Insights** dashboard. 
 
 ## Opening Play Insights
 
-1. Open OpenBox.
-2. In the top bar or Tools menu, choose **Play Insights** (or navigate to `#insightsPanel`).
-3. The dashboard renders above the library grid with instant responsive updates.
+1. Open OpenBox and stay on the library.
+2. Scroll past the grid: Play Insights is the last section on the page and loads the first time it comes into view.
+3. The header carries a **Wrapped** button, a range selector (30, 90, or 365 days), a refresh button, and a collapse toggle that is remembered between visits.
+
+The panel appears only once the library has games, and the **Show Play Insights in the library** checkbox in Settings (Library or Appearance) hides it.
 
 ## What it cost (v1.17.0)
 
@@ -46,8 +48,8 @@ The Play Insights heatmap and cards use dedicated design tokens:
 
 ## Year in Review (Wrapped)
 
-The **Wrapped** report (**Insights → Wrapped**) aggregates your year into a printable "Your Year in Games" summary: playtime, sessions, streaks, progress, and top game/platform/genre. Backed by `GET /api/v2/insights/wrapped?year=YYYY`. The **History → Timeline** tab groups past sessions by day with covers and recording badges (`GET /api/v2/history/timeline?days=90`).
+The **Wrapped** report (the **Wrapped** button in the Play Insights header) aggregates your year into a printable "Your Year in Games" summary: playtime, sessions, streaks, progress, and top game/platform/genre. Backed by `GET /api/v2/insights/wrapped?year=YYYY`. The **History** dialog's **Timeline** tab groups past sessions by day with covers and recording badges (`GET /api/v2/history/timeline?days=90`).
 
 ## Mastery Map
 
-The **Mastery Map** (**Tools → Mastery**) is a completionist dashboard: stacked per-platform and per-decade bars over local progress states (never / played / beaten / completed / mastered), plus a RetroAchievements column read from the existing RA disk cache — no new network calls. Clicking a segment filters the library to that platform. Backed by `GET /api/v2/insights/mastery`.
+The **Mastery Map** (**Tools → Completion ranking**) is a completionist dashboard: stacked per-platform and per-decade bars over local progress states (never / played / beaten / completed / mastered), plus a RetroAchievements column read from the existing RA disk cache — no new network calls. Clicking a segment filters the library to that platform. Backed by `GET /api/v2/insights/mastery`.

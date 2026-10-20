@@ -3,7 +3,7 @@ title: Troubleshooting startup and window
 description: Diagnose why the app does not start or the window does not open.
 ---
 
-Start with the diagnostic log and the exact visible error. **Settings** has **Copy diagnostic log**: it copies the rotating log (`<data-dir>/openbox.log`, 2 MiB per file, 4 rotations) which redacts tokens, passwords, secrets, API keys, and authorization values, but may include game names and local file paths. Review it before sharing.
+Start with the diagnostic log and the exact visible error. **Settings > Advanced** has **Copy diagnostic log**: it copies a redacted diagnostic **summary** (the `/api/diagnostic` preview, with secrets and the full log excluded). The rotating log is `<data-dir>/openbox.log` (2 MiB per file, 4 rotations); it redacts tokens, passwords, secrets, API keys, and authorization values, but may include game names and local file paths. Review it before sharing.
 
 ## The window did not open
 
@@ -24,7 +24,16 @@ The native window renders the same UI as the web UI; both are served by the loop
 
 ## Window opens but the library looks empty
 
-Check `OPENBOX_DATA_DIR`. The server is reading a different directory than the one you edited. The variable must be in the process environment at launch, putting it inside a discovered `.env` file is too late.
+Check `OPENBOX_DATA_DIR`. The server is reading a different directory than the one you edited. The variable must be in the process environment at launch, putting it inside a discovered `.env` file is too late. A library that failed to load at boot also surfaces the error in the library's `startup_errors` list rather than only in the terminal.
+
+## Big Box window problems
+
+- **Pointer or wheel navigation does nothing.** Pointer drag and mouse wheel are separate switches (`pointer_nav_enabled`, `mouse_wheel_nav`). A trackball or spinner needs the pointer path and a usable `spinner_sensitivity` (1..20, default 6); wheel speed is `bigbox_wheel_speed` (0.25..3.0, default 1).
+- **Back does not open the menu.** Holding Back opens the Big Box menu once `bigbox_back_hold_seconds` (0–2, default 0.8) has elapsed; a short tap closes Big Box instead. A zero value makes Back close immediately with no menu. Check controller remapping if Back was reassigned.
+- **The battery indicator is missing.** It reads Linux sysfs only. `GET /api/native/battery` returns `present: false` on Windows, macOS, or a host with no battery, and the indicator is hidden when `battery_indicator` is off.
+- **Video has no sound or fights the music.** Video controls and the audio mix are settings: `bigbox_video_controls` adds the play/seek/mute/full-screen bar, `bigbox_video_volume` sets the video level (0.0–1.0, default 0.8), and `video_bgm_mix` lowers background music under video audio instead of muting the video. A startup video that should play once needs `bigbox_startup_video_loop` off.
+- **No sounds or background music.** Themes may supply a sound pack and background music; a theme without those assets is silent. Missing theme assets are skipped, not an error.
+- **A helper app should stop when Big Box exits.** `bigbox_shutdown_commands` runs shell-free commands when Big Box mode is left; a command that cannot start is skipped and logged, and does not block the exit.
 
 ## Steam / Game Mode specifics
 

@@ -3,69 +3,69 @@ title: Design system
 description: The real CSS variables, typography, layout, and component specs for theme authoring.
 ---
 
-OpenBoxGL's base stylesheet uses a dark, warm game-room palette: near-black surfaces, warm off-white text, and brand orange (`#f06000`) as the focus/selection signal with orange-gold (`#e08a3c`) for launch actions. This page documents the actual variables shipped in the application's `static/app.css` (linked from `index.html`), not a separate token layer. Theme authors override these variables in a CSS file imported through **Themes**.
+OpenBoxGL's base stylesheet uses a dark, warm game-room palette: near-black surfaces, warm off-white text, brand orange (`#FF7A1A`) for selection and the action ramp, and teal (`#5FD3C4`) as the keyboard-focus signal. This page documents the actual variables shipped in the application's `static/app.css` (linked from `index.html`), not a separate token layer. Theme authors override these variables in a CSS file imported through **Themes**.
 
 <Callout type="warning" title="These are the shipped tokens">
 
-This page reflects the current `static/app.css` `:root` block (linked via `<link rel="stylesheet" href="/static/app.css">` in `index.html`). The application repository also ships `docs/development/DESIGN.md`, a design manifest that now documents the same warm palette (orange focus `#f06000`, warm surfaces). If you rely on this page's values, always confirm against `static/app.css` in the repository you are actually running.
+This page reflects the current `static/app.css` `:root` block (linked via `<link rel="stylesheet" href="/static/app.css">` in `index.html`). The application repository also ships `docs/development/DESIGN.md`, a design manifest that documents the same warm palette (orange action ramp, teal focus, warm surfaces). If you rely on this page's values, always confirm against `static/app.css` in the repository you are actually running.
 
 </Callout>
 
 ## Base palette
 
-All colors are dark by default. Neutral surfaces carry most of the screen; the orange family identifies focus, selection, and launch action.
+All colors are dark by default. Neutral surfaces carry most of the screen; the orange family identifies selection and the launch action, while teal marks keyboard focus.
 
 ### Neutral surfaces
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--bg` | `#11100e` | Page canvas, deepest fullscreen surfaces |
-| `--topbar` | `#171513` | Command rail background |
-| `--panel` | `#1b1916` | Sidebar, detail pane, dialogs, lifecycle surfaces |
-| `--surface-deep` | `#141311` | Sticky library header and tools menu background |
-| `--surface-card` | `#211e1a` | Detail cards, emulator items, result rows, history items |
-| `--surface-field` | `#27231e` | Form controls, secondary buttons |
-| `--surface-hover` | `#342d23` | Hovered raised panels |
-| `--border-control` | `#4b4338` | Control borders |
-| `--border-card` | `#534a3d` | Card and dialog borders |
-| `--line` | `#3d3932` | Borders, dividers, separator rules |
-| `--text` | `#f4efe6` | Primary titles, high-priority content |
-| `--muted` | `#aaa094` | Metadata, labels, helper copy, inactive navigation |
+| `--bg` | `#0F0E0C` | Page canvas, deepest fullscreen surfaces |
+| `--topbar` | `#151310` | Command rail background |
+| `--panel` | `#1A1815` | Sidebar, detail pane, dialogs, lifecycle surfaces |
+| `--surface-deep` | `#0B0A09` | Sticky library header and tools menu background |
+| `--surface-card` | `#1F1C18` | Detail cards, emulator items, result rows, history items |
+| `--surface-field` | `#26221D` | Form controls, secondary buttons |
+| `--surface-hover` | `#322C24` | Hovered raised panels |
+| `--border-control` | `#786B58` | Control borders |
+| `--border-card` | `#5E5345` | Card and dialog borders |
+| `--line` | `#3A342C` | Borders, dividers, separator rules |
+| `--text` | `#F6F0E7` | Primary titles, high-priority content |
+| `--muted` | `#B4A897` | Metadata, labels, helper copy, inactive navigation |
 
 ### Accent colors
 
 | Token | Value | Use |
 | --- | --- | --- |
-| `--focus` | `#f06000` | Focus ring, selected controls, active platform markers |
-| `--brand` | `#f06000` | Brand identity color |
-| `--active` | `#f06000` | Active navigation, selected cover borders, Big Box cover borders |
-| `--action` | `#e08a3c` | Launch action (Play button), primary dialog confirmations |
-| `--action-ink` | `#1c160d` | Dark text inside the orange-gold action surface |
+| `--focus` | `#5FD3C4` | Focus ring, focused controls |
+| `--brand` | `#FF7A1A` | Brand identity color |
+| `--active` | `#FF7A1A` | Active navigation, selected cover borders, Big Box cover borders |
+| `--action` | `#F58A2E` | Launch action (Play button), primary dialog confirmations |
+| `--action-ink` | `#1A120A` | Dark text inside the orange action surface |
 | `--white` | `#fff` | Occasional pure white highlights |
-| `--cyan` | `#72c9d4` | Teal accent (defined in `:root`) |
-| `--gold` | `#e5b65c` | Achievement/gold signal, decorative highlights |
-| `--rating` | `#ef8c38` | Rating star signal |
-| `--launch-shadow` | `#e08a3c44` | Shadow tint under the Play button |
-| `--danger` | `#743f3f` | Error/destructive state |
-| `--empty-action` | `#e08a3c` | Empty-state action buttons |
-| `--cover-title-start` | `#51412d` | Cover gradient start tone |
-| `--achievement` | `#eaa54f` | RetroAchievements badge, achievement points |
-| `--lifecycle-bg` | `#45351d` | Session lifecycle overlay background |
-| `--bigbox-bg` | `#30261a` | Big Box cover backdrop |
-| `--bigbox-copy` | `#d0c0a5` | Big Box secondary text |
-| `--overlay-insight-cell-0` | `#1c1915` | Play Insights 0-playtime cell background |
-| `--overlay-insight-cell-1` | `#4a2c0a` | Play Insights level 1 playtime cell background |
-| `--overlay-insight-cell-2` | `#8a4f10` | Play Insights level 2 playtime cell background |
-| `--overlay-insight-cell-3` | `#c97316` | Play Insights level 3 playtime cell background |
-| `--overlay-insight-cell-4` | `#f06000` | Play Insights level 4 (peak) playtime cell background |
-| `--border-insight` | `#3d3932` | Play Insights heatmap and stat card borders |
-| `--shadow-insight` | `#00000066` | Play Insights card shadow |
-| `--surface-insight-card` | `#1b1916` | Play Insights card surface background |
-| `--focus-ring` | `#f06000` | Global accessible focus outline |
+| `--cyan` | `#5FD3C4` | Teal accent (defined in `:root`) |
+| `--gold` | `#F2C14E` | Achievement/gold signal, decorative highlights |
+| `--rating` | `#F2A65A` | Rating star signal |
+| `--launch-shadow` | `#FF7A1A44` | Shadow tint under the Play button |
+| `--danger` | `#B8473F` | Error/destructive state |
+| `--empty-action` | `#F58A2E` | Empty-state action buttons |
+| `--cover-title-start` | `#3A2A1C` | Cover gradient start tone |
+| `--achievement` | `#F2B55C` | RetroAchievements badge, achievement points |
+| `--lifecycle-bg` | `#3A2A18` | Session lifecycle overlay background |
+| `--bigbox-bg` | `#241A10` | Big Box cover backdrop |
+| `--bigbox-copy` | `#D8C7AF` | Big Box secondary text |
+| `--overlay-insight-cell-0` | `#1B1916` | Play Insights 0-playtime cell background |
+| `--overlay-insight-cell-1` | `#4A2E1C` | Play Insights level 1 playtime cell background |
+| `--overlay-insight-cell-2` | `#8A451A` | Play Insights level 2 playtime cell background |
+| `--overlay-insight-cell-3` | `#CC5F17` | Play Insights level 3 playtime cell background |
+| `--overlay-insight-cell-4` | `#FF7A1A` | Play Insights level 4 (peak) playtime cell background |
+| `--border-insight` | `#4b4338` | Play Insights heatmap and stat card borders |
+| `--shadow-insight` | `#0007` | Play Insights card shadow |
+| `--surface-insight-card` | `#211e1a` | Play Insights card surface background |
+| `--focus-ring` | `#000000` | Play Insights peak (level 4) cell border |
 
 ## Typography
 
-The base stack is `ui-sans-serif, system-ui, sans-serif` (no bundled webfont in the base stylesheet). Font sizes come from `--font-*` variables.
+The base stack is `system-ui, sans-serif` (no bundled webfont in the base stylesheet). Font sizes come from `--font-*` variables.
 
 | Token | Value | Use |
 | --- | --- | --- |
@@ -114,12 +114,12 @@ The shell is a three-column workspace with responsive breakpoints:
 | Breakpoint | Sidebar | Library | Detail Pane |
 | --- | --- | --- | --- |
 | Default | `190px` | `minmax(520px, 1fr)` | `410px` |
-| ≤ 1100px | `150px` | `1fr` | `340px` |
+| ≤ 1120px | `150px` | `1fr` | `340px` |
 | ≤ 760px | Stacked above library | Stacked | Stacked below grid |
 
 ### Cover grid
 
-Auto-filled columns with a minimum cover width of `132px` (`105px` at ≤ 1100px, `100px` at ≤ 760px). Covers keep the aspect ratio of each image: portrait, square, and landscape box art all render uncropped. Games without artwork fall back to a portrait `0.72` box with the title centered. The default grid gap is `20px 16px` (row then column); the sticky header keeps collection title, sort, image group, and view actions visible while the grid scrolls.
+Auto-filled columns with a minimum cover width of `132px` (`105px` at ≤ 1120px, `100px` at ≤ 760px). Covers keep the aspect ratio of each image: portrait, square, and landscape box art all render uncropped. Games without artwork fall back to a portrait `0.72` box with the title centered. The default grid gap is `24px 16px` (row then column); the sticky header keeps collection title, sort, image group, and view actions visible while the grid scrolls.
 
 ### Big Box compositions
 
@@ -141,9 +141,9 @@ Depth comes from tonal layering first, tokens second. The real token values in t
 | `--shadow-dialog` | `#000c` | Modal dialog backdrop shadow |
 | `--shadow-elevated` | `#0009` | Drawer and floating menu elevation |
 | `--shadow-empty` | `#0005` | Empty-state container shadow |
-| `--accent-ghost` | `#f0600055` | Strong translucent focus halo |
-| `--accent-ghost-soft` | `#f0600044` | Medium focus glow |
-| `--accent-ghost-faint` | `#f060002e` | Subtle focus glow |
+| `--accent-ghost` | `#FF7A1A55` | Strong translucent focus halo |
+| `--accent-ghost-soft` | `#FF7A1A44` | Medium focus glow |
+| `--accent-ghost-faint` | `#FF7A1A2E` | Subtle focus glow |
 | `--overlay-backdrop` | `#050403d9` | Dialog and modal screen overlay |
 | `--overlay-backdrop-strong` | `#05070bd9` | Darkened backdrop overlay |
 | `--overlay-backdrop-soft` | `#05070bcc` | Soft dimmed background overlay |
@@ -159,31 +159,31 @@ Depth comes from tonal layering first, tokens second. The real token values in t
 
 | Variant | Background | Text color | Radius | Padding |
 | --- | --- | --- | --- | --- |
-| Launch (Play) | `var(--action)` → `#e08a3c` | `var(--action-ink)` → `#1c160d` | Pill (`18px`) | `10px` |
-| Primary | `var(--action)` → `#e08a3c` | `var(--action-ink)` | `4px` | `9px 16px` |
-| Secondary | `var(--surface-field)` → `#27231e` | `var(--text)` | `4px` | (rule-specific) |
+| Launch (Play) | `var(--action)` → `#F58A2E` | `var(--action-ink)` → `#1A120A` | Pill (`18px`) | `10px` |
+| Primary | `var(--action)` → `#F58A2E` | `var(--action-ink)` | `4px` | `9px 16px` |
+| Secondary | `var(--surface-field)` → `#26221D` | `var(--text)` | `4px` | (rule-specific) |
 
 Hover shifts secondary toward a lighter raised surface. Focused controls gain a `2px` focus border (`var(--focus)`) plus a one-pixel ring.
 
 ### Chips and badges
 
-Rating, status, and ESRB chips use muted text on card surfaces. Achievement signals use `--achievement` (`#eaa54f`). Badges stay subordinate to cover art and the launch action.
+Rating, status, and ESRB chips use muted text on card surfaces. Achievement signals use `--achievement` (`#F2B55C`). Badges stay subordinate to cover art and the launch action.
 
 ### Cards
 
 | Element | Radius | Padding | Background |
 | --- | --- | --- | --- |
-| Cover card | `var(--radius-cover)` (`5px`) | `12px` | Gradient (`#51412d` → `#1b1814`) or raised surface |
+| Cover card | `var(--radius-cover)` (`5px`) | `12px` | Gradient (`#3A2A1C` → `#171410`) or raised surface |
 | Detail card | `6px` to `8px` | `12px` | `var(--surface-card)` |
 | Big Box panel | `var(--radius-panel)` (`12px`) | `24px` to `26px` | `var(--bigbox-bg)` / `var(--panel)` |
 
 ### Inputs / Fields
 
-Fields use `--surface-field` background, `--border-control` border, `4px` radius, and `7px 8px` padding. On focus, the border shifts to `--focus` (`#f06000`) and gains a one-pixel ring. Disabled actions reduce opacity and show `not-allowed` cursor. No separate error palette exists in the base system; errors reuse the standard flow with a textual message rather than a colored field.
+Fields use `--surface-field` background, `--border-control` border, `4px` radius, and `7px 8px` padding. On focus, the border shifts to `--focus` (`#5FD3C4`) and gains a one-pixel ring. Disabled actions reduce opacity and show `not-allowed` cursor. No separate error palette exists in the base system; errors reuse the standard flow with a textual message rather than a colored field.
 
 ### Navigation
 
-Topbar items are borderless and transparent at rest, gaining a raised background on hover. Active platform rows use a darker panel tone with a small orange marker dot. Inactive navigation is muted and transparent. The rail scrolls horizontally; the workspace columns tighten at `1100px` and stack below `760px`.
+Topbar items are borderless and transparent at rest, gaining a raised background on hover. Active platform rows use a darker panel tone with a small orange marker dot. Inactive navigation is muted and transparent. The rail scrolls horizontally; the workspace columns tighten at `1120px` and stack below `760px`.
 
 ## Big Box specifics
 
@@ -196,7 +196,7 @@ Big Box reuses the palette and typography tokens, then scales them:
 
 ## Light theme note
 
-Harbor Light is the only bundled light theme. It overrides `--bg`, `--panel`, `--line`, `--text`, `--muted`, `--cyan`, `--accent`, and `--danger` with paper tones and additionally defines theme-local names like `--green` that are not part of the base `:root` contract. Note `--accent` *is* part of the base contract: it defaults to `var(--active)` and is consumed for focus rings, skeleton shimmer, and `--mood-secondary`. If you author a light theme, ensure `--focus`, `--active`, `--action`, and `--action-ink` remain legible against your light surfaces and that text contrast stays at least 4.5:1.
+Harbor Light is the only bundled light theme. It overrides `--bg`, `--panel`, `--line`, `--text`, `--muted`, `--cyan`, `--accent`, and `--danger` with paper tones. Note `--accent` *is* part of the base contract: it defaults to `var(--active)` and is consumed for focus rings, skeleton shimmer, and `--mood-secondary`. If you author a light theme, ensure `--focus`, `--active`, `--action`, and `--action-ink` remain legible against your light surfaces and that text contrast stays at least 4.5:1.
 
 ## Token contract
 

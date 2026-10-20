@@ -7,7 +7,7 @@ The library search box supports field-targeted terms, quoted values, and negativ
 
 <Callout type="tip" title="Search runs against stable data">
 
-Search filters operate on `library.json` at query time, not a pre-built index or database. Every filter you apply stays in place until you clear it or navigate away, so chaining multiple sidebar facets (e.g. genre → platform → installed) compounds filters without extra typing. The Explorer facets panel (sidebar) does the same thing visually by showing counts per value; clicking a facet injects the equivalent `field:value` term. See [Library overview](/guides/library/) for the full UI walk-through.
+`library.json` is the source of truth for search filters, not a separate database you must rebuild. Queries read the in-memory state, or the optional SQLite read model when it is enabled (it also self-enables at 5,000+ games), which accelerates search and facets without changing the grammar or results. Every filter you apply stays in place until you clear it or navigate away, so chaining multiple sidebar facets (e.g. genre → platform → installed) compounds filters without extra typing. The Explorer facets panel (sidebar) does the same thing visually by showing counts per value; clicking a facet injects the equivalent `field:value` term. See [Library overview](/guides/library/) for the full UI walk-through.
 
 </Callout>
 
@@ -39,6 +39,8 @@ Prefix a term with a field name and a colon to target one field:
 | `portable:` | `portable:yes` / `portable:no` |
 | `controller:` | Controller support |
 | `tag:` (alias `tags:`) | Tag (see below) |
+| `import_batch_id:` (alias `import_batch:`) | Import batch id, matched exactly rather than as a substring |
+| `all:` | Every field at once: name, sort title, alternate names, platform, genre, developer, publisher, series, region, notes, source, play mode, status, progress, controller support, and tags |
 
 ## Your own ratings (v1.14.0)
 
@@ -69,18 +71,20 @@ Quote values that contain spaces or special characters:
 
 ## Bare terms
 
-A bare term searches across name, sort title, alternate names, platform, genre, developer, publisher, series, region, notes, source, play mode, status, progress, controller support, and tags.
+A bare term is matched against the title fields only: the game name, its sort title, and its alternate names. A token without a field prefix is treated as a `title:` term, so `hollow` finds *Hollow Knight* but does not look at platform, genre, developer, or any other field.
+
+To search every field at once, use the `all:` key. `all:<term>` searches the name, sort title, alternate names, platform, genre, developer, publisher, series, region, notes, source, play mode, status, progress, controller support, and tags.
 
 ## Acronym matching
 
-Short bare terms (2 to 8 alphanumeric characters) automatically match game title acronyms and initials in addition to substring searches:
+Short terms (2 to 8 alphanumeric characters) match title acronyms and initials in the command palette and in `all:` queries:
 
 - `oot` matches *The Legend of Zelda: Ocarina of Time*
 - `mgs` matches *Metal Gear Solid*
 - `sotn` matches *Castlevania: Symphony of the Night*
 - `ff` matches *Final Fantasy*
 
-Leading articles (*The*, *A*, *An*) are handled cleanly so searches match with or without the leading word.
+This is not a bare-term behaviour of the sidebar search, where a bare term is a plain title match. Leading articles (*The*, *A*, *An*) are handled cleanly so searches match with or without the leading word.
 
 ## Tags
 
@@ -99,7 +103,7 @@ Leading articles (*The*, *A*, *An*) are handled cleanly so searches match with o
 
 ## Natural-language grammar (Backlog Radio query bar)
 
-The query bar above the field syntax also accepts short natural phrases, parsed deterministically by `pkg/parity/parity_query.py:33-37` and rendered as removable chips. Thresholds are named constants, surfaced in the chips:
+The query bar above the field syntax also accepts short natural phrases, parsed deterministically by `pkg/parity/parity_query.py:33-39` and rendered as removable chips. Thresholds are named constants, surfaced in the chips:
 
 | Phrase | Meaning |
 | --- | --- |

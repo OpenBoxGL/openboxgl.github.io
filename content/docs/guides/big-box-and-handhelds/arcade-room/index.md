@@ -1,13 +1,13 @@
 ---
-title: Arcade Room, Museum, and kiosk mode
-description: Browse a controller-friendly platform showroom and configure its local Museum convenience boundary.
+title: Arcade Room and Kiosk mode
+description: Browse a controller-friendly platform showroom and configure its local kiosk convenience boundary.
 ---
 
 **Arcade Room** is a controller-friendly canvas showroom for the library. It groups cabinets by platform, uses available local art and media, and lets you inspect or launch the selected game without leaving the room.
 
 ## Enter and move around
 
-Open **Tools → Arcade Room**, or choose Arcade Room from the Ctrl/Cmd-K command palette. The current UI controls are:
+Open **Tools → 3D arcade room**, or choose Arcade Room from the Ctrl/Cmd-K command palette. The current UI controls are:
 
 | Control | Action |
 | --- | --- |
@@ -16,19 +16,19 @@ Open **Tools → Arcade Room**, or choose Arcade Room from the Ctrl/Cmd-K comman
 | Home / End | Jump to the first/last cabinet |
 | Enter | Open the selected game's details |
 | Space or P | Play the selected game |
-| M | Toggle Museum mode |
+| M | Toggle Kiosk mode |
 | Escape or Backspace | Close the room |
-| Gamepad | D-pad/stick navigates; mapped Play, Back, Favorite, and Menu buttons launch, leave, select, and toggle Museum |
+| Gamepad | D-pad/stick navigates; mapped Play, Back, Favorite, and Menu buttons launch, leave, select, and toggle Kiosk mode |
 
 The room uses the same library and media projections as the main UI. Missing cover art or media produces a labeled placeholder; it is not a promise that every cabinet has artwork.
 
-## Museum mode
+## Kiosk mode
 
-Museum mode turns the room into a self-guided exhibit. It shows real facts available in the selected game record—such as title, year, developer, genre, play time, and achievement counts—and advances through the room while the exhibit is idle. Any keyboard, pointer, or controller activity exits Museum mode. Users with `prefers-reduced-motion: reduce` receive a static presentation rather than the animation loop.
+Kiosk mode (the Museum mode internally) turns the room into a self-guided exhibit. It shows real facts available in the selected game record—such as title, year, developer, genre, play time, and achievement counts—and advances through the room while the exhibit is idle. Any keyboard, pointer, or controller activity exits Kiosk mode. Users with `prefers-reduced-motion: reduce` receive a static presentation rather than the animation loop.
 
 ## Kiosk PIN
 
-The optional Museum kiosk PIN makes unattended browsing a little less casual. Configure it in the kiosk settings or through the API:
+The optional Kiosk PIN makes unattended browsing a little less casual. Configure it in Settings → Big Box (**Require a PIN before entering Kiosk mode** and **Kiosk PIN**, 4–12 digits) or through the API:
 
 ```bash
 curl -s -X POST \
@@ -47,5 +47,7 @@ This is a convenience boundary for a local exhibit, not account authentication, 
 There is no registered `openbox://arcade` URI in the current parser or SPA. Use Tools or the command palette. `openbox://bigbox` and `?deeplink=bigbox` open Big Box, which is a related fullscreen surface but not a deep link for the Arcade Room itself.
 
 MAME set classification (`parent`/`merged`/`split`/`non-merged`) is an import-time property, not a room filter — see [Importing](/guides/library/importing/#arcade-sets) and [Troubleshooting](/guides/troubleshooting/#import-problems).
+
+For arcade entries, the Big Box running-game panel exposes MAME high scores (show, export, and import) through the same endpoints as the library details pane; see [High scores in the running-game panel](/guides/big-box-and-handhelds/#high-scores-in-the-running-game-panel-v1180).
 
 See [Big Box and handhelds](/guides/big-box-and-handhelds/), [Keyboard & Controller Shortcuts](/reference/shortcuts/), and [API 1.11 additions](/reference/api/one-eleven/) for the related controls and route contract.

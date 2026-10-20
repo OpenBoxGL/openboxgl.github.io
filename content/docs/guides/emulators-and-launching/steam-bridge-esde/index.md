@@ -3,7 +3,7 @@ title: Steam Bridge and ES-DE migration
 description: Move handheld library entries with reviewable Steam shortcuts.vdf and ES-DE gamelist workflows.
 ---
 
-OpenBox 1.11 adds two review-first migration paths for handheld users: **Steam Bridge** writes only OpenBox-owned entries to Steam's `shortcuts.vdf`, and **ES-DE import** reads a bounded `gamelist.xml` into the local catalog.
+OpenBox provides two review-first migration paths for handheld users: **Steam Bridge** writes only OpenBox-owned entries to Steam's `shortcuts.vdf`, and **ES-DE import** reads a bounded `gamelist.xml` into the local catalog.
 
 ## Steam Bridge
 
@@ -29,7 +29,7 @@ Bridge entries use the installed `openbox` launcher. `openbox --play <id>` accep
 
 ## ES-DE gamelist import
 
-Open the metadata/import surface and choose **ES-DE import**, or call the v2 routes directly. The request takes an absolute `xml_path` (the `gamelist` key is accepted as an alias) and optional `options` such as path mappings and overwrite choices.
+Open **Tools → Artwork & details** (the LaunchBox Games Database dialog) and use the **ES-DE import** section: choose the `gamelist.xml`, press **Preview ES-DE import**, review the report, then **Apply preview**. You can also call the v2 routes directly: the request takes an absolute `xml_path` (the `gamelist` key is accepted as an alias) and optional `options` such as path mappings and overwrite choices.
 
 Always preview first:
 

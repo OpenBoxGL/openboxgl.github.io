@@ -23,21 +23,20 @@ The native window renders the same UI as the web fallback; both serve `index.htm
 | Flag | Behavior |
 | --- | --- |
 | `-h`, `--help` | Show command-line options and usage summary, then exit. |
-| `--bigbox` | Open the UI straight into Big Box mode at startup by appending `&deeplink=bigbox` to the launch URL. Ignored by `--backup`/`--restore-backup`, which never start the server. (v1.14.0+) |
-| `--no-browser` | Start the server without opening a window. Useful for remote or scripted starts; the printed URL still works. |
+| `--bigbox` | Open the UI straight into Big Box mode by appending `&deeplink=bigbox` to the URL that is opened. Pairs with the **Start in Big Box mode** setting (`bigbox_start_at_launch`) for Deck/HTPC boot. Has no effect with `--no-browser`, since no URL is opened. Ignored by `--backup`/`--restore-backup`, which never start the server. (v1.14.0+) |
+| `--no-browser` | Start the server without opening a window. Useful for remote or scripted starts. The printed URL has no token; open `http://127.0.0.1:<port>/?token=<value>` with the `server.port` and `server.token` values from the data directory. |
 | `--game-mode` | Force gamescope guest behavior (Steam Deck / Bazzite Game Mode). On the web entry point this opens Big Box fullscreen in a kiosk browser; the native window detects gamescope guests from the environment and needs no flag. |
-| `--bigbox` | Open the UI with `?deeplink=bigbox` so it starts in Big Box mode. Pairs with the **Start in Big Box mode** setting (`bigbox_start_at_launch`) for Deck/HTPC boot. |
-| `--play <id>` | Launch a game by stable `game_id` or numeric library id, using the authenticated local launch route. This is the command used by Steam Bridge shortcuts. |
-| `--uri <openbox://...>` | Dispatch a deep link against a running instance (or start one) and exit. You can also pass a bare `openbox://...` URI directly as a positional argument. |
+| `--play <id>` | Launch a game by stable `game_id` or numeric library id, using the authenticated local launch route. This is the command used by Steam Bridge shortcuts. Without an id, prints usage and exits with status 2. |
+| `--uri <openbox://...>` | Dispatch a deep link against a running instance (or start one) and exit. You can also pass a bare `openbox://...` URI directly as a positional argument. Without a value, prints usage and exits with status 2. |
 | `--launcher` | Open the rofi/wofi/dmenu keyboard launcher against the running instance and exit. |
-| `--backup [--items a,b] [--keep N]` | Create a library backup from the command line. Default items are `library,settings`. Prints the archive path. |
+| `--backup [--items a,b] [--keep N]` | Create a backup archive from the command line and print its path. `--items` takes a comma-separated list of `library`, `settings`, `media`, `plugins`, `themes`, and `extension_data`; unknown names are ignored, and the default is `library,settings`. `--keep N` keeps only the newest N archives in `backups/`; the default `0` keeps all of them. |
 | `--restore-backup <archive>` | Restore a backup archive. The archive must be a real `.zip` inside the data directory or `backups/`. Prints the restored item names. |
 | `--web` | Start the loopback web UI in a browser instead of the native window (development). |
 | `--app-window` | Web entry point only: open the UI in a chrome-less app window (browser `--app=` mode) instead of a normal tab. The native window is unaffected. |
 | `--no-app-window` | Web entry point only: open the UI in a normal browser window; overrides the chrome-less app window default there. The native window is unaffected. |
-| `--fullscreen-width <W>` / `--width <W>` | Web entry point: customize the viewport width in kiosk and app window modes. |
-| `--fullscreen-height <H>` / `--height <H>` | Web entry point: customize the viewport height in kiosk and app window modes. |
-| `--resolution <WxH>` / `--resolution=<WxH>` | Web entry point: customize the viewport resolution (e.g. `--resolution 1920x1080`). |
+| `--fullscreen-width <W>` / `--width <W>` | Web entry point: customize the viewport width in kiosk and app window modes. A value that is not an integer is ignored. |
+| `--fullscreen-height <H>` / `--height <H>` | Web entry point: customize the viewport height in kiosk and app window modes. A value that is not an integer is ignored. |
+| `--resolution <WxH>` / `--resolution=<WxH>` | Web entry point: customize the viewport resolution (e.g. `--resolution 1920x1080`). A value without an `x` or with non-integer parts is ignored. |
 
 `--backup` and `--restore-backup` act on the library before the server starts, so they work even when no instance is running. They read `OPENBOX_DATA_DIR` from the environment, like every startup path.
 
@@ -50,14 +49,14 @@ The native window renders the same UI as the web fallback; both serve `index.htm
 | `openbox://start` | Open the running UI in the browser. A no-op if the server is already up. |
 | `openbox://search/<query>` | Open the UI with the search field prefilled for `<query>`. |
 | `openbox://showgame/<id>` (alias `game`) | Open the detail pane for a game by numeric or stable id. |
-| `openbox://launch/<id>` | Launch a game by numeric or stable id. `openbox --play <id>` uses this launch action. |
+| `openbox://launch/<id>` | Launch a game by numeric or stable id. `openbox --play <id>` and the tray's recent-game menu use this launch action. |
 | `openbox://resume/<id>` | Resume a stored Quick Resume state for a game by numeric or stable id. The adapter must expose a compatible state and the stored state must not be stale unless the caller explicitly allows it through the API. |
 | `openbox://moment/<id>` | Open a Moment deep link for its id in the running UI. |
 | `openbox://clip/<id>` | Open a Record That clip deep link for its id in the running UI. |
 | `openbox://bigbox` (alias `fullscreen`) | Switch the running UI to Big Box mode. |
 | `openbox://settings[/<panel>]` | Open Settings. A panel segment is parsed but not currently routed to a specific settings tab. |
 
-Arcade Room is opened from **Tools → Arcade Room** or the Ctrl/Cmd-K command palette. The current URI parser and SPA do not register an `openbox://arcade` action, so do not substitute an unregistered URI for that UI entry point.
+Arcade Room is opened from **Tools → 3D arcade room** or the Ctrl/Cmd-K command palette. The current URI parser and SPA do not register an `openbox://arcade` action, so do not substitute an unregistered URI for that UI entry point.
 
 Usage:
 
@@ -69,7 +68,7 @@ openbox --uri "openbox://moment/MOMENT_ID"
 openbox --uri "openbox://clip/CLIP_ID"
 ```
 
-`--uri` dispatches against the running server using the token and port files, or boots a server if none is running. The browser-facing actions currently wired by the SPA include `?deeplink=bigbox`, `?deeplink=search&q=chrono`, `?deeplink=showgame&id=GAME_ID`, `?deeplink=moment&id=MOMENT_ID`, and `?deeplink=clip&id=CLIP_ID`. Resume is dispatched by the URI/CLI path to the authenticated API; Arcade Room remains a Tools/palette action.
+`--uri` dispatches against the running server using the token and port files, or boots a server if none is running. The browser-facing actions currently wired by the SPA include `?deeplink=bigbox`, `?deeplink=search&q=chrono`, `?deeplink=showgame&id=GAME_ID`, `?deeplink=launch&id=GAME_ID`, `?deeplink=settings`, `?deeplink=recap`, `?deeplink=moment&id=MOMENT_ID`, and `?deeplink=clip&id=CLIP_ID`. The launch action is what the tray's recent-game menu uses (v1.18.0). Resume is dispatched by the URI/CLI path to the authenticated API; Arcade Room remains a Tools/palette action.
 
 ## Keyboard launcher
 

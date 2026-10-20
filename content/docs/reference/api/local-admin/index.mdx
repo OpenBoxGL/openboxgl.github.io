@@ -15,8 +15,8 @@ Check for a new release. Queries the GitHub releases API for `vindeckyy/OpenBoxG
 
 ```json
 {
-  "current": "1.17.0",
-  "latest": "1.17.0",
+  "current": "1.18.0",
+  "latest": "1.18.0",
  "available": false,
  "last_checked": "<timestamp or empty>",
  "notes": "...",
@@ -85,7 +85,7 @@ Write the desktop entry and icon for the running AppImage: `~/.local/share/appli
 
 </ApiEndpoint>
 
-## Native status and display video (1.18 unreleased)
+## Native status and display video
 
 <ApiEndpoint method="GET" path="/api/native/battery">
 
@@ -147,7 +147,7 @@ Open the themes folder in the file manager via `xdg-open` (missing `xdg-open`: `
 
 </ApiEndpoint>
 
-**1.18 unreleased.** The theme sound and asset routes below were added after 1.17.0.
+**Added in 1.18.0.**
 
 <ApiEndpoint method="GET" path="/api/theme-sounds">
 
@@ -265,7 +265,7 @@ The catalog enriched per entry with `installed`, `installed_version`, and `updat
 </ApiEndpoint>
 
 
-### Plugin storage, statistics, and repair (1.18 unreleased)
+### Plugin storage, statistics, and repair
 
 <ApiEndpoint method="GET" path="/api/v2/plugins/credentials">
 
@@ -305,7 +305,7 @@ Refreshes plugin statistics: `{"plugin_ids": ["<id>", ...]}` (at most 64) or the
 
 <ApiEndpoint method="POST" path="/api/v2/plugins/repair">
 
-Reinstalls one plugin from its catalog entry without touching its data, credentials, trust, or settings: `{"id": "<plugin id>"}`. A local-only or unavailable catalog entry leaves the installed package in place. Returns `{"plugin": {...}, "repaired": true}`.
+Reinstalls one plugin from its catalog entry without touching its data, credentials, trust, or settings: `{"id": "<plugin id>"}`. When the catalog entry is missing or local-only, the package is reinstalled from the local package recorded at install time; the repair fails only when that recorded package is unavailable. Returns `{"plugin": {...}, "repaired": true}`.
 
 </ApiEndpoint>
 
@@ -363,7 +363,7 @@ Reinstalls one plugin from its catalog entry without touching its data, credenti
 
 ```json
 {
-  "report": "{\"version\": \"1.17.0\", \"python\": \"3.12.3\", \"platform\": \"Linux-...\", \"data_dir\": \"~/.local/share/openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
+  "report": "{\"version\": \"1.18.0\", \"python\": \"3.12.3\", \"platform\": \"Linux-...\", \"data_dir\": \"~/.local/share/openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
 }
 ```
 
@@ -371,7 +371,7 @@ The same report on Windows carries the Windows host and data directory:
 
 ```json
 {
-  "report": "{\"version\": \"1.17.0\", \"python\": \"3.12.3\", \"platform\": \"Windows-...\", \"data_dir\": \"C:\\\\Users\\\\<you>\\\\AppData\\\\Local\\\\openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
+  "report": "{\"version\": \"1.18.0\", \"python\": \"3.12.3\", \"platform\": \"Windows-...\", \"data_dir\": \"C:\\\\Users\\\\<you>\\\\AppData\\\\Local\\\\openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
 }
 ```
 
@@ -413,7 +413,7 @@ Returns native host capabilities detected by the backend when running inside the
   "gamepad": "webkit",
   "fullscreen": true,
   "clipboard": true,
-  "version": "1.17.0",
+  "version": "1.18.0",
   "platform": "win32",
   "data_dir": "C:\\Users\\<you>\\AppData\\Local\\openbox-game-launcher"
 }
@@ -425,7 +425,7 @@ Returns native host capabilities detected by the backend when running inside the
 
 <ApiEndpoint method="POST" path="/api/native/dialog">
 
-Opens a native file or folder picker dialog on the host system. Body: `{"kind": "folder" | "file" | "save"}` (defaults to `"folder"`). Returns `{"path": "/selected/path"}` or `{"path": null, "cancelled": true}`. Unauthorized requests return `401 {"error": "unauthorized"}`.
+Opens a native file or folder picker dialog on the host system. Body: `{"kind": "folder" | "file" | "save"}` (defaults to `"folder"`). Returns `{"path": "/selected/path"}` or `{"path": null, "cancelled": true}`. Unauthorized requests return `403 {"error": "Unauthorized"}`.
 
 </ApiEndpoint>
 
@@ -474,7 +474,7 @@ Serves a game's document file for inline viewing (`?id=<index>&index=<doc_index>
 
 <ApiEndpoint method="GET" path="/api/explorer/facets">
 
-Facet counts for the Explorer rail (`?field=genre|developer|publisher|platform|progress|esrb`). Hidden games are skipped; missing values fall back to `Unspecified` / `Unset` / `Unrated`; results are sorted by count descending then name, capped at 40. Returns `{"field", "facets": [{"value", "count"}, ...]}`. Unknown fields return an empty list.
+Facet counts for the Explorer rail (`?field=genre|developer|publisher|platform|progress|esrb`). Hidden games are skipped; missing values fall back to `Unspecified` / `Unplayed` / `Unrated`; results are sorted by count descending then name, capped at 40. Returns `{"field", "facets": [{"value", "count"}, ...]}`. Unknown fields return an empty list.
 
 </ApiEndpoint>
 

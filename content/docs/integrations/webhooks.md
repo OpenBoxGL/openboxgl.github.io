@@ -13,9 +13,9 @@ OpenBoxGL delivers signed JSON events to your own webhook endpoints when library
 | Max URL length | 2048 characters |
 | Delivery attempts | 1..5 per config (default 3) |
 | Timeout per attempt | 1..15 seconds (default 5) |
-| Queue | 128 pending items, 4 delivery workers |
+| Queue | 128 pending items per pool (cap 1024), 4 delivery workers |
 | Envelope size | 64 KiB (`MAX_ENVELOPE_BYTES`) |
-| Secret | at least 8 characters when set |
+| Secret | optional; when set, deliveries carry `X-OpenBox-Signature` |
 
 Attempts and timeout are configurable per webhook and globally (`webhook_attempts`, `webhook_timeout` in settings).
 
@@ -76,7 +76,7 @@ assert mac.hexdigest() == provided_signature
 ## Delivery behavior
 
 - A matching enabled config receives the envelope for every subscribed event.
-- Retryable statuses: 408, 425, 429, and any 5xx. Backoff is exponential (1, 2, 4, 8 seconds), clamped by `Retry-After` to at most 30 seconds.
+- Retryable statuses: 408, 425, 429, and any 5xx. Backoff is exponential (1, 2, 4, 8 seconds); a `Retry-After` header raises the wait as a floor, capped at 30 seconds.
 - Redirects (3xx) are a terminal failure: a redirected request is never followed, because following would send the signed payload to an unvalidated destination.
 - Response bodies are drained with a bounded read (4 KiB) and discarded; the response body, resolved addresses, and credentials are never surfaced.
 - A full delivery queue drops the event with a failure notification (`"Webhook delivery queue is full; the event was dropped."`).

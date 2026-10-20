@@ -8,7 +8,8 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 ## Steam
 
 - **Manifests**: `steamapps/appmanifest_*.acf` in every Steam library folder (`~/.local/share/Steam`, `~/.steam/steam`, the Flatpak `~/.var/app/com.valvesoftware.Steam/.local/share/Steam`, plus any library listed in `steamapps/libraryfolders.vdf`).
-- **Records**: name, platform `PC`, source `Steam`, `steam_app_id`, install dir, and a launch command that prefers `steam -applaunch {app_id}`, falls back to `flatpak run com.valvesoftware.Steam -applaunch {app_id}`, then `xdg-open steam://rungameid/{app_id}`.
+- **Records**: name, platform `PC`, source `Steam`, `steam_app_id`, install dir, `store_installed`, and a launch command that prefers `steam -applaunch {app_id}`, falls back to `flatpak run com.valvesoftware.Steam -applaunch {app_id}`, then `xdg-open steam://rungameid/{app_id}`.
+- **Install state**: `store_installed` is `install_dir.is_dir()` at import time, so a manifest whose game folder is gone still imports but is marked missing. Those games show a red **Missing** badge and an **INSTALL** handoff instead of Play; installed games offer **Verify files**, which calls `POST /api/game/store-action` with `action: "repair"` and opens `steam://validate/<app_id>`. A storefront scan refreshes the flag in place.
 - **Prerequisite**: one of `steam`, `flatpak`, or `xdg-open` on `PATH`, else `"Steam, Flatpak, or xdg-open is required to launch imported Steam games."`
 - `POST /api/import/steam` imports installed games; the storefront catalog also reads owned app ids from `userdata/*/config/localconfig.vdf`.
 
@@ -32,7 +33,7 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 - **Records**: source `GOG`/`EA`/`Ubisoft`, the matching `gog_id`/`ea_id`/`ubisoft_id`, install directory, and `platform: "PC"`.
 - **Launch**: GOG runs the executable directly and keeps it inside the install directory, so Galaxy overlay and Galaxy cloud saves do not start. EA launches through the registered `origin2://game/launch` handler; Ubisoft launches through `uplay://launch/<id>/0`.
 - **Routes**: `POST /api/v2/import/gog`, `POST /api/v2/import/ea`, and `POST /api/v2/import/ubisoft`. Re-running an import merges by provider id, so it does not duplicate a game.
-- **Limits**: installed games only. Owned-but-uninstalled catalogs and Xbox PC packages are not imported. On Windows, 1.17.0 ships the manual import only; the unreleased 1.18 build adds an opt-in **Auto-import … on startup** checkbox per source, off by default. On non-Windows hosts the routes return zero games.
+- **Limits**: installed games only. Owned-but-uninstalled catalogs and Xbox PC packages are not imported. Each source has a per-source **Auto-import on startup** option (off by default) stored as `{enabled, platform, include_uninstalled}` with `include_uninstalled` fixed at false for these three. On non-Windows hosts the routes return zero games.
 - **Failure model**: a malformed registry entry or a missing install directory is reported in `errors` and skipped; a GOG executable outside its install directory is refused. Uninstalling the EA app or Ubisoft Connect leaves the game in the library but breaks launches until the handler returns.
 
 ## Gameyfin
@@ -41,10 +42,11 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 - **Behavior**: catalog import lists owned games with installed status; install downloads the game from the server into the install directory (staging, rollback, symlink rejection, 4 GiB per file cap) and marks the entry installed; uninstall removes only files under the install directory.
 - The install directory is empty by default; the Settings field shows a `~/Games/Gameyfin` placeholder. Provider resolution falls back to the first provider the server offers, or the bundled Direct Download provider.
 - Connection and request failures surface as `400` with the server's message.
+- **Exclusions and auto-import**: Gameyfin titles can be excluded per title like any other storefront, and its startup auto-import honors `auto_import_excluded_platforms` plus the `include_uninstalled` option. Its auto-import entry is keyed `gameyfin` in `storefront_auto_import`.
 
 ## ROM folders and executables
 
-- **Import Folder** scans a folder recursively for supported extensions (see [API content and imports](/reference/api/content-and-imports/) for the full list) and adds each file, grouping multi-disc sets into an `.m3u` and ranking duplicate ROMs (preferring USA/World releases over beta/proto/demo/hack tags, and larger CHD/CUE/M3U over archives).
+- **Scan a folder** (Add games → Scan a folder…) scans recursively for supported extensions (see [API content and imports](/reference/api/content-and-imports/) for the full list) and adds each file, grouping multi-disc sets into an `.m3u` and ranking duplicate ROMs (preferring USA/World releases over beta/proto/demo/hack tags, and larger CHD/CUE/M3U over archives).
 - Watch folders rescanned automatically every 10 seconds while the server runs.
 - A `chosen_emulators` map can install emulators from Flathub during the wizard flow.
 
@@ -55,13 +57,16 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 - Launch command defaults to `mame -rompath <folder> {rom_name}` or `fbneo {path}`; an explicit `command` overrides.
 - The set type counts are returned so you can verify classification.
 
-## Loose arcade and console helpers
+## Loose arcade, console, and small-format helpers
 
 - `POST /api/import/loose-arcade`: `.zip`/`.7z`/`.singe`/`.rom` files, defaulting to `hypseus`/`singe` commands.
 - `POST /api/import/xbox360`: folders with `default.xex`, `.xex`, `.xbe`; title from the parent folder for `default.xex`.
 - `POST /api/import/scummvm`: games from `scummvm.ini` sections.
-- `POST /api/import/rpcs3`: titles from `dev_hdd0/game/*/PARAM.SFO` (PS3).
+- `POST /api/import/rpcs3`: titles from `dev_hdd0/game/*/PARAM.SFO` (PS3), plus external game folders and ISOs declared in `games.yml` (or the `games:` list of `config.yml`) in both the native `~/.config/rpcs3` and Flatpak config directories. A path that no longer exists, a folder without `PARAM.SFO`, or a non-ISO file is reported and skipped; one bad entry never aborts the scan.
 - `POST /api/import/vita3k`: titles from `ux0/app/*/sce_sys/param.sfo` (Vita), resolving title ids to readable names.
+- `POST /api/v2/import/pico8`: `.p8` and exported `.p8.png` carts, imported on the `pico8-pico8` adapter.
+- `POST /api/v2/import/msu1`: pairs a `*.msu` audio-pack folder with its sibling `.sfc`/`.smc` ROM and records `msu1: true` plus `msu_path`; a pack with no matching ROM is an error, not a game.
+- `POST /api/v2/import/whdload`: `.lha`/`.slave`/`.hdf` Amiga installs, skipping WHDLoad system drawers, on the `amiga-whdload` adapter.
 
 ## Faugus Launcher
 
@@ -76,12 +81,13 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 
 ## Import exclusions
 
-Entries added via `/api/import/exclusions` block specific storefront titles from future imports and rescans, keyed by source + external id (Heroic entries can carry a three-part `heroic` key for store-specific exclusions).
+Entries added via `/api/import/exclusions` block specific storefront titles from future imports and rescans, keyed by source + external id (Heroic entries can carry a three-part `heroic` key for store-specific exclusions). The sources are Steam, Heroic, Lutris, Gameyfin, GOG, EA, and Ubisoft; Gameyfin exclusions work the same as the other storefronts, including on startup auto-import.
 
 ## Failure model
 
 - Missing launchers, malformed manifests, and empty results never create partial entries: the importer raises a clear error (surfaced as `400`) or skips the unusable record.
 - `found` counts everything the source reported; `added` counts what the library did not already have. Storefront entries without local files are imported as owned-but-uninstalled (`store_installed: false`).
+- A storefront scan is incremental and per source: each source runs in its own process with a 30-second budget, an over-budget source is recorded as `timeout`, and sources already completed keep their results. See [Storefront Manager](/guides/storefront-manager/#scanning-storefronts).
 
 ## Related
 

@@ -9,11 +9,11 @@ Performance profiles apply a TDP limit through `ryzenadj` before a game launches
 
 <Callout type="tip" title="Quick setup for a Steam Deck">
 
-Open **Emulators**, create or pick a profile (for example `GameCube = dolphin-emu -b -e {path}`), then in the **Handheld performance** section check **Enable TDP**, set **Limit (W)** to your desired cap (e.g. `12`), and optionally set **Restore (W)**. Leave **Apply handheld performance limits** on `auto` (the default) so the limit applies only in Game Mode or on battery. Install `ryzenadj` on the host if it is not already present.
+Open **Tools → Emulators & controllers**, create or pick a profile (for example `GameCube = dolphin-emu -b -e {path}`), then in the **Handheld performance** section check **Enable TDP**, set **Limit (W)** to your desired cap (e.g. `12`), and optionally set **Restore (W)**. Leave **Apply handheld performance limits** on `auto` (the default) so the limit applies only in Game Mode or on battery. Install `ryzenadj` on the host if it is not already present.
 
 </Callout>
 
-In **Emulators**, after a profile exists (for example `GameCube = dolphin-emu -b -e {path}`), the Handheld performance section lists each profile with:
+In **Tools → Emulators & controllers**, after a profile exists (for example `GameCube = dolphin-emu -b -e {path}`), the Handheld performance section lists each profile with:
 
 - **Enable TDP** checkbox
 - **Limit (W)**: the TDP applied at launch (0-60, step 0.5)
@@ -30,6 +30,12 @@ The **Apply handheld performance limits** setting (Settings) has three modes:
 - `off`: never applies.
 
 Because `auto` gates on battery or gamescope, a desktop session never applies or restores a limit. The same gating decides restore, so a session that never applied a limit does not try to restore one.
+
+## Battery reporting (v1.18.0)
+
+Big Box shows a battery indicator in its status bar when a battery is present; **Show the battery indicator in Big Box** (`battery_indicator`, default on) controls it. The indicator uses the browser Battery Status API when available and otherwise calls `GET /api/native/battery`, which reads the first `BAT*` device under `/sys/class/power_supply` and returns `present`, `percent`, and `charging`. Non-Linux hosts return `present: false`.
+
+This indicator is display-only. The `auto` performance gate keeps its own battery check and is unaffected by turning the indicator off, so hiding the badge never changes whether a TDP limit applies. Big Box requests the reading when it opens and reuses the 60-second cache, which keeps it off the launch hot path.
 
 ## Failure behavior
 

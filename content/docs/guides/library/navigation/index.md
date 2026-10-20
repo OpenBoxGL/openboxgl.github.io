@@ -10,6 +10,7 @@ Since OpenBox 1.8.0, the library grid and list view support full keyboard and ga
 - **Arrow keys / Home / End / Page Up / Page Down** move the focus across the grid or list; scrolling is virtualization-aware, so focus reveal works in 20k-game libraries.
 - **`f`** toggles favorite on the focused game; **Escape** clears the current selection.
 - **Enter** opens the focused game's detail pane.
+- **`F1`** or **`?`** opens **Help & shortcuts** — Start here, the glossary, and the shortcut table — unless focus is in a text field or a dialog is already open.
 
 ## Gamepad and the controller map
 
@@ -17,7 +18,11 @@ Gamepad input runs through a configurable controller map (Settings → Controlle
 
 ## Hash routing
 
-The library view is encoded in the URL as `#/key/value` hash fragments — platform, category, playlist, filter preset, search query (`q`), selected game, and sort state. Refreshing restores exactly where you were, and copying the address bar gives someone a link that opens the same view. No server round-trip is involved; the fragments are read and written locally.
+The library view is encoded in the URL as `#/key/value` hash fragments — platform, category, playlist, filter preset, search query (`q`), selected game, sort state, and the include/exclude filter pairs. Refreshing restores exactly where you were, including filters you excluded rather than selected, and copying the address bar gives someone a link that opens the same view. No server round-trip is involved; the fragments are read and written locally.
+
+## Sidebar order and sections
+
+Settings → Library has a **Sidebar section order** list with up/down buttons for search, view, filters, platforms, playlists, and explorer, so the parts you use can sit at the top, plus a **Hidden sidebar sections** fieldset of checkboxes; hiding **Explorer** removes the facet panel entirely. Both are saved as `sidebar_sections` and `hidden_sidebar_sections`, and an older saved order that still names a section a later build dropped is accepted instead of being rejected on save.
 
 ## Sortable list columns
 

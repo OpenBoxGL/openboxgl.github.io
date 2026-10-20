@@ -79,7 +79,7 @@ Body: `{ "format": "json" | "csv", "scope": "all" | "platform" | "playlist", "sc
 { "state": "queued", "job_id": "library-export" }
 ```
 
-The worker result is `{ "file": "openbox-export-2026-09-03.json", "count": 412 }`.
+The worker result is `{ "file": "openbox-library-20260903-142530.json", "count": 412 }`.
 
 Validation is fail-fast: an unknown `format` returns `400 "Export format must be json or csv."`, an unknown `scope` returns `400 "Export scope must be all, platform, or playlist."`, and a `platform`/`playlist` scope without `scope_name` returns `400 "Export scope <scope> requires a name."` An unknown playlist name fails the job with `"Playlist not found: <name>"`, and an unknown scope or format inside the worker fails with `"Unknown export scope."` / `"Unknown export format."`
 
@@ -88,7 +88,7 @@ Validation is fail-fast: an unknown `format` returns `400 "Export format must be
 <ApiEndpoint method="GET" path="/api/v2/library/export/exports">
 
 ```json
-{ "exports": [ { "name": "openbox-export-2026-09-03.json", "size": 182044, "created": 1756848000 } ] }
+{ "exports": [ { "name": "openbox-library-20260903-142530.json", "bytes": 182044, "modified": 1756848000 } ] }
 ```
 
 </ApiEndpoint>

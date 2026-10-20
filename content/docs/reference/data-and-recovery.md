@@ -23,7 +23,7 @@ Catalog synchronization is separate from this local state directory. When enable
 
 `JsonStateStore` (`state_store.py`) commits like this:
 
-1. Serialize with compact JSON when the payload exceeds 1 MiB (`COMPACT_JSON_THRESHOLD`) or the library exceeds 500 games; pretty-printed below it; always write a trailing newline.
+1. Serialize with compact JSON when the pretty-printed payload exceeds 1 MiB (`COMPACT_JSON_THRESHOLD`) or the library exceeds 500 games; pretty-printed below it; always write a trailing newline.
 2. Write to a temp file in the same directory, `fsync` it, chmod `0o600`.
 3. Staged atomic backup: write to temporary backup file and `os.replace` over `library.json.bak`, chmod `0o600`.
 4. `os.replace` the primary temp over `library.json`, chmod `0o600`, then `fsync` the directory.
@@ -46,17 +46,31 @@ Unknown fields survive migration; only known collections are normalized. A schem
 
 ## Stable game IDs
 
-`game_id` is derived from game identity, never list position: SHA-256 over a sorted JSON payload of `path` (normalized), `platform`, `steam_app_id`, `heroic_app_id`, `lutris_id`, `gameyfin_id`, `launchbox_db_id`, or `name` when no store id exists, truncated to 24 hex characters and prefixed `game-`. Collisions append `-2`, `-3`, ... Deterministic from identity, so reordering, deleting other games, and re-importing do not change which entry a queue item, save backup, or history entry points at. Legacy indexed IDs are retained as `legacy_game_ids` aliases and accepted by the API.
+`game_id` is derived from game identity, never list position: SHA-256 over a sorted JSON payload of `path` (normalized), `platform`, `steam_app_id`, `heroic_app_id`, `lutris_id`, `gameyfin_id`, `launchbox_db_id`, or `name` when no store id exists, plus `gog_id`, `ea_id`, and `ubisoft_id` when those values are non-empty, truncated to 24 hex characters and prefixed `game-`. Collisions append `-2`, `-3`, ... Deterministic from identity, so reordering, deleting other games, and re-importing do not change which entry a queue item, save backup, or history entry points at. Legacy indexed IDs are retained as `legacy_game_ids` aliases and accepted by the API.
 
 ## Caps
 
 - `queue`: at most 500 entries; oversized or non-list values are capped/replaced on load.
+- `media-queue.json`: at most 5,000 items; new enqueues are refused once full.
 - `notifications`: at most 200 entries, newest first.
 - `history`: capped at the last 500 sessions when session history is enabled.
 - Per-game `tags`: 50 tags, 64 characters each (see [API automation](/reference/api/automation/)).
 - `save_paths`: at most 50 entries per game; `screenshots`: at most 100; `alternate_names`: at most 20; `applications`/`versions`/`documents`: at most 100 entries each (extra `name` defaults to the path stem).
 - `custom_fields`: capped per `custom_field_defs` (up to 20 defs); `list_columns`: at most 12; `hidden_sidebar_sections`: at most 20.
 - `smart_collections`: at most 50 named `{name, query}` shelves at write time (v1.12.0); names cap at 80 characters, queries at 500.
+
+## Other durable files
+
+Not everything durable lives in `library.json`, and these files are not covered by its transaction:
+
+| Path | Content |
+| --- | --- |
+| `media-queue.json` | Durable media download queue. A JSON list written atomically with mode `0o600` under its own `.media-queue.json.lock`; at most 5,000 items, and it survives a restart independently of the state store |
+| `native-host-recent` | Private recent-game list written at boot and refreshed after sessions, one `name<TAB>game id` line per entry, capped at eight so the Linux and Windows tray menus can offer recent games |
+| `cache/launch_audit.json` | The latest Launch Audit report used by readiness badges (not library state) |
+| `cache/launch_audit.jsonl` | Compact rolling launch-audit history, rotated at 5 MiB so trend checks stay bounded |
+
+Save manifests are not a separate data file: each save backup archive carries a `manifest.json` recording every file's size, mode, mtime, and SHA-256. The version-history and selective-restore dialogs read that manifest from the archive.
 
 ## Corruption and recovery
 

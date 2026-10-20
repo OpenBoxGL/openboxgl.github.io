@@ -1,6 +1,6 @@
 ---
 title: Faugus Launcher Integration
-description: Import games, manage prefixes, and configure UMU-backed launches from Faugus Launcher.
+description: Import Faugus Launcher games and their prefixes, with suggested UMU launch commands.
 ---
 
 OpenBox provides native integration with **Faugus Launcher**, the lightweight Linux game manager for Wine and UMU games: it reads Faugus manifests and prefixes and imports the titles into your unified library.
@@ -11,7 +11,7 @@ When Faugus Launcher is installed, OpenBox can scan its data directories, read e
 
 ## How to Import from Faugus
 
-1. Open the **Library Setup Center** (**Set up library** in the top bar).
+1. Open **Add games** in the top bar and choose **Guided setup…** (the Setup Center, headed "Set up your library").
 2. On the **Sources** step, add the **Faugus** source.
 3. Continue to the scan: OpenBox detects all titles defined in Faugus manifests and prefix directories as preview candidates.
 4. Review and commit the preview as usual.
@@ -19,7 +19,7 @@ When Faugus Launcher is installed, OpenBox can scan its data directories, read e
 You can also drive the scan entirely through the REST API (below).
 
 Each imported title automatically receives:
-- Canonical identity deduplication (matching against existing Steam, GOG, or ROM titles)
+- Cross-source identity deduplication (a title already in the library from another source is merged rather than added twice)
 - Target executable path
 - Dedicated Wine prefix path, recorded as `wine_prefix`
 - A **suggested** launch command (`umu-run {path}`) — a starting point you can edit in Edit Metadata, not a wrapper the app applies for you. Prefix-only rows import without it.

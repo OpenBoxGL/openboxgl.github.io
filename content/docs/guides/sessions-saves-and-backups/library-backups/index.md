@@ -3,14 +3,15 @@ title: Library backups
 description: Create, rotate, and restore whole-library backup archives.
 ---
 
-The **Backup** dialog (top bar) creates whole-library ZIP archives under `<data-dir>/backups/` named `OpenBoxBackup-%Y-%m-%d-%H-%M-%S-%f.zip`. Each archive contains a manifest plus any of: settings, library, media, plugins, themes, and extension data. Local credentials are redacted from export and safely preserved on restore.
+The **Backup** dialog (Tools → Backup) creates whole-library ZIP archives under `<data-dir>/backups/` named `OpenBoxBackup-%Y-%m-%d-%H-%M-%S-%f.zip`. Each archive contains a manifest plus any of: settings, library, media, plugins, themes, and extension data. The Gameyfin password, the OBS WebSocket password, the per-provider integration tokens (IGDB, ScreenScraper, SteamGridDB, Gameyfin, RetroAchievements), and webhook secrets are redacted from export and safely preserved on restore.
 
 ## Create a backup
 
-1. Open **Backup**.
-2. Choose which items to include. The defaults are `library` and `settings`; you can add `media`, `plugins`, `themes`, and `extension_data`.
-3. Choose rotation (**keep**): the newest N archives are kept, older ones are deleted. Default from the API is 0 (no rotation); the UI's **Create backup** uses a rotation of 7.
-4. Create. Backup and restore are refused while any game is running.
+1. Open **Tools → Backup**.
+2. Click **Create backup**. The dialog has no item picker and no rotation control: every archive holds the library, settings, media, plugins, and themes, and the newest 7 archives are kept.
+3. Backup and restore are refused while any game is running.
+
+`extension_data` can only be selected through the API or the CLI (`--backup --items ...,extension_data`). When `items` is omitted, the API and the CLI default to library + settings; the API's `keep` default is 0 (no rotation), while **Create backup** uses 7.
 
 The CLI form is:
 
@@ -18,11 +19,11 @@ The CLI form is:
 python3 web_app.py --backup --items library,settings,media --keep 7
 ```
 
-The archive is written via a temp file and `os.replace`, then the directory is fsynced.
+The archive is written via a temp file and `os.replace`, then the directory is fsynced. If you include `plugins`, the archive stores the installed packages and the plugin state file but **not** the capability credential store, and password-format plugin settings are blanked. Local password values are merged back when that archive is restored, so a backup cannot leak a plugin secret or erase one on restore. The other redacted values — the Gameyfin and OBS WebSocket passwords, the per-provider integration tokens, and webhook secrets — are handled the same way: stripped from the archive, merged back from your local copy on restore.
 
 ### Scheduled automatic backups (v1.12.0)
 
-Settings can run the same engine on a weekly schedule: enable **automatic backups**, pick a retention of 1-52 archives (default 4), and an hourly daemon tick fires `auto_backup_due()` once seven days have passed since `last_auto_backup` — a missing or unparsable stamp counts as due. Automatic archives are byte-identical to manual ones, so the restore path below applies unchanged.
+Settings can run the same engine on a weekly schedule: enable **automatic backups**, pick a retention of 1-52 archives (default 4), and an hourly daemon tick fires `auto_backup_due()` once seven days have passed since `last_auto_backup` — a missing or unparsable stamp counts as due. The automatic backup covers the library, settings, media, plugins, and themes — never extension data. Automatic archives are byte-identical to manual ones, so the restore path below applies unchanged.
 
 ## Restore a backup
 

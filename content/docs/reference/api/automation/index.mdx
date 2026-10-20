@@ -106,7 +106,7 @@ Validation (`validate_webhook`):
 - `events` must be a non-empty list of known types.
 - URL must be http/https, at most 2048 characters, no embedded credentials, no fragment, valid port (1..65535).
 - HTTPS is required unless `OPENBOX_ALLOW_HTTP_WEBHOOKS=1` is set.
-- Host must resolve to a non-reserved address: unspecified, multicast, link-local, and reserved addresses are rejected. Loopback targets must not be the running OpenBox server port (checked both by port match and by a live TCP probe).
+- Host must resolve to a globally routable address only: any address that is not global is rejected, which also excludes unspecified, multicast, link-local, private (RFC 1918), and CGNAT ranges. Loopback is handled separately: a loopback target must not be the running OpenBox server port (compared by port match).
 - `attempts` and `timeout` must be numeric; effective values clamp to 1..5 and 1..15 on delivery.
 - Secrets must be at least 8 characters when supplied (delivery signs only when a secret exists). A config with `secret_set: true` and no `secret` preserves the stored value.
 

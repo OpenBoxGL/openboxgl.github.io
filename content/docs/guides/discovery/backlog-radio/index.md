@@ -7,7 +7,7 @@ OpenBox 1.11 adds three local ways to get from “I have too many games” to a 
 
 ## Backlog Radio
 
-Backlog Radio appears in the local Insights/Discovery surface as a playlist of up to five games. Each pick carries reason chips derived from your library and recorded sessions, plus an `estimated_minutes` field (integer, rounded): the genre-based length estimate minus already-played minutes (floor 15; unplayed games report the full estimate). The model uses a bounded recent history window, session length, genres/platforms, completion patterns, freshness, and related-game signals; it does not call an online recommendation service.
+Backlog Radio appears in the local Insights/Discovery surface as a playlist of up to five games. Each pick carries reason chips derived from your library and recorded sessions, plus an `estimated_minutes` field (integer, rounded): the genre-based length estimate minus already-played minutes (floor 15; unplayed games report the full estimate). The model uses a bounded recent history window, session length, genres/platforms, completion patterns, freshness, and related-game signals; it does not call an online recommendation service. It sits alongside the Discovery Center's built-in **Games with achievements** shelf and any plugin-contributed shelves; see [Discovery](/guides/discovery/).
 
 The first recommendations are deliberately modest. The habit model needs enough recorded sessions before it claims to know your habits; otherwise the response carries a fallback notice and uses library freshness/rating signals. Completed, hidden, unavailable, and already selected entries are excluded from a normal backlog pick. Refreshing replaces the managed Backlog Radio selection rather than silently duplicating it.
 
@@ -38,7 +38,7 @@ The grammar also understands typed terms such as `platform:PC`, quoted values, n
 
 Unknown words remain ordinary title/metadata text. A phrase is never promoted to a guessed filter just because it sounds plausible, and the chips are the source of truth for what the current query applies. The parse response carries the leftover words as `unparsed` with a `hint` ("Some words aren't in the query grammar…" or "No query grammar matched…").
 
-Clauses fail closed on missing metadata: a year, rating, player-count, time/idle, added-date, or time-to-beat filter never matches a game that lacks the field, and unknown clause kinds never match. Estimates behind "short/long" use the same genre fallback as Radio picks (RPG/strategy/simulation 120 min, adventure/action/shooter/platform/fighting 60 min, puzzle/card/board 30 min, 45 min otherwise). Launch Doctor surfaces unknown launch-command tokens the same honest way: an `explain_token` fix action renders an **Explain token** button listing the invalid tokens and the valid `{path}` `{name}` `{platform}` set.
+Clauses fail closed on missing metadata: a year, rating, player-count, time/idle, added-date, or time-to-beat filter never matches a game that lacks the field, and unknown clause kinds never match. Estimates behind "short/long" use the same genre fallback as Radio picks (RPG/strategy/simulation 120 min, adventure/action/shooter/platform/fighting 60 min, puzzle/card/board 30 min, 45 min otherwise). Launch check surfaces unknown launch-command tokens the same honest way: an `explain_token` fix action renders an **Explain token** button listing the invalid tokens and the valid `{path}` `{name}` `{platform}` set.
 
 For an integration, parse without changing the library:
 

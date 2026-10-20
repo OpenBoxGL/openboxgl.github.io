@@ -5,14 +5,14 @@ description: How to report copyright or trademark concerns for OpenBoxGL content
 
 # DMCA and trademark notices
 
-OpenBox Game Launcher is an independent open-source project under AGPL-3.0. The application repository at [vindeckyy/OpenBoxGL](https://github.com/vindeckyy/OpenBoxGL) and this documentation site at [OpenBoxGL/openboxgl.github.io](https://github.com/OpenBoxGL/openboxgl.github.io) are hosted on GitHub. GitHub is the host and the designated agent for takedown purposes.
+OpenBox Game Launcher is an independent open-source project under AGPL-3.0-only. The application repository at [vindeckyy/OpenBoxGL](https://github.com/vindeckyy/OpenBoxGL) and this documentation site at [OpenBoxGL/openboxgl.github.io](https://github.com/OpenBoxGL/openboxgl.github.io) are hosted on GitHub. GitHub is the host and the designated agent for takedown purposes.
 
 This page is a project guideline, not legal advice. It does not determine whether a complaint is valid in any jurisdiction.
 
 ## What the project distributes
 
 - Source code and documentation under AGPL-3.0, with no games, ROMs, ISOs, BIOS images, firmware, decryption keys, or DRM circumvention tools.
-- Release artifacts are signed **x86_64 and aarch64 AppImages**, an **x86_64 Flatpak bundle**, per-artifact **SBOMs**, and the `install.sh` installer — plus source archives. No cover art or game files are vendored.
+- Release artifacts are the **x86_64 and aarch64 AppImages**, an **x86_64 Flatpak bundle**, an **x86_64 Windows portable zip** with its native-host executable, per-artifact **SBOMs**, the `install.sh` and `install.ps1` installers, and the source archives. The AppImages, the Windows zip, and the native-host executable are published with `.sha256` and `.sig` sidecars; the Flatpak bundle, the SBOMs, the installers, and the source archives are published unsigned. No cover art or game files are vendored.
 - Showcase and home images are user supplied captures of user supplied games. Metadata and artwork fetched through the app, such as LaunchBox Games Database results, remain the property of their respective owners and are stored locally on the user's machine with the user's consent.
 
 ## What the project does not host

@@ -17,6 +17,10 @@ The sidebar **View** selector covers All games, Favorites, Recently played, Neve
 
 **Save Filter** stores the current platform, category, view, search query, ESRB, and progress as a playlist-style rule set. **Save Preset** does the same but keeps the rules as a **filter preset**, optionally pinned as a **Big Box quick preset** (marked with a star in the sidebar, selectable from the Big Box Filter and Sort menu). Both appear in the sidebar; presets restore their rules when clicked and can be deleted with the × button.
 
+Platform and category filters cycle through three states — include, exclude, clear — on repeated clicks. The **Source** filter is a dropdown with a separate **Exclude** checkbox, and a smart collection loads its saved query into the search box rather than cycling. Excluded values show as "Not `<field>`: `<value>`" chips and are written to the URL hash, so a refresh restores the exclusions along with the rest of the view.
+
+Presets and playlists accept more than the sidebar controls expose: **source**, **achievements-source**, and **region** rules, plus a text operator (`contains_any` / `not_contains_any`) for genre, developer, publisher, and region. Every rule key except `view` and `platform_category` can also appear in an `exclude` block, which rejects matching games rather than adding them — up to 20 values per field, and a refresh keeps the block intact.
+
 ### Visual chip builder (v1.7.2+)
 
 Filter presets render as **visual chips** — compact badges showing the field, operator, and value for each rule (e.g. `platform = SNES`, `genre contains RPG`, `favorite = true`). Chips are generated from the underlying JSON rules via `rules_to_chips()` and convert back via `chips_to_rules()` with round-trip fidelity, so editing a chip and saving produces the same rule structure as before. This makes complex collections with many rules easier to scan and edit at a glance.
@@ -47,17 +51,27 @@ Custom fields are defined in Settings as `Name|Option1,Option2` lines (up to 20 
 
 **Bulk Edit** works on any multi-selection: platform, genre, progress, rating, favorite, hidden, and ESRB. Only supplied values change; rating must be 0 to 5, progress must be one of the known statuses, and favorite/hidden must be true or false. Tags can be replaced or adjusted per game (see [Queue, tags, and notifications](/guides/library/queue-tags-notifications/)).
 
-Progress automation (Settings) can mark a game **Playing** after N minutes of play and **Paused** after N days idle, and a **Progress status on first play** setting stamps the first launch.
+Bulk Edit also offers **find and replace** across the selection: choose a metadata field (name, notes, genre, developer, publisher, platform, region, or source), type the text to find and its replacement, and review the preview first — it lists up to 100 affected games with their before and after values and reports how many more were truncated. Apply then writes the same literal replacement to every match. There is no regular-expression mode, so a `$` or `\` in the replacement is just a character. The preview is a dry run by default; nothing is written until you apply, and the API route (`POST /api/v2/bulk/find-replace`) behaves the same way. The API also accepts `progress` and `esrb` as find fields, but the dialog offers neither.
+
+Progress automation (Settings) can mark a game **Playing** after N minutes of play and **Paused** after N days idle, and a **Progress status on first play** setting stamps the first launch. Which labels are offered at all is configurable: Settings → Sessions & Saves → **Progress values allowed by automation and the game editor** takes a comma-separated list (default Unplayed, Playing, Paused, Beaten, Completed, Mastered, Abandoned). Progress automation and the game editor only show enabled labels, and the API rejects an ineligible label instead of storing it, so a stored value always matches the current list.
+
+## Controller and keyboard remapping (v1.18.0)
+
+**Settings → Controller** records the keyboard shortcuts for play, back, menu, pause, paging, search, settings, and the reader, and maps gamepad buttons to the same actions. A mapped button can be cleared by emptying its field, and a duplicate assignment is never applied silently: OpenBox asks **Swap controller buttons** first and swaps the two assignments only after you confirm.
+
+The same Settings category defines the **controller types** — Gamepad, Arcade stick, Racing wheel, Light gun, Paddle, Trackball, Spinner, Keyboard, Mouse, and VR. A type shows as a chip in the game editor and as one badge per type on a library card, so a shelf that mixes input devices is visible at a glance (`handlers/settings.py:184-217`, `static/settings.js:132-175`). See [Keyboard & Controller Shortcuts](/reference/shortcuts/) for the full table of defaults and rules.
 
 ## Health audit and duplicates
 
-The **Health** button runs a Library Audit over the whole library: duplicate identities, missing game files, missing box fronts, missing extras (applications, versions, documents), missing save paths, and ROMs without an emulator profile. Each issue lists the game and the specific problem, and clicking an issue selects that game. The audit's **Remove duplicate entries** removes only duplicate library entries; game files stay on disk.
+**Library checkup** in the Tools menu runs an audit over the whole library: duplicate identities, missing game files, missing box fronts, missing extras (applications, versions, documents), missing save paths, and ROMs without an emulator profile. Each issue lists the game and the specific problem, and clicking an issue selects that game. The issue table carries a **Source** column and per-source issue counts, and a source filter narrows it to one storefront (plugin sources appear under their display name). The audit's **Remove duplicate entries** removes only duplicate library entries; game files stay on disk.
+
+Bulk platform edits can also **move media**: tick the option and selected games' media files follow the platform change. The field update is committed even when a move fails, and the response reports the failures in `media_errors` so you can retry just those files rather than repeat the whole edit.
 
 **Media** opens the Media Manager: a per-platform audit (games, database matched, missing box front, missing background, missing screenshots), bulk media downloads, and duplicate-media cleanup with a separate dry-run and apply step. Duplicate detection hashes cover, background, and screenshot files; the apply step deletes only files inside the OpenBox data directory and never symlinks.
 
 ## Library health score (v1.14.0)
 
-The **Health** dialog no longer just lists problems — it scores the library out of 100 and tells you where the points went. The score is the weighted sum of five dimensions, and every deduction names the games behind it, so a number is never the whole answer:
+The **Library checkup** dialog no longer just lists problems — it scores the library out of 100 and tells you where the points went. The score is the weighted sum of five dimensions, and every deduction names the games behind it, so a number is never the whole answer:
 
 | Dimension | Weight | What it measures |
 | --- | --- | --- |
@@ -85,5 +99,7 @@ The API equivalents are `GET /api/v2/library/health` and `/health/issues` for th
 ## Safe deletion
 
 Removing a game asks twice: first to confirm removing the library entry, then whether to also delete the game's listed media files. Game files are never deleted. **Settings** has **Remove all imported Steam games** for wiping Steam entries only. The audit and duplicate tools also report before they change anything. Keep a backup when the operation affects files; see [Sessions, saves, and backups](/guides/sessions-saves-and-backups/).
+
+Platform administration works the same way. **Rename platform** (in the platform panel) rewrites the platform across games, launch profiles, filter playlists, presets, and platform settings maps, and optionally moves the platform's media folder; **Delete platform** requires typing the name and moves its games to the Trash. Both are described in [Library overview](/guides/library/#game-details).
 
 Stable game IDs keep edits, session history, queue entries, and saves attached when library order changes. If two imported entries share an identity (for example the same Steam App ID), the health audit flags them as duplicates.

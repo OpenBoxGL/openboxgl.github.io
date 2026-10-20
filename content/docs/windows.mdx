@@ -23,29 +23,26 @@ The installer itself needs Python, because it uses the same RFC 8032 verifier th
 
 ## Install from a signed release
 
-Download the installer and the release archive from the same tag, then run the installer. The installer pins the release public key, verifies its SHA-256 against a committed anchor, and verifies the archive's `.sha256` sidecar and Ed25519 signature before extracting anything.
+Download the release archive from the tag you want, extract it, and run the bundled installer at `OpenBox\scripts\install.ps1`. The installer pins the release public key, verifies its SHA-256 against a committed anchor, and verifies the archive's `.sha256` sidecar and Ed25519 signature before extracting anything.
 
 ```powershell
-# Omitting -Tag installs the latest release.
-.\install.ps1
+$Version = '1.18.0'
+Invoke-WebRequest -UseBasicParsing -OutFile OpenBox-x86_64-windows.zip `
+  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/OpenBox-x86_64-windows.zip"
+Expand-Archive OpenBox-x86_64-windows.zip -DestinationPath .
+Get-Content .\OpenBox\scripts\install.ps1   # read it before running it
+powershell -ExecutionPolicy Bypass -File .\OpenBox\scripts\install.ps1 -Tag "v$Version"
 ```
 
-To pin a specific version instead, set it explicitly. The current release is **1.17.0**:
+Omit `-Tag` to install the latest release instead of the pinned one above; the current release is **1.18.0**. Pass `-Run` to start OpenBox when the install finishes:
 
 ```powershell
-$Version = '1.17.0'
-Invoke-WebRequest -UseBasicParsing -OutFile install.ps1 `
-  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/install.ps1"
-.\install.ps1 -Tag "v$Version"
+powershell -ExecutionPolicy Bypass -File .\OpenBox\scripts\install.ps1 -Run
 ```
 
-Pass `-Run` to start OpenBox when the install finishes:
+Run the script from the extracted `OpenBox\scripts\` folder. It resolves the release verifier (`updates.py`) one directory above itself, and the verifier is the trust anchor for the Ed25519 check, so it is never downloaded on its own — a fetched verifier could be replaced by whoever served it. The release also publishes `install.ps1` as a standalone asset, but it is the same installer that ships inside the archive, so a standalone copy only works from the extracted release, where `updates.py` is one directory above it.
 
-```powershell
-.\install.ps1 -Tag "v$Version" -Run
-```
-
-The installer always fetches `OpenBox-x86_64-windows.zip`, its `.sha256`, and its `.sig` from the release tag into a fresh temp directory — placing the files next to `install.ps1` yourself has no effect. For a mirrored or offline key, pass `-PublicKeyPath` instead.
+The installer always fetches `OpenBox-x86_64-windows.zip`, its `.sha256`, and its `.sig` from the release tag into a fresh temp directory — placing those files next to the script yourself has no effect. For a mirrored or offline key, pass `-PublicKeyPath` instead.
 
 ### What the installer does
 
@@ -128,7 +125,7 @@ openbox-native          # run the native host explicitly
 
 Both scripts accept the same flags as the Linux launchers and forward them to the application. The launchers find the runtime through `OPENBOX_SHARE`, then their own folder, then `%LOCALAPPDATA%\OpenBox\share\openbox`, and find Python as `python.exe` or `py.exe` on `PATH` unless `OPENBOX_PYTHON` is set.
 
-`--web` prints a `http://127.0.0.1:PORT/?token=...` URL. The token is per-launch and is written to the data directory, so the window you opened can always be re-opened from the terminal output if a browser does not appear.
+`--web` prints the server URL, `http://127.0.0.1:PORT/`, without a token. The token is per-launch and is written to the data directory as `server.token`, so the window you opened can always be re-opened from the terminal output if a browser does not appear: add it as `?token=<value>` in the browser URL, or send it in the `X-OpenBox-Token` header for API calls.
 
 ## The native window
 
@@ -146,6 +143,12 @@ Once `native_host.exe` is next to `web_app.py`, every launcher uses it automatic
 
 If the host is missing (source checkout, or a failed build), the launchers print a warning and open the same UI in a browser app window. Nothing else changes: your library, settings, and data directory are the same either way.
 
+### Tray and recent games
+
+With **Enable desktop tray integration** on (Settings → Advanced), the tray menu carries a **Recent games** submenu. OpenBox writes that list to `native-host-recent` in the data directory at startup and again after each recorded session: up to eight distinct games, most recent first, one `name<TAB>game id` line each. Selecting an entry launches that game directly, then lands the window on its details, so the tray is a shortcut into play rather than a way to open the library and search.
+
+The Linux tray menu reads the same file. Both hosts dispatch the launch against the loopback server: on Linux the tray navigates to `?deeplink=launch&id=<game id>`, and the Windows host starts the game through the authenticated API before navigating to the matching view. The deeplink is a normal page request, so the per-launch `token` parameter still applies; it is not a separate unauthenticated entry point, and it only reaches the server instance that issued it.
+
 <Callout type="tip" title="WebView2 is the only runtime dependency">
 
 The WebView2 runtime ships with Windows 11 and is installed on most Windows 10 systems. If it is missing, install it from [Microsoft's WebView2 page](https://developer.microsoft.com/microsoft-edge/webview2/) or keep using `--web`, which needs nothing but a browser.
@@ -159,7 +162,7 @@ The WebView2 runtime ships with Windows 11 and is installed on most Windows 10 s
 | Row | What it tells you |
 | --- | --- |
 | **Version** | The exact version you are running. This is the value to put in a [bug report](https://github.com/vindeckyy/OpenBoxGL/issues/new?template=bug_report.yml). |
-| **Platform** | `Windows`, `Linux`, or `macOS`. |
+| **Platform** | `Windows` or `Linux` (macOS remains out of scope). |
 | **Data folder** | The data directory in use — `%LOCALAPPDATA%\openbox-game-launcher` unless `OPENBOX_DATA_DIR` says otherwise. Copy it from here when backing up or reporting. |
 | **Window** | Whether OpenBox is in its **native window** or a **browser tab**. A browser tab is a supported configuration, not a failure: it is what you get with `openbox --web`, without WebView2, or from a source checkout with no compiled host. |
 
@@ -182,28 +185,28 @@ The built-in updater understands the Windows portable install. It verifies the r
 
 Because a running install cannot be replaced in place, the swap happens **after OpenBox exits**: the old tree is moved to `share\openbox.previous`, the staged tree takes its place, and the app asks you to restart. Your data directory is never part of the swap. See [Updating](/updating/) for the general update flow.
 
-Manual update: download the newer `OpenBox-x86_64-windows.zip` and run that release's `install.ps1`, which keeps the previous tree for rollback.
+Manual update: download the newer `OpenBox-x86_64-windows.zip`, extract it, and run that release's `install.ps1` from the extracted zip, which keeps the previous tree for rollback.
 
 ## Emulators and games on Windows
 
-Emulator support is not Linux-specific. Every bundled emulator definition carries its Windows executable name, so adapter detection, resume-state capture, and Launch Doctor work with Windows builds of Dolphin, RetroArch, PCSX2, RPCS3, Cemu, melonDS, PPSSPP, Vita3K, xemu, Xenia, and the others the matrix lists. See [Emulators and launching](/guides/emulators-and-launching/) and the [Hardware matrix](/reference/hardware-matrix/).
+Emulator support is not Linux-specific. Every bundled emulator definition carries its Windows executable name, so adapter detection, resume-state capture, and the Launch check audit work with Windows builds of Dolphin, RetroArch, PCSX2, RPCS3, Cemu, melonDS, PPSSPP, Vita3K, xemu, Xenia, and the others the matrix lists. See [Emulators and launching](/guides/emulators-and-launching/) and the [Hardware matrix](/reference/hardware-matrix/).
 
 Windows games launch through the game's own executable or through an emulator, exactly as on Linux. Controller support, save-state capture, screenshots, and portable library paths behave identically.
 
 ## Storefronts on Windows
 
-Since 1.17.0, the **Storefronts** dialog imports installed GOG Galaxy, EA app, and Ubisoft Connect games natively, alongside the existing Steam and Epic imports. **Import GOG**, **Import EA app**, and **Import Ubisoft Connect** read each launcher's registry entries and manifests offline, merge by the launcher's provider id, and never duplicate a game on a second import.
+Since 1.17.0, the **Storefront Manager** dialog imports installed GOG Galaxy, EA app, and Ubisoft Connect games natively, alongside the existing Steam and Epic imports. **Import GOG**, **Import EA app**, and **Import Ubisoft Connect** read each launcher's registry entries and manifests offline, merge by the launcher's provider id, and never duplicate a game on a second import.
 
-GOG runs the executable directly (with the executable required to stay inside the install folder), so the Galaxy overlay and Galaxy cloud saves do not start. EA and Ubisoft launch through their registered `origin2://` and `uplay://` handlers; if the launcher is uninstalled, the game stays in the library but will not launch until the handler returns. These imports cover installed games only: owned-but-uninstalled catalogs and Xbox PC package scanning are not included. In the unreleased 1.18 build each source has an opt-in **Auto-import … on startup** checkbox, off by default; 1.17.0 has no such checkbox. See [Import sources](/integrations/import-sources/) and [Storefront Manager](/guides/storefront-manager/).
+GOG runs the executable directly (with the executable required to stay inside the install folder), so the Galaxy overlay and Galaxy cloud saves do not start. EA and Ubisoft launch through their registered `origin2://` and `uplay://` handlers; if the launcher is uninstalled, the game stays in the library but will not launch until the handler returns. The manual imports cover installed games only: owned-but-uninstalled catalogs and Xbox PC package scanning are not included. Since 1.18.0 each of the three sources also has an opt-in **Auto-import GOG on startup**, **Auto-import EA app on startup**, or **Auto-import Ubisoft Connect on startup** checkbox in the same dialog, off by default, so a startup scan can refresh the Windows library. See [Import sources](/integrations/import-sources/) and [Storefront Manager](/guides/storefront-manager/).
 
 ## Troubleshooting
 
 | Problem | Cause / fix |
 | --- | --- |
 | `No Python 3 interpreter found` | Install Python 3.10+ and make sure `python.exe` or `py.exe` is on `PATH`, or set `OPENBOX_PYTHON` to the interpreter's full path. |
-| `running scripts is disabled on this system` | Run the installer, uninstaller, or launcher with `powershell -ExecutionPolicy Bypass -File .\install.ps1`, or set the execution policy for your user. |
+| `running scripts is disabled on this system` | Run the installer, uninstaller, or launcher with `powershell -ExecutionPolicy Bypass -File .\OpenBox\scripts\install.ps1`, or set the execution policy for your user. |
 | `The release public key does not match the pinned trust anchor` | The release key changed or the download was tampered with. Install only from the project's GitHub releases, or pass `-PublicKeyPath` if you deliberately mirror a different key. |
-| The window does not open | Run `openbox --web` from a terminal and open the printed `http://127.0.0.1:PORT/?token=...` URL. |
+| The window does not open | Run `openbox --web` from a terminal and open the printed `http://127.0.0.1:PORT/` URL. The printed URL carries no token, so take the value from `server.token` in the data directory, send it in the `X-OpenBox-Token` header for API calls, or append it as `?token=<value>` in the browser URL. |
 | `native_host is missing ... falling back` | The WebView2 host has not been built. Build it as described above, or ignore it and use the browser app window. |
 | WebView2 host exits immediately | Install or repair the WebView2 runtime, then re-run `openbox-native`. The exit code and warning are printed to the console. |
 | `openbox` is not recognized | The install folder is not on your `PATH` yet. Open a new terminal after installing, or run `%LOCALAPPDATA%\OpenBox\share\openbox\openbox.cmd`. |

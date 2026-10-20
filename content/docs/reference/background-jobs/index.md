@@ -11,19 +11,34 @@ Every submitted operation is recorded with these fields:
 
 | Key | Meaning |
 | --- | --- |
-| `operation_id` | Unique hex identifier |
+| `job_id` | Unique hex identifier |
+| `root_job_id` | Identifier of the root job a retry or resume descends from |
+| `retry_of` | `job_id` of the job this one retries |
+| `resume_of` | `job_id` of the job this one resumes |
 | `type` | Dotted operation type (see supported types below) |
+| `title` | Human-readable job title |
 | `state` | `queued`, `running`, `cancelling`, `done`, `partial`, `error`, `cancelled`, or `interrupted` |
+| `phase` | Current phase label |
+| `current` | Progress counter |
+| `total` | Progress total |
+| `message` | Progress or status message |
 | `created_at` | UTC ISO timestamp |
+| `updated_at` | Last change timestamp |
 | `started_at` | Start timestamp |
 | `finished_at` | Terminal timestamp |
-| `progress` | Current progress object (`current`, `total`, `unit`, `message`) |
-| `error` | Error message on failure |
-| `metadata` | Context-specific parameters and batch identifiers |
+| `can_cancel` | Whether the job can be cancelled right now |
+| `can_retry` | Whether the job can be retried right now |
+| `can_resume` | Whether the job can be resumed right now |
+| `input` | Context-specific parameters, with secrets redacted |
+| `checkpoint` | Resume checkpoint data |
+| `result` | Result counters, normalised to `added`, `merged`, `skipped`, `excluded`, `failed`, `completed`, `downloaded` |
+| `error` | Error object on failure (`code`, `message`, `request_id`) |
+
+Progress is flat: `phase`, `current`, `total`, and `message` are top-level keys, and there is no `unit` field.
 
 ## Supported operation types
 
-Jobs carry a dotted `type`, not a legacy queue name: `setup.scan`, `setup.revalidate`, `setup.commit`, `metadata.db_sync`, `metadata.match_preview`, `metadata.apply`, `media.bulk_download`, `media.cleanup`, `media.memories_import`, `emulator.install`, `emulator.update`, `gameyfin.install`, `saves.scan`, `saves.backup`, `library.backup`, `library.restore`, `library.export`, `screenscraper.match`, `screenscraper.apply`, `steamgrid.match`, `steamgrid.apply`, `storefront.auto_import`, `clips.reel`, `cloud.sync`, `updater.install`. Legacy job names (for example `library-export`, `screenscraper-match`, `auto-import`) map to these types with the matching retry policy, so export, SteamGridDB, ScreenScraper, auto-import, and reel jobs no longer masquerade as `setup.scan`. At most `MAX_OPERATIONS=100` operations are retained (plus 30-day retention for finished runs).
+Jobs carry a dotted `type`, not a legacy queue name: `setup.scan`, `setup.revalidate`, `setup.commit`, `metadata.db_sync`, `metadata.match_preview`, `metadata.match_auto`, `metadata.apply`, `metadata.media_auto`, `media.bulk_download`, `media.cleanup`, `media.memories_import`, `emulator.install`, `emulator.update`, `gameyfin.install`, `saves.scan`, `saves.backup`, `saves.restore`, `library.backup`, `library.restore`, `library.export`, `screenscraper.match`, `screenscraper.apply`, `steamgrid.match`, `steamgrid.apply`, `storefront.auto_import`, `storefront.scan`, `clips.reel`, `cloud.sync`, `updater.install`. Legacy job names (for example `library-export`, `screenscraper-match`, `auto-import`) map to these types with the matching retry policy, so export, SteamGridDB, ScreenScraper, auto-import, and reel jobs no longer masquerade as `setup.scan`. At most `MAX_OPERATIONS=100` operations are retained (plus 30-day retention for finished runs).
 
 Workers execute on a managed `ThreadPoolExecutor` with 4 concurrent slots (`openbox-job-*`). Live status and incremental events stream to the frontend over Server-Sent Events (SSE) via `/api/events`.
 
@@ -49,9 +64,13 @@ queued -> running -> cancelling -> cancelled
 ## Durability & Recovery (`operations.json`)
 
 Unlike legacy in-memory job queues, all operations are persisted atomically to `operations.json` in the data directory.
-- On startup, any operation previously left in `running` or `queued` state is automatically marked `interrupted`.
+- On startup, any operation previously left in `running`, `queued`, or `cancelling` state is automatically marked `interrupted`.
 - The **Activity drawer** (`#activityButton`) displays live and historical operations.
 - Interrupted jobs can be cleanly retried or resumed without duplicating finished work.
+
+## Durable media queue
+
+The media automation queue is a separate durable worker rather than an Operation Service job. It is stored in `media-queue.json` (at most 5,000 items) and reached through `GET /api/media/queue` plus `POST /api/media/queue/pause`, `/resume`, `/cancel`, and `/retry` (the retry body names one `id`). The response reports worker state, `items`, `queue`, and per-state `counts`. Because the list lives on disk, closing OpenBox does not lose queued downloads.
 
 ## Observability & Endpoints
 

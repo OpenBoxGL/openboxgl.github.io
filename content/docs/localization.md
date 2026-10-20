@@ -24,9 +24,13 @@ The locale is loaded via `fetch('/locales/{locale}.json')` on page load, with `e
 
 - All 5 locale files have 100% key coverage (no missing keys in any locale).
 - All `data-i18n` and `t()` references in the codebase have corresponding keys in `en.json`.
-- No locale file carries extra keys outside `en.json` (`check_i18n.py:9`): an extra key fails the gate the same way a missing key does.
+- No locale file carries extra keys outside `en.json`: an extra key fails the gate the same way a missing key does.
 
-A locale file with missing keys will fail CI. This prevents shipping partial translations.
+A locale file with missing keys will fail CI. This prevents shipping partial translations. The gate verifies key and placeholder parity, not translation quality.
+
+## 1.18.0 copy still in English
+
+In `es`, `de`, `fr`, and `pt`, the 1.18.0 additions are present with the same keys and placeholders but are still English strings in this release: the renamed and newly added Tools entries (including the four group headings and their 17 hints), the Add games menu, the new top-bar labels, and the new setup, help, onboarding, and Jump back in copy. That is 52 of the 55 renamed or new `tools.*` and `nav.*` keys per locale, plus the new setup, help, onboarding, and Add games copy. Untouched entries keep their existing translations, and a native-copy translation pass follows.
 
 ## Adding a new language
 

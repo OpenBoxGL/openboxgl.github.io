@@ -10,35 +10,35 @@ The application repository's `PARITY.md` is the maintenance source for capabilit
 
 Every workflow in `PARITY.md` is marked `done`, or carries a decision status for workflows without a Linux equivalent:
 
-- <StatusBadge status="done" /> means the workflow is usable end to end. The 1.17.x line runs on Linux (AppImage, Flatpak, source, and system installs) and on Windows x86_64, so `done` rows apply on both unless the row's note or the Linux-only list below says otherwise.
+- <StatusBadge status="done" /> means the workflow is usable end to end. The 1.18.x line runs on Linux (AppImage, Flatpak, source, and system installs) and on Windows x86_64, so `done` rows apply on both unless the row's note or the Linux-only list below says otherwise.
 - <StatusBadge status="partial" /> means a deliberate Linux equivalent exists but the Windows/premium surface is broader or unavailable.
 - <StatusBadge status="missing" /> means no usable equivalent yet.
 - Decision rows ("Not applicable", "Replaced by ...", "Use ... instead") mark Windows-only workflows with no Linux equivalent; they are documented as boundaries rather than implied support.
 
-Verified against **v1.17.0** (application `docs/PARITY.md`). The application checkout is ahead of the release and contains unreleased 1.18 rows; those rows are not part of v1.17.0 and are not listed here as shipped.
+Verified against **v1.18.0** (application `docs/PARITY.md`).
 
 ## Platform coverage
 
-The 1.17.x line runs on Linux and on Windows x86_64. Windows uses the native WebView2 host, the `install.ps1` installer with its matching `uninstall.ps1`, and verified in-place updates of `OpenBox-<arch>-windows.zip`; the platform seam lives in `pkg/platform_compat.py` (standard library only, plus `ctypes` on Windows).
+The 1.18.x line runs on Linux and on Windows x86_64. Windows uses the native WebView2 host, the `install.ps1` installer with its matching `uninstall.ps1`, and verified in-place updates of `OpenBox-<arch>-windows.zip`; the platform seam lives in `pkg/platform_compat.py` (standard library only, plus `ctypes` on Windows).
 
 These surfaces remain Linux-only and are not part of the Windows build: gamescope and Game Mode, AppImage and Flatpak packaging, XDG desktop entries, `sudo make install`, Steam Deck and handheld tuning, and Flathub-aware emulator management. See [Windows](/windows/) for the platform guide.
 
 ## Capability status
 
-The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Brazilian Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0 through 1.17.0 features plus the Windows support below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
+The source matrix tracks the current LaunchBox-aligned capabilities, including Localization with 5 languages (English, Spanish, German, French, and Brazilian Portuguese), the Premium-equivalent workflows (custom fields, ESRB filters, list view, media packs, cloud statistics sync), and the 1.11.0 through 1.18.0 features plus the Windows support below. OpenBoxGL sets `premium_features_free: true` in settings and ships bundled media packs without a license gate.
 
 | Area | Status | Notes |
 | --- | --- | --- |
 | Mixed-library management | <StatusBadge status="done" /> | One catalog for Steam, ROMs, arcades, executables |
-| Imports | <StatusBadge status="done" /> | Steam, Heroic, Lutris, Faugus, Gameyfin, ROM folders, arcade DATs, ScummVM, RPCS3, Vita3K, Xenia |
-| Metadata | <StatusBadge status="done" /> | LaunchBox Games Database daily sync + IGDB + Steam/GOG |
-| Media | <StatusBadge status="done" /> | Bulk media jobs, duplicate cleanup, EmuMovies, Bezel Project |
+| Imports | <StatusBadge status="done" /> | Steam, Heroic, Lutris, Faugus, Gameyfin, ROM folders, arcade DATs, ScummVM, RPCS3 (including `games.yml` external folders and ISOs), Vita3K, Xenia, PICO-8, MSU-1, and WHDLoad |
+| Metadata | <StatusBadge status="done" /> | LaunchBox Games Database daily sync + IGDB + Steam/GOG, with configurable built-in and plugin provider order and local verification of downloaded media |
+| Media | <StatusBadge status="done" /> | Bulk media jobs, durable media queue, duplicate cleanup, EmuMovies, Bezel Project |
 | Launch profiles | <StatusBadge status="done" /> | Tokenized commands, per-game overrides, archive extraction, dependency checks, Eden Switch |
-| Big Box | <StatusBadge status="done" /> | Stage, Hybrid, CoverFlow; gamepad; screensaver; gamescope guest |
+| Big Box | <StatusBadge status="done" /> | Stage, Hybrid, CoverFlow; gamepad, pointer, wheel, trackball, and spinner input; screensaver; gamescope guest |
 | Sessions and tracking | <StatusBadge status="done" /> | Per-session history, tracking modes, progress automation |
-| Saves and backups | <StatusBadge status="done" /> | Save discovery, versioned backups, restore guards, statistics sync |
-| Integrations | <StatusBadge status="done" /> | Proton/Wine Prefix Manager, RetroAchievements, IGDB, EmuMovies, Bezel, Gameyfin, OBS, MAME, Ludusavi, Hoard |
-| Plugins | <StatusBadge status="done" /> | `library`, `before_launch`, `after_session` hooks |
+| Saves and backups | <StatusBadge status="done" /> | Save discovery, hashed save manifests, versioned backups, selective restore, restore guards, statistics sync |
+| Integrations | <StatusBadge status="done" /> | Proton/Wine Prefix Manager, RetroAchievements, Steam achievements and playtime, IGDB, SteamGridDB, ScreenScraper, EmuMovies, Bezel, Gameyfin, OBS, MAME high scores, RetroArch netplay lobby, Ludusavi, Hoard |
+| Plugins | <StatusBadge status="done" /> | `library`, `before_launch`, `after_session`, `command`, `library_source`, `events`, and capability hooks with bounded host services |
 | Local automation | <StatusBadge status="done" /> | Queue, tags, notifications, HMAC-signed webhooks |
 | Premium workflows (free) | <StatusBadge status="done" /> | Custom fields, ESRB filters, list view, media packs, cloud stats sync |
 | Discovery (shipped in v1.9.0) | <StatusBadge status="done" /> | "What should I play?" picker, Constellation graph, SQLite FTS search |
@@ -77,6 +77,30 @@ The source matrix tracks the current LaunchBox-aligned capabilities, including L
 | Game Night decks (v1.17.0) | <StatusBadge status="done" /> | A named deck stores players, minutes, and a filter query (up to 20 decks); building returns an eight-character seed, and the same seed and library reproduce the same draw (ADR 0074) |
 | Price paid and cost per hour (v1.17.0) | <StatusBadge status="done" /> | A game records price paid and currency; Play Insights shows totals per currency and cost per hour for played, priced games; no conversion is performed (ADR 0075) |
 | Translated server notices (v1.17.0) | <StatusBadge status="done" /> | Cloud sync, launch-check, definition, and webhook notices carry translation keys and parameters and render in all five locales, with the stored English text as fallback (ADR 0076) |
+| Platform rename and delete (v1.18.0) | <StatusBadge status="done" /> | Renaming migrates games, launch profiles, filter playlists, platform settings, and opt-in platform media; deleting requires the platform name and moves its games to Trash |
+| Durable media automation queue (v1.18.0) | <StatusBadge status="done" /> | Auto-import enqueues poster, square, screenshot, video, music, and manual downloads into a queue that survives restart with pause/resume/cancel/retry, per-item errors, global and per-platform limits, provider priority, and validated LaunchBox media; EmuMovies joins the provider list |
+| Emulator settings and versions (v1.18.0) | <StatusBadge status="done" /> | Manage Emulators edits a managed flag, per-platform overrides, and install/version status; MAME and RetroArch display, fullscreen, effects, run-ahead, rewind, and upscaling settings render into launch arguments or `--appendconfig`; update-all probes installed versions and honours a per-emulator opt-out |
+| Save manifests and selective restore (v1.18.0) | <StatusBadge status="done" /> | Backups record each file's size, mode, mtime, and SHA-256; version history lists older backups with add/overwrite/unchanged counts; restore lists archive contents, supports a dry run, and restores only checked files after a safety backup |
+| Plugin capability services (v1.18.0) | <StatusBadge status="done" /> | Manifests declare storefront, metadata, media, stats, emulator-settings, and discovery capabilities; capability hooks receive a bounded data bag, settings, and a credential store and may request read-only library, achievement, profile, activity, leaderboard, catalog, metadata, and media services; plugin storefronts share the catalog UI and plugin stats merge monotonically |
+| Big Box input parity (v1.18.0) | <StatusBadge status="done" /> | Pointer drag, wheel ticks, trackball, and spinner navigation move the Big Box selection with configurable sensitivity and wheel speed; holding Back opens the menu; a battery indicator reads the Linux sysfs battery through `GET /api/native/battery`; platforms, categories, and playlists can be hidden |
+| Keyboard and controller remapping (v1.18.0) | <StatusBadge status="done" /> | Settings > Controller records keyboard shortcuts for play, back, menu, pause, paging, search, settings, and the reader, clears controller buttons, and swaps a duplicate assignment only after confirmation |
+| Storefront scanning and imports (v1.18.0) | <StatusBadge status="done" /> | Startup scans report per-source progress, skip sources with no library games, stop after 30 seconds and keep partial state; per-source auto-import stores a target platform, can include owned-but-uninstalled games, and can restrict to new games; PICO-8, MSU-1, WHDLoad, and RPCS3 `games.yml` imports are supported |
+| Steam missing and repair states (v1.18.0) | <StatusBadge status="done" /> | Imported Steam games record whether their install folder exists; missing games show a Missing badge and an Install handoff, and installed games offer Verify files through `steam://validate/<id>` |
+| Achievements, high scores, and netplay (v1.18.0) | <StatusBadge status="done" /> | Steam achievements and playtime import through the Steam Web API with monotonic merges; achievement tabs show provider totals and source filters; MAME hi2txt JSON or pipe-delimited high scores import, export, and render as a searchable table (including the Big Box running-game panel); RetroArch's public HTTPS lobby opens from Tools > Online play and the Big Box menu |
+| 3D model controls (v1.18.0) | <StatusBadge status="done" /> | Cassette models offer straight or angled backs and clear or solid cases; rotation lock is free, horizontal, or vertical; each choice can be overridden per platform, and the selected CoverFlow card renders the model |
+| Newcomer GUI pass (v1.18.0) | <StatusBadge status="done" /> | One Add games menu replaces four add actions; Setup Center opens on a six-step quick path with advanced steps behind a toggle; Help & shortcuts (`F1`/`?`) adds a glossary and the real shortcut table; the empty library is one illustrated card; the details pane carries a three-step onboarding checklist and a Jump back in hero; Themes shows a swatch gallery |
+| Filter exclusions and richer rules (v1.18.0) | <StatusBadge status="done" /> | Platform, category, source, and smart-collection filters cycle include → exclude → clear; presets and playlists accept source, achievement-source, region, text operators, and exclusions; exclusions survive a refresh through the hash route |
+| Configurable progress values (v1.18.0) | <StatusBadge status="done" /> | Progress automation and the game editor offer only the labels enabled in Settings; labels outside the whitelist are rejected at the API boundary |
+| Bulk find and replace (v1.18.0) | <StatusBadge status="done" /> | Bulk Edit previews and applies a literal replacement in one metadata field across the selected games |
+| Sidebar ordering (v1.18.0) | <StatusBadge status="done" /> | Settings reorders the sidebar sections and hides Explorer; section ids from an older build no longer block a settings save |
+| Discovery achievements shelf (v1.18.0) | <StatusBadge status="done" /> | The Discovery Center lists games with RetroAchievements or provider achievement totals, sorted by completion percentage then title |
+| Per-provider integration tokens (v1.18.0) | <StatusBadge status="done" /> | Optional IGDB, ScreenScraper, SteamGridDB, Gameyfin, and RetroAchievements tokens are stored outside the public settings projection and returned only masked |
+| Metadata provider priority (v1.18.0) | <StatusBadge status="done" /> | Built-in and plugin metadata/media providers can be ordered; candidates carry their source; bulk downloads can prefer plugin results; partial-word search prefers exact title matches and filters by platform |
+| Tray recent games and launch deeplink (v1.18.0) | <StatusBadge status="done" /> | The Linux and Windows tray menus launch one of the eight most recent games, and `?deeplink=launch&id=<id>` starts a game for the tray handoff |
+| Library audit source filtering and bulk media moves (v1.18.0) | <StatusBadge status="done" /> | The Tools > Library checkup report shows a Source column, per-source counts, and a source filter; a bulk platform edit can move selected games' media and reports `media_errors` without discarding the field update |
+| Resume slot and disc hashing (v1.18.0) | <StatusBadge status="done" /> | A game stores a RetroArch save-state slot from its Save management card; automatic RetroAchievements matching expands to WiiWare WADs, M3U playlists, PlayStation CHD, and GameCube/Wii RVZ through `chdman` or `dolphin-tool` |
+| Plugin repair and achievement refresh (v1.18.0) | <StatusBadge status="done" /> | Installed plugins can be reinstalled from their catalog entry without losing settings, stats, or trust; achievement tabs refresh Steam and plugin sources independently; the launch audit appends a rolling history to `cache/launch_audit.jsonl` |
+| Big Box presentation and settings polish (v1.18.0) | <StatusBadge status="done" /> | Reader controls are remappable and persist theme and spread; image cells and Ctrl+I open a fullscreen lightbox; videos gain controls and an audio mix; the startup video plays once; themes may add background music and sounds; the details window remembers position and size; Options search scans every category; a placeholder cover replaces repeated missing-art text and the media cache cleanup route removes stale generated files |
 
 ## Intentionally not replicated on Linux
 
@@ -108,50 +132,75 @@ The capability rows above are implemented by the current modules in `pkg/parity/
 
 | Module | Area |
 | --- | --- |
+| `launch_tokens.py` | Launch command token expansion |
+| `parity_artwork_hygiene.py` | Artwork Doctor audit and safe fix/undo |
 | `parity_backup.py` | Library backups |
+| `parity_bulk_edit.py` | Bulk metadata edits and literal find/replace |
 | `parity_collections.py` | Smart collections (named query shelves) |
-| `parity_radio.py` | Backlog Radio recommendations |
 | `parity_constellation.py` | Constellation relationship graph |
 | `parity_deeplinks.py` | Deep links |
-| `parity_discovery.py` | Discovery queue |
+| `parity_discovery.py` | Discovery Center lists |
+| `parity_dna.py` | Game DNA offline smart search |
+| `parity_duplicates.py` | Duplicate game-record detection and merge |
 | `parity_emulator_defs.py` | Emulator-def registry |
+| `parity_emulator_defs_update.py` | Signed emulator-definition pack updates |
+| `parity_emulator_settings.py` | Per-emulator settings, launch arguments, and version probes |
+| `parity_emumovies.py` | EmuMovies media provider |
 | `parity_esde_import.py` | ES-DE gamelist import |
 | `parity_export.py` | Library export |
 | `parity_faugus.py` | Faugus integration |
-| `parity_filter_presets.py` | Filter presets |
+| `parity_filter_presets.py` | Filter presets and visual chip rules |
+| `parity_flatpak_grant.py` | Flatpak folder grants |
 | `parity_gamescope.py` | Gamescope guest |
 | `parity_gameyfin.py` | Gameyfin storefront |
+| `parity_highscores.py` | MAME high-score discovery, import, and export |
 | `parity_household.py` | Household records and sync |
 | `parity_identity.py` | Identity / instance |
 | `parity_igdb.py` | IGDB metadata |
 | `parity_import.py` | Imports |
-| `parity_import_policy.py` | Import policy |
+| `parity_import_policy.py` | Import policy and exclusion list |
 | `parity_insights.py` | Play insights |
+| `parity_integration_tokens.py` | Per-provider integration tokens and masking |
 | `parity_integrations.py` | Third-party integrations |
+| `parity_launch_audit.py` | Library-wide launch audit and rolling history |
 | `parity_launch_doctor.py` | Launch Doctor preflight |
 | `parity_launchbox_import.py` | LaunchBox XML migration |
-| `parity_library_sync.py` | Causal catalog synchronization |
-| `parity_media.py` | Media jobs |
+| `parity_legacy_import.py` | PICO-8, MSU-1, and Amiga WHDLoad importers |
+| `parity_library_health.py` | Library health score and scheduled rescan |
+| `parity_library_sync.py` | Causal catalog synchronization and local journal |
+| `parity_media.py` | Media jobs, durable media queue, and cache cleanup |
 | `parity_memories.py` | Memory-root import and gallery |
+| `parity_metadata_providers.py` | Metadata provider registry and priority order |
+| `parity_netplay.py` | RetroArch netplay lobby browser |
 | `parity_obs_bridge.py` | OBS replay-buffer bridge |
+| `parity_party.py` | Big Box party mode and Game Night decks |
 | `parity_perf.py` | Performance projections |
-| `parity_party.py` | Big Box party mode |
 | `parity_picker.py` | Play picker recommendations |
+| `parity_platform_admin.py` | Platform rename/delete and media migration |
+| `parity_plugin_discovery.py` | Plugin discovery-list capability |
+| `parity_plugin_providers.py` | Plugin metadata and media provider capability |
+| `parity_plugin_services.py` | Read-only host services for capability hooks |
+| `parity_plugin_stats.py` | Plugin stats and achievement capability |
+| `parity_plugin_storefront.py` | Plugin storefront capability |
 | `parity_premium.py` | Premium-equivalent workflows |
 | `parity_query.py` | Natural-language library query grammar |
+| `parity_radio.py` | Backlog Radio recommendations |
 | `parity_redact.py` | Log redaction |
 | `parity_reels.py` | Deterministic clip/reel manifests |
+| `parity_repair.py` | Missing-file repair wizard |
 | `parity_resume.py` | Quick Resume state capability and storage |
-| `parity_saves.py` | Saves |
 | `parity_save_tools.py` | Save tools (Ludusavi/Hoard) |
+| `parity_saves.py` | Saves, manifests, and selective restore |
 | `parity_screenscraper.py` | ScreenScraper matching |
 | `parity_setup_preview.py` | Setup Center preview |
-| `parity_story.py` | Per-game Story timeline projection |
-| `parity_storefront.py` | Storefront imports |
-| `parity_storefront_windows.py` | Native GOG, EA app, and Ubisoft Connect discovery on Windows |
+| `parity_steam_achievements.py` | Steam achievements and playtime import |
 | `parity_steam_bridge.py` | Steam shortcuts.vdf bridge |
 | `parity_steamgrid.py` | SteamGridDB artwork provider |
-| `parity_tracking.py` | Play tracking |
+| `parity_storefront.py` | Storefront imports and scanning |
+| `parity_storefront_windows.py` | Native GOG, EA app, and Ubisoft Connect discovery on Windows |
+| `parity_story.py` | Per-game Story timeline projection |
 | `parity_time_machine.py` | Journal timeline and revert planning |
+| `parity_tracking.py` | Play tracking |
+| `parity_tray_recent.py` | Tray recent-game list |
 | `parity_trophies.py` | Local launcher trophies |
 | `parity_wine.py` | Wine/Proton prefix management |

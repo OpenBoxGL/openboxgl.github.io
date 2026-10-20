@@ -3,13 +3,13 @@ title: Releasing
 description: Cut and publish an OpenBox release and its verified artifacts.
 ---
 
-This page is for maintainers publishing a release from `master`. The AppImage and Flatpak artifacts are built in CI when a `v*` tag is pushed; the steps below prepare the version, changelog, and metadata before that tag.
+This page is for maintainers publishing a release from `master`. The AppImage, Windows portable, and Flatpak artifacts are built in CI when a `v*` tag is pushed; the steps below prepare the version, changelog, and metadata before that tag.
 
 ## Before you tag
 
 1. Work from a clean `master` that tracks `origin/master`; confirm the target tag does not already exist.
 2. Bump `updates.py` `VERSION` to the new semver.
-3. Add a dated section to `docs/CHANGELOG.md` (Keep a Changelog format) and the comparison links, and update `RELEASE_NOTES.md` (CI publishes it as the release body).
+3. Add a dated section to `docs/CHANGELOG.md` (Keep a Changelog format) and the comparison links, and update `docs/RELEASE_NOTES.md` (CI publishes it as the release body).
 4. Prepend release metadata to `openbox.metainfo.xml`.
 5. Update the README release badge, `PARITY.md` latest-release text, the bug-report template's version field, and any branch/version references that should track the current release. Review `SUPPORT.md`, the Flathub checklist, installer architecture examples, and this page. Leave historical version references in old changelog/metainfo entries and completed specs unchanged.
 6. Run the local gates:
@@ -56,25 +56,36 @@ Confirm the embedded version matches the release by extracting the AppImage and 
 
 ## What CI does
 
-Pushing a `v*` tag triggers the AppImage and Flatpak release workflows. The two publish jobs share a per-tag concurrency group because both update the same GitHub Release.
+Pushing a `v*` tag triggers the AppImage/Windows release workflow and the Flatpak release workflow. The two publish jobs share a per-tag concurrency group because both update the same GitHub Release.
 
-**AppImage build** (contents read): validates the tag against `updates.py` `VERSION`, compiles the native host, runs the full test suite, and builds both `OpenBox-x86_64.AppImage` and `OpenBox-aarch64.AppImage` on architecture-matched runners. Each build gets a `.zsync`, `.sha256`, and architecture-appropriate CycloneDX SBOM, then uploads unsigned outputs as workflow artifacts.
+`release.yml` defines six jobs: `test`, `build`, `attest`, `build-windows`, `attest-windows`, and one shared `publish`. The Windows artifacts are uploaded by that same `publish` job, not by a separate one.
 
-**AppImage attest** (id-token and attestations write): downloads each build output and attests provenance for both AppImages.
+**test** (contents read): installs the build dependencies, compiles the native host, and runs the full test suite on the host.
 
-**AppImage publish** (requires the `release` environment, contents write): checks out the exact tagged commit, confirms the annotated tag points at the build commit, signs and verifies both AppImages, compares the derived public key against the committed `openbox-release.pub`, re-checks each SHA-256, and verifies each signature. If `OPENBOX_SIGNING_KEY` is missing or the derived key does not match, the job fails before anything is published. It then copies `scripts/install.sh` and uploads both signed AppImages, their `.zsync`, `.sha256`, `.sig`, the release key, architecture-specific SBOMs, and the installer. A tag containing `-` is marked prerelease.
+**build** (contents read, needs `test`): validates the tag against `updates.py` `VERSION`, compiles the native host, and builds both `OpenBox-x86_64.AppImage` and `OpenBox-aarch64.AppImage` on architecture-matched runners. Each build is checked against the glibc floor, and gets a `.zsync`, `.sha256`, and architecture-appropriate CycloneDX SBOM, then uploads unsigned outputs as workflow artifacts.
 
-**Flatpak build**: validates packaging metadata, compiles the native host, runs packaging tests, installs the GNOME 49 runtime/SDK, and creates `OpenBox-x86_64.flatpak`.
+**attest** (id-token and attestations write, needs `build`): downloads each build output and attests provenance for both AppImages.
 
-**Flatpak publish** (requires the `release` environment, contents write): uploads the x86_64 Flatpak to the same release and uses the same `docs/RELEASE_NOTES.md` body. Its publish job is serialized with the AppImage publish job for that tag.
+**build-windows** (contents read): builds the portable runtime, compiles `native_host.exe`, packages `OpenBox-x86_64-windows.zip` with one top-level `OpenBox/` folder, and produces the standalone `OpenBox-x86_64-windows-native-host.exe` that source checkouts can drop in.
 
-The release body is `RELEASE_NOTES.md`, so update it before tagging; GitHub does not generate the notes.
+**attest-windows** (id-token and attestations write, needs `build-windows`): attests provenance for the zip and the standalone host. It only attests — the signing and the upload happen in the shared `publish` job.
+
+**publish** (requires the `release` environment, contents write; needs `build`, `attest`, `build-windows`, and `attest-windows`): checks out the exact tagged commit, confirms the annotated tag points at the build commit, signs and verifies the AppImages, the Windows zip, and the standalone host, compares the derived public key against the committed `openbox-release.pub`, re-checks each SHA-256, and verifies each signature. If `OPENBOX_SIGNING_KEY` is missing or the derived key does not match, the job fails before anything is published. It then copies `scripts/install.sh` and `scripts/install.ps1` and uploads both signed AppImages with their `.zsync`, `.sha256`, and `.sig`, the Windows zip and host with their sidecars, the release key, and the architecture-specific SBOMs — so the release publishes both installers. A tag containing `-` is marked prerelease.
+
+The Flatpak workflow (`release-flatpak.yml`) has two jobs:
+
+**build**: validates packaging metadata, compiles the native host, runs packaging tests, installs the GNOME 49 runtime/SDK, and creates `OpenBox-x86_64.flatpak`.
+
+**publish** (requires the `release` environment, contents write): uploads the x86_64 Flatpak to the same release and uses the same `docs/RELEASE_NOTES.md` body. Its publish job is serialized with the shared publish job for that tag.
+
+The release body is `docs/RELEASE_NOTES.md`, so update it before tagging; GitHub does not generate the notes.
 
 ## Verify after publishing
 
-- Confirm GitHub's latest-release API returns the new version and the architecture matrix: x86_64 and aarch64 AppImages with `.zsync`, `.sha256`, and `.sig`, the release key, architecture-specific SBOMs, `install.sh`, and `OpenBox-x86_64.flatpak`.
+- Confirm GitHub's latest-release API returns the new version and the architecture matrix: x86_64 and aarch64 AppImages with `.zsync`, `.sha256`, and `.sig`, the release key, architecture-specific SBOMs, `install.sh`, `install.ps1`, `OpenBox-x86_64.flatpak`, and the signed `OpenBox-x86_64-windows.zip` and `OpenBox-x86_64-windows-native-host.exe` with their sidecars.
 - Download each AppImage and its `.sha256` remotely and run `sha256sum -c`.
-- Verify both signatures with `scripts/verify_release.py --key openbox-release.pub OpenBox-x86_64.AppImage OpenBox-x86_64.AppImage.sig` and the matching aarch64 paths.
+- Verify both signatures with `scripts/verify_release.py --key openbox-release.pub OpenBox-x86_64.AppImage OpenBox-x86_64.AppImage.sig` and the matching aarch64 paths, then repeat for the Windows zip and standalone host.
+- Check that the Windows zip contains a single top-level `OpenBox/` folder with `web_app.py` and the compiled `native_host.exe`.
 - Start the AppImage and confirm the updater reports the new version as current with no update available.
 
 ## Pitfalls

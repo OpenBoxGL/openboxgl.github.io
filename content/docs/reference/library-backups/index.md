@@ -18,7 +18,7 @@ Whole-library backups are ZIP archives in `backups/` that can include settings, 
 | `settings` | `settings.json` (serialized snapshot of `state["settings"]`) |
 | `library` | `library.json` (the full state object) |
 | `media` | `media/` (the media directory tree) |
-| `plugins` | `plugins/` (installed plugin packages) |
+| `plugins` | `plugins/` (installed plugin packages, excluding `plugins/credentials/`) |
 | `themes` | `themes/` (user themes) |
 | `extension_data` | `extension-data/` |
 
@@ -33,6 +33,13 @@ Every archive contains `manifest.json`:
 ```
 
 When no items are given, the default is `["library", "settings"]` (also used by the CLI `--backup`). Backups automatically redact sensitive API keys/passwords, and local credentials are automatically preserved and remerged on restore. Unknown or empty item lists raise `"Select at least one backup item."` Item names are case-folded and deduplicated.
+
+### Plugin state in backups
+
+Two plugin secrets never enter a backup:
+
+- The capability credential store, `<data>/plugins/credentials/` (one `<plugin-id>.json` per plugin, mode `0600`), is skipped entirely when `plugins` is archived. Credentials are local-only by design, like a device keychain.
+- `plugins-state.json` is redacted: every setting whose manifest field declares `"format": "password"` is written as an empty string, so a required setting still validates on restore. On restore those blanks are merged back from your current local values, so a restore does not wipe a stored plugin secret. If the installed package cannot be read, its settings are copied unchanged rather than guessing which values are secret.
 
 ## Limits
 

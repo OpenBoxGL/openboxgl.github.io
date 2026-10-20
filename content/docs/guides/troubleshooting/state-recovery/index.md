@@ -35,7 +35,7 @@ Send `POST /api/state/recover` with `{"dry_run": true}` to inspect recovery opti
   "games": 42,
   "snapshots": [
     {
-      "name": "20260823T153000Z-a1b2c3d4.json",
+      "name": "20260823T153000123456Z-00000007-a1b2c3d4.json",
       "modified": 1723896000.0,
       "size": 154200
     }
@@ -43,10 +43,12 @@ Send `POST /api/state/recover` with `{"dry_run": true}` to inspect recovery opti
 }
 ```
 
+Snapshot names embed the UTC timestamp to microseconds, a sequence number, and a random suffix (`<timestamp>-<sequence>-<hex>.json`). Listing is newest-first by that embedded timestamp and sequence, not by file mtime, so two snapshots written in the same clock tick still sort correctly. A hand-placed filename without that format falls back to mtime ordering.
+
 ### Restoring state
 
 - **Restore last-known-good backup**: `POST /api/state/recover` with `{}` loads `library.json.bak`, validates/normalizes it, and commits it atomically.
-- **Restore specific snapshot**: `POST /api/state/recover` with `{"snapshot": "20260823T153000Z-a1b2c3d4.json"}` restores a point-in-time snapshot from `library.json.snapshots/` (retains the 5 most recent rolling snapshots).
+- **Restore specific snapshot**: `POST /api/state/recover` with `{"snapshot": "20260823T153000123456Z-00000007-a1b2c3d4.json"}` restores a point-in-time snapshot from `library.json.snapshots/` (retains the 5 most recent rolling snapshots).
 
 Success returns `{"ok": true, "games": <count>}`.
 

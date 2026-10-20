@@ -22,7 +22,7 @@ OpenBoxGL is an independent open-source project. It is not affiliated, associate
 
 Third-party names and marks belong to their respective owners and appear only to describe compatibility, interoperability, supported workflows, or factual comparison:
 
-- LaunchBox and Big Box are trademarks of Unbroken Software, LLC.
+- LaunchBox and Big Box are registered trademarks of Unbroken Software, LLC.
 - Steam, Epic, GOG, Nintendo, Sony, Microsoft, Sega, RetroArch, and emulator names belong to their respective owners.
 - References do not constitute or imply endorsement, sponsorship, affiliation, or recommendation. Use product names in plain text with correct capitalization and without altering logo trade dress. Do not place a third-party logo next to the OpenBox logo to imply co-branding.
 

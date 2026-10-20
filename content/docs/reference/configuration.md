@@ -3,17 +3,31 @@ title: Configuration
 description: Configure environment values, local state, and application settings.
 ---
 
-OpenBoxGL reads configuration from three places, in order: the process environment, discovered `.env` files, and persisted application settings (the Settings dialog). This page documents each source, the exact variables, and the validation limits applied when settings are saved.
+OpenBoxGL reads configuration from three places: the process environment, discovered `.env` files, and persisted application settings (the Settings dialog). A `.env` file is a credential and HTTP-allowlist file only — it never carries general settings. This page documents each source, the exact variables, and the validation limits applied when settings are saved.
 
 ## Configuration sources
 
 | Source | When it is read | Precedence |
 | --- | --- | --- |
-| Process environment | At startup and on demand (`os.environ`) | Highest |
-| Discovered `.env` files | `bootstrap_env` at Web UI startup, lazily before some lookups | Middle; never overrides an existing environment value |
-| Persisted settings | `library.json` -> `settings` | Lowest for credentials; the only store for UI settings |
+| Process environment | At startup and on demand (`os.environ`) | Highest for every variable it defines |
+| Discovered `.env` files | `bootstrap_env` at Web UI startup, lazily before some lookups | Never overrides an existing environment value |
+| Persisted settings | `library.json` -> `settings` | Provider-specific (see below); the only store for UI settings |
 
 A `.env` file sets an environment variable only when that variable is not already set, so the process environment always wins. Unreadable or non-UTF-8 `.env` files are skipped silently; an optional `.env` must never abort startup.
+
+A `.env` file is a credential and HTTP-allowlist file only. `env_config.py` loads just the names in `ENV_KEYS`: the provider credentials, the GitHub token aliases, `OPENBOX_ALLOW_HTTP_WEBHOOKS`, and `OPENBOX_ALLOW_HTTP_GAMEYFIN`. Every other key in the file is dropped silently, so `.env` cannot carry general settings.
+
+### Credential precedence
+
+Precedence is per provider, not one global order:
+
+| Provider | Order |
+| --- | --- |
+| RetroAchievements | `retroachievements.json` in the data directory, then the environment |
+| EmuMovies | `emumovies.json` in the data directory, then the environment |
+| Steam | `<data>/steam.json` wins per field; `STEAM_API_KEY` / `STEAM_ID` only fill the values the file does not have |
+| IGDB, ScreenScraper, SteamGridDB | Environment only |
+| Gameyfin | Settings only (`library.json`); no environment variables |
 
 ## `.env` discovery order
 
@@ -24,10 +38,11 @@ A `.env` file sets an environment variable only when that variable is not alread
 3. The parent of the data directory.
 4. Your home directory (`~/.env`).
 5. `~/.config/openbox-game-launcher/.env`.
+6. On Windows only, `%APPDATA%\openbox-game-launcher` and `%LOCALAPPDATA%\openbox-game-launcher`.
 
-The current working directory and the application directory are not searched. Each `.env` file must be an owner-only regular file (mode `0o600`, no group or other permission bits), must not be a symlink, and must be under 1 MiB; anything else is skipped silently. Windows has no POSIX mode bits, so there the check rejects reparse points instead and otherwise relies on the per-user profile ACL — keep `.env` inside your own profile directory.
+The current working directory and the application directory are not searched. Each `.env` file must be an owner-only regular file (no group or other permission bits; `0o600` is the usual value), must not be a symlink, and must be under 1 MiB; anything else is skipped silently. Windows has no POSIX mode bits, so there the check rejects reparse points instead and otherwise relies on the per-user profile ACL — keep `.env` inside your own profile directory.
 
-Values already in the environment are never overridden by `.env`. The template lives at `.env.example` in the repository. Put real secrets in `~/.env` or `~/.config/openbox-game-launcher/.env` only, never in a tracked file.
+Values already in the environment are never overridden by `.env`. The template lives at `.env.example` in the repository. Put real secrets in `~/.env` or `~/.config/openbox-game-launcher/.env` only, never in a tracked file. Only the allowlisted keys are read, so a key in the file that is not in `ENV_KEYS` is ignored — a value placed in `.env` can look configured while the application never sees it.
 
 ## Environment variables
 
@@ -35,18 +50,18 @@ Values already in the environment are never overridden by `.env`. The template l
 
 | Variable | Meaning |
 | --- | --- |
-| `OPENBOX_DATA_DIR` | Data directory. Read at import time, before `.env` bootstrap; must be exported in the shell, desktop entry, or systemd unit before launch. Defaults to `~/.local/share/openbox-game-launcher`, and to `%LOCALAPPDATA%\openbox-game-launcher` on Windows. |
-| `OPENBOX_SAFE_MODE` | Any non-empty value (conventionally `1`) disables plugin execution and the webhook dispatcher for the whole process. Exposed as `settings.safe_mode`. |
+| `OPENBOX_DATA_DIR` | Data directory. Read at import time, before `.env` bootstrap; must be exported in the shell, desktop entry, or systemd unit before launch. Defaults to `~/.local/share/openbox-game-launcher`, and to `%LOCALAPPDATA%\openbox-game-launcher` on Windows. When no home directory can be determined, it falls back to `openbox-game-launcher` inside the current working directory. |
+| `OPENBOX_SAFE_MODE` | Any non-empty value (conventionally `1`) disables plugin execution and the webhook dispatcher for the whole process. Exposed as `settings.safe_mode`. Process environment only (not `.env`). |
 | `APPIMAGE` | Set automatically when running from an AppImage; the Linux updater refuses to install without it. Exposed as `settings.appimage`. Windows updates use the verified `OpenBox-<arch>-windows.zip` path instead. |
 | `OPENBOX_ENV_FILE` | Explicit path to a single `.env` file, checked first before the data-directory roots. Read directly from the process environment; must point at an owner-only regular file (not a symlink) or it is skipped. |
 | `OPENBOX_ALLOW_HTTP_WEBHOOKS` | Set to `1` to allow plain-HTTP webhook URLs. Required only for trusted local test targets; HTTPS is the default and safer. |
 | `OPENBOX_ALLOW_HTTP_GAMEYFIN` | Set to `1` to allow plain-HTTP Gameyfin URLs. HTTPS is the default; loopback (localhost) addresses are always allowed. |
-| `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS` | Set to `1` in the process shell to allow unsandboxed plugin execution when bubblewrap is unavailable. Read directly from the process environment (not `.env`; it is not in `ENV_KEYS`). |
-| `OPENBOX_MEDIA_ROOTS` | Colon-separated list (`os.pathsep`) of additional absolute directories approved for scanning and media storage. Up to 32 roots. |
-| `OPENBOX_EXECUTABLE` | Optional explicit path to the emulator/launcher executable recorded when importing Steam titles for Steam Bridge. Read from the process environment at scan time; when unset, the importer uses the Steam-reported executable. |
-| `OPENBOX_ENABLE_DMABUF` | Set to `1` to enable WebKitGTK DMA-BUF rendering in the Linux native window. Disabled by default to prevent silent blank windows on AMD GPUs (including Steam Deck). Windows uses WebView2 instead and ignores this. |
-| `OPENBOX_WEBKIT_HARDWARE_ACCELERATION` | WebKitGTK hardware acceleration policy in the Linux native window (`always` or `on-demand`; default is `on-demand`). |
-| `OPENBOX_SNAPSHOT_DEBOUNCE` | Debounce delay in seconds (float) for background library state snapshot writes (defaults to `0.0`). |
+| `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS` | Set to `1` in the process shell to allow unsandboxed plugin execution. The sandbox is disabled entirely whenever this is set, even when bubblewrap is available. Read directly from the process environment (not `.env`; it is not in `ENV_KEYS`). |
+| `OPENBOX_MEDIA_ROOTS` | Colon-separated list (`os.pathsep`) of additional absolute directories approved for scanning and media storage. The built-in `<data>/media` root counts toward the total, so at most 31 additional roots can be added. Process environment only (not `.env`). |
+| `OPENBOX_EXECUTABLE` | Optional explicit path to the emulator/launcher executable recorded when importing Steam titles for Steam Bridge. Read from the process environment at scan time; when unset, the importer uses the Steam-reported executable. Process environment only (not `.env`). |
+| `OPENBOX_ENABLE_DMABUF` | Set to `1` to enable WebKitGTK DMA-BUF rendering in the Linux native window. Disabled by default to prevent silent blank windows on AMD GPUs (including Steam Deck). Windows uses WebView2 instead and ignores this. Process environment only (not `.env`). |
+| `OPENBOX_WEBKIT_HARDWARE_ACCELERATION` | WebKitGTK hardware acceleration policy in the Linux native window (`always` or `on-demand`; default is `on-demand`). Process environment only (not `.env`). |
+| `OPENBOX_SNAPSHOT_DEBOUNCE` | Debounce delay in seconds (float) for background library state snapshot writes (defaults to `0.0`). Process environment only (not `.env`). |
 | `OPENBOX_INSTALL_DIR` | Custom installation directory used by `install.sh` (defaults to `~/.local/bin`). On Windows the same variable, or `install.ps1 -InstallDir`, defaults to `%LOCALAPPDATA%\OpenBox`; the runtime lands in `<InstallDir>\share\openbox` and the previous tree is kept at `<InstallDir>\share\openbox.previous`. |
 | `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v1.13.0`) during `install.sh` execution. |
 | `OPENBOX_PYTHON` | Path to the Python interpreter invoked by the native host (defaults to `python3`; on Windows the launchers locate `python.exe` or `py.exe` on `PATH` unless this is set). |
@@ -57,7 +72,7 @@ Values already in the environment are never overridden by `.env`. The template l
 | `OPENBOX_ARCH` | Overrides `uname -m` architecture detection in `install.sh` and `build_appimage.sh` (`x86_64` or `aarch64`). |
 | `OPENBOX_UPDATE_INFORMATION` | zsync update-metadata line embedded by `build_appimage.sh` for the verified updater (packaging-time, not user-facing). |
 | `OPENBOX_RELEASE_BASE` | Base URL the release assets are served from, read by `scripts/install.ps1` (or pass `-ReleaseBase`). Overrides the default GitHub release download host. |
-| `OPENBOX_ENABLE_SQLITE_READ` | Set to `1` to enable the SQLite read model (`pkg/state/sqlite_readmodel.py`) for accelerated search and facets on large libraries. It uses stdlib `sqlite3` with FTS5 full-text search (LIKE fallback if FTS5 is unavailable). JSON remains the source of truth; SQLite is a read-only projection. Release evidence covers 10k and 20k libraries; larger collections are exploratory. Since v1.12.0 the read model also self-enables at 5,000+ games (`should_auto_enable()`, latched per process); an explicit `0`/`false`/`no` opt-out is never overridden. (v1.7.2+) |
+| `OPENBOX_ENABLE_SQLITE_READ` | Set to `1` to enable the SQLite read model (`pkg/state/sqlite_readmodel.py`) for accelerated search and facets on large libraries. It uses stdlib `sqlite3` with FTS5 full-text search (LIKE fallback if FTS5 is unavailable). JSON remains the source of truth; SQLite is a read-only projection. Release evidence covers 10k and 20k libraries; larger collections are exploratory. Since v1.12.0 the read model also self-enables at 5,000+ games (`should_auto_enable()`, latched per process); an explicit `0`/`false`/`no` opt-out is never overridden. (v1.7.2+) Process environment only (not `.env`). |
 
 ### Windows launchers
 
@@ -87,8 +102,10 @@ Python is located as `python.exe` or `py.exe` on `PATH`, or through `OPENBOX_PYT
 | `SCREENSCRAPER_PASSWORD` | ScreenScraper per-ROM-hash scraping (required for that provider) | `OPENBOX_SCREENSCRAPER_PASSWORD` |
 | `SCREENSCRAPER_DEV_ID` | ScreenScraper developer credentials (required for that provider; the API refuses lookups without them) | `OPENBOX_SCREENSCRAPER_DEV_ID` |
 | `SCREENSCRAPER_DEV_PASSWORD` | ScreenScraper developer credentials (required for that provider) | `OPENBOX_SCREENSCRAPER_DEV_PASSWORD` |
+| `STEAM_API_KEY` | Steam Web API key for achievement and playtime import. Process environment only (not `.env`). | |
+| `STEAM_ID` | Steam ID (64-bit account id) for achievement and playtime import. Process environment only (not `.env`). | |
 
-Each credential lookup checks the aliases in order using `env_value()` from `env_config.py`, it iterates through the listed names for a variable and uses the first non-empty value found. If an empty string is returned for any required variable, the route returns a specific `400` error naming exactly which variable is missing. For example, IGDB requires both `IGDB_CLIENT_ID` **and** `IGDB_CLIENT_SECRET`; without either the IGDB routes return `400 {"error":"Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET in ~/.env to use IGDB."}`. Without RetroAchievements credentials, the `/api/ra/*` routes return `400 {"error":"Configure RetroAchievements first."}`.
+Most credential lookups check the aliases in order using `env_value()` from `env_config.py`: it iterates through the listed names and uses the first non-empty value found. Steam's two values work the other way round: `<data>/steam.json` (mode `0o600`) wins per field, and `STEAM_API_KEY` / `STEAM_ID` only fill the values the file does not have. Neither name is in `ENV_KEYS` or in `.env.example`, so a value placed in `.env` is silently dropped — export it in the process environment instead. If an empty string is returned for any required variable, the route returns a specific `400` error naming exactly which variable is missing. For example, IGDB requires both `IGDB_CLIENT_ID` **and** `IGDB_CLIENT_SECRET`; without either the IGDB routes return `400 {"error":"Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET in ~/.env to use IGDB."}`. Without RetroAchievements credentials, the `/api/ra/*` routes return `400 {"error":"Configure RetroAchievements first."}`.
 
 <Callout type="tip" title="Why aliases exist">
 
@@ -96,11 +113,11 @@ The alias pattern lets users choose whichever name suits their setup. A RetroAch
 
 </Callout>
 
-Credentials supplied through the Settings dialog are persisted in the data directory (`retroachievements.json`, `emumovies.json`, `settings.json` for Gameyfin) with owner-only permissions (`0o600` via `secure_text_write`). The API and diagnostic log redact the values, but the files themselves are plaintext. Windows has no POSIX mode bits, so there these files rely on the per-user profile ACL instead.
+Credentials supplied through the Settings dialog are persisted in the data directory with owner-only permissions (`0o600` via `secure_text_write`). RetroAchievements and EmuMovies keep their own files (`retroachievements.json`, `emumovies.json`); the Gameyfin password is stored in the library settings inside `library.json`, which is written with mode `0o600`. A `settings.json` file only ever appears as an archive member inside a backup. The API and diagnostic log redact the values, but the files themselves are plaintext. Windows has no POSIX mode bits, so there these files rely on the per-user profile ACL instead.
 
 ## Persisted settings
 
-The Settings dialog saves into `library.json` under `settings`. The save handler (`SettingsHandlers._save_settings_locked` in `handlers/settings.py`) validates each field before committing; an invalid value aborts the whole save with a `400` error. Keys must exist in the `settings_schema.py` registry: unknown keys are dropped with a diagnostic log warning rather than persisted. `GET /api/settings` returns the public projection of the settings, which is a curated subset of the registry (a few internal and separately-owned keys are not part of it). Notable validated limits:
+The Settings dialog saves into `library.json` under `settings`. The save handler (`SettingsHandlers._save_settings_locked` in `handlers/settings.py`) validates each field it normalizes before committing; a value that fails validation aborts the whole save with a `400` error. Many fields are normalized rather than rejected, though: `spinner_sensitivity` and `obs_websocket_timeout` are clamped to their range, `locale` and `list_sort_dir` are truncated, `attract_mode_seconds` is only coerced to an integer, and the webhook attempt count and timeout are cast to an integer at save time and clamped only at delivery. Keys must exist in the `settings_schema.py` registry: unknown keys are dropped with a diagnostic log warning rather than persisted. `GET /api/settings` returns the projection built by `public_settings()` in `pkg/state/cache.py`, not every registry key. Twenty-six keys are left out, including `webhooks`, `party_queue`, `health_rescan`, `list_sort`, and the `scrape_*` keys. Most of them are read straight from the stored state by their features, but `health_rescan`, `list_sort`, and `list_sort_dir` are not part of the public projection at all, so they do not round-trip through `GET /api/settings`; `gameyfin_password` and `obs_websocket_password` are never returned. Notable validated limits:
 
 | Setting | Default | Validation |
 | --- | --- | --- |
@@ -110,10 +127,10 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `gamescope_preset` | `""` | Selected gamescope preset name (one of: `deck`, `deck_hd`, `1080p`, `1440p`, `4k`, `integer`, `stretch`, `borderless`, or a custom preset name). Empty string = no preset. (v1.7.2+) |
 | `mangohud_enabled` | `false` | Boolean; when true, `MANGOHUD=1` is set on game launch to enable the MangoHud performance overlay. (v1.7.2+) |
 | `gamescope_custom_presets` | `[]` | Up to 16 user-defined gamescope presets (unique names, bounded integer args). A custom name shadows a stock preset; a per-game `gamescope_preset` override wins over the global choice. (v1.8.0+) |
-| `list_sort` | `""` | List-view sort column key (e.g. `title`, `rating`); empty = default order. (v1.8.0+) |
-| `list_sort_dir` | `""` | List-view sort direction: `""` (ascending) or `"reversed"`. (v1.8.0+) |
+| `list_sort` | `"title"` | List-view sort column key (e.g. `title`, `rating`). (v1.8.0+) |
+| `list_sort_dir` | `""` | List-view sort direction. The known values are `""` (ascending) and `"reversed"`; the value is truncated to 10 characters but its membership is not validated. (v1.8.0+) |
 | `show_insights` | `true` | Boolean; toggles the Play Insights panel in the library pane. (v1.8.0+) |
-| `locale` | `"en"` | Interface language code (one of: `en`, `es`, `de`, `fr`, `pt`). (v1.7.2+) |
+| `locale` | `"en"` | Interface language code. The known languages are `en`, `es`, `de`, `fr`, and `pt`; the value is truncated to 5 characters but its membership is not validated. (v1.7.2+) |
 | `progress_automation_enabled` | `false` | Boolean; enables/disables automatic progress changes |
 | `progress_automation_play_minutes` | 30 | 0 to 100,000, minutes before marking Playing |
 | `progress_automation_idle_days` | 30 | 0 to 3,650, days before marking Paused |
@@ -125,18 +142,18 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `show_launch_badges` | `true` | Boolean; shows the "Won't launch" and "Needs attention" readiness badges on the grid from the last Launch Audit. Settings → Appearance. Badges disappear on their own when the library has changed since the audit ran. (v1.16.1+) |
 | `cloud_folder` | "" | Absolute, existing path for mounted-folder statistics sync and optional catalog sync |
 | `library_sync_enabled` | `false` | Explicit opt-in for causal catalog synchronization; it does not enable the separate statistics sync automatically |
-| `storefront_auto_import` | All off | Object with boolean keys: `steam`, `heroic`, `lutris`, `gameyfin` |
-| `auto_import_media_types` | ["background", "cover", "screenshots"] | Subset of MEDIA_TYPES_ALL (18 types including cover, background, screenshots, clear_logo, box_back, manual, video, etc.) |
+| `storefront_auto_import` | All off | Object keyed by store (`steam`, `heroic`, `lutris`, `gameyfin`, `gog`, `ea`, `ubisoft`, or `plugin:<id>`) whose values are `{enabled, platform, include_uninstalled}` objects. At most 20 entries; `platform` is at most 80 characters. Legacy boolean values are still read and are migrated to this shape on the next settings save. |
+| `auto_import_media_types` | ["background", "cover", "screenshots"] | Subset of the 23 media types in `MEDIA_TYPES_ALL` (cover, background, screenshots, clear_logo, fanart, banner, icon, box_back, box_spine, box_3d, title_screen, cart_front, cart_back, disc, advertisement, manual, poster, square, video, video_snap, video_theme, video_trailer, music) |
 | `media_download_limit` | 0 (unlimited) | 0 to 10,000 |
 | `region_priority` | (default list) | Non-empty ordered list, ranks which regional media to prefer |
-| `video_priority` | snap, theme, trailer, recording | Subset of video_snap, video_theme, video_trailer, video_recording, video |
+| `video_priority` | ["video_snap", "video_theme", "video_trailer", "video_recording"] | Subset of video_snap, video_theme, video_trailer, video_recording, video |
 | `library_music` | "" | Path to existing audio file; empty disables Big Box library BGM |
 | `video_bgm_mix` | `false` | Boolean, lower music volume when mixing with video audio |
 | `bigbox_mode` | "stage" | One of stage, hybrid, coverflow |
 | `bigbox_start_at_launch` | `false` | Boolean; when true the UI opens straight into Big Box on startup (or unless a `?deeplink=bigbox` deeplink overrides it) (v1.14.0+) |
 | `attract_mode_seconds` | 90 | Seconds of idle before screensaver/attract mode triggers |
 | `bigbox_startup_video` | "" | Empty string (disabled) or path to startup video file |
-| `bigbox_shutdown_commands` | `[]` | At most 25 commands; run on entering Big Box (see note below) |
+| `bigbox_shutdown_commands` | `[]` | At most 25 commands; run when the UI leaves Big Box |
 | `startup_commands` | `[]` | At most 25 commands; run after server binds |
 | `shutdown_commands` | `[]` | At most 25 commands; run on graceful exit |
 | `track_session_history` | `true` | Boolean, when false, sessions still track but history isn't recorded |
@@ -182,48 +199,46 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `platform_categories` | Built-in mapping | Platform-to-category overrides (Nintendo, Sony, Microsoft, Computer, Arcade, Adventure, Other) |
 | `list_columns` | Defaults | Capped at 12 columns per platform or global view |
 | `library_view` | "grid" | Current persistent view preference |
-| `hidden_sidebar_sections` | `[]` | Capped at 20 entries |
+| `hidden_sidebar_sections` | `[]` | Known, unique section ids from `sidebar_sections`; at most 20 entries |
 | `tray_enabled` | `false` | Boolean, shows system tray icon |
 | `minimize_to_tray` | `false` | Boolean, minimizes to tray instead of closing |
 | `show_playlist_actions` | `true` | Boolean, show add/remove playlist buttons |
-| `gameyfin_url` | "" | Prepends `http://` when no scheme present; must resolve |
+| `gameyfin_url` | "" | Prepends `http://` when no scheme is given. Not checked for reachability at save time. |
 | `gameyfin_username` | "" | Stored as plain text alongside url and password |
-| `gameyfin_password` | "" | Empty value leaves stored password unchanged; otherwise persisted with `0o600` |
-| `gameyfin_install_dir` | "" | Absolute path; created if missing, rejected if symlink or non-existent. Empty by default; the UI shows a `~/Games/Gameyfin` placeholder |
+| `gameyfin_password` | "" | Empty value leaves the stored password unchanged. Stored in `library.json`, which is written with mode `0o600`. `GET /api/settings` returns only `gameyfin_password_set`. |
+| `gameyfin_install_dir` | "" | Absolute directory, created if missing (parent folders included). Gameyfin refuses install paths that contain symlinks. Empty by default. |
 | `gameyfin_provider` | "" | Provider label; falls back to first available |
-| `ludusavi_backup_path` | "" | Optional absolute path for Ludusavi JSON output |
+| `ludusavi_backup_path` | "" | Optional path for Ludusavi JSON output; created if missing |
 | `cover_grouping` | `"shape"` | String; shape used to group covers in the library |
 | `image_group_by_platform` | `{}` | Object; per-platform image group overrides |
 | `image_group_by_playlist` | `{}` | Object; per-playlist image group overrides |
-| `sidebar_sections` | `["search", "view", "platforms", "playlists", "filters"]` | List of strings; valid section names: `search`, `view`, `categories`, `esrb`, `platforms`, `playlists`, `presets`, `explorer` |
+| `sidebar_sections` | `["search", "view", "filters", "platforms", "playlists", "explorer"]` | Ordered list of at most 20 section ids, each at most 40 characters. Current ids: `search`, `view`, `filters`, `platforms`, `playlists`, `explorer`; ids from older builds are preserved so an upgrade does not erase the order. |
 | `platform_documents` | `{}` | Object; per-platform manual/document lists |
 | `filter_presets` | `[]` | List of objects; named filter rules, each needs at least one rule |
-| `import_exclusions` | `[]` | List of objects with `source` (steam, heroic, lutris, gameyfin) and `external_id` |
+| `import_exclusions` | `[]` | List of objects with `source` (steam, heroic, lutris, gameyfin, gog, ea, ubisoft) and `external_id` |
 | `emulator_scan_configs` | `[]` | List of objects; per-emulator scan configuration |
 | `tracking_process_name` | `""` | String; process name used when `tracking_mode` is `process_name` |
-| `webhook_attempts` | 3 | 1 to 5 delivery retries per webhook |
+| `webhook_attempts` | 3 | 1 to 5 delivery attempts per webhook, including the first |
 | `webhook_timeout` | 5 | 1 to 15 seconds before delivery times out |
 | `webhooks` | `[]` | At most 32 configs; each needs a URL and at least one event |
 | `theme` | `""` | String; global theme name, empty uses the stock theme |
 | `theme_by_platform` | `{}` | Object; platform to theme name mappings |
-| `bigbox_quick` | `(auto-managed)` | Derived list; presets flagged as Big Box quick actions, capped at 8 |
-| `controller_prompt_pack` | `"xbox"` | String; active controller prompt pack (`xbox`, `playstation`, `nintendo`) |
-| `controller_prompt_hint` | `false` | Boolean; toggles on-screen controller button prompts in Big Box |
+| `bigbox_quick` | (not stored) | Not written to `settings`. Big Box quick actions are the `filter_presets` entries flagged `bigbox_quick`; at most 8 are shown. |
+| `controller_prompt_pack` | "xbox" | String, 20 characters max. Set when a controller media pack is applied (`controller-xbox` or `controller-playstation`); not otherwise validated. |
+| `controller_prompt_hint` | "" | Text for the controller button hint in Big Box, 200 characters max. Empty uses the built-in hint. Applying a controller media pack sets it to that pack's mapping. A boolean `true` is stored as the default hint text, and `false` as empty. |
 | `active_media_packs` | `[]` | List of strings; media pack ids, appended when a pack is applied |
 | `last_cloud_sync` | `""` | Internal, auto-managed timestamp; do not edit |
 | `last_update_check` | `""` | Internal, auto-managed timestamp; do not edit |
-| `gameyfin_password_set` | `false` | Internal, boolean indicator of whether password is set |
-| `gamescope_guest` | `false` | Internal, auto-detected guest mode under Gamescope |
+| `gameyfin_password_set` | `false` | Read-only in `GET /api/settings`; true when a Gameyfin password is stored |
+| `gamescope_guest` | `false` | Read-only; derived from the Gamescope environment and `--game-mode` |
 
 ### Display, input, and integration settings
 
-**Unreleased 1.18 note:** every key in this table except `currency` was added after the 1.17.0 release and exists only in the unreleased 1.18 build. `currency` shipped in 1.17.0. The reference documents the current source tree, so these keys are listed with their validation, but they are not part of the 1.17.0 release.
-
-The Settings dialog also persists the following keys. They use the same validation path as the table above; a value that fails validation aborts the whole save.
+The Settings dialog also persists the following keys. Every key in this table except `currency` shipped in 1.18.0 (`currency` shipped in 1.17.0). They use the same validation path as the table above; a value that fails validation aborts the whole save, and a value that is merely out of range may be clamped or truncated instead.
 
 | Setting | Default | Validation |
 | --- | --- | --- |
-| `auto_import_excluded_platforms` | `[]` | Up to 100 platform names, each at most 80 characters; matching is case-insensitive. Storefront and watched-folder auto-import skips these platforms. |
+| `auto_import_excluded_platforms` | `[]` | Up to 100 platform names, each at most 80 characters; matching is case-insensitive. Storefront auto-import skips games on these platforms. |
 | `battery_indicator` | `true` | Boolean; shows the battery percentage in the Big Box status area on handheld hardware. |
 | `bigbox_back_hold_seconds` | 0.8 | 0 to 2 seconds; how long Back must be held in Big Box before it acts. |
 | `bigbox_hidden_categories` | `[]` | Up to 500 category names, each at most 200 characters; hidden from Big Box category browsing. |
@@ -240,12 +255,12 @@ The Settings dialog also persists the following keys. They use the same validati
 | `cover_model_by_platform` | `{}` | At most 200 platform-to-model entries; each value must be one of the `cover_model` choices. |
 | `currency` | `"USD"` | Three-letter uppercase currency code (ISO-4217 shape). Used as the default for new price-paid values; no exchange-rate conversion is performed. |
 | `emulator_platform_settings` | `{}` | At most 500 platform entries. Each entry accepts `adapter_id` (120 characters), a validated `retroarch_core` name, and up to 2,000 characters of `extra_args`. |
-| `emulator_update_checks` | `[]` | Up to 100 emulator app ids whose update check is skipped. |
+| `emulator_update_checks` | `[]` | Up to 100 emulator app ids (100 characters each) whose update check is skipped. |
 | `font_family` | `"system"` | One of `system`, `serif`, `mono`, or `humanist`. |
-| `integration_tokens` | `{}` | Provider-to-token object for `igdb`, `screenscraper`, `steamgriddb`, `gameyfin`, and `retroachievements`; each token is at most 4,096 characters and is masked in the public settings projection. |
+| `integration_tokens` | `{}` | Provider-to-token object for `igdb`, `screenscraper`, `steamgriddb`, `gameyfin`, and `retroachievements`; each token is at most 4,096 characters. The public settings projection carries only a boolean per provider, and `GET /api/v2/integration-tokens` returns masked values. |
 | `keyboard_map` | `{}` | Action-to-key object. Actions are `play`, `back`, `favorite`, `random`, `page_left`, `page_right`, `pause`, `menu`, `search`, `settings`, `reader_prev`, and `reader_next`; key specs are validated and no two actions may share a binding. |
 | `last_health_rescan` | `""` | Internal ISO-8601 timestamp of the last scheduled library health scan; do not edit. |
-| `library_journal_enabled` | `true` | Read-only in 1.17.0. The journal records local catalog events for Time Machine even when cloud sync is off; an explicit `false` already present in `library.json` disables it. The current Settings save path does not write this key. |
+| `library_journal_enabled` | `true` | Read-only. The journal records local catalog events for Time Machine even when cloud sync is off; an explicit `false` already present in `library.json` disables it. The Settings save path does not write this key. |
 | `media_download_limit_per_group` | 0 (unlimited) | 0 to 100; caps queued media downloads per platform-and-kind group. `media_download_limit` still caps the whole queue. |
 | `metadata_provider_priority` | `[]` (built-in order) | Up to 20 known provider ids or `plugin:<id>` values. Empty uses launchbox, screenscraper, igdb, steamgriddb, then enabled plugin providers; unknown ids are dropped. |
 | `model_back_by_platform` | `{}` | At most 200 platform-to-style entries; each value is `straight` or `angled`. |
@@ -264,16 +279,19 @@ The Settings dialog also persists the following keys. They use the same validati
 | `save_management_enabled` | `true` | Boolean; when false, save backup, restore, and manifest routes refuse writes and report the feature as disabled. |
 | `spinner_sensitivity` | 6 | 1 to 20; spinner input sensitivity in Big Box. |
 
-Two naming details worth knowing:
+One naming detail worth knowing:
 
-- `bigbox_shutdown_commands` is misnamed: the commands run when Big Box is **entered**, not when it is left.
 - `attract_mode_seconds` is the screensaver delay the Big Box screensaver actually reads; it falls back to `screensaver_seconds` when unset, and the Settings dialog keeps both fields with the same fallback.
 
-Partial saves merge with existing settings: keys you omit are preserved, and concurrent partial saves of different keys do not lose updates (covered by the API sweep tests). An empty `gameyfin_password` in a save leaves the stored password unchanged.
+One shape detail worth knowing:
+
+- `storefront_auto_import` is stored per source as `{enabled, platform, include_uninstalled}`. The legacy boolean shape (`true` / `false` per store) is still read, and each legacy boolean is migrated to the object shape on the next settings save — even a partial one, so every reader sees a single shape.
+
+Partial saves merge with existing settings: keys you omit are preserved, and concurrent partial saves of different keys do not lose updates. An empty `gameyfin_password` or `obs_websocket_password` in a save leaves the stored value unchanged.
 
 <Callout type="tip" title="How validation prevents bad saves">
 
-The save handler validates **every** posted field before committing any change. If a single value fails validation (for example, `screensaver_seconds: -5`), the entire save request returns `400` and **nothing** is written. This means you can safely send partial saves, changing `bigbox_mode` won't accidentally corrupt `tracking_frequency` even if both arrive in the same request. The only exception is an empty `gameyfin_password`, which deliberately preserves the old value so you don't erase your password while updating other settings.
+The save handler validates every field it normalizes before committing any change. If a single value fails validation (for example, `screensaver_seconds: -5`), the entire save request returns `400` and **nothing** is written. This means you can safely send partial saves, changing `bigbox_mode` won't accidentally corrupt `tracking_frequency` even if both arrive in the same request. Some fields never fail: out-of-range numbers are clamped, over-long strings are truncated, and the webhook attempt count and timeout are cast to an integer at save time. The other exceptions are an empty `gameyfin_password` and an empty `obs_websocket_password`, which keep the stored value so a save never erases a password while you update other settings.
 
 </Callout>
 
@@ -287,7 +305,7 @@ These are read once during process startup and require a restart to change:
 - `startup_commands` (run after the server binds, via `run_configured_commands`)
 - Profile merging from emulator definition packs (`merge_profiles_from_definitions`) at startup
 
-`shutdown_commands` run on graceful exit. Both command lists execute with `shlex.split` and a new session; failures are logged and skipped, never fatal.
+`shutdown_commands` run on graceful exit. Both command lists are split with `split_command` (`shlex` rules on Linux and macOS) and started in a new session; failures are logged and skipped, never fatal.
 
 ## Security notes
 

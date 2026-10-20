@@ -7,7 +7,7 @@ description: Keep optional household records and leaderboards local while exchan
 
 ## Start locally
 
-Open **Tools → Household**. Add a member with a stable local `member_id` and display name, then create a challenge with a title, metric, target, and optional participants/game/deadline. Results are records, so another device can validate and merge them rather than receiving an opaque database dump.
+Open **Tools → Family sharing** (the Household dialog). Add a member with a stable local `member_id` and display name, then create a challenge with a title, metric, target, and optional participants/game/deadline. Results are records, so another device can validate and merge them rather than receiving an opaque database dump.
 
 The core routes are:
 

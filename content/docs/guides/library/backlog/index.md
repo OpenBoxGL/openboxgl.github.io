@@ -7,7 +7,7 @@ Every game carries a personal backlog layer on top of its progress field: status
 
 ## Progress statuses
 
-The progress field holds the canonical statuses, and an unset progress renders as **Unplayed** everywhere — cards, details, badges, explorer facets, and filters. `progress:unplayed` is a first-class search clause. The legacy single-string notes never silently change progress: the optional one-time **Mark as Playing?** prompt appears on first launch for unplayed games, with a settings kill switch and per-game prompted-once persistence — it never sets progress silently.
+The progress field holds the canonical statuses, and an unset progress renders as **Unplayed** everywhere — cards, details, badges, explorer facets, and filters. `progress:unplayed` is a first-class search clause. The set of labels offered is configurable in Settings → Sessions & Saves → **Progress values allowed by automation and the game editor** (default Unplayed, Playing, Paused, Beaten, Completed, Mastered, Abandoned): the game editor and progress automation only offer enabled labels, and the API rejects a label that is not on the list. The legacy single-string notes never silently change progress: the optional one-time **Mark as Playing?** prompt appears on first launch for unplayed games, with a settings kill switch and per-game prompted-once persistence — it never sets progress silently.
 
 ## Personal ratings
 

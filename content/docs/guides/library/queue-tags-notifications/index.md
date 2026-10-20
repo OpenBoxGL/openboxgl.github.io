@@ -3,7 +3,7 @@ title: Queue, tags, and notifications
 description: Manage the persistent play queue, normalized tags, notifications, and webhooks.
 ---
 
-OpenBox's Queue, Tags, Notifications, and Webhooks dialogs are opened from the top bar. All of them are persistent local state stored in the library file (schema version 6).
+OpenBox's Queue, Tags, Notifications, and Webhooks dialogs open from the top bar — **Play queue** in the Actions zone, and **Tags**, **Notifications**, and **Webhooks** in the Tools menu. All of them are persistent local state stored in the library file (schema version 6).
 
 <Callout type="note" title="Why these caps matter for automation">
 
@@ -33,7 +33,7 @@ The Tags dialog lists tag counts (visible, non-hidden games only, sorted by coun
 
 ## Notifications
 
-The Notification Center stores up to **200 entries**, newest first. Titles are capped at 200 characters, bodies at 2000. Notifications are deduplicated within 10 minutes when the kind and title match, or immediately when an explicit `dedupe_key` matches (webhook delivery failures reuse a per-event key). **Mark all read** and **Clear** act on the whole list or selected IDs. Webhook delivery failures surface here as error-level notifications so you can notice them without polling.
+The Notification Center stores up to **200 entries**, newest first. Titles are capped at 200 characters, bodies at 2000. The unread count is fetched at boot, so the Tools menu badge is right without opening the center. Notifications are deduplicated within 10 minutes when the kind and title match, or immediately when an explicit `dedupe_key` matches (webhook delivery failures reuse a per-event key). **Mark all read** and **Clear** act on the whole list or selected IDs. Webhook delivery failures surface here as error-level notifications so you can notice them without polling.
 
 Since 1.17.0, notices raised by the server — cloud sync results, launch-check changes, rejected emulator-definition packs, and webhook failures — also carry `title_key`, `body_key`, and their parameters. The Notification Center resolves those keys in the active locale (English, Spanish, German, French, or Portuguese); notifications stored by older versions keep their English title and body and still render normally.
 

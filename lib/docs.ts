@@ -168,6 +168,7 @@ export function buildSidebar(): DocNode[] {
       "reference/library-backups",
       "reference/background-jobs",
       "reference/api",
+      "reference/api/one-eighteen",
       "reference/api/one-seventeen",
       "reference/api/one-sixteen",
       "reference/plugins",

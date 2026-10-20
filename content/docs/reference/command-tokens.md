@@ -7,7 +7,7 @@ Launch commands are tokenized strings: OpenBoxGL substitutes exact placeholders 
 
 ## Tokens
 
-`build_launch` (`openbox.py`) splits the launch command with `shlex.split` first, then replaces these markers inside each resulting argument:
+`build_launch` (`openbox.py`) resolves the command through `resolve_launch` (`pkg/state/launch.py`). The token pass itself lives in `build_launch_args` (`pkg/parity/launch_tokens.py`), which splits the launch command with the platform's quoting rules first — `shlex.split` on Linux, Windows command-line quoting on Windows — then replaces these markers inside each resulting argument:
 
 | Token | Value | Example |
 | --- | --- | --- |
@@ -22,8 +22,10 @@ Launch commands are tokenized strings: OpenBoxGL substitutes exact placeholders 
 | `{heroic_app_id}` | Heroic application ID (`heroic_app_id` field) | `1091500` |
 | `{lutris_id}` | Lutris game identifier (`lutris_id` field) | `1` |
 | `{EmulatorDir}` | Parent directory of the resolved emulator executable | `/usr/bin` |
-| `{retroarch_core}` | Core file name the game uses (v1.16.1+), expanded from the emulator definition before anything else. Set by choosing a per-game core in the Launch Doctor, or empty when the game uses the definition default | `snes9x_libretro.so` |
+| `{retroarch_core}` | Core file name the game uses (v1.16.1+), expanded from the emulator definition before anything else. Set by choosing a per-game core in Launch check, by using a per-platform RetroArch core override, or left empty to use the definition's default | `snes9x_libretro.so` |
 | `{DataDir}` | OpenBox user data directory | `/home/you/.local/share/openbox-game-launcher` |
+
+`{Path}` is a plain alias of `{path}` and substitutes the same value. The append heuristic described under Substitution behavior only recognises the lowercase `{path}` and `{ImagePath}` spellings, so a command written with `{Path}` alone gets the path substituted and then appended a second time. Prefer `{path}`.
 
 ### Quick Resume state tokens (v1.11.0+)
 
@@ -36,15 +38,16 @@ Emulator-def `state:` templates can use these additional tokens, resolved per ga
 | `{state_name}` | State name OpenBox assigns inside the state directory | MAME `-state {state_name}` |
 | `{state_config}` | Path to the generated adapter config fragment (RetroArch auto-save into `state_dir`, command net enabled) | RetroArch `--appendconfig {state_config}` |
 
-When a game has no per-game `launch` command, the platform profile from `profiles` is used; the emulator definition packs and `discover_profiles` provide defaults such as `dosbox {path}`, `dolphin-emu -b -e {path}`, and `pcsx2-qt {path}`. Per-game `launch_profile` overrides select a different named profile for that game only.
+When a game has no per-game `launch` command, resolution walks the precedence chain: a matching emulator adapter from `emulator_defs/` first, then the platform profile from `profiles`, then platform detection. The definition packs and `discover_profiles` provide defaults such as `dosbox {path}`, `dolphin-emu -b -e {path}`, and `pcsx2-qt {path}`. A per-game `launch_profile` chooses which named profile supplies that game's platform command; it does not replace an explicit per-game adapter, which still wins. See [Emulators and launching](/guides/emulators-and-launching/#launch-precedence-hierarchy) for the full five-level order.
 
 ## Substitution behavior
 
 - Each marker is replaced wherever it appears in the tokenized argv parts.
-- If a game uses a platform profile (no per-game command) and that command does not contain `{path}` or `{ImagePath}`, the resolved path is appended as the final argument.
-- A `.sh` file with no command launches as `bash <path>`.
-- Paths containing spaces stay intact because substitution happens per-argument after `shlex.split`, and the resulting parts are passed to `subprocess.Popen` directly without a shell. Quote the marker in your command when the target executable expects a single argument.
+- If a game command or platform profile does not contain `{path}` or `{ImagePath}`, the resolved path is appended as the final argument. Only those two spellings are recognised here — see the note above about `{Path}`.
+- A `.sh` file with no command launches as `bash <path>` (or `sh` when `bash` is unavailable).
+- Paths containing spaces stay intact because substitution happens per-argument after the command is split with `shlex.split` (Linux) or Windows command-line quoting (Windows), and the resulting parts are passed to `subprocess.Popen` directly without a shell. Quote the marker in your command when the target executable expects a single argument.
 - Storefront imports set their own tokenized commands: Steam uses `steam -applaunch {app_id}` (or `flatpak run com.valvesoftware.Steam -applaunch {app_id}`, or `xdg-open steam://rungameid/{app_id}`), Heroic uses `xdg-open heroic://launch/legendary/{heroic_app_id}`, and Lutris uses `lutris:rungameid/{lutris_id}`.
+- After substitution, OpenBox applies emulator settings when the emulator is managed: MAME flags are inserted before the final ROM argument, and a RetroArch `--appendconfig` file is attached before the final ROM argument. A platform's extra launch arguments are then appended last. See [MAME and RetroArch settings](/guides/emulators-and-launching/#mame-and-retroarch-settings).
 
 Example:
 
@@ -60,12 +63,11 @@ Use quotes where the target command requires them, as above.
 A launch fails with a validation error before any process starts when:
 
 - The game has no `path` (empty path): `"<name> has no launch path."`
-- The configured path no longer exists: `"The configured path no longer exists: <path>"`
-- The game has no launch command and its file is not executable: `"<name> has no launch command and its file is not executable. Set a launch command for the platform in Emulator profiles, or per-game in Edit game."`
-- A platform profile is missing for a ROM platform: the same no-command error applies.
+- The configured path no longer exists: the message is `"The configured path no longer exists:"`, then a newline, then the path.
+- No command resolves — no per-game command, matching adapter, or platform profile — and the file is not executable: `"<name> has no launch command and its file is not executable. Set a launch command for the platform in Emulator profiles, or per-game in Edit game."`
 - An archive extraction fails because `7z`/`7zz` is missing (for non-ZIP archives): `"7z or 7zz is required to extract this archive."`
 
-A missing token value is not an error: an empty field substitutes the empty string. What matters is that the final argv is non-empty and every part is a non-empty string. A plugin that returns an invalid launch command also raises a validation error ("A plugin returned an invalid launch command." / "A plugin returned an invalid working directory.").
+A missing token value is not an error: an empty field substitutes the empty string. Plugins are stricter — a `before_launch` hook that returns an empty argv, a non-string part, or a working directory that is not a directory raises "A plugin returned an invalid launch command." or "A plugin returned an invalid working directory."
 
 ## Archive extraction
 

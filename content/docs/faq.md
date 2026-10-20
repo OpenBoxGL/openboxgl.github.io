@@ -56,15 +56,15 @@ Set `OPENBOX_DATA_DIR` before starting OpenBox to relocate it. A library directo
 
 ## How do I get my saves backed up?
 
-Use the **Save management** panel in a game's detail pane: scan for save locations, then back up. Versioned archives are stored under the game's folder in the data directory, with retention limits. Restore writes a safety backup first. See [Save discovery and restore](/guides/sessions-saves-and-backups/saves/).
+Use the **Save management** panel in a game's detail pane: scan for save locations, then back up. Versioned archives are stored under the game's folder in the data directory, with retention limits. Each archived file records its size, mode, modification time, and SHA-256; the restore dialog lists the archive contents, supports a dry run, and restores only the files you check after taking a safety backup. See [Save discovery and restore](/guides/sessions-saves-and-backups/saves/).
 
 ## How do I add an emulator?
 
-Open the **Emulators** dialog, pick one from the catalog, and choose **Install**. On Linux, OpenBox adds the Flathub remote if missing and writes the platform profiles when the install finishes. On Windows, install the Windows build of the emulator yourself; OpenBox detects the executable and writes the same platform profiles from the definition's Windows executable name. Native binaries on PATH are detected automatically on both platforms. See [Emulators and launching](/guides/emulators-and-launching/).
+Open **Tools > Emulators & controllers**, pick one from the catalog, and choose **Install**. On Linux, OpenBox adds the Flathub remote if missing and writes the platform profiles when the install finishes. On Windows, install the Windows build of the emulator yourself; OpenBox detects the executable and writes the same platform profiles from the definition's Windows executable name. Native binaries on PATH are detected automatically on both platforms. See [Emulators and launching](/guides/emulators-and-launching/).
 
 ## Do I need a LaunchBox subscription?
 
-No. OpenBox is free and open source (AGPL-3.0). The workflows that LaunchBox gates behind Premium, like custom fields, ESRB filters, list view, media packs, and cloud statistics sync, ship free here. The capability matrix lives in [Parity](/reference/parity/).
+No. OpenBox is free and open source (AGPL-3.0). The workflows that LaunchBox gates behind Premium, like custom fields, ESRB filters, list view, media packs, and mounted-folder statistics sync, ship free here. The capability matrix lives in [Parity](/reference/parity/).
 
 ## Can I use a gamepad?
 
@@ -86,13 +86,13 @@ OpenBox does not require Wine or Proton on either platform. On Windows, games ru
 
 ## Can I script or automate it?
 
-Yes. A token-authenticated REST API covers library, launch, saves, backups, themes, plugins, and automation. Python plugins hook six points: `library`, `before_launch`, `after_session`, `command`, `library_source`, and `events`. Webhooks deliver HMAC-signed events. See [REST API](/reference/api/), [Plugins](/guides/plugins/), and [Webhooks](/integrations/webhooks/).
+Yes. A token-authenticated REST API covers library, launch, saves, backups, themes, plugins, and automation. Python plugins hook six base points: `library`, `before_launch`, `after_session`, `command`, `library_source`, and `events`; since 1.18.0 they can also declare storefront, metadata, media, stats, emulator-settings, and discovery capabilities, which receive scoped read-only services. Webhooks deliver HMAC-signed events. See [REST API](/reference/api/), [Plugins](/guides/plugins/), and [Webhooks](/integrations/webhooks/).
 
 ## How is OpenBox related to LaunchBox or the Openbox window manager?
 
 OpenBox is an independent open-source project. It is not affiliated with LaunchBox, Unbroken Software, LLC, or the Openbox window manager. Those names appear only to describe compatibility and comparison boundaries. See [Legal and trademarks](/policies/legal-and-trademarks/).
 
-## What's new in 1.11 through 1.17?
+## What's new in 1.11 through 1.18?
 
 **1.11 (Every Second Counts):** Quick Resume, Moments, clips/reels, Time Machine, Backlog Radio, Arcade Room/Museum kiosk, Household, Steam Bridge, ES-DE migration, SteamGridDB artwork, and local launcher trophies — see [API 1.11 additions](/reference/api/one-eleven/). **1.12 (Living Library):** smart collections, per-game Story timelines, per-game `launch_env`/`launch_confirm`, opt-in weekly backups, SQLite self-enable at 5,000 games, palette recents, and the Living Library overview on the [home page](/) — see [API 1.12 additions](/reference/api/one-twelve/). **1.13 (Windows support):** Windows x86_64 with the signed portable `install.ps1`, a WebView2 native window shipped compiled in the portable install, the same updater verification on Windows, and Windows executable names in every bundled emulator definition — see [Windows](/windows/) and the [release notes](/changelog/). Linux fixes in 1.13: process liveness no longer uses `os.kill(pid, 0)`, stored references use POSIX separators on Windows, and the metadata database closes cached SQLite handles before replacing the file.
 
@@ -102,9 +102,11 @@ OpenBox is an independent open-source project. It is not affiliated with LaunchB
 
 **1.16.1 (Launch readiness everywhere):** games that will not launch are badged on the grid, a group sharing one fix gets one button, a Flatpak emulator gets a read-only folder grant instead of a reinstall prompt, each game can choose its RetroArch core, and launch definitions cover 18 more systems. **1.17 (More of your library, and what it cost):** installed GOG Galaxy, EA app, and Ubisoft Connect games import natively on Windows; Game Night decks save players, minutes, and a filter under a name and return a reproducible seed; games record a price paid and currency, and [Play Insights](/guides/library/insights/) shows cost per hour without converting currencies; server notices are translated into the five locales; and ScreenScraper lookups work again with the required developer credentials. See [API 1.17 additions](/reference/api/one-seventeen/) and the [changelog](/changelog/).
 
+**1.18 (A clearer, deeper library):** one **Add games** menu, a six-step Setup Center with the longer steps behind an **advanced** toggle, **Help & shortcuts** (`F1` or `?`), a single illustrated empty-library card, a dismissible onboarding checklist, a **Jump back in** card, and a theme swatch gallery; platform rename and delete in one place, a media queue that survives a restart with EmuMovies and provider ordering, save manifests with selective restore, plugin capabilities and repair, emulator and controller management, Big Box input/video/reader controls, storefront scan progress, and achievements, high scores, and netplay. See the [changelog](/changelog/) and [API 1.18 additions](/reference/api/one-eighteen/).
+
 ## Where do I report a bug or request a feature?
 
-Use the GitHub issue templates: [report a bug](https://github.com/vindeckyy/OpenBoxGL/issues/new?template=bug_report.yml) or [request a feature](https://github.com/vindeckyy/OpenBoxGL/issues/new?template=feature_request.yml). Include the diagnostic log from Settings > Copy diagnostic log; it redacts tokens and passwords but can include game names and file paths.
+Use the GitHub issue templates: [report a bug](https://github.com/vindeckyy/OpenBoxGL/issues/new?template=bug_report.yml) or [request a feature](https://github.com/vindeckyy/OpenBoxGL/issues/new?template=feature_request.yml). Include the diagnostic log from Settings > Advanced > Copy diagnostic log; it redacts tokens and passwords but can include game names and file paths.
 
 ## Related pages
 

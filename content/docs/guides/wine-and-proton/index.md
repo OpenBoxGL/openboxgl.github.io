@@ -1,6 +1,6 @@
 ---
-title: Proton & Wine Prefix Manager
-description: Discovers, configures, and isolates Windows game runners, Wine prefixes, and Proton runtime environments on Linux.
+title: Wine and Proton discovery
+description: Discovers Wine prefixes and Proton runtimes on Linux and resolves the prefix recorded for a game.
 ---
 
 OpenBox ships a local-first Wine and Proton **discovery** layer. It automatically finds existing prefixes in `~/.wine`, `~/.local/share/wineprefixes`, the Lutris Wine runners tree, the Faugus prefix directories, the Bottles store, and `~/Games`, so you can point a title at a prefix without hand-writing a path. Heroic is not one of these sources: it appears only as a storefront importer, which is a different subsystem.
@@ -15,19 +15,20 @@ Since 1.13.0 OpenBox also runs natively on Windows, where Windows titles launch 
 
 OpenBox's Wine subsystem inspects standard local directories and lists what it finds. It is a **discovery and suggestion** layer, not a runtime wrapper: it reads directories and reads the `wine_prefix` field on a game record, but it does not construct the launch command for you.
 
-1. **Prefix Discovery** (`DEFAULT_PREFIX_ROOTS` in `pkg/parity/parity_wine.py:16-24`):
+1. **Prefix Discovery** (`DEFAULT_PREFIX_ROOTS` in `pkg/parity/parity_wine.py`):
    - `~/.wine`, `~/.local/share/wineprefixes/`
    - Faugus Launcher prefixes: `~/.config/faugus-launcher/prefixes`, `~/Faugus`
    - Bottles: `~/.local/share/bottles/bottles`
    - Lutris: `~/.local/share/lutris/runners/wine`
-   - Custom folders: `~/Games`, plus the `WINEPREFIX` environment variable
-   - Note: `~/.local/share/lutris/runners/wine` holds Wine **builds**, not game prefixes. The scanner only accepts a directory that actually contains a `drive_c`, so a runner tree is skipped even though the root is scanned.
+   - Custom folder: `~/Games`
+   - Note: `~/.local/share/lutris/runners/wine` holds Wine **builds**, not game prefixes. The scanner only accepts a directory that actually contains a `drive_c`, so a runner tree is skipped even though the root is scanned. The `WINEPREFIX` environment variable is not a discovery root; it is only read when resolving a game's configured prefix.
 
-2. **Proton Runtime Discovery** (`DEFAULT_PROTON_ROOTS` in `pkg/parity/parity_wine.py:28-36`):
+2. **Proton Runtime Discovery** (`DEFAULT_PROTON_ROOTS` in `pkg/parity/parity_wine.py`):
    - Steam Proton: `~/.steam/root/compatibilitytools.d`, `~/.steam/steam/compatibilitytools.d`, `~/.local/share/Steam/compatibilitytools.d`
    - Faugus runners: `~/.config/faugus-launcher/runners`, `~/.local/share/faugus-launcher/runners`
    - Lutris runners: `~/.local/share/lutris/runners/wine`
-   - System and Flatpak executables: `wine`, `wine64`, `proton`, `umu-run`, `umu-launcher`
+   - Executables on PATH: `wine`, `wine64`, `proton`, `umu-run`, `umu-launcher`
+   - Installed Flatpak apps whose application id contains `wine`, `proton`, or `faugus`, reported with a `flatpak:<app-id>` path and source `flatpak`
 
    Proton roots are scanned one level deep, which is why the Steam `compatibilitytools.d` and Lutris runner trees resolve: each direct child of a root is checked for a `proton` file, a `files/bin/wine` or `dist/bin/wine` binary, or a name containing "proton" or "wine". (The two-level walk belongs to the separate prefix scanner, not to this one.)
 
@@ -51,7 +52,7 @@ The Wine and Proton discovery results are readable over OpenBox's local REST API
 - `GET /api/wine/protons`: Returns all detected Proton runtime versions.
 - `GET /api/wine/prefix-for-game?game_id=<id>`: Resolves the prefix recorded for a library title.
 
-All three return `available: false` with an empty list when the Wine layer is unavailable on the host.
+All three return `available: false` when the Wine layer is unavailable on the host — `GET /api/wine/prefixes` and `GET /api/wine/protons` with empty lists, and `GET /api/wine/prefix-for-game` with an empty `prefix`. On a successful prefix lookup `available` reflects whether a prefix was actually found.
 
 <Callout type="tip" title="Game saves inside prefixes">
 
