@@ -46,8 +46,9 @@ asset sets, 1 stale internal audit file.
 | `DOCS-STALE-SWEEP.md` | Marked superseded and pointed here. |
 
 **Still open by design:** the app's `docs/api-v2.md` and `docs/reliability.md` needed no
-change (both verified current), and ADRs 0080–0084 are untracked in the author's working
-tree — they belong to that in-progress work, not to this sweep.
+change (both verified current). The ADRs 0080–0084 that the documentation index already
+referenced were untracked in the author's working tree; they are documentation for shipped
+1.18.0 features, so they were committed with the rest of the documentation set.
 
 ---
 
