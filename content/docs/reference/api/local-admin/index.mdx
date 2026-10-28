@@ -89,7 +89,7 @@ Write the desktop entry and icon for the running AppImage: `~/.local/share/appli
 
 <ApiEndpoint method="GET" path="/api/native/battery">
 
-Reports battery state for the native window: `{"present": bool, "percent": 0-100, "charging": bool}`. On Linux the first `BAT*` device under `/sys/class/power_supply` is read; the response never exposes the device path. Other platforms return `{"present": false, "percent": 0, "charging": false}`.
+Reports battery state for the native window: `{"present": bool, "percent": 0-100, "charging": bool}`. On Linux the first `BAT*` device under `/sys/class/power_supply` is read; on macOS `pmset -g batt` is read; on Windows `GetSystemPowerStatus` is read. The response never exposes the device path. A host with no battery, such as a desktop, returns `{"present": false, "percent": 0, "charging": false}`. See [API 1.19 changes](/reference/api/one-nineteen/).
 
 </ApiEndpoint>
 
@@ -363,7 +363,7 @@ Reinstalls one plugin from its catalog entry without touching its data, credenti
 
 ```json
 {
-  "report": "{\"version\": \"1.18.0\", \"python\": \"3.12.3\", \"platform\": \"Linux-...\", \"data_dir\": \"~/.local/share/openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
+  "report": "{\"version\": \"1.19.1\", \"python\": \"3.12.3\", \"platform\": \"Linux-...\", \"data_dir\": \"~/.local/share/openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
 }
 ```
 
@@ -402,7 +402,7 @@ The same report on Windows carries the Windows host and data directory:
 
 <ApiEndpoint method="GET" path="/api/native/capabilities">
 
-Returns native host capabilities detected by the backend when running inside the native wrapper (WebKitGTK on Linux, WebView2 on Windows), plus the identity fields **Settings → About** displays. Detection is the `OPENBOX_NATIVE_HOST` variable the host sets before spawning this server, so the payload shape is the same on both platforms; `gamepad` stays `"webkit"` either way, because the host's gamepad hook is a stub and the Web Gamepad API keeps serving.
+Returns native host capabilities detected by the backend when running inside the native wrapper (WebKitGTK on Linux, WebView2 on Windows, WKWebView on macOS), plus the identity fields **Settings → About** displays. Detection is the `OPENBOX_NATIVE_HOST` variable the host sets before spawning this server, so the payload shape is the same on every platform; `gamepad` stays `"webkit"` either way, because the host's gamepad hook is a stub and the Web Gamepad API keeps serving. Since 1.19.1 the response also carries a `features` object that says which platform-specific controls this host supports; a missing object means every feature is unavailable. See [API 1.19 changes](/reference/api/one-nineteen/) for the feature table.
 
 ```json
 {

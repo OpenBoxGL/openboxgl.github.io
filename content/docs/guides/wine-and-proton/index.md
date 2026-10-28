@@ -52,7 +52,7 @@ The Wine and Proton discovery results are readable over OpenBox's local REST API
 - `GET /api/wine/protons`: Returns all detected Proton runtime versions.
 - `GET /api/wine/prefix-for-game?game_id=<id>`: Resolves the prefix recorded for a library title.
 
-All three return `available: false` when the Wine layer is unavailable on the host — `GET /api/wine/prefixes` and `GET /api/wine/protons` with empty lists, and `GET /api/wine/prefix-for-game` with an empty `prefix`. On a successful prefix lookup `available` reflects whether a prefix was actually found.
+All three return `available: false` when the host is not Linux or the Wine layer is unavailable: `GET /api/wine/prefixes` and `GET /api/wine/protons` return empty lists, and `GET /api/wine/prefix-for-game` returns an empty `prefix`. On a successful prefix lookup `available` reflects whether a prefix was actually found.
 
 <Callout type="tip" title="Game saves inside prefixes">
 

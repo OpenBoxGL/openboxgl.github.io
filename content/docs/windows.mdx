@@ -5,7 +5,7 @@ description: Install and run OpenBoxGL on Windows with the signed portable insta
 
 OpenBoxGL runs natively on Windows as of 1.13.0. There is no MSI, no installer wizard, no account, and no license key: the portable installer verifies a signed release, lays the runtime down under `%LOCALAPPDATA%\OpenBox`, and adds the launchers to your user `PATH`.
 
-The Windows build is the same Python standard-library application that runs on Linux. The library format, the web UI, the HTTP API, the plugins, and the emulator definitions are identical across platforms, so a library directory moves between Linux and Windows unchanged.
+The Windows build is the same Python standard-library application that runs on Linux and macOS. The library format, the web UI, the HTTP API, the plugins, and the emulator definitions are identical across platforms, so a library directory moves between Linux, Windows, and macOS unchanged.
 
 Windows builds are **x86_64**.
 
@@ -26,7 +26,7 @@ The installer itself needs Python, because it uses the same RFC 8032 verifier th
 Download the release archive from the tag you want, extract it, and run the bundled installer at `OpenBox\scripts\install.ps1`. The installer pins the release public key, verifies its SHA-256 against a committed anchor, and verifies the archive's `.sha256` sidecar and Ed25519 signature before extracting anything.
 
 ```powershell
-$Version = '1.18.0'
+$Version = '1.19.1'
 Invoke-WebRequest -UseBasicParsing -OutFile OpenBox-x86_64-windows.zip `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/OpenBox-x86_64-windows.zip"
 Expand-Archive OpenBox-x86_64-windows.zip -DestinationPath .
@@ -34,7 +34,7 @@ Get-Content .\OpenBox\scripts\install.ps1   # read it before running it
 powershell -ExecutionPolicy Bypass -File .\OpenBox\scripts\install.ps1 -Tag "v$Version"
 ```
 
-Omit `-Tag` to install the latest release instead of the pinned one above; the current release is **1.18.0**. Pass `-Run` to start OpenBox when the install finishes:
+Omit `-Tag` to install the latest release instead of the pinned one above; the current release is **1.19.1**. Pass `-Run` to start OpenBox when the install finishes:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\OpenBox\scripts\install.ps1 -Run
@@ -162,11 +162,11 @@ The WebView2 runtime ships with Windows 11 and is installed on most Windows 10 s
 | Row | What it tells you |
 | --- | --- |
 | **Version** | The exact version you are running. This is the value to put in a [bug report](https://github.com/vindeckyy/OpenBoxGL/issues/new?template=bug_report.yml). |
-| **Platform** | `Windows` or `Linux` (macOS remains out of scope). |
+| **Platform** | `Windows`, `Linux`, or `macOS`. |
 | **Data folder** | The data directory in use — `%LOCALAPPDATA%\openbox-game-launcher` unless `OPENBOX_DATA_DIR` says otherwise. Copy it from here when backing up or reporting. |
 | **Window** | Whether OpenBox is in its **native window** or a **browser tab**. A browser tab is a supported configuration, not a failure: it is what you get with `openbox --web`, without WebView2, or from a source checkout with no compiled host. |
 
-The same four values are available over the API through the native capabilities response, which reports `version`, `platform`, and `data_dir` alongside its existing fields. See [API local administrator](/reference/api/local-admin/).
+The same four values are available over the API through the native capabilities response, which reports `version`, `platform`, and `data_dir` alongside its existing fields, including the `features` object added in 1.19.1. See [API local administrator](/reference/api/local-admin/).
 
 ## Where your data lives
 
@@ -229,6 +229,7 @@ See [Steam Deck](/steam-deck/) for the handheld workflow and [Compare](/compare/
 
 - [Installation](/install/)
 - [Downloads](/downloads/)
+- [macOS](/macos/)
 - [Updating](/updating/)
 - [Configuration](/reference/configuration/)
 - [Getting started](/getting-started/)

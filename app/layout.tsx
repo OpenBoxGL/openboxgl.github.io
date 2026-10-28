@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     "game launcher",
     "Linux gaming",
     "Windows gaming",
+    "macOS gaming",
     "Steam Deck",
     "emulator frontend",
     "ROM manager",

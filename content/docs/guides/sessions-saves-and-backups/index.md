@@ -32,6 +32,7 @@ Per game, **Save management** offers **Discover locations**, **Back up now**, **
 - **Sega Saturn**: RetroArch `saves` (or `~/.mednafen`).
 - **Wii U**: Cemu `mlc01/usr/save`.
 - **RetroArch**: any save or state file under `saves`/`states` whose stem matches the game name.
+- **macOS**: Steam Cloud under `~/Library/Application Support/Steam/userdata/*/<appid>/remote`, PPSSPP under `~/.config/ppsspp/PSP/SAVEDATA`, RPCS3 and Dolphin under `~/Library/Application Support`, and RetroArch under `~/Documents/RetroArch`. See [macOS](/macos/#saves-on-macos).
 
 Discovered paths can be confirmed per game or applied library-wide; configured paths persist on the game (`save_paths`), and the library's "Has saves" view reflects them.
 

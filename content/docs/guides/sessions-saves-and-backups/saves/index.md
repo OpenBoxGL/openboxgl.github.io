@@ -27,6 +27,7 @@ Open a game's **Save management** and choose **Discover locations**. OpenBoxGL l
 | Wii U | Cemu `mlc01/usr/save` |
 | Sega Saturn | RetroArch `saves` (or `~/.mednafen`) |
 | RetroArch | any save or state file under `saves`/`states` whose stem matches the game name |
+| macOS | Steam Cloud under `~/Library/Application Support/Steam`; PPSSPP `~/.config/ppsspp/PSP/SAVEDATA`; RPCS3 and Dolphin under `~/Library/Application Support`; RetroArch `~/Documents/RetroArch` saves and states. See [macOS](/macos/#saves-on-macos). |
 
 Candidates are shown as `path` + `label` + `shared`. Confirm them per game, or run **Scan library for saves** to apply discovered paths to every game at once. Confirmed paths are stored on the game (`save_paths`) and drive the library's **Has saves** view.
 

@@ -81,7 +81,7 @@ Big Box video snaps read their audio settings from Settings → Big Box; the sta
 
 The Big Box status bar shows battery percentage and a charging marker when a battery is present. Turn it off with **Show the battery indicator in Big Box** (`battery_indicator`, default on).
 
-The indicator prefers the browser Battery Status API and otherwise calls `GET /api/native/battery`, which reads the first `BAT*` device under `/sys/class/power_supply` on Linux. The route returns `present`, `percent` (0–100), and `charging`; on non-Linux hosts it returns `{"present": false, "percent": 0, "charging": false}`. The result is cached for 60 seconds and read once when Big Box opens, so it never polls the filesystem during navigation.
+The indicator prefers the browser Battery Status API and otherwise calls `GET /api/native/battery`, which reads the first `BAT*` device under `/sys/class/power_supply` on Linux, `pmset -g batt` on macOS, and `GetSystemPowerStatus` on Windows. The route returns `present`, `percent` (0–100), and `charging`; a host with no battery returns `{"present": false, "percent": 0, "charging": false}`. The client caches the result for 60 seconds and reads it once when Big Box opens, so it never polls the filesystem during navigation.
 
 ### Hidden platforms, categories, and playlists (v1.18.0)
 

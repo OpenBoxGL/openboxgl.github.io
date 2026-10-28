@@ -53,13 +53,13 @@ Import installed Steam games from local manifests (`steamapps/appmanifest_*.acf`
 
 <ApiEndpoint method="POST" path="/api/import/heroic">
 
-Import installed Heroic games (`legendary`/`gog`/`nile` installed manifests). Missing launcher raises `400` (`"xdg-open is required to launch imported Heroic games."`). Returns `{"added", "found"}`.
+Import installed Heroic games (`legendary`/`gog`/`nile` installed manifests). Heroic is offered on Linux and Windows; on macOS the import refuses with "Heroic import is not available on macOS." Missing launcher raises `400` (`"xdg-open is required to launch imported Heroic games."`). Returns `{"added", "found"}`.
 
 </ApiEndpoint>
 
 <ApiEndpoint method="POST" path="/api/import/lutris">
 
-Import installed Lutris games (`lutris --list-games --installed --json`, or Flatpak) with a 30-second timeout. Missing launcher raises `400` (`"Lutris or Flatpak is required to import Lutris games."`). Returns `{"added", "found"}`. The health route `POST /api/health/dedupe` removes library duplicates by identity.
+Import installed Lutris games (`lutris --list-games --installed --json`, or Flatpak) with a 30-second timeout. Lutris is Linux only. Missing launcher raises `400` (`"Lutris or Flatpak is required to import Lutris games."`). Returns `{"added", "found"}`. The health route `POST /api/health/dedupe` removes library duplicates by identity.
 
 </ApiEndpoint>
 
@@ -114,7 +114,7 @@ Discovers configured Proton and Wine prefix directories. Returns `{"prefixes": [
 
 <ApiEndpoint method="GET" path="/api/wine/protons">
 
-Discovers Proton runtime executables (Steam compatibility tools, Faugus runners, Lutris runners, Flatpak/PATH). Returns `{"protons": [{"name", "path"}, ...], "available": bool}`.
+Discovers Proton runtime executables (Steam compatibility tools, Faugus runners, Lutris runners, Flatpak/PATH). Returns `{"protons": [{"name", "path"}, ...], "available": bool}`. On hosts other than Linux it returns `{"protons": [], "available": false}` and does not scan the disk.
 
 </ApiEndpoint>
 
@@ -451,7 +451,7 @@ Removes exactly what the update channel installed and restores the bundled defin
 <ApiEndpoint method="GET" path="/api/v2/storefronts">
 
 
-Lists the built-in sources (`steam`, `heroic`, `lutris`, `gameyfin`, `gog`, `ea`, `ubisoft`) with `id`, `name`, `kind: "builtin"`, and `installed: true`, followed by enabled plugin storefronts with `kind: "plugin"` and redacted settings. Returns `{"storefronts": [...]}`.
+Lists the built-in sources this host can import from: `steam` and `gameyfin` always, `heroic` on Linux and Windows, `lutris` on Linux, and `gog`, `ea`, and `ubisoft` on Windows (see [API 1.19 changes](/reference/api/one-nineteen/)). Each entry has `id`, `name`, `kind: "builtin"`, and `installed: true`, followed by enabled plugin storefronts with `kind: "plugin"` and redacted settings. Returns `{"storefronts": [...]}`.
 
 </ApiEndpoint>
 

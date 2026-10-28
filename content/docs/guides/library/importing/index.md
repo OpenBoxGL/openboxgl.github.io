@@ -39,7 +39,7 @@ You can also drag a folder onto the **drop zone** ("Drop ROM folders or game fil
 
 ## Steam
 
-Click **Import Steam**. OpenBoxGL reads installed libraries from standard Steam roots: `~/.local/share/Steam`, `~/.steam/steam`, and `~/.var/app/com.valvesoftware.Steam/.local/share/Steam`, plus every library folder listed in `steamapps/libraryfolders.vdf`. It parses `appmanifest_*.acf` files for the App ID, name, and install directory, and launches through `steam -applaunch {app_id}` (or the Flatpak equivalent, falling back to `xdg-open steam://rungameid/{app_id}`).
+Click **Import Steam**. OpenBoxGL reads installed libraries from standard Steam roots: `~/.local/share/Steam`, `~/.steam/steam`, and `~/.var/app/com.valvesoftware.Steam/.local/share/Steam` on Linux; `~/Library/Application Support/Steam` on macOS; and the Steam install found through the registry and Program Files on Windows. It also reads every library folder listed in `steamapps/libraryfolders.vdf`. It parses `appmanifest_*.acf` files for the App ID, name, and install directory, and launches through `steam -applaunch {app_id}` (or the Flatpak equivalent, falling back to `xdg-open steam://rungameid/{app_id}`).
 
 Each imported Steam game records whether its install folder still exists. A game whose folder has gone missing shows a red **Missing** badge and turns its Play button into **INSTALL**, while an installed game offers **Verify Steam files** (`steam://validate/<id>`). See [Storefront Manager](/guides/storefront-manager/) for both states and how a rescan refreshes them.
 

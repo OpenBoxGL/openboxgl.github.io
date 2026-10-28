@@ -75,7 +75,7 @@ These routes discover games installed by GOG Galaxy, the EA app, and Ubisoft Con
 | `POST` | `/api/v2/import/ea` | EA app installer manifests (`installerdata.xml`). |
 | `POST` | `/api/v2/import/ubisoft` | Ubisoft Connect `Installs` registry keys. |
 
-Each route accepts an empty JSON object as its body; a non-object body returns `400`. Discovery is read-only and offline. On non-Windows hosts there is nothing to discover, so the route returns `{"added": 0, "found": 0, "errors": []}` rather than failing.
+Each route accepts an empty JSON object as its body; a non-object body returns `400`. Discovery is read-only and offline. On hosts other than Windows the routes refuse with `400`, for example `GOG import is only available on Windows.`, and the discovery code does not run. That refusal arrived in 1.19.1; see [API 1.19 changes](/reference/api/one-nineteen/).
 
 ```bash
 curl -s -X POST -H "X-OpenBox-Token: $TOKEN" \

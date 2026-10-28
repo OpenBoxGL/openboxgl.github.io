@@ -7,6 +7,8 @@ OpenBox provides native integration with **Faugus Launcher**, the lightweight Li
 
 ## Overview
 
+Faugus Launcher is a Linux launcher, so this integration is Linux only. On Windows and macOS the scanner finds nothing and its controls are hidden.
+
 When Faugus Launcher is installed, OpenBox can scan its data directories, read each game's prefix configuration, and import the titles into your unified library. OpenBox looks for Faugus data in `~/.config/faugus-launcher`, `~/.local/share/faugus-launcher`, `~/Faugus`, the matching `XDG_CONFIG_HOME`/`XDG_DATA_HOME` locations, and prefix directories containing `drive_c`.
 
 ## How to Import from Faugus

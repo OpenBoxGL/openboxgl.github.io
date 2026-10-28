@@ -345,7 +345,7 @@ Reinstalls one installed plugin from its catalog entry, or from the local packag
 | `POST` | `/api/v2/storefronts/plugin/catalog` | Page through one plugin storefront's catalog. |
 | `POST` | `/api/v2/storefronts/plugin/import` | Import one plugin storefront. |
 
-`GET /api/v2/storefronts` lists the built-in sources (`steam`, `heroic`, `lutris`, `gameyfin`, `gog`, `ea`, `ubisoft`) with `id`, `name`, `kind: "builtin"`, and `installed: true`, followed by enabled plugin storefronts with `kind: "plugin"`, their capability `id`, `name`, `platform`, redacted `settings_values`, `settings_schema`, and `permission_granted`. Returns `{"storefronts": [...]}`.
+`GET /api/v2/storefronts` lists the built-in sources this host can import from: `steam` and `gameyfin` always; `heroic` on Linux and Windows; `lutris` on Linux; and `gog`, `ea`, and `ubisoft` on Windows. Each entry has `id`, `name`, `kind: "builtin"`, and `installed: true`. Enabled plugin storefronts follow with `kind: "plugin"`, their capability `id`, `name`, `platform`, redacted `settings_values`, `settings_schema`, and `permission_granted`. Returns `{"storefronts": [...]}`. See [API 1.19 changes](/reference/api/one-nineteen/).
 
 `GET /api/v2/storefront/status` returns `{"sources": [...]}` from the persisted scan report; a missing or malformed report is an empty list. Each source keeps its own result, so one provider failure never erases an earlier successful scan.
 
@@ -490,7 +490,7 @@ Reports battery state for the native window:
 { "present": true, "percent": 87, "charging": false }
 ```
 
-On Linux the first `BAT*` device under `/sys/class/power_supply` is read; `percent` is clamped to 0–100, and `charging` is true for `Charging` or `Full`. The device path is never exposed. Other platforms, or a host with no readable battery, return `{"present": false, "percent": 0, "charging": false}`. The route requires the token like every other `/api/native/*` route.
+On Linux the first `BAT*` device under `/sys/class/power_supply` is read; on macOS `pmset -g batt` is read; on Windows `GetSystemPowerStatus` is read. `percent` is clamped to 0–100, and `charging` is true for `Charging` or `Full` on Linux. The device path is never exposed. A host with no battery, such as a desktop, returns `{"present": false, "percent": 0, "charging": false}`. The macOS and Windows readings are cached for 30 seconds. The route requires the token like every other `/api/native/*` route.
 
 ## Game store actions
 

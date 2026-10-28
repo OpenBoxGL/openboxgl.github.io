@@ -116,13 +116,13 @@ Completed history is worth calling out. Normal session history records store the
 
 ## The data directory boundary
 
-`openbox.py` selects the data directory from `OPENBOX_DATA_DIR`, or from the default path:
+`openbox.py` selects the data directory from `OPENBOX_DATA_DIR`, or from the platform default. The Linux default is shown here:
 
 ```text
 ~/.local/share/openbox-game-launcher/
 ```
 
-On Windows the default is `%LOCALAPPDATA%\openbox-game-launcher` (`%APPDATA%` when `LOCALAPPDATA` is unset), and `OPENBOX_DATA_DIR` overrides both platforms. The resolution lives in `pkg/platform_compat.py`; see [Windows](/windows/) for the install layout.
+On macOS the default is `~/Library/Application Support/openbox-game-launcher`. On Windows the default is `%LOCALAPPDATA%\openbox-game-launcher` (`%APPDATA%` when `LOCALAPPDATA` is unset), and `OPENBOX_DATA_DIR` overrides every platform. The resolution lives in `pkg/platform_compat.py`; see [Windows](/windows/) and [macOS](/macos/) for the install layouts.
 
 When the custom variable is not set and the new library file does not exist, the startup code can copy the legacy LaunchBox Linux library from its old location (`~/.local/share/launchbox-linux/library.json`, `USERPROFILE` on Windows). That migration happens before normal state-store use. It is a one-time compatibility copy, not a general synchronization mechanism.
 

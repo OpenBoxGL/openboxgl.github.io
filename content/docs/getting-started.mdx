@@ -7,7 +7,7 @@ This path is for a first run with a local executable folder. Use a disposable fo
 
 <Callout type="note" title="What happens under the hood">
 
-When you start OpenBox for the first time, OpenBoxGL does several things silently: it creates your data directory (`~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, by default), generates a per-launch `server.token`, writes the port to `server.port`, and initializes an empty `library.json` with schema version 6. You won't see these files unless you look in the data directory, but they're the reason nothing gets corrupted when the server restarts unexpectedly. See [Interfaces and data](/interfaces-and-data/) for where every file lives.
+When you start OpenBox for the first time, OpenBoxGL does several things silently: it creates your data directory (`~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, or `~/Library/Application Support/openbox-game-launcher` on macOS), generates a per-launch `server.token`, writes the port to `server.port`, and initializes an empty `library.json` with schema version 6. You won't see these files unless you look in the data directory, but they're the reason nothing gets corrupted when the server restarts unexpectedly. See [Interfaces and data](/interfaces-and-data/) for where every file lives.
 
 </Callout>
 
@@ -15,7 +15,7 @@ The goal is a full loop: install, import one game, see it in the library, launch
 
 ## Before you start
 
-- Follow [Installation](/install/) and start OpenBox. On Linux, run the AppImage, Flatpak, or source entry point (`./openbox` or `python3 web_app.py`). On Windows, double-click `openbox.cmd` or run `powershell -File .\openbox.ps1` from the runtime directory; add `--web` to either one to force the browser app window instead of the native window. The full Windows path is in [Windows](/windows/). You should see the three-column workspace: filters on the left, an empty cover grid in the center, and the detail pane on the right.
+- Follow [Installation](/install/) and start OpenBox. On Linux, run the AppImage, Flatpak, or source entry point (`./openbox` or `python3 web_app.py`). On Windows, double-click `openbox.cmd` or run `powershell -File .\openbox.ps1` from the runtime directory; add `--web` to either one to force the browser app window instead of the native window. On macOS, open `OpenBox.app` from Applications or run `openbox` from a terminal. The full Windows path is in [Windows](/windows/), and the macOS path is in [macOS](/macos/). You should see the three-column workspace: filters on the left, an empty cover grid in the center, and the detail pane on the right.
 - Make one folder containing a single launchable file. On Linux that is an executable `.sh` file; on Windows use an `.exe` (or a `.cmd`/`.bat` script). For a realistic first test on Linux, use a short script like this:
 
 ```bash
@@ -33,7 +33,7 @@ The workspace looks like this once you have a library entry: filters on the left
 
 <Steps>
 
-<li><strong>Install and start OpenBox.</strong> From the AppImage, Flatpak, or source on Linux, or from the signed portable package on Windows, as described on the [Installation](/install/) page and in [Windows](/windows/). When the library is empty, the setup dialog (**Set up your library**) opens on a six-step quick path, with the longer optional steps behind an **advanced** toggle. You can close it and start from the top bar's **Add games** menu at any time, or follow its preview-before-commit scan.</li>
+<li><strong>Install and start OpenBox.</strong> From the AppImage, Flatpak, or source on Linux, from the signed portable package on Windows, or from the signed app bundle on macOS, as described on the [Installation](/install/) page, in [Windows](/windows/), and in [macOS](/macos/). When the library is empty, the setup dialog (**Set up your library**) opens on a six-step quick path, with the longer optional steps behind an **advanced** toggle. You can close it and start from the top bar's **Add games** menu at any time, or follow its preview-before-commit scan.</li>
 
 <Callout type="note">
 
@@ -105,7 +105,7 @@ Open the game detail view or check Launch check preflight notifications. Launch 
 
 - **"has no launch command and its file is not executable"**: make the file executable (`chmod +x` on Linux; a Windows `.exe` needs no permission bit), or assign an emulator profile. Launch check displays an explanation and fix options.
 - **"The configured path no longer exists"**: the imported file was moved or deleted. Point the game at the new path under Edit game, or re-import the folder.
-- **"Set a launch command for the platform"**: the platform has no profile. See [Emulators and launching](/guides/emulators-and-launching/). On Linux, Launch check can automatically install missing Flathub emulators; on Windows you install the Windows build of the emulator yourself and point the profile at its executable.
+- **"Set a launch command for the platform"**: the platform has no profile. See [Emulators and launching](/guides/emulators-and-launching/). On Linux, Launch check can automatically install missing Flathub emulators; on Windows and macOS you install the emulator yourself and point the profile at its executable.
 
 ### The session reports a failure
 
@@ -137,7 +137,7 @@ Nothing is sent anywhere: no account, no telemetry, and no network traffic unles
 - [Interfaces and data](/interfaces-and-data/) for where every file lives.
 - [Metadata and media](/guides/metadata-and-media/) for enrichment after the first import.
 
-## What's new in 1.11 through 1.18
+## What's new in 1.11 through 1.19
 
 - **1.11 — Every Second Counts:** Quick Resume, Moments, clips/reels, Time Machine, Backlog Radio + natural query, Arcade Room/Museum kiosk, Household, Steam Bridge, ES-DE migration, SteamGridDB artwork, and local launcher trophies. Start with [API 1.11 additions](/reference/api/one-eleven/).
 - **1.12 — Living Library:** smart collections, per-game Story timelines (1h–100h milestones), per-game `launch_env`/`launch_confirm`, opt-in weekly backups, SQLite self-enable at 5,000 games, and command-palette recents. Start with [API 1.12 additions](/reference/api/one-twelve/).
@@ -149,3 +149,4 @@ Nothing is sent anywhere: no account, no telemetry, and no network traffic unles
 - **1.16.1 — Launch readiness everywhere:** **Won't launch** and **Needs attention** badges on the grid, one-button fixes for a group that shares a cause, a read-only Flatpak folder grant, a per-game RetroArch core, and launch definitions for 18 more systems. See [API 1.16 additions](/reference/api/one-sixteen/).
 - **1.17 — More of your library, and what it cost:** native installed-game imports for GOG Galaxy, the EA app, and Ubisoft Connect on Windows; Game Night decks with a reproducible seed; price paid and cost-per-hour insights grouped by currency; translated server notices; and the ScreenScraper fix. See [API 1.17 additions](/reference/api/one-seventeen/).
 - **1.18 — A clearer, deeper library:** the first run is shorter (one **Add games** menu, a six-step setup dialog, **Help & shortcuts** on `F1` or `?`, a single empty-library card, an onboarding checklist, and **Jump back in**); a platform can be renamed or deleted in one place; the media queue survives a restart and adds EmuMovies; backups describe every file and restore only what you check; plugins declare capabilities; the **Emulators & controllers** entry in Tools manages installs; and Big Box gains more input and presentation controls. See [API 1.18 additions](/reference/api/one-eighteen/) and the [changelog](/changelog/).
+- **1.19 — OpenBox on macOS and platform parity:** a signed universal app bundle runs OpenBox natively on macOS 11 or newer, and one capability contract hides Linux-only controls on Windows and macOS instead of failing at click time. See [macOS](/macos/) and [API 1.19 changes](/reference/api/one-nineteen/).

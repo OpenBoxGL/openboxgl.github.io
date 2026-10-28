@@ -7,7 +7,7 @@ The diagnostic log is the first place to look when anything misbehaves. It recor
 
 ## Where it lives
 
-- Path: `<data-dir>/openbox.log` (default `~/.local/share/openbox-game-launcher/openbox.log`).
+- Path: `<data-dir>/openbox.log` (default `~/.local/share/openbox-game-launcher/openbox.log` on Linux, `%LOCALAPPDATA%\openbox-game-launcher\openbox.log` on Windows, and `~/Library/Application Support/openbox-game-launcher/openbox.log` on macOS).
 - Rotation: 2 MiB per file, 4 rotations (`openbox.log.1` ... `.4`).
 - Redaction: tokens, passwords, secrets, API keys, and authorization values are redacted before writing.
 - It can still contain **game names and local file paths**, review it before sharing.

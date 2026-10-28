@@ -50,9 +50,9 @@ Values already in the environment are never overridden by `.env`. The template l
 
 | Variable | Meaning |
 | --- | --- |
-| `OPENBOX_DATA_DIR` | Data directory. Read at import time, before `.env` bootstrap; must be exported in the shell, desktop entry, or systemd unit before launch. Defaults to `~/.local/share/openbox-game-launcher`, and to `%LOCALAPPDATA%\openbox-game-launcher` on Windows. When no home directory can be determined, it falls back to `openbox-game-launcher` inside the current working directory. |
+| `OPENBOX_DATA_DIR` | Data directory. Read at import time, before `.env` bootstrap; must be exported in the shell, desktop entry, or systemd unit before launch. Defaults to `~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, and `~/Library/Application Support/openbox-game-launcher` on macOS. When no home directory can be determined, it falls back to `openbox-game-launcher` inside the current working directory. |
 | `OPENBOX_SAFE_MODE` | Any non-empty value (conventionally `1`) disables plugin execution and the webhook dispatcher for the whole process. Exposed as `settings.safe_mode`. Process environment only (not `.env`). |
-| `APPIMAGE` | Set automatically when running from an AppImage; the Linux updater refuses to install without it. Exposed as `settings.appimage`. Windows updates use the verified `OpenBox-<arch>-windows.zip` path instead. |
+| `APPIMAGE` | Set automatically when running from an AppImage; the Linux updater refuses to install without it. Exposed as `settings.appimage`. Windows updates use the verified `OpenBox-<arch>-windows.zip` path instead, and macOS updates use the verified `OpenBox-macos.zip` bundle. |
 | `OPENBOX_ENV_FILE` | Explicit path to a single `.env` file, checked first before the data-directory roots. Read directly from the process environment; must point at an owner-only regular file (not a symlink) or it is skipped. |
 | `OPENBOX_ALLOW_HTTP_WEBHOOKS` | Set to `1` to allow plain-HTTP webhook URLs. Required only for trusted local test targets; HTTPS is the default and safer. |
 | `OPENBOX_ALLOW_HTTP_GAMEYFIN` | Set to `1` to allow plain-HTTP Gameyfin URLs. HTTPS is the default; loopback (localhost) addresses are always allowed. |
@@ -239,7 +239,7 @@ The Settings dialog also persists the following keys. Every key in this table ex
 | Setting | Default | Validation |
 | --- | --- | --- |
 | `auto_import_excluded_platforms` | `[]` | Up to 100 platform names, each at most 80 characters; matching is case-insensitive. Storefront auto-import skips games on these platforms. |
-| `battery_indicator` | `true` | Boolean; shows the battery percentage in the Big Box status area on handheld hardware. |
+| `battery_indicator` | `true` | Boolean; shows the battery percentage in the Big Box status area when a battery is present (Linux sysfs, `pmset` on macOS, or `GetSystemPowerStatus` on Windows). |
 | `bigbox_back_hold_seconds` | 0.8 | 0 to 2 seconds; how long Back must be held in Big Box before it acts. |
 | `bigbox_hidden_categories` | `[]` | Up to 500 category names, each at most 200 characters; hidden from Big Box category browsing. |
 | `bigbox_hidden_platforms` | `[]` | Up to 500 platform names, each at most 200 characters; hidden from Big Box platform browsing. |

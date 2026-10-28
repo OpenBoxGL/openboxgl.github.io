@@ -56,6 +56,7 @@ The duration and easing tokens (`--dur-fast`, `--dur-base`, `--dur-slow`, `--dur
    mkdir -p ~/.local/share/openbox-game-launcher/themes/
    nano ~/.local/share/openbox-game-launcher/themes/theme-mytheme.css
    ```
+   On macOS, the themes folder is `~/Library/Application Support/openbox-game-launcher/themes/`. On Windows it is `%LOCALAPPDATA%\openbox-game-launcher\themes\`.
 2. Paste your `:root` definition:
    ```css
    :root {

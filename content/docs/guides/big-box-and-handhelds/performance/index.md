@@ -5,6 +5,8 @@ description: Apply optional per-launch handheld performance profiles.
 
 Performance profiles apply a TDP limit through `ryzenadj` before a game launches, and optionally restore a configured value when the session ends. They are per launch profile: either a platform profile or a per-game launch profile override.
 
+Handheld performance limits are a Linux feature: they use `ryzenadj` on Linux only. On Windows and macOS the **Handheld performance** controls are hidden.
+
 ## Setup
 
 <Callout type="tip" title="Quick setup for a Steam Deck">
@@ -33,7 +35,7 @@ Because `auto` gates on battery or gamescope, a desktop session never applies or
 
 ## Battery reporting (v1.18.0)
 
-Big Box shows a battery indicator in its status bar when a battery is present; **Show the battery indicator in Big Box** (`battery_indicator`, default on) controls it. The indicator uses the browser Battery Status API when available and otherwise calls `GET /api/native/battery`, which reads the first `BAT*` device under `/sys/class/power_supply` and returns `present`, `percent`, and `charging`. Non-Linux hosts return `present: false`.
+Big Box shows a battery indicator in its status bar when a battery is present; **Show the battery indicator in Big Box** (`battery_indicator`, default on) controls it. The indicator uses the browser Battery Status API when available and otherwise calls `GET /api/native/battery`, which reads the first `BAT*` device under `/sys/class/power_supply` on Linux, `pmset -g batt` on macOS, and `GetSystemPowerStatus` on Windows, and returns `present`, `percent`, and `charging`. A host with no battery returns `present: false`.
 
 This indicator is display-only. The `auto` performance gate keeps its own battery check and is unaffected by turning the indicator off, so hiding the badge never changes whether a TDP limit applies. Big Box requests the reading when it opens and reuses the 60-second cache, which keeps it off the launch hot path.
 

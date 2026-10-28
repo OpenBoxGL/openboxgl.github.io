@@ -23,10 +23,10 @@ Start with the diagnostic log and the exact visible error. **Settings > Advanced
 
 ## Import problems
 
-- **Steam**: check that one of `~/.local/share/Steam`, `~/.steam/steam`, or the Flatpak path contains `steamapps/` with `appmanifest_*.acf` files. Launching requires `steam`, Flatpak Steam, or `xdg-open`. Imported Steam games record whether their install folder still exists; a missing install shows a red **Missing** badge and the play button becomes **Install**, while an installed game offers **Verify Steam files** (`steam://validate/<id>`).
+- **Steam**: check that one of `~/.local/share/Steam`, `~/.steam/steam`, or the Flatpak path contains `steamapps/` with `appmanifest_*.acf` files (on macOS, `~/Library/Application Support/Steam`). Launching requires `steam`, Flatpak Steam, or `xdg-open`. Imported Steam games record whether their install folder still exists; a missing install shows a red **Missing** badge and the play button becomes **Install**, while an installed game offers **Verify Steam files** (`steam://validate/<id>`).
 - **Storefront scans**: a scan reports progress per source, skips sources with no library games, and gives each source a 30-second budget. A slow source is recorded as `timeout` with `"Storefront scan timed out after 30s."` and leaves the library untouched; earlier sources stay applied, so re-run the scan after the store's catalog responds.
-- **Heroic**: manifests live under `~/.config/heroic` (legendaryConfig, gog_store, nile_config) or the Flatpak path; launching requires `xdg-open`.
-- **Lutris**: OpenBoxGL runs `lutris --list-games --installed --json` (or the Flatpak). A missing binary or malformed JSON reports an error and imports nothing.
+- **Heroic**: manifests live under `~/.config/heroic` (legendaryConfig, gog_store, nile_config) or the Flatpak path; launching requires `xdg-open`. Heroic is not offered on macOS.
+- **Lutris**: Linux only. OpenBoxGL runs `lutris --list-games --installed --json` (or the Flatpak). A missing binary or malformed JSON reports an error and imports nothing.
 - **Arcade**: a DAT/XML file is used when given; otherwise `mame -listxml` must work (up to 256 MiB output, 5-minute timeout). BIOS and non-runnable machines are skipped. Imported sets are classified parent/merged/split/non-merged.
 - **Gameyfin**: configure the URL in Storefronts and use **Test Gameyfin connection** first. Install failures keep the previous files; uninstall refuses paths outside the install directory.
 - **RPCS3, PICO-8, MSU-1, WHDLoad**: RPCS3 imports external folders and ISOs from `games.yml`; the other sources use their own content folders and must exist before a scan finds anything.

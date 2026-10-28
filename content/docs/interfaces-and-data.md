@@ -42,7 +42,7 @@ The server is loopback-only, so nothing is reachable from the network. The URL c
 
 ## Where data lives
 
-The default data directory is `~/.local/share/openbox-game-launcher`. Everything OpenBoxGL persists lives there:
+The default data directory is `~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, and `~/Library/Application Support/openbox-game-launcher` on macOS. Everything OpenBoxGL persists lives there:
 
 | Path (inside the data directory) | Contents |
 | --- | --- |
@@ -53,8 +53,8 @@ The default data directory is `~/.local/share/openbox-game-launcher`. Everything
 | `operations_items/` | Per-operation item lists (for example one row per game in a bulk download) |
 | `previews/` | Transient Setup Center scan preview documents before commit |
 | `server.token`, `server.port` | Per-launch credentials for the running app; deleted on exit |
-| `openbox.sock` (Linux) / named pipe (Windows), `window-geometry`, `native-host-flags` | Native host single-instance endpoint, last window geometry, and tray flags |
-| `native-host-recent` | Private recent-game list, one `name<TAB>game id` line per entry, written at boot and after sessions so the Linux and Windows tray menus can launch the eight most recent games |
+| `openbox.sock` (Linux and macOS) / named pipe (Windows), `window-geometry`, `native-host-flags` | Native host single-instance endpoint, last window geometry, and tray flags |
+| `native-host-recent` | Private recent-game list, one `name<TAB>game id` line per entry, written at boot and after sessions so the Linux, Windows, and macOS tray menus can launch the eight most recent games |
 | `save-backups/` | Versioned per-game save backups with retention limits; each archive carries its own `manifest.json` (size, mode, mtime, and SHA-256 per file), not a separate manifest file elsewhere |
 | `backups/` | Library backup archives (`OpenBoxBackup-*.zip`) |
 | `media/` | Downloaded artwork, screenshots, video, and metadata media, grouped by source (`media/memories/` holds imported Memories gallery items, `media/clips/` holds Record That captures) |

@@ -7,7 +7,7 @@ Launch commands are tokenized strings: OpenBoxGL substitutes exact placeholders 
 
 ## Tokens
 
-`build_launch` (`openbox.py`) resolves the command through `resolve_launch` (`pkg/state/launch.py`). The token pass itself lives in `build_launch_args` (`pkg/parity/launch_tokens.py`), which splits the launch command with the platform's quoting rules first — `shlex.split` on Linux, Windows command-line quoting on Windows — then replaces these markers inside each resulting argument:
+`build_launch` (`openbox.py`) resolves the command through `resolve_launch` (`pkg/state/launch.py`). The token pass itself lives in `build_launch_args` (`pkg/parity/launch_tokens.py`), which splits the launch command with the platform's quoting rules first: `shlex.split` on Linux and macOS, and Windows command-line quoting on Windows. It then replaces these markers inside each resulting argument:
 
 | Token | Value | Example |
 | --- | --- | --- |

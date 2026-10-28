@@ -1,9 +1,9 @@
 ---
 title: Installation
-description: Install OpenBoxGL on Linux with AppImage, Flatpak, or source, or on Windows with the signed portable installer.
+description: Install OpenBoxGL on Linux with AppImage, Flatpak, or source, on Windows with the signed portable installer, or on macOS with the signed app bundle.
 ---
 
-OpenBoxGL runs on Linux and, since 1.13.0, natively on Windows. On Linux the AppImage is the recommended path with Python 3.10+ for source installs: it bundles its own Python runtime, so you never depend on system Python versions or library packages. On Windows the signed portable installer is the supported path; it is covered in full on the [Windows](/windows/) page.
+OpenBoxGL runs on Linux, natively on Windows since 1.13.0, and natively on macOS since 1.19.0. On Linux the AppImage is the recommended path with Python 3.10+ for source installs: it bundles its own Python runtime, so you never depend on system Python versions or library packages. On Windows the signed portable installer is the supported path; it is covered in full on the [Windows](/windows/) page. On macOS the signed app bundle installs with `install-macos.sh`, and the [macOS](/macos/) page covers it in full.
 
 There is no OpenBox account, installer wizard, or license key. Downloading a release or cloning the repository is the entire installation.
 
@@ -16,29 +16,32 @@ There is no OpenBox account, installer wizard, or license key. Downloading a rel
 | [Source](#source--system) | Development, testing, or patching | `git pull` and re-run |
 | [System install](#source--system) | Installing to `/usr/local` from source | `sudo make install` again |
 | [Windows portable](#windows) | Windows 10 and 11, x86_64 | Built-in verified updater |
+| [macOS](#macos) | macOS 11 or newer, Apple Silicon or Intel | Built-in verified updater |
 
 The fastest path on Linux is the [versioned release installer](#versioned-release-installer): download the tag-pinned script, inspect it, then run it. It selects the matching AppImage, pins the release public key, verifies its SHA-256 checksum and Ed25519 signature, and installs it to `~/.local/bin`.
 
 On Windows, download the release's `OpenBox-x86_64-windows.zip`, extract it, and run the bundled installer at `OpenBox\scripts\install.ps1`: it verifies the same key pin, checksum, and signature before extracting the portable install to `%LOCALAPPDATA%\OpenBox`, registering the Start Menu shortcut and the `openbox://` handler, and adding the launchers to your user `PATH`. The full walkthrough is on the [Windows](/windows/) page.
 
-Only the AppImage and the Windows portable install receive the built-in updater. Flatpak, source, and system installs follow their own package or source workflow; see [Updating](/updating/).
+Only the AppImage, the Windows portable install, and the macOS app bundle receive the built-in updater. Flatpak, source, and system installs follow their own package or source workflow; see [Updating](/updating/).
 
 ## Prerequisites
 
 Before you install, confirm your system meets the baseline:
 
-| Requirement | AppImage | Flatpak | Source | Windows |
-| --- | --- | --- | --- | --- |
-| Linux desktop (X11 or Wayland) | Yes | Yes | Yes | Not applicable |
-| Windows 10 or 11, x86_64 | Not applicable | Not applicable | Not applicable | Yes |
-| WebKitGTK for the native window | Bundled | Bundled | Required (`libwebkit2gtk-4.1`) | Not used |
-| WebView2 runtime for the native window | Not used | Not used | Not used | Required for the native window — bundled on Windows 11 and most Windows 10 systems; falls back to a browser window without it |
-| Python | Bundled | Bundled | 3.10+ | 3.10+ (`python.exe` or `py.exe` on `PATH`) |
-| `flatpak` + `flatpak-builder` | Not needed | Required | Not needed | Not needed |
-| `git` | Not needed | Not needed | Required | Not needed |
-| FUSE (to mount AppImages) | Required | Not needed | Not needed | Not applicable |
-| bubblewrap `bwrap` | Optional (plugins sandboxed when present) | Bundled check | Optional (plugins sandboxed when present) | Not applicable |
-| Visual Studio Build Tools (C++ workload) | Not needed | Not needed | Not needed | Only to build the native host |
+| Requirement | AppImage | Flatpak | Source | Windows | macOS app bundle |
+| --- | --- | --- | --- | --- | --- |
+| Linux desktop (X11 or Wayland) | Yes | Yes | Yes | Not applicable | Not applicable |
+| Windows 10 or 11, x86_64 | Not applicable | Not applicable | Not applicable | Yes | Not applicable |
+| macOS 11 or newer, Apple Silicon or Intel | Not applicable | Not applicable | Not applicable | Not applicable | Yes |
+| WebKitGTK for the native window | Bundled | Bundled | Required (`libwebkit2gtk-4.1`) | Not used | Not used |
+| WebView2 runtime for the native window | Not used | Not used | Not used | Required for the native window — bundled on Windows 11 and most Windows 10 systems; falls back to a browser window without it | Not used |
+| WKWebView for the native window | Not used | Not used | Not used | Not used | Built in |
+| Python | Bundled | Bundled | 3.10+ | 3.10+ (`python.exe` or `py.exe` on `PATH`) | Bundled; `install-macos.sh` needs `python3` on `PATH` to verify the release |
+| `flatpak` + `flatpak-builder` | Not needed | Required | Not needed | Not needed | Not needed |
+| `git` | Not needed | Not needed | Required | Not needed | Not needed |
+| FUSE (to mount AppImages) | Required | Not needed | Not needed | Not applicable | Not applicable |
+| bubblewrap `bwrap` | Optional (plugins sandboxed when present) | Bundled check | Optional (plugins sandboxed when present) | Not applicable | Not available; plugins need trust or the unsandboxed override |
+| Visual Studio Build Tools (C++ workload) | Not needed | Not needed | Not needed | Only to build the native host | Not needed |
 
 <Callout type="tip" title="No Python packages to install">
 
@@ -58,7 +61,7 @@ The source install uses only the Python standard library, there is no `pip insta
  Download the installer from a specific signed release, inspect it, then run it. The installer verifies the release public-key pin, SHA-256 checksum, and Ed25519 signature before installing to `~/.local/bin`:
 
  ```bash
- VERSION=1.18.0
+ VERSION=1.19.1
  curl --proto '=https' --tlsv1.2 --fail --location \
    --output install.sh \
    "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -66,7 +69,7 @@ The source install uses only the Python standard library, there is no `pip insta
  OPENBOX_RELEASE_TAG="v${VERSION}" bash install.sh
  ```
 
- `VERSION` is the current release, **1.18.0**. Pin it deliberately only when reproducing a specific build, because security fixes are not backported to older releases (see [Security](/policies/security/)). The `install.sh` file is itself fetched from that tag, so the download needs a tag either way; dropping the `OPENBOX_RELEASE_TAG="v${VERSION}"` prefix lets the installer resolve the latest release at run time instead.
+ `VERSION` is the current release, **1.19.1**. Pin it deliberately only when reproducing a specific build, because security fixes are not backported to older releases (see [Security](/policies/security/)). The `install.sh` file is itself fetched from that tag, so the download needs a tag either way; dropping the `OPENBOX_RELEASE_TAG="v${VERSION}"` prefix lets the installer resolve the latest release at run time instead.
 
  The installer needs `curl`, `python3`, `openssl`, and `sha256sum` on `PATH`: it verifies the release public-key pin, the SHA-256 checksum, and the Ed25519 signature before installing to `~/.local/bin`.
 
@@ -122,7 +125,7 @@ The source install uses only the Python standard library, there is no `pip insta
  flatpak run io.openbox.GameLauncher
  ```
 
-Download `OpenBox-x86_64.flatpak` from the [release page](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.18.0) for the bundle install.
+Download `OpenBox-x86_64.flatpak` from the [release page](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.19.1) for the bundle install.
 
  - The manifest (the `native-host` and `openbox` modules) uses the GNOME Flatpak runtime (`org.gnome.Platform` 49) and grants `--filesystem=home`, so Steam, Heroic, Lutris, and ROM folders under your home directory are readable.
  - The Flatpak is not updated by OpenBoxGL's built-in updater (it only understands the AppImage). Update by rebuilding the manifest or using the Flatpak workflow you already have for local builds.
@@ -140,7 +143,7 @@ Download `OpenBox-x86_64.flatpak` from the [release page](https://github.com/vin
  python3 web_app.py
  ```
 
- Requirements: Python 3.10 or newer on a Linux system with standard desktop tooling. No third-party Python packages are required; the application uses the standard library.
+Requirements: Python 3.10 or newer on Linux or macOS, with standard desktop tooling. On macOS the Command Line Tools `python3` can be older than 3.10, so install a current one (for example `brew install python@3.12`). No third-party Python packages are required; the application uses the standard library.
 
  `python3 web_app.py` starts the loopback web UI in a browser. To run the native WebKitGTK window from source, build the host and launch it with `make native-host && ./openbox-native.sh`.
 
@@ -166,7 +169,7 @@ The current `sudo make install` wrapper path is not the recommended installation
 Windows 10 and 11 on x86_64 are supported since 1.13.0, through a signed portable install rather than an AppImage. Download the release's `OpenBox-x86_64-windows.zip`, extract it, and run the bundled installer at `OpenBox\scripts\install.ps1`; it resolves and pins the release public key, then verifies the archive's SHA-256 checksum and Ed25519 signature before extracting the runtime to `%LOCALAPPDATA%\OpenBox\share\openbox`:
 
 ```powershell
-$Version = '1.18.0'
+$Version = '1.19.1'
 Invoke-WebRequest -UseBasicParsing -OutFile OpenBox-x86_64-windows.zip `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/OpenBox-x86_64-windows.zip"
 Expand-Archive OpenBox-x86_64-windows.zip -DestinationPath .
@@ -181,6 +184,21 @@ Requirements are Windows PowerShell 5.1, which ships with Windows, and Python 3.
 The `openbox.cmd`, `openbox.ps1`, and `openbox-native.ps1` launchers mirror `openbox` and `openbox-native` on Linux: `openbox` opens the native WebView2 window once the host is built and the same UI in a browser app window otherwise, while `openbox --web` always uses the browser. Library data lives in `%LOCALAPPDATA%\openbox-game-launcher`.
 
 The release publishes only the two installers, `install.sh` and `install.ps1`, as release assets — the uninstaller is not one of them. It ships **inside** the zip and inside the install tree, so you run it from `scripts\uninstall.ps1` under your install directory (for a default install, `%LOCALAPPDATA%\OpenBox\share\openbox\scripts\uninstall.ps1`) with `powershell -ExecutionPolicy Bypass -File`; add `-InstallDir` for a non-default install, or `-WhatIf` to preview. It removes exactly what the installer created — the install tree and its rollback copy, the user `PATH` entry, the Start Menu shortcut, and the `openbox://` registration — and never touches your library or settings. The [Windows](/windows/) page covers installer options, the native host build, deeplinks, updating, the uninstaller, and Windows troubleshooting in full.
+
+## macOS
+
+macOS 11 or newer on Apple Silicon or Intel installs from the signed universal app bundle. Download `install-macos.sh` from the release, read it, and run it with the tag pinned:
+
+```bash
+VERSION=1.19.1
+curl --proto '=https' --tlsv1.2 --fail --location \
+  --output install-macos.sh \
+  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install-macos.sh"
+less install-macos.sh
+OPENBOX_RELEASE_TAG="v${VERSION}" bash install-macos.sh
+```
+
+The installer verifies the release key, the bundle's SHA-256 checksum, and its Ed25519 signature, then installs `OpenBox.app` into `~/Applications` and links `openbox` into `~/.local/bin`. It needs `python3` on your `PATH` to run the release verifier. The bundle is not notarized, so the first launch asks you to allow it in **System Settings > Privacy & Security > Open Anyway**. The [macOS](/macos/) page covers the native window, updates, saves, what is hidden on macOS, and troubleshooting.
 
 ## Making an app menu entry
 
@@ -199,7 +217,7 @@ python -B updates.py install-desktop-entry .\openbox.cmd
 <li>Run the entry point from a terminal. It should open the native window showing the three-column workspace.</li>
   <li>On first launch with an empty library, the setup dialog (**Set up your library**) appears.</li>
   <li>Settings → About reports the running version, platform, data folder, and whether OpenBox is in its native window or a browser tab. The update status line in Settings shows `· AppImage` when OpenBox runs from an AppImage.</li>
-  <li>Your data directory (`~/.local/share/openbox-game-launcher` unless `OPENBOX_DATA_DIR` is set) now contains `library.json`, `server.token`, and `server.port`.</li>
+  <li>Your data directory (`~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, or `~/Library/Application Support/openbox-game-launcher` on macOS, unless `OPENBOX_DATA_DIR` is set) now contains `library.json`, `server.token`, and `server.port`.</li>
 
 </Steps>
 
@@ -220,9 +238,9 @@ See [Configuration](/reference/configuration/) for the full environment contract
 
 ## Where installs keep state
 
-All library data, media, backups, themes, and logs live in `~/.local/share/openbox-game-launcher` (or the `OPENBOX_DATA_DIR` you set), never inside the AppImage file. Updating or deleting the AppImage does not touch your library.
+All library data, media, backups, themes, and logs live in `~/.local/share/openbox-game-launcher` on Linux, or in the `OPENBOX_DATA_DIR` you set. They are never inside the AppImage file, and updating or deleting the AppImage does not touch your library.
 
-The Windows portable install uses the same layout under `%LOCALAPPDATA%\openbox-game-launcher`; updating or deleting `%LOCALAPPDATA%\OpenBox` leaves the library untouched.
+The Windows portable install uses the same layout under `%LOCALAPPDATA%\openbox-game-launcher`; updating or deleting `%LOCALAPPDATA%\OpenBox` leaves the library untouched. The macOS app stores its data in `~/Library/Application Support/openbox-game-launcher`, and updating or deleting `OpenBox.app` leaves it untouched.
 
 ## Troubleshooting
 
@@ -244,7 +262,7 @@ Your first launch creates the data directory with an empty library. The window s
 
 - First-time setup: [Getting started](/getting-started/)
 - What the interfaces look like and where data lives: [Interfaces and data](/interfaces-and-data/)
-- Keeping an AppImage install current: [Updating](/updating/)
+- Keeping an install current: [Updating](/updating/)
 - If something does not start: [Troubleshooting](/guides/troubleshooting/)
 
 ## Related pages

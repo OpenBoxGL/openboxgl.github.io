@@ -15,6 +15,8 @@ OpenBox Game Launcher is released under GNU Affero General Public License v3.0. 
 
 Every release is signed with Ed25519. On Linux the installer selects the matching AppImage architecture and verifies the release against a pinned public key and a published SHA-256 checksum. On Windows the release asset `install.ps1` runs the same trust ladder: it fetches `openbox-release.pub` and checks its SHA-256 against a pinned bootstrap anchor (unless `-PublicKeyPath` is given), then verifies the archive's `.sha256` sidecar and its Ed25519 `.sig` before extracting. Windows installs land under `%LOCALAPPDATA%\OpenBox` by default (`-InstallDir` or `OPENBOX_INSTALL_DIR` overrides it), with the previous tree kept at `<InstallDir>\share\openbox.previous` for rollback.
 
+On macOS, the signed universal app bundle is verified by `install-macos.sh` and by the in-app updater, against the same pinned key, SHA-256 checksum, and Ed25519 signature, before anything is installed. The bundle is ad-hoc signed and not notarized, so macOS asks you to allow it on first launch.
+
 | Artifact | What it is | Where to find it |
 | --- | --- | --- |
 | `OpenBox-x86_64.AppImage` | x86_64 release binary | [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest) |
@@ -25,14 +27,19 @@ Every release is signed with Ed25519. On Linux the installer selects the matchin
 | `OpenBox-x86_64-windows.zip.sig` | Windows archive Ed25519 signature | Same release assets |
 | `OpenBox-x86_64-windows.zip.sha256` | Windows archive SHA-256 checksum | Same release assets |
 | `OpenBox-x86_64-windows-native-host.exe` | x86_64 WebView2 window host, the same binary the zip carries (with `.sha256` and `.sig`) | Same release assets |
+| `OpenBox-macos.zip` | Universal macOS app bundle (arm64 and x86_64), ad-hoc signed | [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest) |
+| `OpenBox-macos.zip.sha256` | macOS bundle SHA-256 checksum | Same release assets |
+| `OpenBox-macos.zip.sig` | macOS bundle Ed25519 signature | Same release assets |
 | `openbox-release.pub` | Pinned public key | Same release assets and the application repository; pinned by SHA-256 in `scripts/install.sh` and in the bootstrap anchor of `scripts/install.ps1` |
 | `OpenBox-x86_64.AppImage.sha256` and `OpenBox-aarch64.AppImage.sha256` | Architecture-specific SHA-256 checksums | Same release assets |
-| `OpenBox-<version>-sbom.json` and arch-suffixed SBOM | CycloneDX 1.4 SBOM | Same release assets |
+| `OpenBox-<version>-sbom.json`, the arch-suffixed SBOM, and `OpenBox-<version>-macos-sbom.json` | CycloneDX 1.4 SBOMs | Same release assets |
 | `OpenBox-x86_64.flatpak` | x86_64 Flatpak bundle | Same release assets |
 | `install.sh` | Cryptographically verified Linux installer | Same release assets |
 | `install.ps1` | Cryptographically verified Windows installer (PowerShell 5.1, standard library only) | Same release assets |
+| `install-macos.sh` | Cryptographically verified macOS installer (bash) | Same release assets |
+| `verify_release.py` | Standard-library release signature verifier that `install-macos.sh` runs | Same release assets |
 
-Verify path: on Linux, download the AppImage matching your architecture, its `.sig` and `.sha256`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.18.0"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. On Windows, download `OpenBox-x86_64-windows.zip` with its `.sha256` and `.sig` and run the released `install.ps1`, which applies the same key-pin, checksum, and signature checks before extracting. The uninstaller is not a standalone release asset — it ships **inside** the zip and the installed tree, so it is run from the install at `scripts\uninstall.ps1` (for a default install, `%LOCALAPPDATA%\OpenBox\share\openbox\scripts\uninstall.ps1`); it removes exactly what the installer created and never touches your library. See [Updating](/updating/) for architecture-matched rollback and [Windows](/windows/) for the platform guide.
+Verify path: on Linux, download the AppImage matching your architecture, its `.sig` and `.sha256`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v1.19.1"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. On Windows, download `OpenBox-x86_64-windows.zip` with its `.sha256` and `.sig` and run the released `install.ps1`, which applies the same key-pin, checksum, and signature checks before extracting. On macOS, download `install-macos.sh` and run it with the tag pinned; it applies the same checks to `OpenBox-macos.zip` before it installs. The uninstaller is not a standalone release asset — it ships **inside** the zip and the installed tree, so it is run from the install at `scripts\uninstall.ps1` (for a default install, `%LOCALAPPDATA%\OpenBox\share\openbox\scripts\uninstall.ps1`); it removes exactly what the installer created and never touches your library. See [Updating](/updating/) for architecture-matched rollback, [Windows](/windows/) for the platform guide, and [macOS](/macos/) for the app bundle.
 
 ## Build and CI
 
@@ -46,7 +53,7 @@ The application uses only the Python standard library at runtime (plus `ctypes` 
 
 ## Data and privacy
 
-Library data is local JSON at `~/.local/share/openbox-game-launcher/library.json`, or at `%LOCALAPPDATA%\openbox-game-launcher\library.json` on Windows. Set `OPENBOX_DATA_DIR` before launch to relocate it on either platform. The server binds to `127.0.0.1` on a random port, requires a per launch token on every API request, and never listens on the network. No account, no vendor-hosted cloud, no telemetry. Local mounted-folder statistics and catalog synchronization remain opt-in. See [Interfaces and data](/interfaces-and-data/), [Data and recovery](/reference/data-and-recovery/), and [Privacy](/policies/privacy/).
+Library data is local JSON at `~/.local/share/openbox-game-launcher/library.json` on Linux, `%LOCALAPPDATA%\openbox-game-launcher\library.json` on Windows, or `~/Library/Application Support/openbox-game-launcher/library.json` on macOS. Set `OPENBOX_DATA_DIR` before launch to relocate it on any platform. The server binds to `127.0.0.1` on a random port, requires a per launch token on every API request, and never listens on the network. No account, no vendor-hosted cloud, no telemetry. Local mounted-folder statistics and catalog synchronization remain opt-in. See [Interfaces and data](/interfaces-and-data/), [Data and recovery](/reference/data-and-recovery/), and [Privacy](/policies/privacy/).
 
 ## Support and notices
 

@@ -66,7 +66,7 @@ Not everything durable lives in `library.json`, and these files are not covered 
 | Path | Content |
 | --- | --- |
 | `media-queue.json` | Durable media download queue. A JSON list written atomically with mode `0o600` under its own `.media-queue.json.lock`; at most 5,000 items, and it survives a restart independently of the state store |
-| `native-host-recent` | Private recent-game list written at boot and refreshed after sessions, one `name<TAB>game id` line per entry, capped at eight so the Linux and Windows tray menus can offer recent games |
+| `native-host-recent` | Private recent-game list written at boot and refreshed after sessions, one `name<TAB>game id` line per entry, capped at eight so the Linux, Windows, and macOS tray menus can offer recent games |
 | `cache/launch_audit.json` | The latest Launch Audit report used by readiness badges (not library state) |
 | `cache/launch_audit.jsonl` | Compact rolling launch-audit history, rotated at 5 MiB so trend checks stay bounded |
 

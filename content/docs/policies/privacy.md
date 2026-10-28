@@ -33,7 +33,7 @@ Every outbound action is user-initiated and visible in the UI:
 
 ## What is stored locally
 
-The data directory (`~/.local/share/openbox-game-launcher` by default, or `OPENBOX_DATA_DIR`) holds the library, settings, media, backups, save archives, themes, plugin installs, credentials, and the rotating diagnostic log. Credentials are stored owner-only (`0o600`). Optional tokens for IGDB, ScreenScraper, SteamGridDB, Gameyfin, and RetroAchievements are kept out of the public settings view and exposed to the browser only in masked form. The diagnostic log redacts tokens, passwords, and API keys, but it can contain game names and local file paths, so review it before sharing it.
+The data directory (`~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, `~/Library/Application Support/openbox-game-launcher` on macOS, or `OPENBOX_DATA_DIR`) holds the library, settings, media, backups, save archives, themes, plugin installs, credentials, and the rotating diagnostic log. Credentials are stored owner-only (`0o600`). Optional tokens for IGDB, ScreenScraper, SteamGridDB, Gameyfin, and RetroAchievements are kept out of the public settings view and exposed to the browser only in masked form. The diagnostic log redacts tokens, passwords, and API keys, but it can contain game names and local file paths, so review it before sharing it.
 
 See [Interfaces and data](/interfaces-and-data/) for the full file layout and [Configuration](/reference/configuration/) for environment variables and persisted settings.
 

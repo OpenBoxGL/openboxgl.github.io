@@ -1,0 +1,171 @@
+---
+title: macOS
+description: Install and run OpenBoxGL on macOS 11 or newer with the signed universal app bundle, the install script, and the WKWebView window.
+---
+
+OpenBoxGL runs natively on macOS 11 or newer, on Apple Silicon and Intel, since 1.19.0. The release is one signed universal app bundle, `OpenBox-macos.zip`, which carries its own Python and renders the UI in a WKWebView window. The library format, the web UI, the HTTP API, the plugins, and the emulator definitions are the same as on Linux and Windows, so a library directory moves between platforms unchanged.
+
+The macOS build hides Linux-only controls instead of failing when you click them. The list is in [What is not on macOS](#what-is-not-on-macos).
+
+## Requirements
+
+| Requirement | Needed for | Notes |
+| --- | --- | --- |
+| macOS 11 or newer, Apple Silicon or Intel | Everything | One universal bundle serves both. The bundle declares a minimum system version of 11.0. |
+| `python3` on `PATH`, version 3.10 or newer | `install-macos.sh` only | The installer runs the release verifier with `python3`. The Command Line Tools `python3` can be older than 3.10; `brew install python@3.12` is the usual fix. The installed app does not use this interpreter. |
+| `curl`, `shasum`, `ditto` | `install-macos.sh` only | Ship with macOS. |
+| WKWebView | The native window | Ships with macOS. |
+| Python 3.10 or newer | Source checkouts only | The app bundle includes its own Python 3.12, so the app needs nothing installed. |
+
+## Install the app bundle
+
+Download `install-macos.sh` from the release, read it, and run it with the tag pinned. The script checks the release public key against the trust anchor pinned inside the script, verifies the bundle's SHA-256 checksum and Ed25519 signature, then installs `OpenBox.app`:
+
+```bash
+VERSION=1.19.1
+curl --proto '=https' --tlsv1.2 --fail --location \
+  --output install-macos.sh \
+  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install-macos.sh"
+less install-macos.sh
+OPENBOX_RELEASE_TAG="v${VERSION}" bash install-macos.sh
+```
+
+What the installer does:
+
+- Installs `OpenBox.app` into `~/Applications`. Set `OPENBOX_INSTALL_DIR` to install somewhere else.
+- Links the `openbox` launcher into `~/.local/bin`. If that folder is not on your `PATH`, the installer says so.
+- Refuses to replace an existing `OpenBox.app` unless you pass `--replace`, for example `bash install-macos.sh --replace`.
+- Resolves the latest release only when you omit `OPENBOX_RELEASE_TAG`. Omit it only when you intend to track the latest release.
+
+### First launch: allow the app
+
+The bundle is ad-hoc signed, not notarized. The first time you open it, macOS asks you to allow it. Open **System Settings > Privacy & Security** and choose **Open Anyway**. Every new build asks again, because each build has a new ad-hoc signature. The release signature is what the installer and the in-app updater verify; the ad-hoc signature only shows that the bundle was not changed after it was built.
+
+## Launching OpenBox
+
+| Command | What it does |
+| --- | --- |
+| `openbox` | Opens the native WKWebView window. |
+| `openbox --web` | Starts the same local server and opens the UI in your browser. |
+
+You can also open `OpenBox.app` from Finder or Launchpad.
+
+An app started from Finder inherits a minimal `PATH`. OpenBox adds the Homebrew, `/usr/local`, and MacPorts `bin` folders before it probes emulators and tools, so Homebrew-installed tools are found.
+
+Settings → About reports **macOS** as the platform, the data folder in use, and whether OpenBox is in its native window or a browser tab.
+
+## The native window
+
+The native window is a WKWebView host that renders the same UI over the loopback server. It owns the Python server's lifetime, remembers window geometry, provides the status-item tray (`NSStatusItem`) with minimize-to-tray, shows native dialogs, and handles `openbox://` deeplinks. It allows one instance per data directory: a second launch focuses the running window. The instance lock is an `AF_UNIX` socket in the data directory, and OpenBox checks the 104-byte socket path limit before it binds.
+
+With **Enable desktop tray integration** on (Settings → Advanced), the tray menu carries the **Recent games** submenu, as on the other platforms.
+
+## Updating
+
+The built-in updater handles the macOS bundle. It runs the same key pin, SHA-256, and Ed25519 checks as the installer, then checks that the staged bundle has a valid code signature with `codesign --verify --strict`. Before it installs, it:
+
+1. Refuses to install while a game session is running. The message is "Close running games before installing an update."
+2. Refuses when the folder that holds `OpenBox.app` is not writable. Move the app to a folder you own, such as `~/Applications`.
+3. Waits for the server to exit, then replaces `OpenBox.app` with the staged bundle.
+4. Keeps the previous bundle as `OpenBox.app.previous`.
+
+Restart OpenBox to use the update. To roll back, quit OpenBox and move `OpenBox.app.previous` back over `OpenBox.app`. Your library is never part of the swap. See [Updating](/updating/) for the update flow on every platform.
+
+## Where your data lives
+
+| Content | Location |
+| --- | --- |
+| Library, settings, media, backups, themes, logs | `~/Library/Application Support/openbox-game-launcher` |
+| Per-launch server token and port | The same folder (`server.token`, `server.port`) |
+| Installed app | `~/Applications/OpenBox.app` |
+| Previous app kept by the updater | `~/Applications/OpenBox.app.previous` |
+| Launcher link | `~/.local/bin/openbox` |
+
+Set `OPENBOX_DATA_DIR` before launch to move the library. It is read at startup, before any `.env` file, so it must be in the process environment.
+
+## Storefronts and emulators
+
+**Storefronts.** Steam imports read `~/Library/Application Support/Steam`. Gameyfin and plugin storefronts work as on the other platforms. Heroic, Lutris, Epic, GOG Galaxy, EA app, and Ubisoft Connect are not offered on macOS, and the Heroic import refuses to run there.
+
+**Emulators.** 37 of the 44 bundled emulator definitions name a verified macOS build through `native_exe_macos`. That value can be an app bundle such as `RetroArch.app`, a bare program, or empty. The other seven have no verified macOS build. OpenBox reports them as not installed instead of launching a Linux binary:
+
+- Azahar (Nintendo 3DS)
+- Cemu (Wii U)
+- DuckStation (PlayStation)
+- Eden (Nintendo Switch)
+- PICO-8
+- Vita3K (PlayStation Vita)
+- Xenia (Xbox 360)
+
+Install emulators yourself on macOS. The Flatpak install controls are hidden. See [Emulators and launching](/guides/emulators-and-launching/) and the [Hardware matrix](/reference/hardware-matrix/).
+
+## Saves on macOS
+
+Save discovery searches these locations on macOS. A folder is listed only when an upstream project documents it for macOS. PCSX2 and Cemu have no such folder, so they are not guessed.
+
+| Source | Location searched |
+| --- | --- |
+| Steam Cloud | `~/Library/Application Support/Steam/userdata/*/<app id>/remote` |
+| PSP (PPSSPP) | `~/.config/ppsspp/PSP/SAVEDATA` |
+| PlayStation 3 (RPCS3) | `~/Library/Application Support/rpcs3/dev_hdd0/home/00000001/savedata` |
+| GameCube (Dolphin) | `~/Library/Application Support/Dolphin/GC` |
+| Wii and WiiWare (Dolphin) | `~/Library/Application Support/Dolphin/Wii/title` |
+| RetroArch saves and states | `~/Documents/RetroArch/saves` and `~/Documents/RetroArch/states`, for files whose name matches the game |
+
+macOS may ask for permission the first time OpenBox reads a protected folder or captures the screen. Each new build can ask again.
+
+## Battery and screenshots
+
+The Big Box battery indicator uses the browser's battery API first. Otherwise it calls `GET /api/native/battery`, which reads `pmset -g batt` on macOS and caches the reading for 30 seconds. Screenshots use `screencapture`, which runs silently.
+
+## What is not on macOS
+
+These features are hidden on macOS, and their backend routes refuse the request, because they depend on Linux or Windows machinery:
+
+- gamescope presets, Steam Game Mode, MangoHud, and the handheld TDP limits. `--game-mode` exits with status 2 and prints "Game Mode needs gamescope and is only available on Linux."
+- Flatpak emulator installs and Flatpak folder grants.
+- The Wine and Proton manager, Faugus Launcher, Lutris, Heroic, and Epic.
+- The native GOG Galaxy, EA app, and Ubisoft Connect imports, which are Windows-only.
+- The XDG desktop shortcut. On macOS the app bundle is the launcher.
+- AppImage and Flatpak packaging.
+
+The plugin sandbox is also unavailable, because macOS has no `bubblewrap`. An enabled plugin is skipped unless you trust that exact package in the Plugins manager, or set `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` for trusted local plugins. See [Plugins](/guides/plugins/).
+
+## Build from source
+
+Use a current Python. The system `python3` is older than the 3.10 floor on many Macs:
+
+```bash
+brew install python@3.12
+git clone https://github.com/vindeckyy/OpenBoxGL.git
+cd OpenBoxGL
+python3 web_app.py
+```
+
+To build the native window from source, run `scripts/build_native_host_macos.sh`. To build the whole universal bundle, run `scripts/build_macos_app.sh`. The bundle build verifies the SHA-256 of each pinned Python download, merges the arm64 and x86_64 interpreters, signs the bundle ad-hoc, and refuses to package a bundle whose signature does not verify.
+
+## Troubleshooting
+
+| Problem | Cause / fix |
+| --- | --- |
+| macOS will not open OpenBox | The bundle is not notarized. Use **System Settings > Privacy & Security > Open Anyway**. |
+| The installer stops with "python3 3.10 or newer is required to verify the release" | Install a current Python (`brew install python@3.12`), put it first on `PATH`, and run the installer again. |
+| The installer says `OpenBox.app already exists` | Run it again with `--replace`. |
+| The updater says "Close running games before installing an update." | Quit the running games, then check for updates again. |
+| The updater says the folder is not writable | Move `OpenBox.app` to a folder you own, such as `~/Applications`. |
+| An emulator shows as not installed | Its definition has no verified macOS build. See the list above. |
+| A Homebrew tool is not found | Start OpenBox from the app or the `openbox` command. OpenBox adds the Homebrew and MacPorts folders to its `PATH`. |
+| `native_host failed` in a source checkout | Build the host with `scripts/build_native_host_macos.sh`, or use the app bundle. OpenBox falls back to a browser window. |
+| "Game Mode needs gamescope and is only available on Linux." | Expected on macOS. Use the native window or `openbox --web`. |
+
+More at [Troubleshooting startup and browser](/guides/troubleshooting/startup-and-browser/).
+
+## Related pages
+
+- [Installation](/install/)
+- [Downloads](/downloads/)
+- [Updating](/updating/)
+- [Windows](/windows/)
+- [Configuration](/reference/configuration/)
+- [Interfaces and data](/interfaces-and-data/)
+- [Parity matrix](/reference/parity/)

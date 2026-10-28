@@ -18,6 +18,8 @@ OpenBox is a local app, so the command line is a first-class surface. This page 
 
 The native window renders the same UI as the web fallback; both serve `index.html` over the loopback server. Flags below apply to the app entry point unless noted.
 
+On macOS, `openbox` is the launcher inside `OpenBox.app`, which `install-macos.sh` links into `~/.local/bin`. The native window is WKWebView, and `openbox --web` opens the same UI in your browser.
+
 ## Flags
 
 | Flag | Behavior |
@@ -25,7 +27,7 @@ The native window renders the same UI as the web fallback; both serve `index.htm
 | `-h`, `--help` | Show command-line options and usage summary, then exit. |
 | `--bigbox` | Open the UI straight into Big Box mode by appending `&deeplink=bigbox` to the URL that is opened. Pairs with the **Start in Big Box mode** setting (`bigbox_start_at_launch`) for Deck/HTPC boot. Has no effect with `--no-browser`, since no URL is opened. Ignored by `--backup`/`--restore-backup`, which never start the server. (v1.14.0+) |
 | `--no-browser` | Start the server without opening a window. Useful for remote or scripted starts. The printed URL has no token; open `http://127.0.0.1:<port>/?token=<value>` with the `server.port` and `server.token` values from the data directory. |
-| `--game-mode` | Force gamescope guest behavior (Steam Deck / Bazzite Game Mode). On the web entry point this opens Big Box fullscreen in a kiosk browser; the native window detects gamescope guests from the environment and needs no flag. |
+| `--game-mode` | Force gamescope guest behavior (Steam Deck / Bazzite Game Mode). On the web entry point this opens Big Box fullscreen in a kiosk browser; the native window detects gamescope guests from the environment and needs no flag. Linux only: on Windows and macOS the flag exits with status 2 and prints `Game Mode needs gamescope and is only available on Linux.` |
 | `--play <id>` | Launch a game by stable `game_id` or numeric library id, using the authenticated local launch route. This is the command used by Steam Bridge shortcuts. Without an id, prints usage and exits with status 2. |
 | `--uri <openbox://...>` | Dispatch a deep link against a running instance (or start one) and exit. You can also pass a bare `openbox://...` URI directly as a positional argument. Without a value, prints usage and exits with status 2. |
 | `--launcher` | Open the rofi/wofi/dmenu keyboard launcher against the running instance and exit. |
@@ -72,7 +74,7 @@ openbox --uri "openbox://clip/CLIP_ID"
 
 ## Keyboard launcher
 
-`openbox --launcher` (or `scripts/openbox-launcher.sh`) opens a rofi, wofi, or dmenu picker against the running instance. It queries `/api/launcher/menu`, which lists Big Box, Settings, Search, and up to 40 games. Selecting an entry dispatches it.
+`openbox --launcher` (or `scripts/openbox-launcher.sh`) opens a rofi, wofi, or dmenu picker against the running instance. It queries `/api/launcher/menu`, which lists Big Box, Settings, Search, and up to 40 games. Selecting an entry dispatches it. The pickers are Linux programs.
 
 ```bash
 # picker auto-detected (rofi > wofi > dmenu)

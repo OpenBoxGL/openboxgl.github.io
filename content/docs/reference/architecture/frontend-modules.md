@@ -12,7 +12,7 @@ The web UI ships as `index.html` plus 51 ES modules in `static/` (49 domain modu
 | `activity.js` | Activity Center (durable operations, jobs, SSE progress) |
 | `app.js` | Entry/boot: wires all domain modules into the shell |
 | `arcaderoom.js` | Controller-friendly Arcade Room and kiosk canvas surface |
-| `battery.js` | Big Box battery indicator (browser API first, Linux sysfs bridge second) |
+| `battery.js` | Big Box battery indicator (browser API first, then the `GET /api/native/battery` route, which reads sysfs, `pmset`, or `GetSystemPowerStatus`) |
 | `bigbox.js` | Big Box kiosk UI (stage/hybrid/coverflow, gamepad and pointer input, screensaver) |
 | `clips.js` | Record That clip gallery and reel actions |
 | `constellation.js` | Library relationship graph |

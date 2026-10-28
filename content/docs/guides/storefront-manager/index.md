@@ -3,7 +3,7 @@ title: Storefront Manager
 description: Browse owned and installed catalogs, import either set, and automate imports.
 ---
 
-The **Storefront Manager** dialog (Tools → Game stores) browses your storefront catalogs, owned versus installed, and imports either set into the library. It covers Steam, Heroic, Lutris, and Gameyfin on both platforms, and native GOG Galaxy, EA app, and Ubisoft Connect installs on Windows.
+The **Storefront Manager** dialog (Tools → Game stores) browses your storefront catalogs, owned versus installed, and imports either set into the library. Steam and Gameyfin are available on every platform, Heroic on Linux and Windows, and Lutris on Linux only. Native GOG Galaxy, EA app, and Ubisoft Connect installs are imported on Windows.
 
 <Callout type="note" title="Why owned vs. installed matters">
 
@@ -22,9 +22,9 @@ A source with no storefront installed *and* no games already in the library is s
 | Source | Owned list comes from | Installed list comes from |
 | --- | --- | --- |
 | Steam | `userdata/*/config/localconfig.vdf` | `steamapps/appmanifest_*.acf` |
-| Heroic | `store_cache` library JSON | installed manifests (`legendaryConfig`, `gog_store`, `nile_config`) |
+| Heroic (Linux and Windows) | `store_cache` library JSON | installed manifests (`legendaryConfig`, `gog_store`, `nile_config`) |
 | Epic | `legendaryConfig/legendary/installed.json`, or `~/.config/legendary/installed.json` | the same manifests |
-| Lutris | `lutris --list-games --json` | `lutris --list-games --installed --json` |
+| Lutris (Linux only) | `lutris --list-games --json` | `lutris --list-games --installed --json` |
 | Gameyfin | The configured server's catalog | The same catalog, filtered to installed titles |
 | GOG Galaxy (Windows) | Not imported | Registry entries plus each game's `goggame-*.info` |
 | EA app (Windows) | Not imported | EA `installerdata.xml` manifests |

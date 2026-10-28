@@ -3,7 +3,7 @@ title: Releasing
 description: Cut and publish an OpenBox release and its verified artifacts.
 ---
 
-This page is for maintainers publishing a release from `master`. The AppImage, Windows portable, and Flatpak artifacts are built in CI when a `v*` tag is pushed; the steps below prepare the version, changelog, and metadata before that tag.
+This page is for maintainers publishing a release from `master`. The AppImage, Windows portable, macOS app bundle, and Flatpak artifacts are built in CI when a `v*` tag is pushed; the steps below prepare the version, changelog, and metadata before that tag.
 
 ## Before you tag
 
@@ -58,7 +58,7 @@ Confirm the embedded version matches the release by extracting the AppImage and 
 
 Pushing a `v*` tag triggers the AppImage/Windows release workflow and the Flatpak release workflow. The two publish jobs share a per-tag concurrency group because both update the same GitHub Release.
 
-`release.yml` defines six jobs: `test`, `build`, `attest`, `build-windows`, `attest-windows`, and one shared `publish`. The Windows artifacts are uploaded by that same `publish` job, not by a separate one.
+`release.yml` defines eight jobs: `test`, `build`, `attest`, `build-windows`, `attest-windows`, `build-macos`, `attest-macos`, and one shared `publish`. The Windows and macOS artifacts are uploaded by that same `publish` job, not by a separate one.
 
 **test** (contents read): installs the build dependencies, compiles the native host, and runs the full test suite on the host.
 
@@ -70,7 +70,11 @@ Pushing a `v*` tag triggers the AppImage/Windows release workflow and the Flatpa
 
 **attest-windows** (id-token and attestations write, needs `build-windows`): attests provenance for the zip and the standalone host. It only attests — the signing and the upload happen in the shared `publish` job.
 
+**build-macos** (contents read): runs the test suite on the macOS runner, builds the universal app bundle with `scripts/build_macos_app.sh`, smoke-tests it, and produces the per-release SBOM. **attest-macos** (id-token and attestations write, needs `build-macos`): attests provenance for `OpenBox-macos.zip`. It only attests; the signing and upload happen in the shared `publish` job.
+
 **publish** (requires the `release` environment, contents write; needs `build`, `attest`, `build-windows`, and `attest-windows`): checks out the exact tagged commit, confirms the annotated tag points at the build commit, signs and verifies the AppImages, the Windows zip, and the standalone host, compares the derived public key against the committed `openbox-release.pub`, re-checks each SHA-256, and verifies each signature. If `OPENBOX_SIGNING_KEY` is missing or the derived key does not match, the job fails before anything is published. It then copies `scripts/install.sh` and `scripts/install.ps1` and uploads both signed AppImages with their `.zsync`, `.sha256`, and `.sig`, the Windows zip and host with their sidecars, the release key, and the architecture-specific SBOMs — so the release publishes both installers. A tag containing `-` is marked prerelease.
+
+For the macOS bundle, the same `publish` job signs `OpenBox-macos.zip` with the release key, verifies the signature against the committed `openbox-release.pub`, and uploads it with its `.sha256` and `.sig`, together with `install-macos.sh` and `verify_release.py`.
 
 The Flatpak workflow (`release-flatpak.yml`) has two jobs:
 
@@ -82,7 +86,7 @@ The release body is `docs/RELEASE_NOTES.md`, so update it before tagging; GitHub
 
 ## Verify after publishing
 
-- Confirm GitHub's latest-release API returns the new version and the architecture matrix: x86_64 and aarch64 AppImages with `.zsync`, `.sha256`, and `.sig`, the release key, architecture-specific SBOMs, `install.sh`, `install.ps1`, `OpenBox-x86_64.flatpak`, and the signed `OpenBox-x86_64-windows.zip` and `OpenBox-x86_64-windows-native-host.exe` with their sidecars.
+- Confirm GitHub's latest-release API returns the new version and the architecture matrix: x86_64 and aarch64 AppImages with `.zsync`, `.sha256`, and `.sig`, the release key, architecture-specific SBOMs, `install.sh`, `install.ps1`, `install-macos.sh`, `verify_release.py`, `OpenBox-x86_64.flatpak`, the signed `OpenBox-x86_64-windows.zip` and `OpenBox-x86_64-windows-native-host.exe` with their sidecars, and the signed `OpenBox-macos.zip` with its sidecars.
 - Download each AppImage and its `.sha256` remotely and run `sha256sum -c`.
 - Verify both signatures with `scripts/verify_release.py --key openbox-release.pub OpenBox-x86_64.AppImage OpenBox-x86_64.AppImage.sig` and the matching aarch64 paths, then repeat for the Windows zip and standalone host.
 - Check that the Windows zip contains a single top-level `OpenBox/` folder with `web_app.py` and the compiled `native_host.exe`.

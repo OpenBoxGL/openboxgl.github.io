@@ -18,7 +18,7 @@ Save management, library backups, statistics sync, save-tool hooks, high scores,
 <ApiEndpoint method="GET" path="/api/saves/discover">
 
 
-`?id=<index>&game_id=<stable>` returns `{"candidates": [...]}` of save paths found on disk that are not yet configured: `{"path", "label", "shared"}`. Discovery covers Steam Cloud (`userdata/*/<app_id>/remote`), shared platform roots (PCSX2 memcards, PPSSPP SAVEDATA, RPCS3 savedata, Dolphin GC/Wii title, Cemu `usr/save`, RetroArch saves/states, Mednafen), and RetroArch files whose stem matches the game title.
+`?id=<index>&game_id=<stable>` returns `{"candidates": [...]}` of save paths found on disk that are not yet configured: `{"path", "label", "shared"}`. Discovery covers Steam Cloud (`userdata/*/<app_id>/remote`), shared platform roots (PCSX2 memcards, PPSSPP SAVEDATA, RPCS3 savedata, Dolphin GC/Wii title, Cemu `usr/save`, RetroArch saves/states, Mednafen), and RetroArch files whose stem matches the game title. On macOS the roots are the Steam Cloud folder under `~/Library/Application Support/Steam`, PPSSPP under `~/.config/ppsspp`, RPCS3 and Dolphin under `~/Library/Application Support`, and RetroArch under `~/Documents/RetroArch`; PCSX2, Cemu, and Mednafen have no documented macOS folder and are not searched. See [macOS](/macos/#saves-on-macos).
 
 </ApiEndpoint>
 

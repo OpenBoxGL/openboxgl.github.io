@@ -7,7 +7,7 @@ Start with the exact visible error and the diagnostic log (**Settings > Advanced
 
 ## Steam
 
-Check that one of `~/.local/share/Steam`, `~/.steam/steam`, or the Flatpak path contains `steamapps/` with `appmanifest_*.acf` files. Launching requires `steam`, the Steam Flatpak, or `xdg-open` on `PATH`; otherwise the importer raises:
+Check that one of `~/.local/share/Steam`, `~/.steam/steam`, or the Flatpak path contains `steamapps/` with `appmanifest_*.acf` files (on macOS, `~/Library/Application Support/Steam`). Launching requires `steam`, the Steam Flatpak, or `xdg-open` on `PATH`; otherwise the importer raises:
 
 ```
 "Steam, the Steam Flatpak, or xdg-open is required to launch imported Steam games."

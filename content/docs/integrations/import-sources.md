@@ -3,7 +3,7 @@ title: Import sources
 description: Configure Steam, Heroic, Lutris, Gameyfin, ROM, and arcade imports.
 ---
 
-OpenBoxGL imports installed libraries and local files from the sources you already run on Linux, plus native GOG Galaxy, EA app, and Ubisoft Connect installs on Windows. Every importer adds only entries that are not already present, so re-running an import never duplicates. Missing manifests, binaries, or malformed output are reported and skipped according to the source importer.
+OpenBoxGL imports installed libraries and local files from the sources you already run on Linux, macOS, and Windows, plus native GOG Galaxy, EA app, and Ubisoft Connect installs on Windows. Each source is offered only on the platforms it supports, as noted under its heading. Every importer adds only entries that are not already present, so re-running an import never duplicates. Missing manifests, binaries, or malformed output are reported and skipped according to the source importer.
 
 ## Steam
 
@@ -15,6 +15,8 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 
 ## Heroic
 
+Heroic is offered on Linux and Windows. It is not offered on macOS, where the import refuses to run.
+
 - **Manifests**: `legendaryConfig/legendary/installed.json` (Epic), `gog_store/installed.json` (GOG), `nile_config/installed.json` (Amazon) under `~/.config/heroic` or the Flatpak `~/.var/app/com.heroicgameslauncher.hgl/config/heroic`, plus the standalone `~/.config/legendary/installed.json`.
 - **Records**: source `Epic`/`GOG`/`Amazon`, `heroic_app_id`, launch `xdg-open heroic://launch/<runner>/{heroic_app_id}`.
 - DLC records (`is_dlc`) are skipped.
@@ -22,6 +24,8 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 - The storefront catalog reads library caches (`store_cache/*.json`, `GamesConfig/legendary.json`) to list owned-but-uninstalled titles.
 
 ## Lutris
+
+Lutris is offered on Linux only.
 
 - **Source**: `lutris --list-games --installed --json` (or `flatpak run net.lutris.Lutris --list-games --installed --json`), 30-second timeout.
 - **Records**: non-installed entries skipped; numeric `id` required. Origin tagging from the service/source fields: Xbox/Game Pass -> `Xbox`, EA app/Origin -> `EA`, Ubisoft/uPlay -> `Ubisoft`, else `Lutris`. Platform defaults to the record platform, or `Windows` for wine/winesteam runners. Cover art is discovered from Lutris coverart folders when present.
@@ -33,7 +37,7 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 - **Records**: source `GOG`/`EA`/`Ubisoft`, the matching `gog_id`/`ea_id`/`ubisoft_id`, install directory, and `platform: "PC"`.
 - **Launch**: GOG runs the executable directly and keeps it inside the install directory, so Galaxy overlay and Galaxy cloud saves do not start. EA launches through the registered `origin2://game/launch` handler; Ubisoft launches through `uplay://launch/<id>/0`.
 - **Routes**: `POST /api/v2/import/gog`, `POST /api/v2/import/ea`, and `POST /api/v2/import/ubisoft`. Re-running an import merges by provider id, so it does not duplicate a game.
-- **Limits**: installed games only. Owned-but-uninstalled catalogs and Xbox PC packages are not imported. Each source has a per-source **Auto-import on startup** option (off by default) stored as `{enabled, platform, include_uninstalled}` with `include_uninstalled` fixed at false for these three. On non-Windows hosts the routes return zero games.
+- **Limits**: installed games only. Owned-but-uninstalled catalogs and Xbox PC packages are not imported. Each source has a per-source **Auto-import on startup** option (off by default) stored as `{enabled, platform, include_uninstalled}` with `include_uninstalled` fixed at false for these three. On non-Windows hosts the routes refuse with `400` (see [API 1.19 changes](/reference/api/one-nineteen/)).
 - **Failure model**: a malformed registry entry or a missing install directory is reported in `errors` and skipped; a GOG executable outside its install directory is refused. Uninstalling the EA app or Ubisoft Connect leaves the game in the library but breaks launches until the handler returns.
 
 ## Gameyfin

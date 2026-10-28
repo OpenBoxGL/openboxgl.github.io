@@ -1,15 +1,19 @@
 ---
 title: Updating
-description: Update AppImage and Windows portable installations and understand package boundaries.
+description: Update AppImage, Windows portable, and macOS app bundle installations, and understand package boundaries.
 ---
 
-OpenBoxGL has one built-in updater with two platform paths: the AppImage on Linux and the portable install on Windows. This page explains what it verifies, what happens during an update, what can go wrong, and how the other installation types update instead.
+OpenBoxGL has one built-in updater with three platform paths: the AppImage on Linux, the portable install on Windows, and the app bundle on macOS. This page explains what it verifies, what happens during an update, what can go wrong, and how the other installation types update instead.
 
 ## Upgrading from a pre-1.0 build
 
 The Tk interface was removed as of 1.0.0; the app opens a native WebKitGTK window by default. If you are upgrading from any pre-1.0 build, the same notes apply. Your library data is untouched: the same `library.json` in `~/.local/share/openbox-game-launcher` (or `OPENBOX_DATA_DIR`) keeps working, and the schema migrates to version 6 automatically on first launch. Later migrations add queue, notifications, `ui_state`, and `active_sessions` without requiring a re-import or re-download.
 
 The one behavioral change to expect is the window itself: instead of a browser tab, `openbox` opens the native window. `openbox --web` still opens the loopback web UI in a browser for development, and if WebKitGTK is missing the launcher falls back to a chrome-less app window rather than failing.
+
+## Upgrading from 1.18.x
+
+1.19.0 and 1.19.1 install over any 1.18.x release. No v1 API route is removed or changed, and the library schema stays at version 6, so an existing library opens without a re-import. There is no data migration. The one new install type is the macOS app bundle, covered in [How the macOS app update works](#how-the-macos-app-update-works).
 
 ## Upgrading from 1.17.x
 
@@ -24,11 +28,12 @@ The one behavioral change to expect is the window itself: instead of a browser t
 | --- | --- | --- |
 | AppImage | Built-in verified updater | Settings > Check for updates, then Install verified update |
 | Windows portable | Built-in verified updater | Settings > Check for updates, then Install verified update, then restart |
+| macOS app bundle (1.19.0 and later) | Built-in verified updater | Settings > Check for updates, then Install verified update, then restart. Quit running games first. |
 | Flatpak | None | Rebuild the manifest (`flatpak-builder --user --install --force-clean build-dir io.openbox.GameLauncher.yml`) or use your local Flatpak workflow |
 | Source | None | `git pull` in the checkout, then restart |
 | System install (`sudo make install`) | None | `git pull`, then `sudo make install` again |
 
-The updater only recognizes an AppImage or a Windows portable install: on Linux it refuses to run when `APPIMAGE` is not set (source and Flatpak launches never set it), and on Windows it requires the launcher to live under the installed tree. If you are on Flatpak or source, the update button reports the release channel but the install step will not replace anything, by design.
+The updater only recognizes an AppImage, a Windows portable install, or an `OpenBox.app` bundle. On Linux it refuses to run when `APPIMAGE` is not set (source and Flatpak launches never set it), on Windows it requires the launcher to live under the installed tree, and on macOS it requires the running app to be an `OpenBox.app` bundle in a writable folder. If you are on Flatpak or source, the update button reports the release channel but the install step will not replace anything, by design.
 
 ## How the AppImage update works
 
@@ -60,6 +65,17 @@ The Windows path runs the same version comparison, asset selection, and verifica
 
 Your library is never part of the swap: it lives in `%LOCALAPPDATA%\openbox-game-launcher` (or `OPENBOX_DATA_DIR`).
 
+## How the macOS app update works
+
+The macOS path runs the same version comparison and the same key-pin, SHA-256, and Ed25519 checks as the other platforms, using `OpenBox-macos.zip` with its `.sha256` and `.sig`. The staged bundle must also pass `codesign --verify --strict`, which confirms that the ad-hoc signature is intact.
+
+1. **Refusal while games run.** The updater will not install while a game session is running. Quit the game, then check again.
+2. **Writable folder.** The folder that holds `OpenBox.app` must be writable. If the update says it is not, move the app to a folder you own, such as `~/Applications`.
+3. **Swap after exit.** A running bundle cannot be replaced in place. A detached applier waits for the server to exit, replaces `OpenBox.app` with the staged bundle, and keeps the previous bundle as `OpenBox.app.previous`.
+4. **Rollback.** Quit OpenBox and move `OpenBox.app.previous` back over `OpenBox.app`.
+
+Restart OpenBox to use the update. Your library lives in `~/Library/Application Support/openbox-game-launcher` and is never part of the swap.
+
 ## Common failures and recovery
 
 <Callout type="tip" title="The rollback file is your safety net">
@@ -79,6 +95,14 @@ The Windows build is not running from a portable install (for example, you launc
 ### Windows: the update is downloaded but nothing changed yet
 
 The staged tree is swapped in only after OpenBox exits, because Windows cannot replace files that are in use. Quit OpenBox (including the tray icon) and it lands within seconds; the applier gives up after ten minutes, and nothing is lost if it does — the staged tree and the current install are both intact.
+
+### macOS: "Close running games before installing an update."
+
+The updater checks for running game sessions before it replaces the app bundle. Quit the running games, then check for updates again.
+
+### macOS: "is not writable; move OpenBox to a writable folder"
+
+Move `OpenBox.app` to a folder you own, such as `~/Applications`, then check for updates again.
 
 ### "GitHub releases request failed (4xx) or Could not reach GitHub releases"
 
@@ -105,7 +129,7 @@ then report the failure with the diagnostic log (Settings > Advanced > Copy diag
 
 ## Data safety during updates
 
-The updater touches only the AppImage file next to the running executable. Your library, media, backups, themes, and settings live in the data directory (`~/.local/share/openbox-game-launcher` or `OPENBOX_DATA_DIR`) and are never part of the update. Moving, replacing, or deleting the AppImage does not touch them.
+The updater touches only the installed AppImage, Windows tree, or macOS app bundle. Your library, media, backups, themes, and settings live in the data directory (`~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, `~/Library/Application Support/openbox-game-launcher` on macOS, or `OPENBOX_DATA_DIR`) and are never part of the update. Moving, replacing, or deleting the installed app does not touch them.
 
 Still, keep a library backup before major changes, and definitely before any rollback dance: [Library backups](/reference/library-backups/) and [Data and recovery](/reference/data-and-recovery/) cover both.
 

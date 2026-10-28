@@ -4,6 +4,60 @@ description: Release notes for OpenBox, from the latest release back to the firs
 sidebar: false
 ---
 
+## 1.19.1 (2026-10-28) — Platform parity
+
+A platform-parity bug sweep. Every platform-specific control is now decided by one server-computed capability contract, so a Linux-only control is hidden on Windows and macOS instead of failing at click time, and the controls those platforms do have use their own tools. Linux behavior is the reference and is unchanged. No route or setting was added, and no v1 route changed. Upgrade from 1.19.0.
+
+### Fixed
+
+- **A stored gamescope preset no longer breaks Windows and macOS launches.** The preset applies only on Linux, and the preset, MangoHud, and handheld-performance controls are hidden on Windows and macOS. `--game-mode` refuses to start there with "Game Mode needs gamescope and is only available on Linux." See [API 1.19 changes](/reference/api/one-nineteen/).
+- **Windows reports its real battery.** `GET /api/native/battery` reads `GetSystemPowerStatus`: a desktop reports no battery, a laptop reports its percentage and charging state, and the reading is cached for 30 seconds.
+- **Wine, Faugus, and Flatpak management answer only on Linux.** The Wine and Proton routes report `available: false` with empty results off Linux, the Faugus scanner returns nothing, and a Flatpak folder grant is refused with a 400 before any subprocess runs.
+- **Storefront browsing uses the platform's own URL opener.** The Steam and Heroic catalogs no longer assume `xdg-open`. A host with no opener gets a clear message, and a Git or MSYS `xdg-open` no longer wins over Explorer on Windows.
+- **The storefront list matches the host.** `GET /api/v2/storefronts` lists Heroic on Linux and Windows, Lutris only on Linux, and GOG, EA app, and Ubisoft Connect only on Windows. The native Windows import routes refuse other hosts with a 400.
+
+### Changed
+
+- **One capability contract drives every platform-specific control.** `GET /api/native/capabilities` carries a `features` object: `gamescope`, `mangohud`, `handheld_perf`, `flatpak`, `wine`, `faugus`, `lutris`, `heroic`, `epic`, `native_storefronts`, and `desktop_entry`. A missing object means every feature is false, so a failed request hides controls instead of exposing broken ones.
+
+### Known limits in 1.19.1
+
+- The macOS bundle is ad-hoc signed and not notarized. The first launch needs **System Settings > Privacy & Security > Open Anyway**.
+- Linux-only features stay unavailable on Windows and macOS by design. They are hidden rather than broken.
+- Windows ARM64 remains out of scope. The Windows artifact is x86_64.
+
+[Full OpenBox 1.19.1 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.19.1) · [Compare v1.19.0...v1.19.1](https://github.com/vindeckyy/OpenBoxGL/compare/v1.19.0...v1.19.1) · [API 1.19 changes](/reference/api/one-nineteen/)
+
+## 1.19.0 (2026-10-27) — OpenBox on macOS
+
+OpenBox now runs natively on macOS 11 or newer. The release adds a universal app bundle for Apple Silicon and Intel that carries its own Python, a WKWebView window with the same tray, native dialogs, `openbox://` deeplinks, and verified updater as the other platforms, macOS paths and process handling, and macOS values for every bundled emulator definition. Linux-only features are hidden there rather than broken, and Linux and Windows behavior is unchanged. No v1 route is removed or changed. Upgrade from any 1.18.x release. Start with the [macOS guide](/macos/).
+
+### Added
+
+- **OpenBox runs on macOS 11 or newer.** `OpenBox-macos.zip` is one universal app bundle with arm64 and x86_64 builds and one merged CPython 3.12, so the app runs without installing Python. `scripts/install-macos.sh` verifies the release key, the SHA-256 checksum, and the Ed25519 signature before it installs `OpenBox.app` into `~/Applications`. The in-app updater replaces the bundle after the server exits and keeps `OpenBox.app.previous`.
+- **macOS uses native paths and process identity.** The library lives in `~/Library/Application Support/openbox-game-launcher`. Process identity comes from libproc, path comparison folds Unicode and case, symlinked save targets are refused, and app bundles resolve through `Contents/Info.plist`.
+- **Every emulator definition says whether it has a macOS build.** `native_exe_macos` names an app bundle such as `RetroArch.app`, a bare program, or an explicit empty value when no macOS build is verified. An empty value is reported as not installed instead of launching a Linux binary. 37 of the 44 definitions name a macOS build.
+- **macOS saves and desktop features.** Save discovery covers Steam Cloud and the documented macOS folders for PPSSPP, RPCS3, Dolphin, and RetroArch. The Big Box battery indicator reads `pmset`, screenshots use `screencapture`, and the tray and recent-games menu work as on the other platforms.
+- **macOS is a CI and release target.** The test suite and portable gates run on `macos-15` and `macos-15-intel`, and the release workflow builds, smoke-tests, signs, and attaches the bundle beside the Linux and Windows artifacts.
+
+### Changed
+
+- **Linux-only features are hidden on macOS.** Heroic, Lutris, Epic, Faugus, Proton scanning, Flatpak emulator installs, gamescope, and the plugin sandbox are not offered there, and Game Mode exits with a clear message.
+
+### Fixed
+
+- **Backups no longer carry provider tokens or the OBS WebSocket password.** The redaction list covered the Gameyfin password and webhook secrets but not the per-provider integration tokens or `obs_websocket_password`, so a default backup wrote them in cleartext. All of them are now redacted, and a restore still preserves the local copy.
+- **The Windows installer explains itself when the release verifier is missing.** Running the standalone `install.ps1` alone now fails with the supported flow: extract the release archive and run `OpenBox\scripts\install.ps1`.
+- **A native `openbox://resume/<id>` deeplink is no longer ignored.** The page selects the game and scrolls it into view.
+
+### Known limits in 1.19.0
+
+- The macOS bundle is ad-hoc signed and not notarized. The first launch needs **System Settings > Privacy & Security > Open Anyway**, and each new build asks again.
+- Windows ARM64 remains out of scope.
+- Xbox PC package scanning remains unavailable.
+
+[Full OpenBox 1.19.0 release notes](https://github.com/vindeckyy/OpenBoxGL/releases/tag/v1.19.0) · [Compare v1.18.0...v1.19.0](https://github.com/vindeckyy/OpenBoxGL/compare/v1.18.0...v1.19.0) · [macOS guide](/macos/)
+
 ## 1.18.0 (2026-10-19) — A clearer, deeper library
 
 This release rewrites the first-run screens, then deepens the library: a platform can be renamed or deleted in one place, media downloads survive a restart, backups describe and restore individual files, plugins declare the access they need, and emulators and Big Box gain more controls. No v1 route is removed or changed. **49 additive method-and-path pairs** are added, grouped on [API 1.18 additions](/reference/api/one-eighteen/).

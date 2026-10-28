@@ -6,6 +6,8 @@ Audit date **2026-10-19**, remediation completed **2026-10-20**, against app
 Supersedes `DOCS-STALE-SWEEP.md` (that file audits 1.17.0 and is now behind both repos).
 This is an internal audit record, not a published page.
 
+> **Superseded.** This file audits the **1.18.0** release. The current audit is **[DOCS-SWEEP-2026-10-28.md](./DOCS-SWEEP-2026-10-28.md)**, against **1.19.1**. Keep this file for the 1.18.0 evidence trail.
+
 **Scope**
 
 - App repo: `/home/hayden/Desktop/projects/OpenBoxGL` — `README.md`, `AGENTS.md`, `docs/**`

@@ -54,6 +54,22 @@ if (!current) {
   throw new Error(`no "## X.Y.Z" release heading in ${CHANGELOG}; the gate cannot derive the current version`);
 }
 
+// The changelog is the only version the gates above compare against, so a site
+// that stops at an old release passes every one of them. The application's own
+// VERSION is what the site has to reach, so read it whenever the source is here.
+let appVersion = null;
+let latestNote = 'not checked (set OPENBOX_RELEASE_REPO to enable)';
+const appProblems = [];
+const APP_DIR = process.env.OPENBOX_APP_DIR;
+if (APP_DIR) {
+  const updatesPath = join(APP_DIR, 'updates.py');
+  appVersion = (await readFile(updatesPath, 'utf8')).match(/^VERSION\s*=\s*"(\d+\.\d+\.\d+)"/m)?.[1] ?? null;
+  if (!appVersion) throw new Error(`no VERSION = "X.Y.Z" in ${updatesPath}`);
+  if (isOlder(current, appVersion)) {
+    appProblems.push(`the application is at ${appVersion} (${updatesPath}), but the newest changelog entry is ${current}`);
+  }
+}
+
 // Contexts where a version literal asserts the *current* release. Each entry is
 // [name, RegExp] with one capture group around the version.
 const CONTEXTS = [
@@ -134,11 +150,31 @@ if (CURRENT_REPO) {
   }
 }
 
-if (problems.length) {
-  console.error(`Version-currency gate failed: current release is ${current}, ${problems.length} stale claim(s):\n`);
+// The same check against the published release. The lookup is best-effort, as
+// the asset lookup above is, and a failed lookup is reported rather than hidden.
+if (CURRENT_REPO) {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${CURRENT_REPO}/releases/latest`, {
+      headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'openbox-docs-gate' },
+    });
+    if (!res.ok) throw new Error(`release lookup returned ${res.status}`);
+    const latest = (await res.json()).tag_name?.match(/^v(\d+\.\d+\.\d+)$/)?.[1];
+    if (!latest) throw new Error('the latest release has no X.Y.Z tag');
+    latestNote = `${latest}`;
+    if (isOlder(current, latest)) {
+      appProblems.push(`the latest published release is ${latest}, but the newest changelog entry is ${current}`);
+    }
+  } catch (error) {
+    latestNote = `lookup failed (${error.message})`;
+  }
+}
+
+if (problems.length || appProblems.length) {
+  console.error(`Version-currency gate failed: ${problems.length} stale claim(s), ${appProblems.length} release mismatch(es) against changelog ${current}:\n`);
+  for (const p of appProblems) console.error(`  [release] ${p}`);
   for (const p of problems) console.error(`  ${p.file}:${p.line}  [${p.name}] ${p.version}  ${p.text}`);
   console.error(`\nAssets: ${assetNote}`);
   process.exit(1);
 }
 
-console.log(`version currency passed (current ${current}; ${files.length} pages scanned; assets: ${assetNote})`);
+console.log(`version currency passed (current ${current}; app ${appVersion ?? 'not checked (set OPENBOX_APP_DIR)'}; latest release ${latestNote}; ${files.length} pages scanned; assets: ${assetNote})`);

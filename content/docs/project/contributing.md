@@ -3,7 +3,7 @@ title: Contributing
 description: Develop, test, and document OpenBoxGL.
 ---
 
-OpenBoxGL development requires Python 3.10+ and Git, on Linux or Windows. The Linux workflow below uses bash and `make`; Windows is covered in [Windows development](#windows-development). The application repository is [vindeckyy/OpenBoxGL](https://github.com/vindeckyy/OpenBoxGL); this site lives in [OpenBoxGL/openboxgl.github.io](https://github.com/OpenBoxGL/openboxgl.github.io).
+OpenBoxGL development requires Python 3.10+ and Git, on Linux, Windows, or macOS. The Linux workflow below uses bash and `make`; Windows is covered in [Windows development](#windows-development), and macOS in [macOS development](#macos-development). The application repository is [vindeckyy/OpenBoxGL](https://github.com/vindeckyy/OpenBoxGL); this site lives in [OpenBoxGL/openboxgl.github.io](https://github.com/OpenBoxGL/openboxgl.github.io).
 
 ## Development setup
 
@@ -80,6 +80,12 @@ powershell -ExecutionPolicy Bypass -File scripts\build_native_host_windows.ps1
 ## Plugins
 
 Plugins require a manifest (`plugin.json` with `id`, `name`, `version`, optional `entry`, `hooks`, and optional `capabilities`) and an entry Python module that exports one function per declared hook (each takes the decoded JSON payload and returns a dict; the runner handles stdin/stdout). Base hooks are `library`, `before_launch`, `after_session`, `command`, `library_source`, and `events`. Since 1.18.0 a manifest can also declare storefront, metadata, media, stats, emulator-settings, and discovery capabilities alongside their hooks; capability hooks receive a bounded data bag, plugin settings, and a credential store, and may request read-only library, achievement, profile, activity, leaderboard, catalog, metadata, and media services in one round. See [Plugins](/reference/plugins/) for the full contract.
+
+## macOS development
+
+On macOS the Linux workflow works with bash and `make`. The system `python3` is older than the 3.10 floor on many Macs, so install a current interpreter first (for example `brew install python@3.12`) and run the examples with it.
+
+The native window is built from `native_host_mac.m` with `scripts/build_native_host_macos.sh`. The whole universal app bundle is built with `scripts/build_macos_app.sh`, and `scripts/install-macos.sh` is the release installer. CI runs the test suite and the portable gates on `macos-15` and `macos-15-intel`.
 
 ## Documentation site
 

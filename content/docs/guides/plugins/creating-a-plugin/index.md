@@ -196,7 +196,7 @@ Windows has no `bwrap`, so plugin hooks cannot be isolated there: enabled plugin
 
 ## Installing & Testing
 
-1. Create directory `~/.local/share/openbox-game-launcher/plugins/my-plugin/` on Linux, or `%LOCALAPPDATA%\openbox-game-launcher\plugins\my-plugin\` on Windows.
+1. Create directory `~/.local/share/openbox-game-launcher/plugins/my-plugin/` on Linux, `~/Library/Application Support/openbox-game-launcher/plugins/my-plugin/` on macOS, or `%LOCALAPPDATA%\openbox-game-launcher\plugins\my-plugin\` on Windows.
 2. Add `plugin.json` and `plugin.py`.
 3. Open OpenBox → **Tools** → **Plugins**.
 4. Enable your plugin in the list. Trust it if the host reports the sandbox is unavailable, and grant `network` if it declares that permission.

@@ -158,6 +158,7 @@ Each `emulator_defs/*.yaml` file uses these fields (example: `emulator_defs/dolp
 | `extensions` | ROM extensions this adapter claims (`gcm`, `gcz`, `rvz`, …) |
 | `native_exe` | Native binary name (`dolphin-emu`) |
 | `native_exe_windows` | Windows binary name (`Dolphin.exe`) |
+| `native_exe_macos` | macOS binary: an app bundle name such as `RetroArch.app`, or a bare program name. An explicit empty value means no verified macOS build; the emulator is then reported as not installed instead of launching a Linux binary |
 | `flatpak_app_id` | Flatpak app id (`org.DolphinEmu.dolphin-emu`) |
 | `startup_args` | argv template; `{path}` is replaced with the game path (`-b -e {path}`) |
 | `startup_args_windows` | Optional argv template used instead on Windows, where emulator layouts differ (RetroArch cores sit beside the executable) |

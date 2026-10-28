@@ -118,4 +118,4 @@ curl -X POST -H "X-OpenBox-Token: $TOKEN" \
  http://127.0.0.1:$PORT/api/launch
 ```
 
-Where `$TOKEN` and the port come from the running server (`cat ~/.local/share/openbox-game-launcher/server.token`). See [Configuration](/reference/configuration/) for the data directory and [the application repository](https://github.com/vindeckyy/OpenBoxGL) for the current route contract (`routes.py`).
+Where `$TOKEN` and the port come from the running server (`cat ~/.local/share/openbox-game-launcher/server.token`). On Windows the data directory is `%LOCALAPPDATA%\openbox-game-launcher`, and on macOS it is `~/Library/Application Support/openbox-game-launcher`. See [Configuration](/reference/configuration/) for the data directory and [the application repository](https://github.com/vindeckyy/OpenBoxGL) for the current route contract (`routes.py`).

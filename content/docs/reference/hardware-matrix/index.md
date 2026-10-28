@@ -33,5 +33,5 @@ To run OpenBox directly in Steam Deck Gaming Mode:
 Power, frame pacing, and memory use depend on the installed image, browser/native host, display mode, library size, and running integrations. Use the [configuration guidance](/reference/configuration/) and [Handheld performance](/guides/big-box-and-handhelds/performance/) pages, then validate the result with the handheld's own TDP/FPS tools:
 - **Display sizing**: use `--resolution <WxH>` or the supported fullscreen width/height options for a web/app-window launch when the viewport needs an explicit size.
 - **Game Mode**: `--game-mode` selects the gamescope guest behavior; it is not a generic `--kiosk` or `--fullscreen` flag.
-- **Battery indicator**: the `battery_indicator` setting shows charge percentage in the Big Box status area. It reads the browser battery API first and falls back to the Linux sysfs battery through `GET /api/native/battery`.
+- **Battery indicator**: the `battery_indicator` setting shows charge percentage in the Big Box status area. It reads the browser battery API first and falls back to `GET /api/native/battery`, which reads Linux sysfs, `pmset` on macOS, or `GetSystemPowerStatus` on Windows.
 - **Sleep / resume safety**: confirm behavior on the installed host, especially while a game, capture job, or background import is active.
