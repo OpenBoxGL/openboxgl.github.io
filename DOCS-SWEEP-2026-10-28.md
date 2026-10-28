@@ -2,7 +2,7 @@
 
 Audit date **2026-10-28**, against app **1.19.1** (`updates.py:38`). The gap covered is the app's `v1.18.0` → `v1.19.1` range: 119 files changed in the app repo, including macOS support (1.19.0) and the platform capability contract (1.19.1). Supersedes `DOCS-SWEEP-2026-10-19.md`, which audited 1.18.0. This is an internal audit record, not a published page.
 
-**Status:** every finding below is fixed unless marked **OPEN**. The docs-site changes are committed to `main` and pushed, which deploys the site through `docs.yml`. The app-repo changes remain uncommitted on `master` in the application repository.
+**Status:** every finding below is fixed unless marked **OPEN**. Both repos are committed and pushed: the docs site as `490e304` on `main` (deployed by `docs.yml`), and the app repo as `2407b46` on `master`.
 
 ## Method
 
@@ -83,12 +83,13 @@ Run:
 - **Docs site `npm run build`** passed: MDX compile (109 pages); contract, API, and version gates; release-asset pairing; Next static export (112 pages); redirect stubs; sitemap (110 URLs); and the built-site check (129 HTML pages and routes, with no broken links, fragments, or images reported).
 - **Version gate fault injection:** passes against the app at 1.19.1, and fails against an injected 1.20.0.
 - **App repo:** `make ratchets` passed (settings 150, emulator definitions 44, frontend modules 51, reliability catalog 112 rows with every Tested row naming a real test, clock coupling, exec modes). `scripts/check_version_sync.py` passed. `scripts/gen_api_docs.py --v2 --check` reported the API docs fresh.
+- **App repo `make check`** (the full gate, run before the commit): 223 test files passed, 0 failed; coverage 86.0% (floor 83.0%); `web_app.py` 74.0% (floor 58.0%); token gate at baseline. CI on `master` for `2407b46` passed on every job, and CodeQL passed.
+- **Docs deploy** (`docs.yml` run `40703994241`, for `490e304`): build and deploy passed. `/macos/`, `/reference/api/one-nineteen/`, `/downloads/`, and `/changelog/` return 200 with the new content.
 
 Not run:
-- **The app test suite and `make check`.** The app repo changed in documentation and templates only.
 - **Any macOS installer or app run.** No macOS host was available. macOS statements are verified against source and the release workflow, not by running them on a Mac.
 
 ## Changed files
 
-- **Docs repo:** 55 modified (54 content, components, app, and tooling files, plus the supersession note in `DOCS-SWEEP-2026-10-19.md`), and 3 added (`DOCS-SWEEP-2026-10-28.md`, `content/docs/macos.mdx`, `content/docs/reference/api/one-nineteen/`). The baselines `scripts/api-routes.baseline.json` and `scripts/contracts.baseline.json` are unchanged.
-- **App repo:** 10 modified: `README.md`, `AGENTS.md`, `docs/PARITY.md`, `docs/README.md`, `docs/CONTRIBUTING.md`, `docs/RELEASE_NOTES.md`, `docs/TRADEMARKS.md`, `docs/flathub-checklist.md`, `docs/native-host-contract.md`, and `.github/ISSUE_TEMPLATE/bug_report.yml`.
+- **Docs repo:** committed as `490e304` on `main` (56 modified and 3 added). The 56 modified files are 54 content, components, app, and tooling files, the supersession note in `DOCS-SWEEP-2026-10-19.md`, and the regenerated `public/docs-index.json`. The 3 added files are `DOCS-SWEEP-2026-10-28.md`, `content/docs/macos.mdx`, and `content/docs/reference/api/one-nineteen/`. The baselines `scripts/api-routes.baseline.json` and `scripts/contracts.baseline.json` are unchanged.
+- **App repo:** committed as `2407b46` on `master` (10 modified: `README.md`, `AGENTS.md`, `docs/PARITY.md`, `docs/README.md`, `docs/CONTRIBUTING.md`, `docs/RELEASE_NOTES.md`, `docs/TRADEMARKS.md`, `docs/flathub-checklist.md`, `docs/native-host-contract.md`, and `.github/ISSUE_TEMPLATE/bug_report.yml`).
