@@ -228,7 +228,7 @@ async function loadRss() {
 <channel>
   <title>OpenBox changelog</title>
   <link>https://openboxgl.github.io/changelog/</link>
-  <description>Release notes for OpenBox, the local-first game library and launcher for Linux.</description>
+  <description>Release notes for OpenBox, the local-first game library and launcher for Linux, Windows, and macOS.</description>
   ${items
     .map(
       (i) => `  <item>

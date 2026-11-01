@@ -7,7 +7,7 @@ This path is for a first run with a local executable folder. Use a disposable fo
 
 <Callout type="note" title="What happens under the hood">
 
-When you start OpenBox for the first time, OpenBoxGL does several things silently: it creates your data directory (`~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, or `~/Library/Application Support/openbox-game-launcher` on macOS), generates a per-launch `server.token`, writes the port to `server.port`, and initializes an empty `library.json` with schema version 6. You won't see these files unless you look in the data directory, but they're the reason nothing gets corrupted when the server restarts unexpectedly. See [Interfaces and data](/interfaces-and-data/) for where every file lives.
+When you start OpenBox for the first time, OpenBoxGL does several things silently: it creates your data directory (`~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, or `~/Library/Application Support/openbox-game-launcher` on macOS), generates a per-launch `server.token`, writes the port to `server.port`, and initializes an empty `library.json` with schema version 7. You won't see these files unless you look in the data directory, but they're the reason nothing gets corrupted when the server restarts unexpectedly. See [Interfaces and data](/interfaces-and-data/) for where every file lives.
 
 </Callout>
 
@@ -136,6 +136,10 @@ Nothing is sent anywhere: no account, no telemetry, and no network traffic unles
 - [Emulators and launching](/guides/emulators-and-launching/) for command tokens and platform profiles.
 - [Interfaces and data](/interfaces-and-data/) for where every file lives.
 - [Metadata and media](/guides/metadata-and-media/) for enrichment after the first import.
+
+## What's new in 1.11 through 2.0
+
+**2.0 (unreleased)** adds library format 7 with `openbox --rollback-library`, `/api/v2` as the public contract with the `/api/v1` bridge retired, the portable library with Move library, backup format 2, plugin API v2, the migration readiness gate, and the Windows ARM64 lane — see the [changelog](/changelog/) and [API 2.0 changes](/reference/api/two-zero/).
 
 ## What's new in 1.11 through 1.19
 

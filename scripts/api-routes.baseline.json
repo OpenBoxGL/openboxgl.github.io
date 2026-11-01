@@ -1,6 +1,6 @@
 {
  "_comment": "Authoritative OpenBoxGL HTTP route table, derived from @route decorators. Regenerate with: npm run routes:sync (requires OPENBOX_APP_DIR).",
- "count": 381,
+ "count": 391,
  "routes": [
   {
    "method": "GET",
@@ -300,6 +300,10 @@
   },
   {
    "method": "GET",
+   "path": "/api/v2/compat/report"
+  },
+  {
+   "method": "GET",
    "path": "/api/v2/emulators/defs/status"
   },
   {
@@ -413,6 +417,10 @@
   {
    "method": "GET",
    "path": "/api/v2/library/health/issues"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/integrity"
   },
   {
    "method": "GET",
@@ -532,6 +540,10 @@
   },
   {
    "method": "GET",
+   "path": "/api/v2/setup/migration/status"
+  },
+  {
+   "method": "GET",
    "path": "/api/v2/setup/preview"
   },
   {
@@ -569,6 +581,10 @@
   {
    "method": "GET",
    "path": "/api/v2/story"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/version"
   },
   {
    "method": "GET",
@@ -717,6 +733,10 @@
   {
    "method": "POST",
    "path": "/api/highscores/import"
+  },
+  {
+   "method": "POST",
+   "path": "/api/host/resume"
   },
   {
    "method": "POST",
@@ -1236,6 +1256,14 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/library/move/apply"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/library/move/preview"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/library/notes/add"
   },
   {
@@ -1449,6 +1477,18 @@
   {
    "method": "POST",
    "path": "/api/v2/setup/commit"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/setup/migration/acknowledge"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/setup/migration/backup"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/setup/migration/rollback"
   },
   {
    "method": "POST",

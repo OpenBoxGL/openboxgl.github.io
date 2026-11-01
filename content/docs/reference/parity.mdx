@@ -10,12 +10,25 @@ The application repository's `PARITY.md` is the maintenance source for capabilit
 
 Every workflow in `PARITY.md` is marked `done`, or carries a decision status for workflows without a Linux equivalent:
 
-- <StatusBadge status="done" /> means the workflow is usable end to end. The 1.19.x line runs on Linux (AppImage, Flatpak, source, and system installs), on Windows x86_64, and on macOS 11 or newer, so `done` rows apply on every platform unless the row's note, the platform notes below, or the macOS channel says otherwise.
+- <StatusBadge status="done" /> means the workflow is usable end to end. The current line (1.19.x released, 2.0 on master) runs on Linux (AppImage, Flatpak, source, and system installs), on Windows x86_64 and ARM64, and on macOS 11 or newer, so `done` rows apply on every platform unless the row's note, the platform notes below, or the macOS channel says otherwise.
 - <StatusBadge status="partial" /> means a deliberate Linux equivalent exists but the Windows/premium surface is broader or unavailable.
 - <StatusBadge status="missing" /> means no usable equivalent yet.
 - Decision rows ("Not applicable", "Replaced by ...", "Use ... instead") mark Windows-only workflows with no Linux equivalent; they are documented as boundaries rather than implied support.
 
-Verified against **v1.19.1** (application `docs/PARITY.md`).
+Verified against **v2.0.0** (application `docs/PARITY.md`).
+
+## 2.0 (unreleased)
+
+| Capability | Status | Notes |
+| --- | --- | --- |
+| Portable library and Move library | <StatusBadge status="done" /> | Game paths under `library_root` are stored as `@library/...` tokens; Settings > Library > Move library previews and rebases a move, refusing stale plans with `MOVE_PLAN_STALE`. The move never copies files |
+| Public `/api/v2` contract and retired `/api/v1` bridge | <StatusBadge status="done" /> | `/api/v2` is the public API; `/api/v1` is off by default (`410 V1_API_DISABLED`, opt back in with `OPENBOX_ENABLE_V1_API=1` through 2.0.x). Native windows use `/api/host/*` with a major-version guard |
+| Library integrity and maintenance CLI | <StatusBadge status="done" /> | `openbox --check-library`, `--repair-library`, `--migrate-library`, `--rollback-library` plus `GET /api/v2/library/integrity` and Settings > Library > Check integrity |
+| Backup format 2 | <StatusBadge status="done" /> | SHA-256 per archive member; restore refuses corrupt or unlisted members before writing. A 1.19-compatible format-1 export remains selectable |
+| Migration readiness gate | <StatusBadge status="done" /> | First launch lists readiness items (theme tokens, plugin API, sync folder, archive formats, library scale, custom data dir) and offers a backup before the migrated library opens |
+| Plugin API v2 | <StatusBadge status="done" /> | `api_version: 2` adds `min_openbox`, event `subscriptions`, a persistent JSON Lines runner with a 4 MiB output cap, and versioned read-only host services (`library.query`, `media.search`); v1 plugins unchanged, v1 runner removed in 3.0 |
+| Windows ARM64 release lane | <StatusBadge status="done" /> | `OpenBox-arm64-windows.zip` and ARM64 native host built on `windows-11-arm`; `install.ps1` resolves `arm64`/`aarch64` and selects the ARM64 asset |
+| macOS notarization | <StatusBadge status="missing" /> | Notarization machinery (entitlements, `notarize_macos.sh`) is in the tree but the shipped bundle stays ad-hoc signed by maintainer decision; first launch still needs Privacy & Security > Open Anyway |
 
 ## Platform coverage
 

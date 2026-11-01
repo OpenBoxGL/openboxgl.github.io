@@ -55,7 +55,7 @@ The query parameter `token=TOKEN` is also accepted but can leak through browser 
 
 ## Response envelope
 
-Most API handlers return JSON objects. Structured errors include an `error`, stable `code`, and short `request_id`; public assets, media/download endpoints, and Server-Sent Events can return bytes or streams instead of JSON. The versioned route pages document the response shape for each operation.
+Most API handlers return JSON objects. Since 2.0 every error is served as `application/problem+json` (RFC 9457) carrying `type`, `title`, `status`, `detail`, a stable `code`, `retryable`, `request_id`, and `instance`; `error` is kept as a duplicate of `detail` for one compatibility cycle. The payloads below name the fields integrations read today. Public assets, media/download endpoints, and Server-Sent Events can return bytes or streams instead of JSON. The versioned route pages document the response shape for each operation.
 
 | Status | Meaning |
 | --- | --- |
@@ -91,6 +91,8 @@ Each group has its own reference page with per-endpoint cards.
   { href: '/reference/api/one-sixteen/', title: 'API 1.16 additions', eyebrow: 'release', description: 'Launch Readiness and the whole-library audit, the restore preview block, Flatpak folder grants, and per-game RetroArch cores.' },
   { href: '/reference/api/one-seventeen/', title: 'API 1.17 additions', eyebrow: 'release', description: 'Game Night decks with a reproducible seed, and native installed-game imports for GOG Galaxy, the EA app, and Ubisoft Connect on Windows.' },
   { href: '/reference/api/one-eighteen/', title: 'API 1.18 additions', eyebrow: 'release', description: 'Platform administration, durable media queue control, save manifests and selective restore, plugin credentials/data/stats/repair, storefront scanning, integration tokens and Steam, new import formats, and emulator settings.' },
+  { href: '/reference/api/one-nineteen/', title: 'API 1.19 changes', eyebrow: 'release', description: 'The platform-capability contract: one features object decides every platform-specific control, and storefront/battery behavior on Windows and macOS.' },
+  { href: '/reference/api/two-zero/', title: 'API 2.0 changes', eyebrow: 'release', description: 'The public /api/v2 contract, the retired /api/v1 bridge, the /api/host channel, problem-details errors, migration, portable-library move, integrity, compat report, and version routes.' },
   { href: '/reference/api/local-admin/', title: 'Local administrator', eyebrow: 'admin', description: 'Updates, shutdown, state recovery, desktop integration, themes, plugins, premium read models.' },
  ]}
 />

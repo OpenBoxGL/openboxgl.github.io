@@ -45,7 +45,7 @@ Missing `ryzenadj` on PATH, a permission failure, a non-Ryzen CPU, or a malforme
 
 ## Library scale and test gates
 
-Blocking performance gates cover **10k and 20k** libraries (`perf-20k` in CI; `docs/development/PERF.md`), and `scripts/check_tests.py` enforces **83.0% total** and **58.0% `web_app.py`** coverage floors. The optional SQLite FTS read model self-enables at **5,000+ games** (`OPENBOX_ENABLE_SQLITE_READ=0` opts out) for indexed search and facets on large libraries; JSON remains canonical. See [API 1.12 additions](/reference/api/one-twelve/) and [Configuration](/reference/configuration/).
+Blocking performance gates cover **10k and 20k** libraries (`perf-20k` in CI; `docs/development/PERF.md`), and `scripts/check_tests.py` enforces **85.0% total** and **62.0% `web_app.py`** coverage floors. The optional SQLite FTS read model self-enables at **5,000+ games** (`OPENBOX_ENABLE_SQLITE_READ=0` opts out) for indexed search and facets on large libraries; in 2.0 it rebuilds on a background thread and falls back to `source: "json"` while stale, and JSON remains canonical. See [API 1.12 additions](/reference/api/one-twelve/) and [Configuration](/reference/configuration/).
 
 ## Safety
 

@@ -24,7 +24,7 @@ Starting `openbox` (or `openbox-native`) does three things in order:
 
 On window close the host shuts the server down cleanly. When WebKitGTK is missing, the launcher prints an install hint and falls back to the system-browser app window, so no install bricks.
 
-The bridge surface is `window.openboxNative`, injected by `native_host.c` on Linux and `native_host_win.c` on Windows:
+The bridge surface is `window.openboxNative`, injected by `native_host.c` on Linux, `native_host_win.c` on Windows, and `native_host_mac.m` on macOS:
 
 | Member | Purpose |
 | --- | --- |
@@ -46,9 +46,15 @@ The default data directory is `~/.local/share/openbox-game-launcher` on Linux, `
 
 | Path (inside the data directory) | Contents |
 | --- | --- |
-| `library.json` | The library: games, profiles, history, settings, playlists, queue, notifications |
+| `library.json` | The library (format 7): the `openbox-library` envelope plus games, profiles, history, settings, playlists, queue, notifications, ui_state |
 | `library.json.bak` | Last-known-good copy, rewritten before every commit |
 | `.library.json.lock` | Cross-process lock file coordinating concurrent writes |
+| `sessions.json` | Active sessions mirrored out of the library for crash recovery (2.0); reconciled at startup and removed when none remain |
+| `library.v6.backup.json` | Pre-migration v6 library copy kept by the 2.0 upgrade; `openbox --rollback-library` restores it |
+| `migration-report.json`, `migration-in-progress.json` | The v6→v7 migration record and its in-flight crash marker (2.0) |
+| `rollback-report.json`, `library.v7.kept-<stamp>.json` | A rollback's discarded-edit record and the replaced v7 file it kept (2.0) |
+| `media/manifest.json` | Per-file SHA-256, size, and mtime for media downloads and captures; feeds the integrity check (2.0) |
+| `sqlite_readmodel.db`, `dna_index.json` | The search read-model projection and Game DNA index — rebuildable caches |
 | `operations.json` | Durable background operations and task lifecycle states |
 | `operations_items/` | Per-operation item lists (for example one row per game in a bulk download) |
 | `previews/` | Transient Setup Center scan preview documents before commit |

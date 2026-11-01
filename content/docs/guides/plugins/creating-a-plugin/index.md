@@ -14,13 +14,17 @@ Every plugin requires a `plugin.json` manifest placed in its directory under `~/
   "id": "play-notifier",
   "name": "Play Session Notifier",
   "version": "1.0.0",
-  "api_version": 1,
+  "api_version": 2,
+  "min_openbox": "2.0.0",
   "description": "Sends local desktop notifications when games start and finish.",
   "entry": "plugin.py",
   "hooks": [
     "before_launch",
     "after_session",
     "library"
+  ],
+  "subscriptions": [
+    "app_shutdown"
   ]
 }
 ```
@@ -37,7 +41,9 @@ Every plugin requires a `plugin.json` manifest placed in its directory under `~/
 | `homepage` | string | Optional HTTPS project URL (300 characters). |
 | `entry` | string | Entry point Python file inside the package (defaults to `plugin.py`; must resolve inside the package, no symlinks or `..`). |
 | `hooks` | array | Subscribed hooks: the six base hooks (`before_launch`, `after_session`, `library`, `command`, `library_source`, `events`) plus the six capability hooks (`storefront`, `metadata`, `media`, `stats`, `emulator`, `discovery`). |
-| `api_version` | integer | Plugin API version targeted (defaults to `1`); newer versions are refused. |
+| `api_version` | integer | Plugin API version targeted: `1` (default) or `2` (2.0.0+). Versions this build does not serve are refused. Version 2 switches to the JSON Lines runner and unlocks `min_openbox`, `subscriptions`, and the versioned read-only host services (`library.query`, `media.search`); the v1 runner is scheduled for removal in 3.0. |
+| `min_openbox` | string | v2 only: oldest OpenBox release that may serve the plugin; older hosts refuse it at load. |
+| `subscriptions` | array | v2 only: named events the runner delivers, on top of the base `events` hook. |
 | `commands` | array | Up to 32 `{id, label, description?}` entries, exposed in the command palette under the `>` prefix. |
 | `permissions` | array | Declared permissions; in 1.x only `network`, granted by the user in the Plugins manager. |
 | `settings` | object | JSON Schema subset for per-plugin settings; the Plugins manager and Settings > Plugins render a form and inject stored values into hook payloads. |

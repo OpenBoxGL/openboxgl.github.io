@@ -42,7 +42,7 @@ When a game has no per-game `launch` command, resolution walks the precedence ch
 
 ## Substitution behavior
 
-- Each marker is replaced wherever it appears in the tokenized argv parts.
+- Each marker is replaced wherever it appears in the tokenized argv parts. An unrecognized `{...}` marker is not passed through verbatim: settings and launch-profile validation reject it, so a typo fails at save time rather than reaching the emulator command line.
 - If a game command or platform profile does not contain `{path}` or `{ImagePath}`, the resolved path is appended as the final argument. Only those two spellings are recognised here — see the note above about `{Path}`.
 - A `.sh` file with no command launches as `bash <path>` (or `sh` when `bash` is unavailable).
 - Paths containing spaces stay intact because substitution happens per-argument after the command is split with `shlex.split` (Linux) or Windows command-line quoting (Windows), and the resulting parts are passed to `subprocess.Popen` directly without a shell. Quote the marker in your command when the target executable expects a single argument.

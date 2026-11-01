@@ -161,11 +161,16 @@ The environment variable must be available before startup selects `DATA`. An `.e
 
 ### State shape and migration
 
-`default_state()` creates schema version 6 with these top-level collections:
+`default_state()` creates schema version 7 with these top-level collections:
 
 ```json
 {
- "schema_version": 6,
+ "format": "openbox-library",
+ "schema_version": 7,
+ "library_id": "<ulid>",
+ "created_with": "2.0.0",
+ "path_mode": "absolute",
+ "library_root": "",
  "games": [],
  "profiles": {},
  "history": [],
@@ -174,7 +179,6 @@ The environment variable must be available before startup selects `DATA`. An `.e
  "queue": [],
  "notifications": [],
  "ui_state": {},
- "active_sessions": [],
  "trash": [],
  "party_decks": [],
  "emulator_settings": {},
@@ -182,11 +186,11 @@ The environment variable must be available before startup selects `DATA`. An `.e
 }
 ```
 
-The migration path is ordered. Version 1 was a bare game list. Version 2 wrapped that list in a state object and added the main collections. Version 3 replaced index-suffixed game IDs with identity-derived IDs and retained the old IDs as `legacy_game_ids` aliases. Version 4 added queue and notification collections and repaired their caps and basic types. Version 5 added the host-owned `ui_state` block (window geometry, last session, single-instance flag) and left every existing field untouched. Version 6 added the `active_sessions` collection used to reconcile running sessions across restart.
+The migration path is ordered. Version 1 was a bare game list. Version 2 wrapped that list in a state object and added the main collections. Version 3 replaced index-suffixed game IDs with identity-derived IDs and retained the old IDs as `legacy_game_ids` aliases. Version 4 added queue and notification collections and repaired their caps and basic types. Version 5 added the host-owned `ui_state` block (window geometry, last session, single-instance flag) and left every existing field untouched. Version 6 added the `active_sessions` collection used to reconcile running sessions across restart. Version 7 adds the `format`/`library_id`/`created_with` envelope plus `path_mode` and `library_root` for the portable library, and moves `active_sessions` out to `sessions.json`; the pre-migration file is kept as `library.v6.backup.json` with a `migration-report.json`.
 
 The loader rejects versions below 1, versions above the current schema, and a version for which no migration exists. Corrupt JSON, a state value of the wrong top-level type, a non-list `games` collection, a non-dictionary game, or a game without a usable ID raises `StateCorruptError`. The API turns that condition into a recovery response instead of silently discarding the library.
 
-Normalization is deliberately selective. Unknown top-level and per-game fields are retained. Known fields such as IDs, queue, notifications, and tags are repaired or capped. A schema-6 file can use a fast path when its required keys and basic collection shapes already look valid. That fast path does not prove that every nested settings, playlist, queue, notification, or active-session value has valid application semantics. Feature code still validates its own input at the boundary where it uses it.
+Normalization is deliberately selective. Unknown top-level and per-game fields are retained. Known fields such as IDs, queue, notifications, and tags are repaired or capped. A schema-7 file can use a fast path when its required keys and basic collection shapes already look valid. That fast path does not prove that every nested settings, playlist, queue, notification, or active-session value has valid application semantics. Feature code still validates its own input at the boundary where it uses it.
 
 ### Stable identity
 
@@ -262,7 +266,7 @@ Unauthenticated requests are rejected before useful route details are exposed. T
 
 The request handler uses a 30-second socket timeout and caps JSON request bodies at 65,536 bytes. It rejects invalid or negative `Content-Length`, oversized bodies, truncated reads, malformed JSON, and JSON values that are not objects. GET parameters come from the query string and follow `parse_qs` behavior for repeated values.
 
-Responses use JSON for API errors and set no-store, nosniff, no-referrer, and restrictive content-security headers. Media responses have their own cache, ETag, last-modified, range, and partial-content behavior because cover art and video are materially different from small state responses.
+Responses use `application/problem+json` for API errors (2.0; see [API 2.0 changes](/reference/api/two-zero/)) and set no-store, nosniff, no-referrer, and restrictive content-security headers. Media responses have their own cache, ETag, last-modified, range, and partial-content behavior because cover art and video are materially different from small state responses.
 
 ### Error mapping
 
@@ -365,7 +369,7 @@ The `before_launch` plugin chain receives a JSON payload and may rewrite `args` 
 
 The Web launcher passes `start_new_session=True` to `subprocess.Popen` on POSIX, where the launched game becomes the leader of a new process session and process group. Pause, resume, stop, restart, and force-close then operate on the group with `SIGSTOP`, `SIGCONT`, `SIGTERM`, or `SIGKILL` rather than targeting only the direct child. On Windows the same call goes through `pkg/platform_compat.launch_kwargs()`, which passes `CREATE_NEW_PROCESS_GROUP` instead; pause and resume use `NtSuspendProcess`/`NtResumeProcess` on the process and its descendants, and stop or force-close uses `taskkill /PID <pid> /T` (adding `/F` for force).
 
-Live process data is held in `RUNNING` and `PROCESSES` under `PROCESS_LOCK`, with active sessions persisted to `active_sessions` in `library.json` (Schema v6). It includes the launch ID, stable identity information, PID, process start time, selected profile, and pause state. On startup, `reconcile_sessions_on_startup()` automatically reattaches to surviving game processes and transitions deceased ones to `abandoned`. Liveness and process identity checks go through `pkg/platform_compat.process_alive()`: Windows never uses `os.kill(pid, 0)`, which CPython maps to `TerminateProcess` there, and reads start time, command line, and image name through `ctypes` instead of `/proc`.
+Live process data is held in `RUNNING` and `PROCESSES` under `PROCESS_LOCK`, with active sessions mirrored to `sessions.json` beside the library (2.0; re-injected at load and removed when none remain). It includes the launch ID, stable identity information, PID, process start time, selected profile, and pause state. On startup, `reconcile_sessions_on_startup()` automatically reattaches to surviving game processes and transitions deceased ones to `abandoned`. Liveness and process identity checks go through `pkg/platform_compat.process_alive()`: Windows never uses `os.kill(pid, 0)`, which CPython maps to `TerminateProcess` there, and reads start time, command line, and image name through `ctypes` instead of `/proc`.
 
 ## Session completion and teardown
 

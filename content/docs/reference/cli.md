@@ -33,6 +33,10 @@ On macOS, `openbox` is the launcher inside `OpenBox.app`, which `install-macos.s
 | `--launcher` | Open the rofi/wofi/dmenu keyboard launcher against the running instance and exit. |
 | `--backup [--items a,b] [--keep N]` | Create a backup archive from the command line and print its path. `--items` takes a comma-separated list of `library`, `settings`, `media`, `plugins`, `themes`, and `extension_data`; unknown names are ignored, and the default is `library,settings`. `--keep N` keeps only the newest N archives in `backups/`; the default `0` keeps all of them. |
 | `--restore-backup <archive>` | Restore a backup archive. The archive must be a real `.zip` inside the data directory or `backups/`. Prints the restored item names. |
+| `--check-library` | Run the library integrity report (missing, unreadable, and outside-folder game paths, plus media manifest mismatches) and exit without starting a window. Exit 0 healthy, 1 warnings, 2 errors. (v2.0.0+) |
+| `--repair-library [--refresh-backup]` | Rebuild the media manifest and prune expired trash after confirmation, then exit. Exit 0 on success. (v2.0.0+) |
+| `--migrate-library` | Apply the format 7 library upgrade from the command line and exit; refuses while the server is running. (v2.0.0+) |
+| `--rollback-library [--yes]` | Restore `library.v6.backup.json`: lists the game edits made after the upgrade, then requires typing `ROLLBACK` (non-interactive refusal exits 3 with a rerun instruction; `--yes` skips the prompt). Library command usage errors exit 4. (v2.0.0+) |
 | `--web` | Start the loopback web UI in a browser instead of the native window (development). |
 | `--app-window` | Web entry point only: open the UI in a chrome-less app window (browser `--app=` mode) instead of a normal tab. The native window is unaffected. |
 | `--no-app-window` | Web entry point only: open the UI in a normal browser window; overrides the chrome-less app window default there. The native window is unaffected. |

@@ -62,7 +62,7 @@ There is no standalone `services` hook. Declaring one is rejected, and `service_
 ## Limits and failure behavior
 
 - One JSON object per invocation over stdin/stdout.
-- Input payload and output capped at 2 MiB each; oversized output is ignored with a warning.
+- Input payload capped at 2 MiB; output capped at 2 MiB for `api_version: 1` and 4 MiB for `api_version: 2` (2.0.0+). Oversized output is ignored with a warning.
 - Per-hook timeout: 5 seconds for base hooks, 30 seconds for `storefront`, 15 seconds for `metadata`/`media`/`stats`, and 10 seconds for `emulator`/`discovery`. A timeout, crash, or invalid JSON logs a warning and the plugin's result is skipped (the previous result passes through). Palette `command` runs are the exception: a hook error there is surfaced to the API caller as a `400`.
 - A nonzero exit is logged with the last 400 bytes of stderr.
 - The plugin environment is cleaned: `PYTHONPATH`, `PYTHONHOME`, `LD_PRELOAD`, `LD_LIBRARY_PATH` removed, `PYTHONNOUSERSITE=1`.

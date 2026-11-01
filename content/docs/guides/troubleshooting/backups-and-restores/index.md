@@ -17,6 +17,8 @@ Both whole-library backups and per-game save backups validate hard before writin
 
 | Message | Cause / fix |
 | --- | --- |
+| `BACKUP_FORMAT_UNSUPPORTED` | The archive declares a format this build cannot read (2.0 writes format 2; 1.19.x reads format 1). Use a 1.19-compatible export for older installs, or upgrade the restore side. |
+| Manifest hash mismatch or unlisted member | Format 2 records a SHA-256 per member and refuses a corrupt or unlisted file before writing anything — restore a different archive or re-export. |
 | `"This backup is older than the current library. Pass force=True to restore it anyway."` | The archive predates the current library. Only force when you intentionally want the older state; the current library is saved to `library.before-restore.json` first. |
 | `"Backup archive is invalid."` / `"Backup manifest is invalid."` | Not a ZIP or missing manifest. Only `OpenBoxBackup-*.zip` archives inside the data directory or `backups/` are accepted. |
 | `"Save backup roots do not match this game."` | The game's `save_paths` changed after the backup. Restore the archived paths (or back up again). |

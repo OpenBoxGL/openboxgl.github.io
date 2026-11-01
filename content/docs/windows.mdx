@@ -7,13 +7,13 @@ OpenBoxGL runs natively on Windows as of 1.13.0. There is no MSI, no installer w
 
 The Windows build is the same Python standard-library application that runs on Linux and macOS. The library format, the web UI, the HTTP API, the plugins, and the emulator definitions are identical across platforms, so a library directory moves between Linux, Windows, and macOS unchanged.
 
-Windows builds are **x86_64**.
+Windows builds are **x86_64 and ARM64** (ARM64 since 2.0).
 
 ## Requirements
 
 | Requirement | Needed for | Notes |
 | --- | --- | --- |
-| Windows 10 or 11, x86_64 | Everything | Current Windows 10 builds and Windows 11. |
+| Windows 10 or 11, x86_64 or ARM64 | Everything | Current Windows 10 builds and Windows 11. |
 | Windows PowerShell 5.1 | Installer and launchers | Ships with Windows. PowerShell 7 is not required. |
 | Python 3.10 or newer | Everything | `python.exe` or `py.exe` must be on `PATH`; set `OPENBOX_PYTHON` to point at another interpreter. The portable install is the source tree, so it uses your interpreter. |
 | WebView2 runtime | The native window | Present on Windows 11 and most Windows 10 systems. Without it, OpenBox runs the same UI in a browser app window. |
@@ -26,7 +26,7 @@ The installer itself needs Python, because it uses the same RFC 8032 verifier th
 Download the release archive from the tag you want, extract it, and run the bundled installer at `OpenBox\scripts\install.ps1`. The installer pins the release public key, verifies its SHA-256 against a committed anchor, and verifies the archive's `.sha256` sidecar and Ed25519 signature before extracting anything.
 
 ```powershell
-$Version = '1.19.1'
+$Version = '2.0.0'
 Invoke-WebRequest -UseBasicParsing -OutFile OpenBox-x86_64-windows.zip `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/OpenBox-x86_64-windows.zip"
 Expand-Archive OpenBox-x86_64-windows.zip -DestinationPath .
@@ -42,14 +42,14 @@ powershell -ExecutionPolicy Bypass -File .\OpenBox\scripts\install.ps1 -Run
 
 Run the script from the extracted `OpenBox\scripts\` folder. It resolves the release verifier (`updates.py`) one directory above itself, and the verifier is the trust anchor for the Ed25519 check, so it is never downloaded on its own — a fetched verifier could be replaced by whoever served it. The release also publishes `install.ps1` as a standalone asset, but it is the same installer that ships inside the archive, so a standalone copy only works from the extracted release, where `updates.py` is one directory above it.
 
-The installer always fetches `OpenBox-x86_64-windows.zip`, its `.sha256`, and its `.sig` from the release tag into a fresh temp directory — placing those files next to the script yourself has no effect. For a mirrored or offline key, pass `-PublicKeyPath` instead.
+The installer always fetches the archive for your architecture (`OpenBox-x86_64-windows.zip` or `OpenBox-arm64-windows.zip`), its `.sha256`, and its `.sig` from the release tag into a fresh temp directory — placing those files next to the script yourself has no effect. For a mirrored or offline key, pass `-PublicKeyPath` instead.
 
 ### What the installer does
 
 <Steps>
 
 <li>Resolves `openbox-release.pub` from the release and checks its SHA-256 against the pinned bootstrap anchor. `-PublicKeyPath` replaces that anchor for mirror or offline installs, and the checksum and signature gates still apply.</li>
-  <li>Downloads `OpenBox-x86_64-windows.zip` with its `.sha256` and `.sig`, then fails closed if any check does not match. `-Arch` accepts `x86_64` (or `amd64`); ARM64 values fail because there is no ARM64 Windows zip.</li>
+  <li>Downloads `OpenBox-x86_64-windows.zip` with its `.sha256` and `.sig`, then fails closed if any check does not match. `-Arch` accepts `x86_64`/`amd64` and `arm64`/`aarch64`; the ARM64 lane ships `OpenBox-arm64-windows.zip` starting with 2.0.</li>
   <li>Extracts the archive, which must contain exactly one top-level folder holding `web_app.py`.</li>
   <li>Moves the runtime to `<InstallDir>\share\openbox`, keeping any previous install at `<InstallDir>\share\openbox.previous`.</li>
   <li>Registers the Start Menu shortcut and the `openbox://` protocol handler for the current user.</li>
@@ -67,7 +67,7 @@ Nothing is extracted before every verification step passes.
 | `-InstallDir <path>` | Bin root. Defaults to `OPENBOX_INSTALL_DIR`, then `%LOCALAPPDATA%\OpenBox`. The runtime lands in `<InstallDir>\share\openbox`. |
 | `-Run` | Launch OpenBox after a successful install. |
 | `-NoPathUpdate` | Skip adding the runtime folder to the user `PATH`. |
-| `-Arch <arch>` | Artifact architecture, x86_64 only. Defaults to the host CPU; `aarch64`/`arm64` are rejected because OpenBox publishes Windows builds for x86_64 only. |
+| `-Arch <arch>` | Artifact architecture, `x86_64` or `arm64`. Defaults to the host CPU; the ARM64 lane ships `OpenBox-arm64-windows.zip` starting with 2.0. Anything else is rejected. |
 | `-PublicKeyPath <file>` | Use a local release public key instead of the pinned anchor, for mirrors and offline installs. |
 | `-ReleaseBase <url>` | Base URL the release assets are served from. Defaults to the project's GitHub releases. |
 | `-Repo <owner/name>` | Repository to resolve releases from. |
@@ -181,11 +181,11 @@ Set `OPENBOX_DATA_DIR` to move the library, which is read before the `.env` boot
 
 ## Updating
 
-The built-in updater understands the Windows portable install. It verifies the release key the same way the installer does — pinned key anchor, SHA-256 checksum, Ed25519 signature, with the same stdlib-only implementation, so Windows needs neither curl nor OpenSSL — then downloads `OpenBox-x86_64-windows.zip`, extracts it, and stages the swap.
+The built-in updater understands the Windows portable install. It verifies the release key the same way the installer does — pinned key anchor, SHA-256 checksum, Ed25519 signature, with the same stdlib-only implementation, so Windows needs neither curl nor OpenSSL — then downloads the archive for the running architecture (`OpenBox-x86_64-windows.zip` or `OpenBox-arm64-windows.zip`), extracts it, and stages the swap.
 
 Because a running install cannot be replaced in place, the swap happens **after OpenBox exits**: the old tree is moved to `share\openbox.previous`, the staged tree takes its place, and the app asks you to restart. Your data directory is never part of the swap. See [Updating](/updating/) for the general update flow.
 
-Manual update: download the newer `OpenBox-x86_64-windows.zip`, extract it, and run that release's `install.ps1` from the extracted zip, which keeps the previous tree for rollback.
+Manual update: download the newer Windows archive for your architecture (`OpenBox-x86_64-windows.zip` or `OpenBox-arm64-windows.zip`), extract it, and run that release's `install.ps1` from the extracted zip, which keeps the previous tree for rollback.
 
 ## Emulators and games on Windows
 

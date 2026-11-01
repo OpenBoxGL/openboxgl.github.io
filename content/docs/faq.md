@@ -16,10 +16,10 @@ No OpenBox account is required. Optional integrations may have their own account
 
 ## What operating systems are supported?
 
-OpenBox targets **Linux**, **Windows x86_64** (since 1.13.0), and **macOS 11 or newer** on Apple Silicon and Intel (since 1.19.0).
+OpenBox targets **Linux**, **Windows x86_64 and ARM64** (x86_64 since 1.13.0; ARM64 since 2.0), and **macOS 11 or newer** on Apple Silicon and Intel (since 1.19.0).
 
 - **Linux:** desktops, laptops, Steam Deck systems, and handheld PCs on x86_64 and aarch64. Release artifacts are built for both architectures — pick the AppImage matching `uname -m`, and the built-in updater only offers the artifact matching the running architecture. Source installs require Python 3.10 or newer; the AppImage bundles its own Python runtime.
-- **Windows:** x86_64 only, installed from the signed portable package with `install.ps1`. Windows PowerShell 5.1 is enough; the installer needs neither curl nor OpenSSL.
+- **Windows:** x86_64 and ARM64 (ARM64 since 2.0), installed from the signed portable package with `install.ps1`. Windows PowerShell 5.1 is enough; the installer needs neither curl nor OpenSSL.
 - **macOS:** the signed universal app bundle, installed with `install-macos.sh` into `~/Applications`. The bundle carries its own Python and renders the UI in a WKWebView window. The installer needs `python3` 3.10 or newer on `PATH` to verify the release.
 
 Linux stays the primary distro-integration target. See [Installation](/install/), [Windows](/windows/), and [macOS](/macos/).
@@ -31,12 +31,12 @@ The runtime is dependency-free on every platform: standard library only (plus `c
 | Platform | Install | Requirements |
 | --- | --- | --- |
 | Linux | AppImage, Flatpak, or source | Python 3.10+ for source installs (the AppImage bundles its own); WebKitGTK for the native window |
-| Windows | Signed portable package via `install.ps1` | Windows x86_64, Windows PowerShell 5.1; the WebView2 runtime for the native window (present on Windows 11 and most Windows 10 systems) |
+| Windows | Signed portable package via `install.ps1` | Windows x86_64 or ARM64, Windows PowerShell 5.1; the WebView2 runtime for the native window (present on Windows 11 and most Windows 10 systems) |
 | macOS | Signed universal app bundle via `install-macos.sh`, or source | macOS 11 or newer on Apple Silicon or Intel; `python3` 3.10+ on `PATH` for the installer; WKWebView is built into macOS |
 
 ## Does OpenBox run on Windows?
 
-Yes, since 1.13.0. Windows x86_64 installs from the signed portable package using the published `install.ps1`, which verifies the release key, the archive checksum, and its Ed25519 signature before extracting to `%LOCALAPPDATA%\OpenBox`.
+Yes, since 1.13.0. Windows x86_64 and ARM64 install from the signed portable package using the published `install.ps1`, which verifies the release key, the archive checksum, and its Ed25519 signature before extracting to `%LOCALAPPDATA%\OpenBox`.
 
 The launchers `openbox.cmd` and `openbox.ps1` start the app; `--web` forces the browser app window. The native window is WebView2: the portable install ships `native_host.exe` compiled, and a source checkout either drops in the released `OpenBox-x86_64-windows-native-host.exe` as `native_host.exe` or builds it with `powershell -File scripts/build_native_host_windows.ps1` (MSVC toolchain with the C++ workload). Until that binary exists, the launchers open the same UI in a browser app window, so Windows works out of the box either way. Python is found as `python.exe` / `py.exe` on PATH or via `OPENBOX_PYTHON`.
 
@@ -100,7 +100,9 @@ Yes. A token-authenticated REST API covers library, launch, saves, backups, them
 
 OpenBox is an independent open-source project. It is not affiliated with LaunchBox, Unbroken Software, LLC, or the Openbox window manager. Those names appear only to describe compatibility and comparison boundaries. See [Legal and trademarks](/policies/legal-and-trademarks/).
 
-## What's new in 1.11 through 1.18?
+## What's new in 1.11 through 2.0?
+
+**1.19 (Platform parity):** one capability contract decides every platform-specific control. **2.0 (unreleased):** library format 7, `/api/v2` as the public contract, the portable library, backup format 2, plugin API v2, and the Windows ARM64 lane — see the [changelog](/changelog/).
 
 **1.11 (Every Second Counts):** Quick Resume, Moments, clips/reels, Time Machine, Backlog Radio, Arcade Room/Museum kiosk, Household, Steam Bridge, ES-DE migration, SteamGridDB artwork, and local launcher trophies — see [API 1.11 additions](/reference/api/one-eleven/). **1.12 (Living Library):** smart collections, per-game Story timelines, per-game `launch_env`/`launch_confirm`, opt-in weekly backups, SQLite self-enable at 5,000 games, palette recents, and the Living Library overview on the [home page](/) — see [API 1.12 additions](/reference/api/one-twelve/). **1.13 (Windows support):** Windows x86_64 with the signed portable `install.ps1`, a WebView2 native window shipped compiled in the portable install, the same updater verification on Windows, and Windows executable names in every bundled emulator definition — see [Windows](/windows/) and the [release notes](/changelog/). Linux fixes in 1.13: process liveness no longer uses `os.kill(pid, 0)`, stored references use POSIX separators on Windows, and the metadata database closes cached SQLite handles before replacing the file.
 

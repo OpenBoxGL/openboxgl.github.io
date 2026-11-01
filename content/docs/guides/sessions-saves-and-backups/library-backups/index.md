@@ -23,7 +23,11 @@ The archive is written via a temp file and `os.replace`, then the directory is f
 
 ### Scheduled automatic backups (v1.12.0)
 
-Settings can run the same engine on a weekly schedule: enable **automatic backups**, pick a retention of 1-52 archives (default 4), and an hourly daemon tick fires `auto_backup_due()` once seven days have passed since `last_auto_backup` — a missing or unparsable stamp counts as due. The automatic backup covers the library, settings, media, plugins, and themes — never extension data. Automatic archives are byte-identical to manual ones, so the restore path below applies unchanged.
+Settings can run the same engine on a weekly schedule: enable **automatic backups**, pick a retention of 1-52 archives (default 4), and an hourly daemon tick fires `auto_backup_due()` once seven days have passed since `last_auto_backup` — a missing or unparsable stamp counts as due. The automatic backup covers the library, settings, media, plugins, and themes — never extension data. Automatic archives are byte-identical to a manual backup in the default format 2, so the restore path below applies unchanged.
+
+### Backup format 2 (2.0)
+
+2.0 writes backups in **format 2** by default — the Settings > Sessions **Backup format** selector also offers format 1 for a 1.19-compatible export. Format 2 records a SHA-256 hash for every archive member, and restore validates every member's hash and refuses a corrupt member or a member the manifest does not list (`BACKUP_FORMAT_UNSUPPORTED` on an archive format this build cannot read) before writing anything. A format-1 export embeds a v1-shape library snapshot so a 1.19.x install can restore it; automatic backups always use format 2.
 
 ## Restore a backup
 

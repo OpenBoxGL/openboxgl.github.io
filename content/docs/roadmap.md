@@ -10,7 +10,7 @@ OpenBox is maintained by one person in the open, so the roadmap is short and hon
 
 ## In the current release
 
-The [changelog](/changelog/) is the accurate record. The current release is **1.19.1 — Platform parity**. The highlights below cover the 1.19 platform work first, then the 1.18.0 library work:
+The [changelog](/changelog/) is the accurate record. The latest published release is **1.19.1 — Platform parity**; **2.0.0** is on `master`, unreleased until its tag. The highlights below cover the 1.19 platform work first, then the 1.18.0 library work:
 
 - **OpenBox on macOS.** A signed universal app bundle runs OpenBox natively on macOS 11 or newer, with its own Python, a WKWebView window, the tray, native dialogs, `openbox://` deeplinks, and the verified updater. See [macOS](/macos/).
 - **Platform parity.** One server-computed capability contract hides Linux-only controls on Windows and macOS, the Windows battery reports real values, and the storefront list matches each host. See [API 1.19 changes](/reference/api/one-nineteen/).
@@ -26,12 +26,12 @@ Earlier milestones include 1.17.0 — More of your library, and what it cost (na
 
 ## Coming next
 
-No feature is committed for the next release yet. The known limits in the 1.19.1 changelog and release notes are the honest list of open work rather than a promise:
+2.0.0 is committed on `master` — library format 7 with rollback, `/api/v2` as the public contract, the portable library, backup format 2, plugin API v2, and the Windows ARM64 lane — and ships when tagged. The known limits in the 1.19.1 changelog and release notes are the honest list of open work rather than a promise:
 
 - **A translation pass for the new first-run surfaces.** The Tools, Add games, help, setup, onboarding, and Jump back in text is English in Spanish, German, French, and Portuguese for this release. Existing translations remain, and native copy follows in a later pass.
 - **Backup coverage boundaries.** Plugin service credentials and blank password-format plugin settings are excluded from backups.
 - **The settings migration window.** `storefront_auto_import` values are now `{enabled, platform, include_uninstalled}` objects; older boolean values are still read until the next settings save migrates them.
-- **Platform boundaries.** Xbox PC package scanning remains unavailable, Windows ARM64 remains out of scope, and the macOS bundle is not yet notarized.
+- **Platform boundaries.** Xbox PC package scanning remains unavailable, and the macOS bundle is not yet notarized (Windows ARM64 ships in the 2.0 release lane).
 - **Storefront auto-import scope.** Native storefront auto-import targets installed games by default; owned-but-uninstalled imports are an explicit per-source option.
 
 Work in progress is tracked in the app repository: the [CHANGELOG](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/CHANGELOG.md) for shipped releases and [GitHub issues](https://github.com/vindeckyy/OpenBoxGL/issues) for planned work. New ideas come from the sources below.

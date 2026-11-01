@@ -14,7 +14,7 @@ One table for every install method. Pick the row that matches your system, then 
 | Flatpak | Sandboxed installs | Flatpak workflow | `flatpak info io.openbox.GameLauncher` |
 | From source | Development, patching | `git pull` | `python3 web_app.py` |
 | System install | Install to `/usr/local` | `sudo make install` again | `openbox --web` prints the server URL |
-| Windows portable with installer | Windows 10 and 11, x86_64 | Built-in verified updater | `install.ps1` Ed25519 plus SHA-256 checksum |
+| Windows portable with installer | Windows 10 and 11, x86_64 or ARM64 or ARM64 | Built-in verified updater | `install.ps1` Ed25519 plus SHA-256 checksum |
 | macOS app bundle | macOS 11 or newer, Apple Silicon or Intel | Built-in verified updater | `install-macos.sh` verifies the release key, SHA-256, and Ed25519 signature |
 
 Every release publishes these artifacts:
@@ -41,12 +41,19 @@ Every release publishes these artifacts:
 | `OpenBox-x86_64-windows-native-host.exe` | x86_64 | WebView2 window host, signed |
 | `OpenBox-x86_64-windows-native-host.exe.sha256` | x86_64 | SHA-256 checksum sidecar |
 | `OpenBox-x86_64-windows-native-host.exe.sig` | x86_64 | Ed25519 signature sidecar |
+| `OpenBox-arm64-windows.zip` | ARM64 | Windows portable, signed |
+| `OpenBox-arm64-windows.zip.sha256` | ARM64 | SHA-256 checksum sidecar |
+| `OpenBox-arm64-windows.zip.sig` | ARM64 | Ed25519 signature sidecar |
+| `OpenBox-arm64-windows-native-host.exe` | ARM64 | WebView2 window host, signed |
+| `OpenBox-arm64-windows-native-host.exe.sha256` | ARM64 | SHA-256 checksum sidecar |
+| `OpenBox-arm64-windows-native-host.exe.sig` | ARM64 | Ed25519 signature sidecar |
 | `OpenBox-macos.zip` | Universal (arm64 and x86_64) | macOS app bundle, ad-hoc signed, with a signed release |
 | `OpenBox-macos.zip.sha256` | Universal | SHA-256 checksum sidecar |
 | `OpenBox-macos.zip.sig` | Universal | Ed25519 signature sidecar |
-| `OpenBox-1.19.1-sbom.json` | x86_64 | SBOM (CycloneDX 1.4) |
-| `OpenBox-1.19.1-aarch64-sbom.json` | ARM64 | SBOM (CycloneDX 1.4) |
-| `OpenBox-1.19.1-macos-sbom.json` | Universal | SBOM (CycloneDX 1.4) |
+| `OpenBox-2.0.0-sbom.json` | x86_64 | SBOM (CycloneDX 1.4) |
+| `OpenBox-2.0.0-aarch64-sbom.json` | ARM64 | SBOM (CycloneDX 1.4) |
+| `OpenBox-2.0.0-macos-sbom.json` | Universal | SBOM (CycloneDX 1.4) |
+| `OpenBox-2.0.0-arm64-windows-sbom.json` | ARM64 | SBOM (CycloneDX 1.4) |
 
 The Windows archive ships with the same `.sha256` sidecar and `.sig` signature as the AppImages, verified by `install.ps1` and by the in-app updater with the Python standard library alone. The native-host executable is the same binary that archive carries, published on its own for source checkouts, and it goes through the same checksum and signature ladder.
 
@@ -57,7 +64,7 @@ The macOS bundle is signed the same way. `install-macos.sh` and the in-app updat
 The installer pins the release public key, verifies the SHA-256 checksum, and verifies the Ed25519 signature before installing to `~/.local/bin`.
 
 ```bash
-VERSION=1.19.1
+VERSION=2.0.0
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output install.sh \
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install.sh"
@@ -88,7 +95,7 @@ chmod +x OpenBox-$(uname -m).AppImage
 Windows 10 and 11 on x86_64 install from a signed portable archive. Download the archive, extract it, and run the bundled installer. The installer resolves and pins the release public key, verifies the archive's SHA-256 checksum and its Ed25519 signature, and only then extracts the runtime to `%LOCALAPPDATA%\OpenBox\share\openbox`.
 
 ```powershell
-$Version = '1.19.1'
+$Version = '2.0.0'
 Invoke-WebRequest -UseBasicParsing -OutFile OpenBox-x86_64-windows.zip `
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v$Version/OpenBox-x86_64-windows.zip"
 Expand-Archive OpenBox-x86_64-windows.zip -DestinationPath .
@@ -107,7 +114,7 @@ It keeps the previous runtime at `share\openbox.previous`, registers the Start M
 macOS 11 or newer on Apple Silicon or Intel installs from the signed universal app bundle. The installer pins the release key, verifies the bundle's SHA-256 checksum and Ed25519 signature, and installs `OpenBox.app` into `~/Applications`:
 
 ```bash
-VERSION=1.19.1
+VERSION=2.0.0
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output install-macos.sh \
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install-macos.sh"
@@ -124,7 +131,7 @@ Install the published bundle directly — no build step needed:
 ```bash
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output OpenBox-x86_64.flatpak \
-  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v1.19.1/OpenBox-x86_64.flatpak"
+  "https://github.com/vindeckyy/OpenBoxGL/releases/download/v2.0.0/OpenBox-x86_64.flatpak"
 flatpak install --bundle OpenBox-x86_64.flatpak
 flatpak run io.openbox.GameLauncher
 ```

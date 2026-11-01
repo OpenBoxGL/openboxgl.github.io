@@ -7,9 +7,19 @@ OpenBoxGL has one built-in updater with three platform paths: the AppImage on Li
 
 ## Upgrading from a pre-1.0 build
 
-The Tk interface was removed as of 1.0.0; the app opens a native WebKitGTK window by default. If you are upgrading from any pre-1.0 build, the same notes apply. Your library data is untouched: the same `library.json` in `~/.local/share/openbox-game-launcher` (or `OPENBOX_DATA_DIR`) keeps working, and the schema migrates to version 6 automatically on first launch. Later migrations add queue, notifications, `ui_state`, and `active_sessions` without requiring a re-import or re-download.
+The Tk interface was removed as of 1.0.0; the app opens a native WebKitGTK window by default. If you are upgrading from any pre-1.0 build, the same notes apply. Your library data is untouched: the same `library.json` in `~/.local/share/openbox-game-launcher` (or `OPENBOX_DATA_DIR`) keeps working, and the schema migrates to the current format automatically on first launch (format 7 in 2.0). Later migrations add queue, notifications, `ui_state`, and `active_sessions` without requiring a re-import or re-download.
 
 The one behavioral change to expect is the window itself: instead of a browser tab, `openbox` opens the native window. `openbox --web` still opens the loopback web UI in a browser for development, and if WebKitGTK is missing the launcher falls back to a chrome-less app window rather than failing.
+
+## Upgrading to 2.0
+
+2.0 installs over any 1.19.x release and migrates the library to **format 7** on first launch. The migration is automatic and keeps a copy of the old file:
+
+- The pre-upgrade library is kept as `library.v6.backup.json`, and a `migration-report.json` records what changed. `openbox --rollback-library` restores the v6 file (with `--yes` for non-interactive use); 1.19.x cannot read a format 7 library, so this is the downgrade path.
+- On the first start a **readiness gate** lists anything that needs a look before the upgraded library is used — a theme with unknown tokens, a plugin API version this build does not serve, a missing sync folder, an archive with no format, a library over the formal scale, or a custom data directory — and a backup can be written from the gate before the library is opened.
+- Active sessions now live in `sessions.json` (crash recovery), not inside `library.json`.
+- The public API is `/api/v2`. `/api/v1` is off by default (`410 V1_API_DISABLED`); `OPENBOX_ENABLE_V1_API=1` restores it through 2.0.x. Unversioned `/api/*` paths keep answering as the internal layer.
+- Backups written by 2.0 use **format 2** (SHA-256 manifest per file, restore refuses corrupt or unlisted members). A 1.19-compatible export is still available in Settings > Sessions.
 
 ## Upgrading from 1.18.x
 

@@ -1,9 +1,9 @@
 ---
 title: Frontend modules
-description: Inventory of the 51 static/ JS modules, entry wiring, and the search worker contract.
+description: Inventory of the 53 static/ JS modules, entry wiring, and the search worker contract.
 ---
 
-The web UI ships as `index.html` plus 51 ES modules in `static/` (49 domain modules plus `app.js` and `worker.search.js`), served from `/static/*` with cache headers. `app.js` is the entry point; every other main-thread module imports shared state and helpers from `state.js` / `util.js`.
+The web UI ships as `index.html` plus 53 ES modules in `static/` (51 domain modules plus `app.js` and `worker.search.js`), served from `/static/*` with cache headers. `app.js` is the entry point; every other main-thread module imports shared state and helpers from `state.js` / `util.js`.
 
 ## Module inventory
 
@@ -15,6 +15,7 @@ The web UI ships as `index.html` plus 51 ES modules in `static/` (49 domain modu
 | `battery.js` | Big Box battery indicator (browser API first, then the `GET /api/native/battery` route, which reads sysfs, `pmset`, or `GetSystemPowerStatus`) |
 | `bigbox.js` | Big Box kiosk UI (stage/hybrid/coverflow, gamepad and pointer input, screensaver) |
 | `clips.js` | Record That clip gallery and reel actions |
+| `compat.js` | Compatibility report dialog (`GET /api/v2/compat/report`) (2.0) |
 | `constellation.js` | Library relationship graph |
 | `defs.js` | Settings > Emulators: check, install, and roll back the signed definition pack |
 | `details.js` | Popped-out game details window: URL detection, geometry memory, and opening |
@@ -30,9 +31,11 @@ The web UI ships as `index.html` plus 51 ES modules in `static/` (49 domain modu
 | `imports.js` | Import dialogs (storefronts, ROM folders, arcade DATs, wizards) |
 | `insights.js` | Play Insights dashboard (heatmap, streaks, rankings; lazy-loaded) |
 | `library.js` | Library grid rendering, cover grouping, search worker client |
+| `library_storage.js` | Move library preview/apply and integrity-report UI (`/api/v2/library/*`) (2.0) |
 | `mastery.js` | Mastery completion dashboard |
 | `media.js` | Media audit, gallery, bulk downloads, and media queue |
 | `metadata.js` | Artwork & details dialog and batch auto-match |
+| `migrate.js` | First-launch migration readiness gate (`/api/v2/setup/migration/*`) (2.0) |
 | `model3d.js` | CSS-only 3D cover models (box, jewel, cassette) and rotation |
 | `moments.js` | Moments capture, timeline, and resume-from-moment UI |
 | `mood.js` | Adaptive cover theming |

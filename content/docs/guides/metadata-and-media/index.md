@@ -89,6 +89,8 @@ EmuMovies downloads require a licensed account: credentials come from Settings o
 
 ## Limits and recovery
 
+Downloads and captures are recorded in `media/manifest.json` (2.0) with each file's size, mtime, and SHA-256. The [library integrity check](/guides/library/#portable-library-and-integrity-20) uses it to report media that changed, went missing, or was added behind the app's back, and `--repair-library` rebuilds the manifest.
+
 <Callout type="note" title="Why downloads are bounded and jobs are observable">
 
 Metadata and media work never blocks the UI and never runs unbounded. Every bulk operation is a named background job (metadata sync, media-bulk) on a 4-thread pool, surfaced through its own status route so you can poll until `done` and inspect the per-game error list before retrying, while the durable queue records per-item retries. LaunchBox media downloads validate the HTTP status, content type, and payload size before writing: the response is streamed to a temporary file under the per-image cap, rejected on an unexpected status or content type, and moved to its destination only after the full download succeeds, so a failed request never leaves a partial file in the library. Local database imports keep their retry and progress reporting. See [Background jobs](/reference/background-jobs/) for the job lifecycle and [How OpenBoxGL works](/reference/how-it-works/#job-manager-and-durable-operations) for why a crash mid-job leaves partial-but-valid state.

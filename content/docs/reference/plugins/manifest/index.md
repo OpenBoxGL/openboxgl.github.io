@@ -19,7 +19,9 @@ A manifest missing any of these raises `"Plugin id, name, and version are requir
 
 | Field | Type | Default | Rules |
 | --- | --- | --- | --- |
-| `api_version` | integer | `1` | Must be a positive integer (booleans rejected). A value above the host's supported version is refused: `"Plugin requires API v2; this build supports v1."` |
+| `api_version` | integer | `1` | `1` or `2` (2.0.0+; the host serves both). A value above the host's supported versions is refused. Version 2 switches to the persistent JSON Lines runner and unlocks `min_openbox` and `subscriptions`. |
+| `min_openbox` | string | — | v2 only: oldest OpenBox release that may serve the plugin (for example `"2.0.0"`); an older host refuses the plugin at load. |
+| `subscriptions` | array of strings | `[]` | v2 only: up to 8 named events the runner delivers — `library.changed`, `library.progress`, `session.started`, `session.ended`, `game.launched`. |
 | `entry` | string | `plugin.py` | Python file name inside the package. Must be a real file, with a `.py` suffix, and must resolve inside the package (no symlinks or `..` escapes); otherwise `"Plugin entry must be a Python file inside the package."` |
 | `hooks` | array of strings | `[]` | The six base hooks plus the capability hooks: `before_launch`, `after_session`, `library`, `command`, `library_source`, `events`, `storefront`, `metadata`, `media`, `stats`, `emulator`, `discovery`. An unknown hook raises `"Plugin declares an unsupported hook."` |
 | `commands` | array of objects | `[]` | Up to 32 unique `{id, label, description?}` entries used by the `command` hook. `id` must match `^[a-z0-9][a-z0-9._-]{0,63}$`; `label` is required; `description` is capped at 280 characters. |
@@ -120,7 +122,7 @@ The `read_manifest` validator (in `plugins.py`) checks, in order:
 1. `plugin.json` exists and decodes.
 2. `id` matches the pattern, and `name` and `version` are non-empty.
 3. `hooks` is a list and a subset of the twelve supported hooks (six base, six capability).
-4. `api_version` is a positive integer no greater than the host's supported version.
+4. `api_version` is `1` or `2` (v2 manifests may add `min_openbox` and `subscriptions`).
 5. `entry` is a `.py` file that resolves strictly inside the package directory.
 6. `commands`, `permissions`, `settings`, `messages`, and `capabilities` each validate against their own rules, including capability-hook pairing and unique capability ids.
 
@@ -135,7 +137,8 @@ Invalid packages are **not** hidden: `list_plugins` surfaces them with `valid: F
   "id": "vendor.plugin",
   "name": "Vendor Plugin",
   "version": "1.2.0",
-  "api_version": 1,
+  "api_version": 2,
+  "min_openbox": "2.0.0",
   "permissions": ["network"],
   "settings": {
     "type": "object",

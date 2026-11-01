@@ -46,7 +46,9 @@ dispatch to handler (routes.py → Handler.<method>)
 send JSON response (nosniff, CSP, Referrer-Policy: no-referrer)
 ```
 
-Most structured error responses carry a stable `code` and a `request_id`. The request id is a short per-request token that also appears in the diagnostic log, so a screenshot of an error banner can be correlated with the log line. The direct unauthorized response is intentionally the smaller `{"error":"Unauthorized"}` envelope; rate-limit and outer-handler errors include their additional fields.
+Most structured error responses carry a stable `code` and a `request_id`. The request id is a short per-request token that also appears in the diagnostic log, so a screenshot of an error banner can be correlated with the log line.
+
+Since 2.0, every error response is an `application/problem+json` (RFC 9457) document carrying `type`, `title`, `status`, `detail`, `code`, `retryable`, `request_id`, and `instance`; the `error` field is kept as a duplicate of `detail` for one compatibility cycle. The payload examples in the table below show the fields older integrations read; the full document adds the problem-details members on top.
 
 POST handlers re-raise `ApiError` unchanged and convert `ValueError`, `OSError`, `TypeError`, `AttributeError`, `KeyError`, `IndexError`, `json.JSONDecodeError`, `GameyfinError`, `FileNotFoundError`, `RuntimeError`, and `subprocess.SubprocessError` into `400 BAD_REQUEST` with the message in `error`. State-corruption errors become `503` before handler dispatch. Everything else is logged and returned as `500`.
 
@@ -79,13 +81,15 @@ JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Option
 
 ## Versioned surface
 
-- **Frozen v1 Contract (`/api/v1/*`)**: Stable, frozen remote contract (enforced via `v1_contracts.json`, currently 61 routes; the contract pins path + methods, per-route params are manually verified).
-- **Base-only routes (`/api/*` without a `/api/v1/*` alias)**: local-workflow routes such as `GET /api/emulators/recommend`, `GET /api/plugins/catalog`, `POST /api/webhooks/test`, `POST /api/plugins/install|toggle|remove`, `/api/wine/*`, and `/api/faugus/*` are documented on the group pages as `/api/*` with no v1 alias. Treat them as local operations, not part of the frozen remote contract; v1 aliases are added only when a route becomes a stable remote dependency.
-<Callout type="note" title="1.18.0 is the current release">
-OpenBox 1.18.0 adds **49 method and path pairs across 43 routes** without removing or changing a v1 route. They are documented in the group pages and collected on [API 1.18 additions](/reference/api/one-eighteen/), with request bodies, response shapes, validation, and state effects. The previous release's six routes remain on [API 1.17 additions](/reference/api/one-seventeen/).
+- **Public v2 contract (`/api/v2/*`)**: Since 2.0 this is the stable public API. Every `/api/v2/*` route below is part of the ratcheted contract; the newest additions (migration, library move/integrity, compatibility report, version) are collected on [API 2.0 changes](/reference/api/two-zero/).
+- **Native host channel (`/api/host/*`)**: The authenticated channel the bundled native windows use (`launch`, `resume`, `shutdown`, `capabilities`). Host requests carry `X-OpenBox-API-Version: 2`; a mismatched major version is refused `409 HOST_API_UNSUPPORTED` before any route runs.
+- **Retired v1 bridge (`/api/v1/*`)**: Off by default in 2.0 — every route answers `410 V1_API_DISABLED`. `OPENBOX_ENABLE_V1_API=1` restores the bridge through 2.0.x with `Deprecation` and `Sunset` headers; it is removed in 2.1.0.
+- **Base routes (`/api/*` without a version prefix)**: Local-workflow routes such as `GET /api/emulators/recommend`, `POST /api/webhooks/test`, `/api/wine/*`, and `/api/faugus/*` stay routable as the internal layer through 2.0.x. Documented on the group pages; treat them as local operations, not the stable remote contract.
+<Callout type="note" title="2.0.0 (unreleased) is the newest build">
+OpenBox 2.0 promotes `/api/v2` to the public contract, retires the `/api/v1` bridge (off by default), adds the `/api/host/*` native channel, and switches every error to an RFC 9457 problem document. The new routes — migration gate, portable-library move, integrity check, compatibility report, version — are on [API 2.0 changes](/reference/api/two-zero/). The previous release's changes remain on [API 1.19 changes](/reference/api/one-nineteen/).
 </Callout>
 
-- **Additive v2 API (`/api/v2/*`)**: Modern workflows introduced in v1.7.0 through 1.18.0:
+- **v2 surface added before 2.0**: Modern workflows introduced in v1.7.0 through 1.19.1, now part of the public contract:
   - **Setup Center**: `POST /api/v2/setup/preview`, `GET /api/v2/setup/preview`, `GET /api/v2/setup/preview/items`, `POST /api/v2/setup/preview/decisions`, `POST /api/v2/setup/preview/revalidate`, `POST /api/v2/setup/commit`, `GET /api/v2/setup/summary`
   - **Launch Doctor**: `POST /api/v2/launch/preflight`, `POST /api/v2/launch/preflight/batch`
   - **Emulator Registry**: `GET /api/v2/emulators/registry` (with `?health=1` for BIOS/firmware/core status)

@@ -22,7 +22,7 @@ The macOS build hides Linux-only controls instead of failing when you click them
 Download `install-macos.sh` from the release, read it, and run it with the tag pinned. The script checks the release public key against the trust anchor pinned inside the script, verifies the bundle's SHA-256 checksum and Ed25519 signature, then installs `OpenBox.app`:
 
 ```bash
-VERSION=1.19.1
+VERSION=2.0.0
 curl --proto '=https' --tlsv1.2 --fail --location \
   --output install-macos.sh \
   "https://github.com/vindeckyy/OpenBoxGL/releases/download/v${VERSION}/install-macos.sh"

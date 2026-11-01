@@ -66,9 +66,15 @@ Use [Importing](/guides/library/importing/), [Organizing](/guides/library/organi
 
 Removing a game asks twice: first to confirm the library entry removal, then whether to also delete the game's listed media files. Game files are never deleted. **Settings** also offers **Remove all imported Steam games**, which removes only Steam entries and keeps files and media.
 
+## Portable library and integrity (2.0)
+
+**Settings > Library > Move library** turns the library portable: game paths under the chosen library folder are stored as `@library/...` tokens (`path_mode: portable`, `library_root`), so the folder can move between drives or machines. The flow is preview first — it counts the paths that become portable, the ones that stay absolute, and the ones outside the folder — then apply, and apply refuses with `MOVE_PLAN_STALE` if the library changed after the preview. OpenBox never copies or deletes game files; you move the folder with your file manager.
+
+**Settings > Library > Check integrity** (or `openbox --check-library`, `GET /api/v2/library/integrity`) reports missing, unreadable, and outside-folder game paths plus media files that were changed, deleted, or added behind the app's back — without changing anything. `openbox --repair-library` rebuilds the media manifest and prunes expired trash after confirmation.
+
 ## Source and status
 
-Capability status belongs to the [parity matrix](/reference/parity/), maintained from `PARITY.md`. Library data lives in the platform data directory (`~/.local/share/openbox-game-launcher/library.json` on Linux, `~/Library/Application Support/openbox-game-launcher/library.json` on macOS, and `%LOCALAPPDATA%\openbox-game-launcher\library.json` on Windows) unless `OPENBOX_DATA_DIR` points elsewhere. State is schema version 6, written atomically with a `.bak` last-known-good copy beside it; recovery is covered in [Data and recovery](/reference/data-and-recovery/).
+Capability status belongs to the [parity matrix](/reference/parity/), maintained from `PARITY.md`. Library data lives in the platform data directory (`~/.local/share/openbox-game-launcher/library.json` on Linux, `~/Library/Application Support/openbox-game-launcher/library.json` on macOS, and `%LOCALAPPDATA%\openbox-game-launcher\library.json` on Windows) unless `OPENBOX_DATA_DIR` points elsewhere. State is schema version 7, written atomically with a `.bak` last-known-good copy beside it; active sessions live in `sessions.json` beside it. Recovery is covered in [Data and recovery](/reference/data-and-recovery/).
 
 ## Guides in this section
 
@@ -82,4 +88,4 @@ Capability status belongs to the [parity matrix](/reference/parity/), maintained
 - [Navigation](/guides/library/navigation/) — keyboard and controller navigation through the grid and detail pane.
 - [Export](/guides/library/export/) — portable, redacted exports of your library for inspection or external tooling.
 
-Large libraries (5,000+ games) self-enable the SQLite FTS read model unless `OPENBOX_ENABLE_SQLITE_READ=0` opts out, and an opt-in weekly automatic backup keeps 4 archives on a 7-day schedule — see [Organizing](/guides/library/organizing/#large-libraries-and-automatic-backups-v1120), [API 1.12 additions](/reference/api/one-twelve/), and [Library backups](/guides/sessions-saves-and-backups/library-backups/).
+Large libraries (5,000+ games) self-enable the SQLite FTS read model unless `OPENBOX_ENABLE_SQLITE_READ=0` opts out (in 2.0 it rebuilds on a background thread and falls back to `source: "json"` while stale), and an opt-in weekly automatic backup keeps 4 archives on a 7-day schedule — see [Organizing](/guides/library/organizing/#large-libraries-and-automatic-backups-v1120), [API 1.12 additions](/reference/api/one-twelve/), and [Library backups](/guides/sessions-saves-and-backups/library-backups/).

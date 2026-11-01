@@ -15,6 +15,8 @@ Every active session, queue entry, and save backup points at a `game_id` derived
 
 Every launch starts a session: play count increments, last-played stamps, and the first-launch progress setting applies. When the session ends (see tracking modes in [Emulators and launching](/guides/emulators-and-launching/)), play time adds, the session history records game, start time, duration, and exit code (history keeps the last 500 entries), and progress automation may move the game to Playing or Paused. **Track play session history** in Settings disables history recording while still tracking current sessions. **Back up saves when a game session ends** creates a save backup with an `on-close` label and enforces the save retention limit.
 
+Active sessions are mirrored to `sessions.json` beside `library.json` (2.0) so a crash can reconcile them at startup; the file is removed when no sessions remain.
+
 The **Running** dialog (top bar) shows live sessions with Pause/Resume, Restart, Exit, and Force close. The **History** dialog lists past sessions with timestamps, durations, and exit codes. A session that fails fast (under 5 seconds, nonzero exit) shows a "Session failed" overlay with the code and a hint to check the Launch command and emulator install.
 
 Since 1.16.0 the long-run case is distinguished too: a game that ran for a while and *then* exited with an error shows **Session ended** with the exit code, rather than the ordinary "Play time and history were saved". A normal exit still shows the usual message. The same two values reach [webhooks](/integrations/webhooks/) — the exit code, plus a separate `timed_out` flag when a session ended because it timed out rather than failing.

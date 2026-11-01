@@ -1,6 +1,6 @@
 ---
 title: Data and recovery
-description: Understand schema version 6 state files and recovery behavior.
+description: Understand schema version 7 state files and recovery behavior.
 ---
 
 The library is one schema-versioned JSON file with a last-known-good sidecar, cross-process locking, and atomic owner-only writes. This page documents the exact layout, the migration path, stable IDs, caps, and recovery.
@@ -11,10 +11,16 @@ Inside the data directory (default `~/.local/share/openbox-game-launcher`, or `O
 
 | Path | Purpose |
 | --- | --- |
-| `library.json` | The primary state: `schema_version`, `games`, `profiles`, `history`, `settings`, `playlists`, `queue`, `notifications`, `ui_state`, `active_sessions` |
+| `library.json` | The primary state: `format` (`openbox-library`), `schema_version` (7), `games`, `profiles`, `history`, `settings`, `playlists`, `queue`, `notifications`, `ui_state` |
 | `library.json.bak` | Last-known-good copy, rewritten before every commit |
 | `library.json.snapshots/` | Rolling snapshots of the last 5 committed states, kept as timestamped JSON copies for point-in-time recovery |
 | `.library.json.lock` | Cross-process `flock` lock coordinating concurrent writers |
+| `sessions.json` | Active sessions mirrored out of the library (format 1) for crash recovery; reconciled at startup and removed when no sessions remain |
+| `library.v6.backup.json` | Pre-migration copy of the v6 library, written when 2.0 upgrades the file; the `openbox --rollback-library` source |
+| `migration-report.json` | Record of the v6→v7 migration (counts, sessions moved) |
+| `migration-in-progress.json` | Crash marker present while a migration runs; a leftover marker lets startup reconstruct the report |
+| `rollback-report.json` | Record of a rollback: the discarded game edits made after the upgrade |
+| `media/manifest.json` | Per-file SHA-256, size, and mtime for downloads and captures, feeding the integrity check |
 | `server.token`, `server.port` | Per-launch credentials for the running Web UI; deleted on exit |
 
 Catalog synchronization is separate from this local state directory. When enabled, immutable events live under `<cloud_folder>/openbox-library-v3/` in the mounted folder selected in Settings. The v3 transport does not copy launch paths, commands, credentials, statistics, saves, or media.
@@ -32,7 +38,7 @@ Every read and write happens under the file lock, so two OpenBoxGL processes (We
 
 ## Schema versions and migration
 
-The current schema is version 6 (`STATE_SCHEMA_VERSION`). Older files migrate in place on load:
+The current schema is version 7 (`STATE_SCHEMA_VERSION`). Older files migrate in place on load:
 
 | From | Migration |
 | --- | --- |
@@ -41,8 +47,11 @@ The current schema is version 6 (`STATE_SCHEMA_VERSION`). Older files migrate in
 | v3→v4 | Gains `queue` and `notifications`, capped at 500 and 200 entries; non-list game `tags` become `[]` |
 | v4→v5 | Gains the host-owned `ui_state` block; games, settings, playlists, and history are unchanged |
 | v5→v6 | Gains the `active_sessions` collection used to reconcile running sessions across restart |
+| v6→v7 | Adds the `"format": "openbox-library"` envelope; `active_sessions` move out to `sessions.json`; the pre-migration file is kept as `library.v6.backup.json` |
 
-Unknown fields survive migration; only known collections are normalized. A schema version above 6, below 1, or with no migration available raises `StateCorruptError` instead of guessing. A complete v6 object takes a fast path without normalization.
+Unknown fields survive migration; only known collections are normalized. A schema version above 7, below 1, or with no migration available raises `StateCorruptError` (a future version raises `StateFutureVersionError`, which is never rewritten or auto-recovered) instead of guessing. A complete v7 object takes a fast path without normalization.
+
+`openbox --rollback-library` restores `library.v6.backup.json`: it lists the game edits made after the upgrade, requires confirmation (or `--yes`), and refuses while OpenBox is running or sessions are recorded.
 
 ## Stable game IDs
 

@@ -4,6 +4,36 @@ description: Release notes for OpenBox, from the latest release back to the firs
 sidebar: false
 ---
 
+## 2.0.0 (unreleased) — Library format 7, API v2, portable library
+
+A major release. The library upgrades to **format 7** on first launch (with `library.v6.backup.json` and `openbox --rollback-library` as the downgrade path), the public API is **`/api/v2`** with `/api/v1` disabled by default, and game paths can live under one portable library folder. Also in 2.0: backup format 2 with per-file SHA-256 manifests, plugin API v2, a migration readiness gate, a library integrity check, a Windows ARM64 release lane, and an OpenAPI document. Upgrade from 1.19.x. See [API 2.0 changes](/reference/api/two-zero/).
+
+### Added
+
+- **Portable library.** Game paths under one library folder are stored as `@library/...` tokens. Settings > Library > Move library previews a move and rebases paths after you move the folder; a stale preview is refused with `MOVE_PLAN_STALE`.
+- **Library maintenance.** `openbox --check-library`, `--repair-library`, `--migrate-library`, and `--rollback-library` run without a window; `GET /api/v2/library/integrity` and Settings > Library > Check integrity serve the same report.
+- **Backup format 2.** Every file in a backup records a SHA-256; restore refuses a corrupt or unlisted member before writing. A 1.19-compatible export remains available.
+- **Plugin API v2.** `api_version: 2` adds `min_openbox`, event subscriptions, a JSON Lines runner with a 4 MiB output cap, and versioned read-only host services. v1 plugins keep working; the v1 runner goes in 3.0.
+- **Migration readiness gate.** First launch lists anything that needs a look — unknown theme tokens, unservable plugin API versions, a missing sync folder, an archive with no format, an oversized library, a custom data directory — and can write a backup before the library opens. The planned 1.19.2 preflight release was dropped, so these checks run here instead.
+- **Compatibility report.** Settings > About > Show compatibility report lists the library format, path mode, API prefix, host channel, backup and sync versions, and each theme's token fallbacks.
+- **Windows ARM64 lane.** `OpenBox-arm64-windows.zip` and an ARM64 native host build on `windows-11-arm`; `install.ps1` resolves arm64 and selects the asset.
+- **Problem-details errors.** API errors are `application/problem+json` (`type`, `title`, `status`, `detail`, `code`, `retryable`, `request_id`); `error` is kept for one cycle.
+- **`GET /api/v2/version`** reports app, API, state schema, plugin API, backup, and sync format versions.
+
+### Changed
+
+- **Library format 7.** Adds the `openbox-library` envelope and moves active sessions to `sessions.json`. 1.19.x cannot read a format 7 library.
+- **`/api/v1` is a retired bridge.** Off by default (`410 V1_API_DISABLED`); `OPENBOX_ENABLE_V1_API=1` restores it through 2.0.x with `Deprecation`/`Sunset` headers. Native windows use `/api/host/*` and a wrong host major version is refused with `HOST_API_UNSUPPORTED`.
+- **Search projection rebuilds in the background.** A stale or corrupt SQLite read model falls back to the canonical JSON with `source: "json"`.
+
+### Known limits in 2.0.0
+
+- The macOS bundle is still ad-hoc signed — notarization machinery is in the tree but the shipped app is not notarized. First launch needs **System Settings > Privacy & Security > Open Anyway**.
+- Linux-only features stay unavailable on Windows and macOS by design.
+- The `media_manifest_enabled` setting is stored but has no consumer yet; the manifest records unconditionally.
+
+[OpenBox 2.0.0 release notes](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/RELEASE_NOTES.md) · [API 2.0 changes](/reference/api/two-zero/)
+
 ## 1.19.1 (2026-10-28) — Platform parity
 
 A platform-parity bug sweep. Every platform-specific control is now decided by one server-computed capability contract, so a Linux-only control is hidden on Windows and macOS instead of failing at click time, and the controls those platforms do have use their own tools. Linux behavior is the reference and is unchanged. No route or setting was added, and no v1 route changed. Upgrade from 1.19.0.

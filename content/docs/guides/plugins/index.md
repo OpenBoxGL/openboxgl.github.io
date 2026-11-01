@@ -7,7 +7,7 @@ Plugins are optional local Python packages that observe or extend OpenBoxGL thro
 
 <Callout type="caution" title="What 'separate process' actually means">
 
-Without bubblewrap, isolation is robustness, not a security sandbox. The child process shares your user privileges and your filesystem, it can read and write any file your OpenBoxGL process can reach. The per-hook timeout (5 seconds for base hooks), 2 MiB payload cap, and `PYTHONNOUSERSITE=1` environment cleaning prevent runaway behavior, but they don't restrict what the plugin can see on disk. When `bwrap` (bubblewrap) is available, OpenBoxGL runs plugins in an OS sandbox (`--unshare-all`, `--ro-bind / /`, `tmpfs` on `/home`/`/tmp`/`/run`, no network); if the sandbox cannot be created, enabled plugins are skipped unless you trust the plugin in the Plugins manager ("Trust and run", bound to the package's SHA-256) or set `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` for trusted local plugins.
+Without bubblewrap, isolation is robustness, not a security sandbox. The child process shares your user privileges and your filesystem, it can read and write any file your OpenBoxGL process can reach. The per-hook timeout (5 seconds for base hooks), the payload caps (2 MiB in; 4 MiB out for a `api_version: 2` plugin), and `PYTHONNOUSERSITE=1` environment cleaning prevent runaway behavior, but they don't restrict what the plugin can see on disk. When `bwrap` (bubblewrap) is available, OpenBoxGL runs plugins in an OS sandbox (`--unshare-all`, `--ro-bind / /`, `tmpfs` on `/home`/`/tmp`/`/run`, no network); if the sandbox cannot be created, enabled plugins are skipped unless you trust the plugin in the Plugins manager ("Trust and run", bound to the package's SHA-256) or set `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` for trusted local plugins.
 
 </Callout>
 
@@ -42,6 +42,18 @@ Capability hooks receive the usual payload plus:
 - **`credentials`** — values from the capability credential store. Password-format settings are never included.
 
 They may also return `service_requests` (at most 8, one round only). The host answers read-only services — `library.query`, `achievements`, `profile`, `activity`, `leaderboards`, `catalog.search`, `metadata.search`, and `media.search` — and re-invokes the hook once with `service_results`. There is no standalone `services` hook: services exist only as a request from a capability hook. Credentials cannot be written from a hook result.
+
+## Plugin API v2 (2.0)
+
+A manifest may declare `"api_version": 2` (2.0.0+). Version 2 adds:
+
+- **`min_openbox`** — the oldest OpenBox release that may serve the plugin; a host older than that refuses it at load.
+- **`subscriptions`** — named events the plugin asks to receive, on top of the base `events` hook.
+- **A JSON Lines runner** — request/response framing with per-request timeout and cancellation, instead of the v1 runner's one-shot payloads.
+- **Versioned, read-only host services** — `library.query` and `media.search` descriptors the plugin can call through the runner; writes are refused.
+- **A 4 MiB plugin output cap** (the request/input cap stays 2 MiB).
+
+A manifest without `api_version` stays on the v1 runner with byte-identical v1 payloads; the v1 runner is scheduled for removal in 3.0. The same bubblewrap masks apply to both versions, and `plugins/openbox.sample-v2/` in the app repository is a working sample.
 
 ## Install a plugin
 
@@ -97,7 +109,7 @@ The [Plugin API reference](/reference/plugins/) documents the full contract:
 
 - [Manifest](/reference/plugins/manifest/), `plugin.json` fields, capabilities, messages, and ID validation
 - [Hooks](/reference/plugins/hooks/), the payloads, service requests, and response rules
-- [Processes and errors](/reference/plugins/process-and-errors/), limits (2 MiB in/out, per-hook timeouts), environment cleaning, and failure handling
+- [Processes and errors](/reference/plugins/process-and-errors/), limits (2 MiB in, 4 MiB out for `api_version: 2`; per-hook timeouts), environment cleaning, and failure handling
 - [Catalog](/reference/plugins/catalog/), bundled entries and installation
 
 A minimal plugin that observes sessions:

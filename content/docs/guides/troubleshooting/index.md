@@ -13,6 +13,8 @@ Start with the diagnostic log and the exact visible error. **Settings > Advanced
 - If an older AppImage build opened but never showed a window after desktop integration, install v0.6.0 or newer, remove the old menu entry, and re-add the AppImage.
 - Startup failures that were recovered from (a restored last-known-good backup, a library that could not be read) appear in the `startup_errors` list the library page reads at boot; check the diagnostic log for the underlying error.
 - Games that launch through Steam still go through Steam (`steam -applaunch` / `steam://`). If Steam Input or overlays do not work in Game Mode, confirm the title is a real Steam launch and that Steam Input is enabled for the OpenBox shortcut.
+- **Settings > About > Show compatibility report** (2.0) lists the library format, path mode and library root, the migration backup, the public API prefix and host channel, backup and sync format versions, and each theme's token fallbacks — the deterministic summary to paste into a report. About also carries a Buy me a coffee support link.
+- Scripted callers should target the public `/api/v2` contract ([API 2.0 changes](/reference/api/two-zero/)); unversioned `/api/*` paths still answer but are the internal layer, and `/api/v1` is off by default (`410 V1_API_DISABLED`).
 
 ## Big Box input and display
 
@@ -46,7 +48,7 @@ Start with the diagnostic log and the exact visible error. **Settings > Advanced
 
 ## State recovery
 
-- Library state is `library.json` (schema version 6) with a `.bak` last-known-good copy and a `.lock` file beside it. Writes are atomic and owner-only.
+- Library state is `library.json` (schema version 7) with a `.bak` last-known-good copy, a `.lock` file, and `sessions.json` for active sessions beside it. Writes are atomic and owner-only.
 - If the primary file cannot be read, operations return 503 with "OpenBox library data needs recovery"; the original file is preserved, never overwritten. Recovery loads the `.bak` file, normalizes it, and writes it back. If the backup is also unusable, recovery fails with a clear error.
 - Back up the data directory before manual intervention: copy `library.json` and `library.json.bak` together.
 - Stable game IDs (`game-<hex>`) survive reordering; legacy index-suffixed IDs are kept as aliases (`legacy_game_ids`).

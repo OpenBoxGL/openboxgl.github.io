@@ -7,7 +7,7 @@ OpenBoxGL writes library state atomically with a last-known-good backup, so a cr
 
 ## How to read the state
 
-- The library is `library.json` (schema version 6) with a `.bak` last-known-good copy and a `.lock` file beside it. Writes are atomic and owner-only.
+- The library is `library.json` (schema version 7) with a `.bak` last-known-good copy, a `.lock` file, and `sessions.json` for active sessions beside it. Writes are atomic and owner-only.
 - Stable game IDs (`game-<hex>`) survive reordering; legacy index-suffixed IDs are kept as aliases (`legacy_game_ids`).
 
 ## When recovery is needed
@@ -58,11 +58,15 @@ Success returns `{"ok": true, "games": <count>}`.
 | `"The last-known-good state is also unusable: <bak path>"` | Both primary and backup are bad; recovery fails clearly rather than guessing. |
 | `"Unknown snapshot: <name>"` | Specified snapshot filename does not exist in `library.json.snapshots/`. |
 
+## Upgrading to 2.0
+
+On the first start after a 2.0 upgrade, OpenBox migrates the library to format 7 and shows a **readiness gate** listing anything that needs a look before the migrated library is used — a theme with unknown tokens, a plugin API version this build does not serve, a missing sync folder, an archive with no format, a library over the formal scale, or a custom data directory. A `library`+`settings` backup can be written from the gate before the library opens. The migration writes `migration-report.json` and keeps `library.v6.backup.json`; `migration-in-progress.json` is a crash marker removed when the migration completes. `openbox --rollback-library` restores the v6 file, lists the edits made after the upgrade, and writes `rollback-report.json` (the replaced v7 file is kept as `library.v7.kept-<stamp>.json`).
+
 ## Preventing data loss
 
 - Back up the whole data directory before manual intervention: copy `library.json` and `library.json.bak` together.
 - Rolling snapshots are automatically saved in `library.json.snapshots/` before schema migrations or major updates (capped at 5 rotating snapshots).
-- Schema versions migrate in place on load from v1 through v6; a version above 6, below 1, or with no migration available raises `StateCorruptError` instead of guessing.
+- Schema versions migrate in place on load from v1 through v7; a version above 7 raises `StateFutureVersionError` (never rewritten or auto-recovered), and below 1 or with no migration available raises `StateCorruptError` instead of guessing. The v6→v7 upgrade keeps `library.v6.backup.json` and `openbox --rollback-library` restores it.
 - The `.bak` is always at least as fresh as the primary commit that preceded the last write, because it is written before the swap.
 
 ## See also

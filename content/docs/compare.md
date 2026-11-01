@@ -7,15 +7,15 @@ description: OpenBoxGL compared to LaunchBox and Windows-first launchers on Linu
 
 OpenBoxGL exists because LaunchBox is Windows first and gates useful workflows behind Premium. This page uses the same source as the docs parity matrix and the README comparison, with no invented claims.
 
-OpenBoxGL runs on **Linux, Windows x86_64, and macOS 11 or newer** (since 1.19.0), so the comparison below covers all three. Linux remains the primary distro-integration target; the Linux-only boundaries are named in the rows that follow.
+OpenBoxGL runs on **Linux, Windows x86_64 and ARM64, and macOS 11 or newer** (since 1.19.0), so the comparison below covers all three. Linux remains the primary distro-integration target; the Linux-only boundaries are named in the rows that follow.
 
 ## At a glance
 
-| Topic | OpenBox 1.19.1 | LaunchBox |
+| Topic | OpenBox 2.0.0 | LaunchBox |
 | --- | --- | --- |
 | License | AGPL-3.0-only, full source on GitHub | Proprietary |
 | Cost | Free, no subscription | Premium paywall for advanced workflows |
-| Platform | Linux x86_64 and aarch64; Windows x86_64; macOS 11+ on Apple Silicon and Intel | Windows first, no Linux build |
+| Platform | Linux x86_64 and aarch64; Windows x86_64 and ARM64; macOS 11+ on Apple Silicon and Intel | Windows first, no Linux build |
 | Install | AppImage, Flatpak, or source on Linux; signed portable package via `install.ps1` on Windows; signed universal app bundle via `install-macos.sh` on macOS | Windows installer only |
 | Data | Local JSON at `~/.local/share/openbox-game-launcher/library.json` on Linux, `%LOCALAPPDATA%\openbox-game-launcher\library.json` on Windows, and `~/Library/Application Support/openbox-game-launcher/library.json` on macOS; no account | Cloud library for Premium |
 | Game sources | Steam, Heroic, Lutris, Faugus, RetroArch, ROMs, Arcade, ScummVM, RPCS3, Vita3K; native installed GOG, EA app, and Ubisoft Connect on Windows | Windows-first imports |
@@ -46,8 +46,8 @@ Every LaunchBox Premium equivalent ships without a subscription in OpenBoxGL: cu
 
 ## How to verify
 
-- Check the current release tag at [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest), currently v1.19.1.
-- For Windows, the same release publishes `OpenBox-x86_64-windows.zip` with its `.sha256` and `.sig`, plus `install.sh` and `install.ps1` as standalone assets; the installer verifies the key, checksum, and signature before extracting. The uninstaller is not a standalone asset — it ships **inside** the zip and the installed tree, where the installer also puts it, so it is run from the install at `scripts\uninstall.ps1` (for a default install, `%LOCALAPPDATA%\OpenBox\share\openbox\scripts\uninstall.ps1`). It removes exactly what the installer created while leaving your library in place. The full path is in [Windows](/windows/).
+- Check the current release tag at [Releases](https://github.com/vindeckyy/OpenBoxGL/releases/latest), currently v2.0.0 (unreleased; the latest published tag is v1.19.1).
+- For Windows, the same release publishes `OpenBox-x86_64-windows.zip` and `OpenBox-arm64-windows.zip` with their `.sha256` and `.sig`, plus `install.sh` and `install.ps1` as standalone assets; the installer verifies the key, checksum, and signature before extracting. The uninstaller is not a standalone asset — it ships **inside** the zip and the installed tree, where the installer also puts it, so it is run from the install at `scripts\uninstall.ps1` (for a default install, `%LOCALAPPDATA%\OpenBox\share\openbox\scripts\uninstall.ps1`). It removes exactly what the installer created while leaving your library in place. The full path is in [Windows](/windows/).
 - For macOS, the same release publishes `OpenBox-macos.zip` with its `.sha256` and `.sig`, plus `install-macos.sh`, which verifies the key, checksum, and signature before it installs `OpenBox.app`.
 - Open PARITY.md in the application repository and confirm the acceptance check for any row before relying on it.
 - For pricing, LaunchBox Premium pricing is published by Unbroken Software. OpenBox cost is zero and source is AGPL-3.0 at [LICENSE](https://github.com/vindeckyy/OpenBoxGL/blob/master/LICENSE).

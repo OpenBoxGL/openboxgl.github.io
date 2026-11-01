@@ -23,7 +23,9 @@ If you run 1.15.x or older, these are the security defects 1.16.0 closes. **None
 
 | Version | Support |
 | --- | --- |
-| 1.18.x | Yes (current) |
+| 2.0.x | Yes (current; v2.0.0 is unreleased until the tag) |
+| 1.19.x | Yes (latest published release) |
+| 1.18.x | No |
 | 1.17.x | No — upgrade required |
 | 1.16.x | No — upgrade required |
 | 1.15.x | No — upgrade required (see above) |
@@ -50,7 +52,7 @@ If you run 1.15.x or older, these are the security defects 1.16.0 closes. **None
 | 0.4.x | Best effort |
 | < 0.4.0 | No |
 
-Only the latest release on the `master` branch is maintained, and the 1.18.x line is the current maintained release. The older rows document the historical support policy and do not promise backports; upgrade to 1.18.x to receive fixes.
+Only the latest release on the `master` branch is maintained, and the 2.0.x line is the current maintained release (v2.0.0 is unreleased until the tag; 1.19.1 is the latest published release). The older rows document the historical support policy and do not promise backports; upgrade to 2.0.x to receive fixes.
 
 ## Protecting local data
 

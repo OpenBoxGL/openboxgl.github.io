@@ -39,7 +39,7 @@ The detail pane **Story** tab narrates one game's deterministic timeline via `GE
 
 ## Large libraries and automatic backups (v1.12.0)
 
-Collections and search run through the same read path documented in [API 1.12 additions](/reference/api/one-twelve/): the SQLite FTS read model **self-enables at 5,000+ games** (`SQLITE_AUTO_THRESHOLD` in `pkg/state/sqlite_readmodel.py:30-34`); set `OPENBOX_ENABLE_SQLITE_READ=0` to opt out — the opt-out is never overridden. JSON remains the source of truth either way. Whole-library protection is the opt-in **weekly automatic backup** (`AUTO_BACKUP_DAYS = 7`, `AUTO_BACKUP_KEEP = 4` in `pkg/parity/parity_backup.py:27-28`, `last_auto_backup` stamp; missing or unparsable counts as due). See [Library backups](/guides/sessions-saves-and-backups/library-backups/) for the manual engine the schedule reuses.
+Collections and search run through the same read path documented in [API 1.12 additions](/reference/api/one-twelve/): the SQLite FTS read model **self-enables at 5,000+ games** (`SQLITE_AUTO_THRESHOLD` in `pkg/state/sqlite_readmodel.py:30-34`); set `OPENBOX_ENABLE_SQLITE_READ=0` to opt out — the opt-out is never overridden. In 2.0 the projection rebuilds on a background thread after writes, and a query that lands before the rebuild falls back to the canonical library with `source: "json"` — JSON remains the source of truth either way. Whole-library protection is the opt-in **weekly automatic backup** (`AUTO_BACKUP_DAYS = 7`, `AUTO_BACKUP_KEEP = 4` in `pkg/parity/parity_backup.py:27-28`, `last_auto_backup` stamp; missing or unparsable counts as due). See [Library backups](/guides/sessions-saves-and-backups/library-backups/) for the manual engine the schedule reuses.
 
 ## Fields, badges, and bulk edits
 

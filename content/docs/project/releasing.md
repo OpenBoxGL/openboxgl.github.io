@@ -58,7 +58,7 @@ Confirm the embedded version matches the release by extracting the AppImage and 
 
 Pushing a `v*` tag triggers the AppImage/Windows release workflow and the Flatpak release workflow. The two publish jobs share a per-tag concurrency group because both update the same GitHub Release.
 
-`release.yml` defines eight jobs: `test`, `build`, `attest`, `build-windows`, `attest-windows`, `build-macos`, `attest-macos`, and one shared `publish`. The Windows and macOS artifacts are uploaded by that same `publish` job, not by a separate one.
+`release.yml` defines ten jobs: `test`, `build`, `attest`, `build-windows`, `attest-windows`, `build-windows-arm64`, `attest-windows-arm64`, `build-macos`, `attest-macos`, and one shared `publish`. The Windows and macOS artifacts are uploaded by that same `publish` job, not by a separate one.
 
 **test** (contents read): installs the build dependencies, compiles the native host, and runs the full test suite on the host.
 
@@ -72,7 +72,7 @@ Pushing a `v*` tag triggers the AppImage/Windows release workflow and the Flatpa
 
 **build-macos** (contents read): runs the test suite on the macOS runner, builds the universal app bundle with `scripts/build_macos_app.sh`, smoke-tests it, and produces the per-release SBOM. **attest-macos** (id-token and attestations write, needs `build-macos`): attests provenance for `OpenBox-macos.zip`. It only attests; the signing and upload happen in the shared `publish` job.
 
-**publish** (requires the `release` environment, contents write; needs `build`, `attest`, `build-windows`, and `attest-windows`): checks out the exact tagged commit, confirms the annotated tag points at the build commit, signs and verifies the AppImages, the Windows zip, and the standalone host, compares the derived public key against the committed `openbox-release.pub`, re-checks each SHA-256, and verifies each signature. If `OPENBOX_SIGNING_KEY` is missing or the derived key does not match, the job fails before anything is published. It then copies `scripts/install.sh` and `scripts/install.ps1` and uploads both signed AppImages with their `.zsync`, `.sha256`, and `.sig`, the Windows zip and host with their sidecars, the release key, and the architecture-specific SBOMs — so the release publishes both installers. A tag containing `-` is marked prerelease.
+**publish** (requires the `release` environment, contents write; needs all eight upstream jobs: `build`, `attest`, `build-windows`, `attest-windows`, `build-windows-arm64`, `attest-windows-arm64`, `build-macos`, and `attest-macos`): checks out the exact tagged commit, confirms the annotated tag points at the build commit, signs and verifies the AppImages, the x86_64 and ARM64 Windows zips, and both standalone hosts, compares the derived public key against the committed `openbox-release.pub`, re-checks each SHA-256, and verifies each signature. If `OPENBOX_SIGNING_KEY` is missing or the derived key does not match, the job fails before anything is published. It then copies `scripts/install.sh`, `scripts/install.ps1`, and `scripts/install-macos.sh` and uploads both signed AppImages with their `.zsync`, `.sha256`, and `.sig`, the x86_64 and ARM64 Windows zips and hosts with their sidecars, the release key, and the architecture-specific SBOMs — so the release publishes all three installers. A tag containing `-` is marked prerelease.
 
 For the macOS bundle, the same `publish` job signs `OpenBox-macos.zip` with the release key, verifies the signature against the committed `openbox-release.pub`, and uploads it with its `.sha256` and `.sig`, together with `install-macos.sh` and `verify_release.py`.
 
@@ -97,7 +97,7 @@ The release body is `docs/RELEASE_NOTES.md`, so update it before tagging; GitHub
 - `build_appimage.sh` does not regenerate the `.sha256` sidecar; a stale checksum must be replaced manually.
 - Release artifacts are Git-ignored and must be uploaded explicitly via the release workflow.
 - Do not tag or publish before CI succeeds for the exact release commit.
-- OpenBoxGL uses only `master`; there is no release branch or worktree.
+- OpenBoxGL ships from `master`; there is no release branch or worktree for releases (CI checks out a `release/1.19` branch only as the perf baseline).
 
 ## Related
 

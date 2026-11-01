@@ -105,7 +105,7 @@ Returns the public settings projection: every validated setting key with default
 <ApiEndpoint method="POST" path="/api/settings">
 
 
-Partial save: merge the posted keys into existing settings and validate. See [Configuration](/reference/configuration/) for the full validation table. Empty `gameyfin_password` keeps the stored password. Returns the new public settings.
+Partial save: merge the posted keys into existing settings and validate. See [Configuration](/reference/configuration/) for the full validation table. Empty `gameyfin_password` keeps the stored password. Returns the new public settings. A save that would change `library_root` or `path_mode` is refused — use the Move library flow, which previews the change first. Keys outside the registry are dropped with a diagnostic warning rather than persisted.
 
 </ApiEndpoint>
 

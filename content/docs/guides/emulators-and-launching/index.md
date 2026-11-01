@@ -142,7 +142,7 @@ How it behaves:
 - **Retractions are honored.** If a newer pack stops shipping a definition the previous one installed, the old file is removed rather than left shadowing the bundled set.
 - **No restart needed.** A definition update refreshes the emulator list, the platform map, and the folder-import extension list in place, so a newly added definition is recognized on the next scan.
 
-The API equivalents are `GET /api/v2/emulators/defs/status` (what is installed, what is local, whether anything is available), `GET`/`POST /api/v2/emulators/defs/update` (check, then install), and `POST /api/v2/emulators/defs/rollback`. They are additive `/api/v2` routes; the v1 surface is unchanged.
+The API equivalents are `GET /api/v2/emulators/defs/status` (what is installed, what is local, whether anything is available), `GET`/`POST /api/v2/emulators/defs/update` (check, then install), and `POST /api/v2/emulators/defs/rollback`. They are public `/api/v2` routes; the v1 surface is frozen and off by default in 2.0 — `/api/v1` answers `410 V1_API_DISABLED` unless `OPENBOX_ENABLE_V1_API=1` is set.
 
 ### Emulator-def schema
 

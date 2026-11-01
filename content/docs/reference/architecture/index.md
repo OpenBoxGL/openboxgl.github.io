@@ -10,7 +10,7 @@ OpenBox is engineered with a strict **local-first, dependency-free runtime** arc
 ```mermaid
 flowchart TB
     subgraph UI["User Interface Layer"]
-        WebApp["Desktop Web App<br/>Vanilla JS and CSS, 51 modules"]
+        WebApp["Desktop Web App<br/>Vanilla JS and CSS, 53 modules"]
         BigBox["Big Box Kiosk UI<br/>Gamepad, Stage and CoverFlow"]
     end
     NativeHost["Native Host<br/>WebKitGTK on Linux, WebView2 on Windows"]
