@@ -8,7 +8,7 @@ OpenBoxGL merges play statistics between machines through any mounted folder, Sy
 ## Set it up
 
 1. In **Settings → Integrations**, set **Mounted cloud folder** to the absolute path of the mounted folder (for example `/mnt/cloud/openbox`).
-2. Click **Sync statistics now** to run a merge immediately, or let it run automatically, sync runs automatically after each session ends, so play time propagates without manual action.
+2. Click **Sync statistics now** to run a merge immediately. The Python fallback also runs a merge after each session; the 3.0 Rust server does not currently call that hook, so use the button until it is wired.
 3. Configure the same folder on another machine to merge stats there.
 
 ## What syncs and how conflicts resolve
@@ -42,6 +42,6 @@ See [Library catalog sync](/guides/sessions-saves-and-backups/library-sync/) for
 
 - [Library catalog sync](/guides/sessions-saves-and-backups/library-sync/), opt-in catalog metadata sync (v1.10.0)
 - [Sessions, saves, and backups](/guides/sessions-saves-and-backups/), session recording and history
-- [API saves and operations](/reference/api/saves-and-operations/), `POST /api/cloud/sync`
+- [API saves and operations](/reference/api/saves-and-operations/), `POST /api/v2/cloud/sync`
 - [Data and recovery](/reference/data-and-recovery/), where local state lives
 

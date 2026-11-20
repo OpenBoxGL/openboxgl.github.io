@@ -3,7 +3,7 @@ title: Big Box and handhelds
 description: Browse a library fullscreen with controller-oriented layouts.
 ---
 
-Big Box is the fullscreen controller-oriented view of the app. Click **Big Box** in the top bar (or launch with `?deeplink=bigbox`; OpenBoxGL also opens Big Box automatically when it detects a gamescope guest session).
+Big Box is the fullscreen controller-oriented view of the app. Click **Big Box** in the top bar (or launch with `?deeplink=bigbox`; OpenBoxGL also opens Big Box automatically when it detects a gamescope guest session). In 3.0 the top bar carries a clickable **Exit** button, and Stage mode fixes portrait cover framing so a portrait cover no longer shows a dark chin.
 
 ## Starting in Big Box
 
@@ -63,7 +63,7 @@ Pressing **M** (or Start on gamepad) opens the Filter and Sort menu with 4 inter
 
 ### Controller prompt packs
 
-Activating a controller media pack (`controller-xbox` or `controller-playstation`) via Settings or `POST /api/premium/media-packs/apply` automatically updates the on-screen button legend and prompts to match your physical gamepad layout (`controller_prompt_pack`). Toggle on-screen button hints with `controller_prompt_hint`.
+Activating a controller media pack (`controller-xbox` or `controller-playstation`) via Settings or `POST /api/v2/premium/media-packs/apply` automatically updates the on-screen button legend and prompts to match your physical gamepad layout (`controller_prompt_pack`). Toggle on-screen button hints with `controller_prompt_hint`.
 
 The **screensaver / attract mode** shows a rotating random game after a delay. Settings has two related fields: **Big Box screensaver delay** (`screensaver_seconds`, default 90) and **Attract mode delay** (`attract_mode_seconds`). The screensaver reads `attract_mode_seconds`, which falls back to `screensaver_seconds` when unset, and the Settings dialog keeps both in sync with the same fallback. Both are 0-3600 seconds (0 disables; values 1-29 are rejected). Any control returns; Play launches the displayed game. The screensaver uses the game's background or cover and plays its video when present.
 
@@ -81,7 +81,7 @@ Big Box video snaps read their audio settings from Settings → Big Box; the sta
 
 The Big Box status bar shows battery percentage and a charging marker when a battery is present. Turn it off with **Show the battery indicator in Big Box** (`battery_indicator`, default on).
 
-The indicator prefers the browser Battery Status API and otherwise calls `GET /api/native/battery`, which reads the first `BAT*` device under `/sys/class/power_supply` on Linux, `pmset -g batt` on macOS, and `GetSystemPowerStatus` on Windows. The route returns `present`, `percent` (0–100), and `charging`; a host with no battery returns `{"present": false, "percent": 0, "charging": false}`. The client caches the result for 60 seconds and reads it once when Big Box opens, so it never polls the filesystem during navigation.
+The indicator prefers the browser Battery Status API and otherwise calls `GET /api/v2/native/battery`, which reads the first `BAT*` device under `/sys/class/power_supply` on Linux, `pmset -g batt` on macOS, and `GetSystemPowerStatus` on Windows. The route returns `present`, `percent` (0–100), and `charging`; a host with no battery returns `{"present": false, "percent": 0, "charging": false}`. The client caches the result for 60 seconds and reads it once when Big Box opens, so it never polls the filesystem during navigation.
 
 ### Hidden platforms, categories, and playlists (v1.18.0)
 
@@ -132,8 +132,8 @@ All four overrides are edited in the desktop platform view under **Presentation*
 For an arcade entry (platform `Arcade` or a game with a ROM name), the Big Box running-game panel adds **High scores**. It shows the parsed scores in a searchable Rank/Score/Name table and exports or imports the game's MAME files. It uses the same endpoints as the library details pane:
 
 - `GET /api/v2/highscores/table?id=<id>` returns `parsed` and the `scores` rows, or a `message` when the table cannot be read;
-- `POST /api/highscores/export` writes the game's score files; and
-- `POST /api/highscores/import` restores a chosen MAME high-score file.
+- `POST /api/v2/highscores/export` writes the game's score files; and
+- `POST /api/v2/highscores/import` restores a chosen MAME high-score file.
 
 Parsing uses the optional `hi2txt` tool and accepts its JSON or pipe-delimited output. Without `hi2txt` the panel says the table was not parsed instead of showing empty scores. The native battery route and the rest of the additive 1.18 surface are catalogued in [API 1.18 additions](/reference/api/one-eighteen/).
 
@@ -191,7 +191,7 @@ Settings → Controller also supports **user-defined presets**: up to 16 custom 
 
 ## MangoHud performance overlay (v1.7.2)
 
-Settings → Controller includes a **MangoHud** toggle. When enabled, `MANGOHUD=1` and `MANGOHUD_CONFIG=font_size=24,no_display` are set in the environment when launching games (`pkg/parity/parity_gamescope.py:580-581`), causing the MangoHud on-screen performance overlay (FPS, CPU/GPU usage, frame pacing) to appear. MangoHud must be installed on your system separately.
+Settings → Controller includes a **MangoHud** toggle. When enabled, `MANGOHUD=1` and `MANGOHUD_CONFIG=font_size=24,no_display` are set in the environment when launching games (`crates/openbox-emulators/src/gamescope.rs`), causing the MangoHud on-screen performance overlay (FPS, CPU/GPU usage, frame pacing) to appear. MangoHud must be installed on your system separately.
 
 ## Controller bench (v1.7.2)
 

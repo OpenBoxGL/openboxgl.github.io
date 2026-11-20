@@ -3,7 +3,7 @@ title: Creating an OpenBox Plugin
 description: Build, sandbox, and distribute plugins using standard JSON lifecycle hooks and capability declarations.
 ---
 
-OpenBox plugins extend launcher functionality through decoupled lifecycle hooks. Each hook invocation runs as an isolated subprocess in a Bubblewrap sandbox (`bwrap`) when available, communicating via one JSON object on standard input and one on standard output.
+OpenBox plugins extend launcher functionality through decoupled lifecycle hooks. Each hook invocation runs in its own subprocess, in a Bubblewrap sandbox (`bwrap`) when available. A `.py` entry is driven by `plugin_runner_v2.py` over a JSON Lines frame; a native executable entry receives the same JSON Lines request directly.
 
 ## Plugin Manifest (`plugin.json`)
 
@@ -39,13 +39,13 @@ Every plugin requires a `plugin.json` manifest placed in its directory under `~/
 | `description` | string | Optional short summary of plugin capabilities (500 characters). |
 | `author` | string | Optional author name (80 characters) shown with the plugin. |
 | `homepage` | string | Optional HTTPS project URL (300 characters). |
-| `entry` | string | Entry point Python file inside the package (defaults to `plugin.py`; must resolve inside the package, no symlinks or `..`). |
+| `entry` | string | Entry point inside the package (defaults to `plugin.py`). A `.py` file runs through `plugin_runner_v2.py`; any other executable file runs directly. It must resolve inside the package, with no symlinks or `..`. |
 | `hooks` | array | Subscribed hooks: the six base hooks (`before_launch`, `after_session`, `library`, `command`, `library_source`, `events`) plus the six capability hooks (`storefront`, `metadata`, `media`, `stats`, `emulator`, `discovery`). |
-| `api_version` | integer | Plugin API version targeted: `1` (default) or `2` (2.0.0+). Versions this build does not serve are refused. Version 2 switches to the JSON Lines runner and unlocks `min_openbox`, `subscriptions`, and the versioned read-only host services (`library.query`, `media.search`); the v1 runner is scheduled for removal in 3.0. |
+| `api_version` | integer | **Required. Must be `2` in 3.0.** A missing value or `1` fails with `PLUGIN_API_RETIRED`. Version 2 uses the JSON Lines runner and unlocks `min_openbox`, `subscriptions`, and the versioned read-only host services (`library.query`, `media.search`). |
 | `min_openbox` | string | v2 only: oldest OpenBox release that may serve the plugin; older hosts refuse it at load. |
 | `subscriptions` | array | v2 only: named events the runner delivers, on top of the base `events` hook. |
 | `commands` | array | Up to 32 `{id, label, description?}` entries, exposed in the command palette under the `>` prefix. |
-| `permissions` | array | Declared permissions; in 1.x only `network`, granted by the user in the Plugins manager. |
+| `permissions` | array | Declared permissions; the only permission is `network`, granted by the user in the Plugins manager. |
 | `settings` | object | JSON Schema subset for per-plugin settings; the Plugins manager and Settings > Plugins render a form and inject stored values into hook payloads. |
 | `capabilities` | object | Capability declarations (1.18.0+). Each requires its matching hook and is what makes a plugin act like a built-in source. |
 | `messages` | object | Localized notification templates (1.18.0+), resolved against the active locale. |
@@ -59,7 +59,7 @@ A capability is additive on top of the base hooks and is accepted only when the 
   "id": "vendor.switch-store",
   "name": "Vendor Switch Store",
   "version": "1.0.0",
-  "api_version": 1,
+  "api_version": 2,
   "hooks": ["storefront", "metadata"],
   "permissions": ["network"],
   "capabilities": {
@@ -101,11 +101,15 @@ Supported locales are `en`, `es`, `de`, `fr`, and `pt`. The host resolves the ac
 
 ## Hook Lifecycles & JSON Protocol
 
-OpenBox runs each hook as a child process: `python3 plugin_runner.py <entry> <hook>` (wrapped in `bwrap` when available). The runner loads the entry file as a module and calls the function named after the hook: `def library(payload)`, `def before_launch(payload)`, `def after_session(payload)`, `def command(payload)`, `def library_source(payload)`, `def events(payload)`, `def storefront(payload)`, `def metadata(payload)`, `def media(payload)`, `def stats(payload)`, `def emulator(payload)`, or `def discovery(payload)`. The payload arrives as one decoded JSON dict argument, and the function's return value (a dict) is written to stdout as JSON. If the module does not define the hook function, the payload passes through unchanged.
+OpenBox runs each hook as a child process. For a `.py` entry it starts `python3 -B plugin_runner_v2.py <entry>` (wrapped in `bwrap` when available) and sends one JSON Lines `{"type":"invoke", "hook": ..., "payload": ...}` frame. For a native entry it executes the entry directly and sends the same frame. The runner calls the function named after the hook: `def library(payload)`, `def before_launch(payload)`, `def after_session(payload)`, `def command(payload)`, `def library_source(payload)`, `def events(payload)`, `def storefront(payload)`, `def metadata(payload)`, `def media(payload)`, `def stats(payload)`, `def emulator(payload)`, or `def discovery(payload)`. If the module does not define the hook function, the payload passes through unchanged.
 
 ### Supported Hooks
 
-1. **`before_launch`**: Invoked at launch, after profile and archive resolution.
+<Callout type="note" title="3.0 hook wiring">
+The Rust 3.0 server invokes `command`, `events`, and the six capability hooks. The `library`, `before_launch`, `after_session`, and `library_source` hooks are currently invoked only by the Python fallback (`OPENBOX_BACKEND=python`). Do not rely on them in a packaged 3.0 build yet.
+</Callout>
+
+1. **`before_launch`**: Invoked at launch, after profile and archive resolution. Python fallback only in 3.0.
    - **Input Payload**: `{"game": {"id": 1, "name": "Chrono Trigger", "platform": "SNES", "path": "/roms/snes/ct.sfc", ...}, "args": ["retroarch", "-L", "core.so", "/roms/snes/ct.sfc"], "cwd": "/roms/snes"}`
    - **Output Result**: `{"args": [...], "cwd": "..."}` to rewrite the launch argv/working directory, or `{"cancel": true, "error": "why"}` to abort the launch with that message. Structurally invalid output (empty argv, nonexistent `cwd`, or a different executable in `args[0]`) raises a launch validation error.
 2. **`after_session`**: Dispatched when a game process exits.
@@ -118,9 +122,9 @@ OpenBox runs each hook as a child process: `python3 plugin_runner.py <entry> <ho
    - **Input Payload**: `{"command": "<command id>", "library": [...]}` — the library summary is bounded to 500 entries with only `game_id`, `name`, `platform`, `progress`, `favorite`, and `playtime_seconds`.
    - **Output Result**: any dict; may include `{"notification": {"level": "info" | "success" | "warning" | "error", "message": "..."}}` (or a `key`/`params` reference) to show a UI notification. Hook errors are surfaced to the caller.
 5. **`library_source`**: Runs on every library state build, making the plugin a library importer.
-   - **Input Payload**: `{"api_version": 1}` (plus `settings` when the manifest declares a settings schema).
+   - **Input Payload**: `{"api_version": 2}` (plus `settings` when the manifest declares a settings schema).
    - **Output Result**: `{"games": [...]}` — a bare list or any other shape is rejected with a warning. Entries are namespaced as `plugin:<plugin_id>:<their_id>` and shown with a source badge; disabling or removing the plugin drops its games.
-6. **`events`**: Fan-out for lifecycle events — `app_startup`, `app_shutdown`, `scan_finished`, `playtime_milestone`, `game_added`, `game_removed`, `game_updated`.
+6. **`events`**: Fan-out for lifecycle events. The Rust server emits `app_startup` and `app_shutdown`; the Python fallback also emits `scan_finished`, `playtime_milestone`, `game_added`, `game_removed`, and `game_updated`.
    - **Input Payload**: `{"event": "<name>", ...}` with a small bounded payload (e.g. `game_added` carries `game_ids`, up to 500; `game_updated` carries `changes`, up to 100).
    - **Output Result**: any dict; failures never break the host operation.
 7. **Capability hooks**: `storefront`, `metadata`, `media`, `stats`, `emulator`, and `discovery`. Each has a purpose-built payload and result, documented in [Plugin hooks](/reference/plugins/hooks/#capability-hooks). A capability hook is invoked directly (not chained) and gets the data bag, capability settings, and credentials.

@@ -1,9 +1,9 @@
 ---
 title: Frontend modules
-description: Inventory of the 53 static/ JS modules, entry wiring, and the search worker contract.
+description: Inventory of the 60 static/ JS modules, entry wiring, and the search worker contract.
 ---
 
-The web UI ships as `index.html` plus 53 ES modules in `static/` (51 domain modules plus `app.js` and `worker.search.js`), served from `/static/*` with cache headers. `app.js` is the entry point; every other main-thread module imports shared state and helpers from `state.js` / `util.js`.
+The web UI ships as `index.html` plus 60 ES modules in `static/` (58 domain modules plus `app.js` and `worker.search.js`), served from `/static/*` with cache headers. `app.js` is the entry point; every other main-thread module imports shared state and helpers from `state.js` / `util.js`.
 
 ## Module inventory
 
@@ -12,7 +12,7 @@ The web UI ships as `index.html` plus 53 ES modules in `static/` (51 domain modu
 | `activity.js` | Activity Center (durable operations, jobs, SSE progress) |
 | `app.js` | Entry/boot: wires all domain modules into the shell |
 | `arcaderoom.js` | Controller-friendly Arcade Room and kiosk canvas surface |
-| `battery.js` | Big Box battery indicator (browser API first, then the `GET /api/native/battery` route, which reads sysfs, `pmset`, or `GetSystemPowerStatus`) |
+| `battery.js` | Big Box battery indicator (browser API first, then the `GET /api/v2/native/battery` route, which reads sysfs, `pmset`, or `GetSystemPowerStatus`) |
 | `bigbox.js` | Big Box kiosk UI (stage/hybrid/coverflow, gamepad and pointer input, screensaver) |
 | `clips.js` | Record That clip gallery and reel actions |
 | `compat.js` | Compatibility report dialog (`GET /api/v2/compat/report`) (2.0) |
@@ -22,7 +22,7 @@ The web UI ships as `index.html` plus 53 ES modules in `static/` (51 domain modu
 | `dialogs.js` | Dialog manager (focus trap, Escape to close) |
 | `dna.js` | Game DNA smart-search toggle, results panel, and why-chips |
 | `emulators.js` | Shared emulator-settings form helpers |
-| `events.js` | The tab's single server-sent event stream (`/api/events`) with backoff retry |
+| `events.js` | The tab's single server-sent event stream (`/api/v2/events`) with backoff retry |
 | `gamepad.js` | Unified gamepad rAF poll loop shared by every controller surface |
 | `health.js` | Library health score card, breakdown dialog, and fix queue |
 | `help.js` | Help & shortcuts dialog with start, glossary, and shortcut tabs |
@@ -60,6 +60,12 @@ The web UI ships as `index.html` plus 53 ES modules in `static/` (51 domain modu
 | `timeline.js` | History timeline view |
 | `timemachine.js` | Journal timeline, as-of view, and revert preview UI |
 | `util.js` | Shared helpers (`$`, `escapeHtml`, controller map, trigram utilities) |
+| `deals.js` | Deal Radar watchlist, manual entries, price history, and watch toggles (3.0) |
+| `itinerary.js` | Backlog Itinerary plan, replan, estimate, and status views (3.0) |
+| `machines.js` | Shared job/session state literals mirroring the Rust state-machine table (3.0) |
+| `playerlog.js` | Player's Log, Time Capsules, and Milestone Cards (3.0) |
+| `savevault.js` | Save Vault snapshot list, diff, restore, and delete (3.0) |
+| `trail.js` | Achievement Trail velocity, ETA, next-up, and refresh views (3.0) |
 | `whatsnew.js` | What's New panel and local tips |
 | `worker.search.js` | Off-main-thread trigram search worker (see contract below) |
 | `wrapped.js` | Printable Year in Games report |

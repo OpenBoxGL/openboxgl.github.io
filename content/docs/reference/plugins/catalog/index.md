@@ -12,11 +12,11 @@ The plugin catalog is the curated list of community plugins OpenBoxGL knows abou
 | Remote | The pinned `plugins/catalog.json` commit on the OpenBoxGL repository | 20 s, 4 MiB, plus a pinned SHA-256 check on the response | Bundled local catalog |
 | Local | `plugins/catalog.json` next to the application | none | `[]` |
 
-`GET /api/plugins/catalog` tries the remote catalog first and falls back to the bundled file on any network, checksum, or parse failure, so the catalog always returns something valid. `GET /api/v2/plugins/catalog` (1.14.0+) additionally enriches every entry with `installed`, `installed_version`, and `update_available` (the enrichment is per-entry, not attached to `sandbox`), and reports the current `sandbox` status as a top-level response field.
+`GET /api/v2/plugins/catalog` tries the remote catalog first and falls back to the bundled file on any network, checksum, or parse failure, so the catalog always returns something valid. `GET /api/v2/plugins/catalog` (1.14.0+) additionally enriches every entry with `installed`, `installed_version`, and `update_available` (the enrichment is per-entry, not attached to `sandbox`), and reports the current `sandbox` status as a top-level response field.
 
 ## Bundled entries
 
-The current bundled catalog (`plugins/catalog.json`) contains two documentation examples, both `local_only`:
+The current bundled catalog (`plugins/catalog.json`) contains three documentation examples, all `local_only` and all `api_version: 2`:
 
 | id | name | hooks | url | notes |
 | --- | --- | --- | --- | --- |
@@ -40,14 +40,14 @@ The current bundled catalog (`plugins/catalog.json`) contains two documentation 
 
 ## Installing from the catalog
 
-`POST /api/plugins/catalog/install` with `{"id": "<catalog id>"}`:
+`POST /api/v2/plugins/catalog/install` with `{"id": "<catalog id>"}`:
 
 1. Fetches the current catalog.
 2. Looks up the id; unknown ids raise `400` `"Unknown catalog plugin."`
 3. Downloads the package into a temporary directory with a 128 MiB cap, 120-second timeout, and SHA-256 verification when the entry provides `sha256`.
 4. Installs it with the normal plugin installer (safe extraction, staging, rollback).
 
-The plugin is then listed by `GET /api/plugins` and runs its declared hooks. `POST /api/v2/plugins/repair` with `{id}` reinstalls an installed plugin from its catalog entry without touching its settings or cached stats; when the catalog has no entry it falls back to the recorded local package and re-verifies its SHA-256. The trust record survives the reinstall but is re-evaluated against the new package checksum, so a reinstall with different bytes leaves the plugin untrusted and asks for approval again.
+The plugin is then listed by `GET /api/v2/plugins` and runs its declared hooks. `POST /api/v2/plugins/repair` with `{id}` reinstalls an installed plugin from its catalog entry without touching its settings or cached stats; when the catalog has no entry it falls back to the recorded local package and re-verifies its SHA-256. The trust record survives the reinstall but is re-evaluated against the new package checksum, so a reinstall with different bytes leaves the plugin untrusted and asks for approval again.
 
 Catalog validation is strict:
 

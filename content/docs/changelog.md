@@ -4,9 +4,92 @@ description: Release notes for OpenBox, from the latest release back to the firs
 sidebar: false
 ---
 
-## 2.0.0 (unreleased) — Library format 7, API v2, portable library
+## 3.0.0 (2026-11-19) — The Rust-y Box
 
-A major release. The library upgrades to **format 7** on first launch (with `library.v6.backup.json` and `openbox --rollback-library` as the downgrade path), the public API is **`/api/v2`** with `/api/v1` disabled by default, and game paths can live under one portable library folder. Also in 2.0: backup format 2 with per-file SHA-256 manifests, plugin API v2, a migration readiness gate, a library integrity check, a Windows ARM64 release lane, and an OpenAPI document. Upgrade from 1.19.x. See [API 2.0 changes](/reference/api/two-zero/).
+The largest release in the project. The entire Python backend is replaced by a standalone native Rust server, `openbox-server` (ADR 0115), spanning 15 workspace crates, 170 migrated backend modules, and 417 HTTP endpoints (413 public `/api/v2/*` routes plus 4 `/api/host/*` native-window routes). Every packaged build ships the Rust binary with **zero bundled CPython**. Formal scale graduates to **50,000 games** (ADR 0116). Five new player features ship alongside a desktop UI and usability redesign. Library schema 7 is unchanged: a 2.0 or 2.1 library opens without migration.
+
+### Added
+
+- **Native Rust backend.** `openbox-server` replaces the Python server in the AppImage, Flatpak, Windows portable zips, and the universal macOS bundle. Linux AppImages are 9.7 MiB (x86_64) and 9.0 MiB (aarch64); the Flatpak is 7.1 MiB; Windows zips are 14.6 MiB (x86_64) and 13.8 MiB (ARM64); the macOS bundle is 17.4 MiB (59.1% smaller).
+- **50,000-game scale.** At 50,000 games the Rust server finishes the benchmark at 468.8 MB RSS, with cover serving 5,867x faster, Explorer facets 142.1x faster, and delta search 82.6x faster than the Python 3.0 build. `library.json` remains canonical and human-readable.
+- **Save Vault (ADR 0109).** Indexed, SHA-256-verified save snapshots triggered manually, on session close (`save_vault_on_close`), or on a schedule (`save_vault_auto_days`). Restores take a mandatory `pre-restore` safety snapshot, shared emulator roots are excluded, and the tabbed Save History dialog exposes snapshot, restore, diff, and delete. Vault data lives under `<data-dir>/save-vault/` and is excluded from library backups.
+- **Achievement Trail (ADR 0110).** Offline RetroAchievements analytics over `cache/retroachievements/`: 8-week ISO unlock velocity charts, confidence-rated completion ETAs, next 100-point milestones, cheapest-first next-up queues, and explicit cancellable refresh jobs.
+- **Deal Radar (ADR 0111).** Opt-in Steam price watchlist and manual price tracker (`deals_enabled=false` by default). Requests and redirects are pinned to `https://store.steampowered.com`; polling defaults to 168 hours and price-drop alerts deduplicate per price point.
+- **Player's Log — Time Capsules and Milestone Cards (ADR 0112).** Sealed notes and questions stay redacted server-side until a local unlock date, plus nine deterministic milestone kinds with offline 1200x630 PNG share cards.
+- **Backlog Itinerary (ADR 0113).** An advisory multi-week play schedule with `quick-wins`, `comeback`, and `raided` strategies, IGDB and own-history completion estimates, RetroAchievements refinement, and live `done`/`on_track`/`behind`/`stale` status.
+- **Eight new settings and six OpenAPI schemas.** `save_vault_enabled`, `save_vault_keep`, `save_vault_on_close`, `save_vault_auto_days`, `deals_enabled`, `deals_poll_hours`, `deals_min_drop_pct`, and `deals_store_cc` join the settings registry; `docs/openapi.json` gains typed schemas for the new surfaces.
+- **Desktop UI and usability polish.** A 94 px single-row library header with a `Display` popover, an auto-hidden drag-and-drop banner, a dismissible Jump back in strip, an auto-collapsing empty Details pane with close and Escape, Settings promoted to the top bar, a searchable 3-column Tools menu, a reordered sidebar with collapsed More filters, calmer Activity drawer, sticky Settings/Filters layouts, sequential 1-6 Guided Setup, a 2-column Edit Game Basics layout, instant Surprise Me picks, and a Big Box Exit button with fixed portrait Stage framing.
+
+### Changed
+
+- **Opening a library does not migrate it.** Schema 7 opens directly. Schema 6 and older raise `STATE_SCHEMA_TOO_OLD` and the file is left unchanged. `openbox --migrate-library` is the only writer that upgrades a schema 6 library; schema 1-5 must be opened once on OpenBox 2.1 first.
+- **Python 3.11 is the floor.** Source launches and Python v2 plugins on 3.10 stop before bind. CI runs 3.11 and 3.12. Packaged builds still need no Python at all.
+- **State machines are declared once (ADR 0107).** `pkg/state/machines.py` lists every lifecycle with its states and allowed transitions; the operation service validates against that table and the UI pollers share one set of job-state literals.
+
+### Removed
+
+- `openbox --rollback-library`. The command exits 4, changes no file, and names OpenBox 2.1.0 as the build that restores `library.v6.backup.json`. Existing backups are left in place. The HTTP route stays registered and returns `409 ROLLBACK_REMOVED`.
+- The plugin API v1 runner. A manifest must set `"api_version": 2`; a missing version or an explicit `1` fails with `PLUGIN_API_RETIRED`. `plugin_runner.py` is gone.
+- Python 3.10 runtime support.
+
+### Fixed
+
+- A schema 6 library no longer stops startup before the window can explain `STATE_SCHEMA_TOO_OLD`; recovering a schema 6 backup writes `library.v6.backup.json` first.
+- Plugin ids `data`, `credentials`, and `plugins-state.json` are rejected; sandboxed plugins cannot set `LD_*` or `DYLD_*` on an emulator, read a data directory inside the application tree, or import a storefront row whose launch command is a shell or system binary.
+- Media downloads refuse private, link-local, multicast, and NAT64 addresses, including a redirect onto one.
+- Title duplicate matching no longer treats "Assassin's Creed" and "Revelations", or "Super Mario" and "Super Mario World", as the same game; disc grouping understands `(Disc 1 of 3)`, and MAME clones that share a parent zip stay separate.
+- Search matches a word in the middle of a title; a hash such as `#/q/game/game/42` keeps the selection; holding Enter in Big Box launches once; statistics sync keeps other devices' records; backups redact the museum kiosk PIN; MAME launches with `-rompath` and the set name.
+
+### Known limits in 3.0.0
+
+- The macOS bundle is ad-hoc signed and not notarized. First launch needs **System Settings > Privacy & Security > Open Anyway**.
+- Linux-only features stay unavailable on Windows and macOS by design.
+- Xbox PC package scanning and owned-but-uninstalled GOG, EA, and Ubisoft catalogs are not imported.
+
+[OpenBox 3.0.0 release notes](https://github.com/vindeckyy/OpenBoxGL/blob/master/docs/RELEASE_NOTES.md) · [Upgrade to 3.0](/upgrading-3-0/) · [API 3.0 changes](/reference/api/three-zero/) · [Compare v2.1.0...v3.0.0](https://github.com/vindeckyy/OpenBoxGL/compare/v2.1.0...v3.0.0)
+
+## 2.1.0 (2026-11-02) — The 2.0 contracts made permanent
+
+2.1 closes the 2.0 transition. The public API is `/api/v2` only, the v1 bridge and unversioned aliases are gone, backups write format 2 only, and the media checksum toggle finally has an effect. The Flatpak moves to runtime 51, Python 3.10 is deprecated, and the jobs panel reads the v2 cursor API.
+
+### Added
+
+- **Media checksum toggle.** Settings > Library > Record media checksums controls whether downloads and captures are recorded in `media/manifest.json`. Turning it off skips manifest writes and media hashing, and the integrity report says the manifest is disabled.
+- **A v2 jobs panel.** Background jobs and export polling read `/api/v2/jobs` list/cursor rows; the legacy job-name map is gone.
+- **Retired-surface errors.** Clients that call `/api/v1`, an unversioned path, or a legacy native-host name receive a `410` problem document naming the replacement path.
+
+### Changed
+
+- **The public API is `/api/v2` only.** Unversioned public `/api/*` paths are no longer dispatched. `/api/host` is the only native-host channel. `OPENBOX_ENABLE_V1_API` is ignored with a startup warning.
+- **Backups write format 2 only.** Format 1 archives still restore. New format 1 writes return `BACKUP_FORMAT_RETIRED`; use a 2.0.x build for a 1.19-compatible export.
+- **Every frontend API URL is versioned.** Covers, theme CSS, theme sounds, RA badges, documents, platform videos, startup videos, and the reader use `/api/v2`.
+- **Flatpak runtime 51.** The manifest moved from runtime 49 to 51 and `libwebkit2gtk-4.1.so.0` is present.
+- **Python 3.10 is deprecated.** It still works in 2.1; removal is planned for 3.0.
+
+### Removed
+
+- `/api/v1/*` and the `OPENBOX_ENABLE_V1_API` bridge (ADR 0103).
+- Unversioned public `/api/*` dispatch, including `/api/jobs` and the legacy host names `/api/launch`, `/api/shutdown`, and `/api/native/capabilities`.
+- Backup format 1 write support. Format 1 reads remain.
+- `contracts.py` and the v1 contract generator.
+
+### Fixed
+
+- `openbox://` readiness probes `GET /api/v2/version` instead of a POST-only `/api/health` route, so an already-running server is detected.
+- The media manifest toggle now controls record, verify, and repair.
+- Decorator-only routes load when the server is started as a script.
+- `release.sh` uses the polished release notes, and the version-sync gate checks the release-notes heading and docs index.
+
+### Security
+
+- Retired paths authenticate before they return their `410`, so an unauthenticated caller still receives `403`.
+- The v1 bridge can no longer be re-enabled by an environment variable.
+
+[Compare v2.0.0...v2.1.0](https://github.com/vindeckyy/OpenBoxGL/compare/v2.0.0...v2.1.0)
+
+## 2.0.0 (2026-10-31) — Library format 7, API v2, portable library
+
+A major release. The library upgrades to **format 7** on first launch (with `library.v6.backup.json` and `openbox --rollback-library` as the 2.0 downgrade path), the public API is **`/api/v2`** with `/api/v1` disabled by default, and game paths can live under one portable library folder. Also in 2.0: backup format 2 with per-file SHA-256 manifests, plugin API v2, a migration readiness gate, a library integrity check, a Windows ARM64 release lane, and an OpenAPI document. Upgrade from 1.19.x. See [API 2.0 changes](/reference/api/two-zero/).
 
 ### Added
 

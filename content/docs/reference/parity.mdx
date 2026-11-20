@@ -10,29 +10,35 @@ The application repository's `PARITY.md` is the maintenance source for capabilit
 
 Every workflow in `PARITY.md` is marked `done`, or carries a decision status for workflows without a Linux equivalent:
 
-- <StatusBadge status="done" /> means the workflow is usable end to end. The current line (1.19.x released, 2.0 on master) runs on Linux (AppImage, Flatpak, source, and system installs), on Windows x86_64 and ARM64, and on macOS 11 or newer, so `done` rows apply on every platform unless the row's note, the platform notes below, or the macOS channel says otherwise.
+- <StatusBadge status="done" /> means the workflow is usable end to end. The current 3.0.x line runs on Linux (AppImage, Flatpak, source, and system installs), on Windows x86_64 and ARM64, and on macOS 11 or newer, so `done` rows apply on every platform unless the row's note, the platform notes below, or the macOS channel says otherwise.
 - <StatusBadge status="partial" /> means a deliberate Linux equivalent exists but the Windows/premium surface is broader or unavailable.
 - <StatusBadge status="missing" /> means no usable equivalent yet.
 - Decision rows ("Not applicable", "Replaced by ...", "Use ... instead") mark Windows-only workflows with no Linux equivalent; they are documented as boundaries rather than implied support.
 
-Verified against **v2.0.0** (application `docs/PARITY.md`).
+Verified against **v3.0.0** (application `docs/PARITY.md`).
 
-## 2.0 (unreleased)
+## 3.0
 
 | Capability | Status | Notes |
 | --- | --- | --- |
 | Portable library and Move library | <StatusBadge status="done" /> | Game paths under `library_root` are stored as `@library/...` tokens; Settings > Library > Move library previews and rebases a move, refusing stale plans with `MOVE_PLAN_STALE`. The move never copies files |
-| Public `/api/v2` contract and retired `/api/v1` bridge | <StatusBadge status="done" /> | `/api/v2` is the public API; `/api/v1` is off by default (`410 V1_API_DISABLED`, opt back in with `OPENBOX_ENABLE_V1_API=1` through 2.0.x). Native windows use `/api/host/*` with a major-version guard |
-| Library integrity and maintenance CLI | <StatusBadge status="done" /> | `openbox --check-library`, `--repair-library`, `--migrate-library`, `--rollback-library` plus `GET /api/v2/library/integrity` and Settings > Library > Check integrity |
-| Backup format 2 | <StatusBadge status="done" /> | SHA-256 per archive member; restore refuses corrupt or unlisted members before writing. A 1.19-compatible format-1 export remains selectable |
-| Migration readiness gate | <StatusBadge status="done" /> | First launch lists readiness items (theme tokens, plugin API, sync folder, archive formats, library scale, custom data dir) and offers a backup before the migrated library opens |
-| Plugin API v2 | <StatusBadge status="done" /> | `api_version: 2` adds `min_openbox`, event `subscriptions`, a persistent JSON Lines runner with a 4 MiB output cap, and versioned read-only host services (`library.query`, `media.search`); v1 plugins unchanged, v1 runner removed in 3.0 |
+| Public `/api/v2` contract and retired `/api/v1` | <StatusBadge status="done" /> | `/api/v2` is the public API; `/api/v1` returns `410 V1_API_REMOVED` and unversioned `/api/*` paths return `410 API_VERSION_REQUIRED`. Native windows use `/api/host/*` with a major-version guard. |
+| Library integrity and maintenance CLI | <StatusBadge status="done" /> | `openbox --check-library`, `--repair-library`, `--migrate-library` plus `GET /api/v2/library/integrity` and Settings > Library > Check integrity. `--rollback-library` was removed in 3.0 and exits 4. |
+| Backup format 2 | <StatusBadge status="done" /> | SHA-256 per archive member; restore refuses corrupt or unlisted members before writing. Format 2 is the only writable format; format 1 archives still restore. |
+| Migration readiness gate | <StatusBadge status="done" /> | After `openbox --migrate-library`, the gate lists readiness items (theme tokens, plugin API, sync folder, archive formats, library scale, custom data dir). Opening a schema 6 library does not migrate it. |
+| Plugin API v2 | <StatusBadge status="done" /> | `api_version: 2` is mandatory; v1 was removed in 3.0 (`PLUGIN_API_RETIRED`). Adds `min_openbox`, event `subscriptions`, a per-invocation JSON Lines runner with a 4 MiB output cap, native executable entries, and versioned read-only host services (`library.query`, `media.search`). |
+| Rust backend and 50,000-game scale | <StatusBadge status="done" /> | `openbox-server` ships in every package with zero bundled CPython; formal scale graduates to 50,000 games (ADR 0115/0116). |
+| Save Vault | <StatusBadge status="done" /> | SHA-256-verified save snapshots (manual, on-close, scheduled), pre-restore safety snapshots, shared-root exclusion, and `<data>/save-vault/` (3.0). |
+| Achievement Trail | <StatusBadge status="done" /> | Offline RetroAchievements velocity, ETAs, next-up queue, and milestones from `cache/retroachievements/` (3.0). |
+| Deal Radar | <StatusBadge status="done" /> | Opt-in Steam price watch, restricted to `store.steampowered.com`, with deduplicated drop alerts (3.0). |
+| Player's Log | <StatusBadge status="done" /> | Time Capsules unlock once at local midnight; nine milestone kinds export 1200x630 PNG cards (3.0). |
+| Backlog Itinerary | <StatusBadge status="done" /> | Capacity-bounded multi-week plans with `quick-wins`, `comeback`, and `raided` strategies (3.0). |
 | Windows ARM64 release lane | <StatusBadge status="done" /> | `OpenBox-arm64-windows.zip` and ARM64 native host built on `windows-11-arm`; `install.ps1` resolves `arm64`/`aarch64` and selects the ARM64 asset |
 | macOS notarization | <StatusBadge status="missing" /> | Notarization machinery (entitlements, `notarize_macos.sh`) is in the tree but the shipped bundle stays ad-hoc signed by maintainer decision; first launch still needs Privacy & Security > Open Anyway |
 
 ## Platform coverage
 
-The 1.19.x line runs on Linux, on Windows x86_64, and on macOS 11 or newer (Apple Silicon and Intel). The platform seam lives in `pkg/platform_compat.py` (standard library only, plus `ctypes` on Windows). Since 1.19.1 one capability contract decides which platform-specific controls each host shows: `GET /api/native/capabilities` returns a `features` object, and a missing object means every feature is unavailable. See [API 1.19 changes](/reference/api/one-nineteen/).
+The 3.0.x line runs on Linux, on Windows x86_64 and ARM64, and on macOS 11 or newer (Apple Silicon and Intel). The platform seam lives in `crates/openbox-platform` (`platform_features()`); the Python `pkg/platform_compat.py` mirrors it for the fallback. One capability contract decides which platform-specific controls each host shows: `GET /api/v2/native/capabilities` (or `GET /api/host/capabilities`) returns a `features` object, and a missing object means every feature is unavailable. See [API 1.19 changes](/reference/api/one-nineteen/).
 
 These surfaces remain Linux-only and are not part of the Windows or macOS builds: gamescope and Game Mode, AppImage and Flatpak packaging, XDG desktop entries, `sudo make install`, Steam Deck and handheld tuning, and Flathub-aware emulator management. See [Windows](/windows/) and [macOS](/macos/) for the platform guides.
 
@@ -44,13 +50,13 @@ Since 1.19.0 the same source tree, tests, and gates run on macOS. These rows rec
 | --- | --- | --- |
 | Native window | <StatusBadge status="done" /> | `native_host_mac.m` (WKWebView) renders the same UI in a real window, with remembered geometry, `NSStatusItem` tray and minimize-to-tray, `openbox://` deeplinks, and one instance per data directory through an `AF_UNIX` socket, with the 104-byte `sun_path` limit checked before binding (1.19.0) |
 | Universal install and verified update | <StatusBadge status="done" /> | `OpenBox-macos.zip` carries arm64 and x86_64 hosts and one merged interpreter; `scripts/install-macos.sh` verifies the release key anchor, the SHA-256 sidecar, and the Ed25519 signature before it installs `OpenBox.app`; the in-app updater swaps the bundle after the server exits and keeps `OpenBox.app.previous` (1.19.0) |
-| No-install app | <StatusBadge status="done" /> | The bundle ships a pinned universal CPython 3.12 and the CA bundle, so the app runs without Python or WebKit installed. The installer script still needs `python3` on `PATH` to run the release verifier, and a source checkout needs Python 3.10 or newer (1.19.0) |
+| No-install app | <StatusBadge status="done" /> | The 3.0 bundle ships the universal Rust `openbox-server` and the WKWebView host with zero bundled CPython, so the app runs without Python or WebKit installed. The installer script still needs `python3` 3.11+ on `PATH` to run the release verifier; a source build needs Rust 1.92+ (3.0) |
 | Emulator detection and launch | <StatusBadge status="done" /> | Every bundled definition carries `native_exe_macos`; an app bundle resolves through `Contents/Info.plist`, and an explicit empty value means no verified macOS build, reported as not installed (1.19.0) |
 | Library data location | <StatusBadge status="done" /> | `~/Library/Application Support/openbox-game-launcher`; `OPENBOX_DATA_DIR` overrides it, and stored paths keep POSIX separators so a library moves between platforms (1.19.0) |
 | macOS saves | <StatusBadge status="done" /> | Save discovery covers Steam Cloud plus the documented macOS folders for PPSSPP, RPCS3, Dolphin, and RetroArch (1.19.0) |
 | Notarization | <StatusBadge status="missing" /> | The bundle is ad-hoc signed. The first launch needs System Settings > Privacy & Security > Open Anyway. The release signature is verified by the installer and the updater (1.19.0, ADR 0085) |
 | AppImage and Flatpak packaging | Not applicable | Linux-only channels. The macOS artifact is the signed universal zip |
-| gamescope and Steam Game Mode presets | Not applicable | Linux-only. The preset, MangoHud, and handheld-performance controls are hidden on macOS, and `web_app.py --game-mode` exits with a clear message (1.19.0; capability-gated by ADR 0086) |
+| gamescope and Steam Game Mode presets | Not applicable | Linux-only. The preset, MangoHud, and handheld-performance controls are hidden on macOS, and `openbox --web --game-mode` (or `openbox-server --game-mode`) exits with a clear message (capability-gated by ADR 0086) |
 | Wine and Proton prefix manager | Not applicable | Wine management is a Linux surface. The panel is hidden on macOS, and `/api/wine/*` reports `available: false` (1.19.1; ADR 0086) |
 | Flathub emulator management | Not applicable | Flathub is a Linux store. macOS emulators are installed by the user, and the install and folder-grant controls are hidden (1.19.1; ADR 0086) |
 | Plugin sandbox | Not applicable | macOS has no bubblewrap, so the no-bwrap rule applies: plugins are skipped unless trusted or the unsandboxed override is set |
@@ -114,7 +120,7 @@ The source matrix tracks the current LaunchBox-aligned capabilities, including L
 | Emulator settings and versions (v1.18.0) | <StatusBadge status="done" /> | Manage Emulators edits a managed flag, per-platform overrides, and install/version status; MAME and RetroArch display, fullscreen, effects, run-ahead, rewind, and upscaling settings render into launch arguments or `--appendconfig`; update-all probes installed versions and honours a per-emulator opt-out |
 | Save manifests and selective restore (v1.18.0) | <StatusBadge status="done" /> | Backups record each file's size, mode, mtime, and SHA-256; version history lists older backups with add/overwrite/unchanged counts; restore lists archive contents, supports a dry run, and restores only checked files after a safety backup |
 | Plugin capability services (v1.18.0) | <StatusBadge status="done" /> | Manifests declare storefront, metadata, media, stats, emulator-settings, and discovery capabilities; capability hooks receive a bounded data bag, settings, and a credential store and may request read-only library, achievement, profile, activity, leaderboard, catalog, metadata, and media services; plugin storefronts share the catalog UI and plugin stats merge monotonically |
-| Big Box input parity (v1.18.0) | <StatusBadge status="done" /> | Pointer drag, wheel ticks, trackball, and spinner navigation move the Big Box selection with configurable sensitivity and wheel speed; holding Back opens the menu; a battery indicator reads the battery through `GET /api/native/battery` (Linux sysfs, `pmset` on macOS, `GetSystemPowerStatus` on Windows); platforms, categories, and playlists can be hidden |
+| Big Box input parity (v1.18.0) | <StatusBadge status="done" /> | Pointer drag, wheel ticks, trackball, and spinner navigation move the Big Box selection with configurable sensitivity and wheel speed; holding Back opens the menu; a battery indicator reads the battery through `GET /api/v2/native/battery` (Linux sysfs, `pmset` on macOS, `GetSystemPowerStatus` on Windows); platforms, categories, and playlists can be hidden |
 | Keyboard and controller remapping (v1.18.0) | <StatusBadge status="done" /> | Settings > Controller records keyboard shortcuts for play, back, menu, pause, paging, search, settings, and the reader, clears controller buttons, and swaps a duplicate assignment only after confirmation |
 | Storefront scanning and imports (v1.18.0) | <StatusBadge status="done" /> | Startup scans report per-source progress, skip sources with no library games, stop after 30 seconds and keep partial state; per-source auto-import stores a target platform, can include owned-but-uninstalled games, and can restrict to new games; PICO-8, MSU-1, WHDLoad, and RPCS3 `games.yml` imports are supported |
 | Steam missing and repair states (v1.18.0) | <StatusBadge status="done" /> | Imported Steam games record whether their install folder exists; missing games show a Missing badge and an Install handoff, and installed games offer Verify files through `steam://validate/<id>` |
@@ -160,7 +166,7 @@ When behavior changes, `PARITY.md` is updated in the application repository and 
 
 ## Parity internals
 
-The capability rows above are implemented by the current modules in `pkg/parity/` (application repository). Root `parity_*.py` compatibility shims were removed in v1.9.0; `pkg/parity/__init__.py` now registers `_ParityFlatFinder` so legacy flat imports resolve to the canonical package modules. This is an inventory, not a second status matrix — status still lives in the table above.
+The capability rows above are implemented by the Rust crates in `crates/` (the Python `pkg/parity/` modules are the `OPENBOX_BACKEND=python` fallback). The table below is the fallback module inventory, not a second status matrix — status still lives in the table above.
 
 | Module | Area |
 | --- | --- |

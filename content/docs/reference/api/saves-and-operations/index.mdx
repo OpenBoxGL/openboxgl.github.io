@@ -8,35 +8,35 @@ Save management, library backups, statistics sync, save-tool hooks, high scores,
 
 ## Save discovery and management
 
-<ApiEndpoint method="GET" path="/api/saves">
+<ApiEndpoint method="GET" path="/api/v2/saves">
 
 
 `?id=<index>&game_id=<stable>` returns `{"backups": [{"name", "size"}, ...]}` for the game, newest first. Unknown game: `404`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/saves/discover">
+<ApiEndpoint method="GET" path="/api/v2/saves/discover">
 
 
 `?id=<index>&game_id=<stable>` returns `{"candidates": [...]}` of save paths found on disk that are not yet configured: `{"path", "label", "shared"}`. Discovery covers Steam Cloud (`userdata/*/<app_id>/remote`), shared platform roots (PCSX2 memcards, PPSSPP SAVEDATA, RPCS3 savedata, Dolphin GC/Wii title, Cemu `usr/save`, RetroArch saves/states, Mednafen), and RetroArch files whose stem matches the game title. On macOS the roots are the Steam Cloud folder under `~/Library/Application Support/Steam`, PPSSPP under `~/.config/ppsspp`, RPCS3 and Dolphin under `~/Library/Application Support`, and RetroArch under `~/Documents/RetroArch`; PCSX2, Cemu, and Mednafen have no documented macOS folder and are not searched. See [macOS](/macos/#saves-on-macos).
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/saves/scan">
+<ApiEndpoint method="GET" path="/api/v2/saves/scan">
 
 
-Scan every library game for save paths. Returns `{"games": {"<game_id>": [paths]}, "count": <n>}`.
+Scan every library game for save paths. Returns `{"games": {"<index>": [paths]}, "count": <n>}` where `<index>` is the game's position in the library array (the scan result is keyed by index, not by `game_id`). When save management is disabled, returns `{"enabled": false}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/saves/scan/apply">
+<ApiEndpoint method="POST" path="/api/v2/saves/scan/apply">
 
 
 Add all scanned save paths to each game. Returns `202 {"state": "queued", "job_id": "<id>"}` — the scan runs as a durable background job. Poll the job via `GET /api/v2/jobs`; the worker result carries `{"updated": <count>, "games": <n>}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/saves/backup">
+<ApiEndpoint method="POST" path="/api/v2/saves/backup">
 
 
 Create a versioned save backup ZIP. Body: `{"id"|"game_id"}`. Requirements and behavior:
@@ -50,7 +50,7 @@ Returns `{"backup": "<name>", "trimmed": <removed count>}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/saves/restore">
+<ApiEndpoint method="POST" path="/api/v2/saves/restore">
 
 
 `{"id"|"game_id", "backup": "<name>"}` restores a save backup. Safety behavior:
@@ -75,63 +75,79 @@ Stores the per-game save-state slot used by Quick Resume: `{"id"|"game_id", "slo
 
 **Added in 1.18.0.**
 
-<ApiEndpoint method="GET" path="/api/saves/manifest">
+<ApiEndpoint method="GET" path="/api/v2/saves/manifest">
 
 Inspects one save backup without restoring it: `?id=<index>` or `?game_id=<stable>`, plus `backup=<archive name>`. Returns `{"archive", "game", "files": [{"archive", "path", "size"}], "manifest": {...}}`. The archive is resolved strictly inside the game's backup directory, and an unsafe or missing archive returns `400`. When `save_management_enabled` is false the route returns the disabled response and writes nothing.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/saves/restore/preview">
+<ApiEndpoint method="POST" path="/api/v2/saves/restore/preview">
 
 Describes what restoring one save backup would change, without writing: `{"id"|"game_id", "backup": "<name>", "selected": ["optional/archive/path", ...]}`. Returns `{"archive", "game", "add", "overwrite", "remove", "missing", "conflict", "unchanged", "counts", "truncated"}`. `add` files are absent on disk, `overwrite` files exist with a different SHA-256, `remove` is always empty because a save restore never deletes local files, and `missing` lists manifest entries the archive no longer contains. Each bucket is capped and `counts` carries the true totals. A selection must be a non-empty subset of the archive, and an empty or mismatched selection returns `400`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/saves/add">
+<ApiEndpoint method="POST" path="/api/v2/saves/add">
 
 
 `{"id"|"game_id", "path": "/absolute/save/path"}` adds an existing path to the game's `save_paths`. Nonexistent path: `400`. Returns `{"path"}`.
 
 </ApiEndpoint>
 
+## Save Vault
+
+Save Vault keeps indexed, SHA-256-verified snapshots of a game's saves under `<data-dir>/save-vault/`. It is separate from the per-game save backups above and is excluded from library backups.
+
+| Route | Behavior |
+| --- | --- |
+| `GET /api/v2/saves/vault` | Lists snapshots for `?game_id=` (or the vault index when omitted). |
+| `GET /api/v2/saves/vault/status` | Vault enabled state, retention, disk use, and the 5 GiB warning. |
+| `GET /api/v2/saves/vault/diff` | Compares a snapshot with the live saves. |
+| `POST /api/v2/saves/vault/snapshot` | Creates a snapshot. Body `{id, game_id, trigger}`; `trigger` is `manual`, `session_close`, `auto`, or `pre-restore`. `session_close` and `auto` require `save_vault_enabled`. |
+| `POST /api/v2/saves/vault/restore` | Restores a snapshot and takes a mandatory `pre-restore` safety snapshot first. Returns `202 {state: "queued", job_id}`. |
+| `POST /api/v2/saves/vault/delete` | Deletes one snapshot. |
+
+Settings: `save_vault_enabled` (default true), `save_vault_keep` (default 5, 1-50), `save_vault_on_close` (default false), `save_vault_auto_days` (default 0, 0-365). Snapshots are capped at 512 MiB and 5,000 files; shared emulator roots are excluded; `index.json` self-heals. See [Save Vault](/guides/sessions-saves-and-backups/save-vault/).
+
 ## Library backups
 
-<ApiEndpoint method="POST" path="/api/backup/create">
+<ApiEndpoint method="POST" path="/api/v2/backup/create">
 
 
-`{"items": ["library", "settings", "media", "plugins", "themes", "extension_data"], "keep": <int>}` creates `backups/OpenBoxBackup-<timestamp>.zip`. Default items when omitted: `library`, `settings`. Behavior:
+`{"items": ["library", "settings", "media", "plugins", "themes", "extension_data"], "keep": <int>, "format": 2}` creates `backups/OpenBoxBackup-<timestamp>.zip`. Default items when omitted: `library`, `settings`. Behavior:
 
 - Refuses while any game is running: `400` `"Close running games before creating a backup."`
 - Backs up at most 50,000 members, 4 GiB per member, 32 GiB total.
 - Backs up no symlinks (raises on any symlink in the source).
 - `keep` (when > 0) rotates old `OpenBoxBackup-*.zip` files to retain the newest `keep`.
+- `format` defaults to 2. Format 2 is the only writable format; a request for format 1 returns `410 BACKUP_FORMAT_RETIRED` ("Backup format 1 is no longer written by OpenBox 2.1. Use a 2.0.x build to create a 1.19-compatible export."). Format 1 archives still restore.
 
 Returns `202 {"state": "queued", "job_id": "<id>"}` — backup creation runs as a durable background job. Poll the job via `GET /api/v2/jobs` (cancel with `POST /api/v2/jobs/cancel`); the worker result carries `{"archive": "<path>", "name": "<filename>"}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/backups">
+<ApiEndpoint method="GET" path="/api/v2/backups">
 
 
 `{"backups": [...]}` newest first, each with `name`, `path`, `size`, `created` (from the manifest), `items`, and `invalid: true` when the archive or manifest cannot be read.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/backup">
+<ApiEndpoint method="GET" path="/api/v2/backup">
 
 
 Downloads a redacted, portable export of the current library state as a JSON attachment (`openbox-portable-redacted-export.json`). This is a redacted export (credentials and secrets stripped), not a raw `library.json` snapshot nor a backup archive; it is useful for inspection and external tooling. The response is streamed with `Content-Disposition: attachment; filename=openbox-portable-redacted-export.json`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/backup/manifest">
+<ApiEndpoint method="GET" path="/api/v2/backup/manifest">
 
 
 `{"items": ["settings", "library", "media", "plugins", "themes", "extension_data"]}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/backup/restore">
+<ApiEndpoint method="POST" path="/api/v2/backup/restore">
 
 
 `{"path": "/path/to/OpenBoxBackup-....zip", "items": [...], "force": bool}` restores selected items. Path must be a real `.zip` inside the data directory (or `backups/`); anything else raises `400`. Behavior:
@@ -148,10 +164,10 @@ Returns `202 {"state": "queued", "job_id": "<id>"}` — restore runs as a durabl
 
 ## Cloud statistics sync
 
-<ApiEndpoint method="POST" path="/api/cloud/sync">
+<ApiEndpoint method="POST" path="/api/v2/cloud/sync">
 
 
-Merge statistics with the mounted cloud folder (`settings.cloud_folder`). No folder configured: `400` `"Configure a mounted cloud sync folder first."`. Reads/writes `openbox-statistics.json` (format 1) under a file lock:
+Merge statistics with the mounted cloud folder (`settings.cloud_folder`). The route always returns `202 {"state": "queued", "job_id": "<id>"}`; when no folder is configured the background job fails with `"Configure a cloud sync folder first."`. Reads/writes `openbox-statistics.json` (format 1) under a file lock:
 
 - Merges `play_count`, `playtime_seconds`, `last_played` by maximum.
 - `progress`, `rating`, `favorite` follow the side with the newer `last_played`; with no play timestamps the newer file (by `generated_at` vs `last_cloud_sync`) wins.
@@ -164,21 +180,21 @@ Returns `202 {"state": "queued", "job_id": "<id>"}` — the merge runs as a dura
 
 ## Save tools (Ludusavi / Hoard)
 
-<ApiEndpoint method="GET" path="/api/save-tools/status">
+<ApiEndpoint method="GET" path="/api/v2/save-tools/status">
 
 
 `{"ludusavi": bool, "hoard": bool}` presence on `PATH`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/save-tools/ludusavi">
+<ApiEndpoint method="POST" path="/api/v2/save-tools/ludusavi">
 
 
 `{"action": "backup"|"restore"|"backups"|"find", "name"|"id", "path": ""}`. Requires the `ludusavi` binary (`400` with the install URL otherwise); unknown actions raise `400`. Backup/restore pass `--force`; `path` maps to `--path`. Runs with a 600-second timeout. Returns `{"ok", "action", "result", "stderr"}` where `result` is the parsed `--api` JSON (or `{"raw": ...}`).
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/save-tools/hoard">
+<ApiEndpoint method="POST" path="/api/v2/save-tools/hoard">
 
 
 `{"action": "backup"|"restore"|"list", "name"|"id"}`. Requires `hoard` on `PATH`. Returns `{"ok": true, "action", "output"}`.
@@ -189,7 +205,7 @@ These actions affect local files and restore is destructive: run backups before 
 
 ## MAME high scores
 
-<ApiEndpoint method="GET" path="/api/highscores">
+<ApiEndpoint method="GET" path="/api/v2/highscores">
 
 
 `?id=<index>&game_id=<stable>` lists local high-score files for the game's `rom_name` (or path stem): `{"scores": [{"file", "size", "label"}, ...]}`. Only meaningful for Arcade/MAME/FinalBurn Neo games. `404` when the game is missing.
@@ -204,14 +220,14 @@ Returns the parsed MAME high-score table for a game: `?id=<index>` or `?game_id=
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/highscores/export">
+<ApiEndpoint method="POST" path="/api/v2/highscores/export">
 
 
 Exports matching `.hi` files plus a `highscores.json` manifest (format 1, `exported_at`, `game`, `rom`, `files`) into `highscores/<slug>/`. Returns `{"files": [...], "manifest": "<path>"}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/highscores/import">
+<ApiEndpoint method="POST" path="/api/v2/highscores/import">
 
 
 `{"id"|"game_id", "path": "/dir"}` restores `.hi` files from a folder (or a `highscores.json` bundle) into the MAME hi directory, prefixing filenames with the ROM name when needed, mode `0o600`. Returns `{"restored": [...]}`; no usable files raise `400`.
@@ -220,37 +236,37 @@ Exports matching `.hi` files plus a `highscores.json` manifest (format 1, `expor
 
 ## Media queue and cache
 
-<ApiEndpoint method="GET" path="/api/media/queue">
+<ApiEndpoint method="GET" path="/api/v2/media/queue">
 
 Returns the durable media download queue snapshot: `{"items": [...], "queue": [...], "running", "paused", "completed", "failed", "cancelled", "counts": {"total", "queued", "failed", "completed", "cancelled"}}`. `items` and `queue` carry the same normalized entries. The snapshot is read from `media-queue.json` and merged with the worker's in-process counters, so a restarted server still reports queued work.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/media/queue/pause">
+<ApiEndpoint method="POST" path="/api/v2/media/queue/pause">
 
 Requests a cooperative pause of the media worker and returns the current worker state (`running`, `paused`, `cancelled`, `completed`, `failed`). The in-flight download is allowed to finish; queued items stay queued.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/media/queue/resume">
+<ApiEndpoint method="POST" path="/api/v2/media/queue/resume">
 
 Clears the pause and cancel flags and starts the worker if it is not alive. Returns the current worker state. Resuming an already-running worker is harmless.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/media/queue/cancel">
+<ApiEndpoint method="POST" path="/api/v2/media/queue/cancel">
 
 Requests cancellation of the media worker and clears the pause flag. Returns the current worker state; queued items remain in the queue and can be resumed later.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/media/queue/retry">
+<ApiEndpoint method="POST" path="/api/v2/media/queue/retry">
 
 Requeues one failed download: `{"id": "<queue item id>"}`. The item's attempts and error are cleared, and the worker starts if it is idle. Returns `{"ok": true, "id"}`; a missing id or an unknown item raises `400`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/media/cache/cleanup">
+<ApiEndpoint method="POST" path="/api/v2/media/cache/cleanup">
 
 Deletes generated media-cache files older than `days`: `{"days": 30}` (default 30, clamped to 1–3650). Only regular files under `<data>/cache/media` are touched; user media and symlinks are never removed. Returns `{"root", "deleted", "bytes", "skipped"}`.
 
@@ -258,14 +274,14 @@ Deletes generated media-cache files older than `days`: `{"days": 30}` (default 3
 
 ## OBS
 
-<ApiEndpoint method="GET" path="/api/obs/status">
+<ApiEndpoint method="GET" path="/api/v2/obs/status">
 
 
 `{"running": bool, "recording": bool, "directory": "<obs output dir>", "latest_recording": "<path or null>"}`. The directory is read from the newest OBS profile's `basic.ini` (`SimpleOutput`/`AdvOut` FilePath/RecFilePath), falling back to `~/Videos`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/obs/attach">
+<ApiEndpoint method="POST" path="/api/v2/obs/attach">
 
 
 `{"id"|"game_id", "path": "/path/to/recording.mp4"}` attaches a recording file as `video_recording` (and `video` when no video is set). Missing file: `400`. Returns `{"path", "obs": {status}}`.
@@ -274,7 +290,7 @@ Deletes generated media-cache files older than `days`: `{"days": 30}` (default 3
 
 ## Screenshot and capture
 
-<ApiEndpoint method="POST" path="/api/screenshot">
+<ApiEndpoint method="POST" path="/api/v2/screenshot">
 
 
 Capture the screen with the first available tool among gnome-screenshot, spectacle, scrot, and ImageMagick `import`; appends the PNG to the game's `screenshots` under `media/captures/` and bumps the media epoch. Returns `{"path"}`; no tool available raises `400`.
@@ -283,35 +299,35 @@ Capture the screen with the first available tool among gnome-screenshot, spectac
 
 ## RetroAchievements
 
-<ApiEndpoint method="GET" path="/api/ra/settings">
+<ApiEndpoint method="GET" path="/api/v2/ra/settings">
 
 
 `{"configured": false}` when no credentials exist; otherwise fetches the user profile and returns `{"configured": true, "username", "points", "motto"}`. Profile API failures return `400`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/ra/settings">
+<ApiEndpoint method="POST" path="/api/v2/ra/settings">
 
 
 `{"username", "api_key"}` validates against `API_GetUserProfile.php` and persists to `retroachievements.json` (mode `0o600`). Rejected credentials raise `400 "RetroAchievements rejected those credentials."` — RetroAchievements `401`/`403` responses are translated to that message instead of a generic HTTP failure, and a profile without a `User` fails the same way. Returns the profile summary.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/ra/game">
+<ApiEndpoint method="POST" path="/api/v2/ra/game">
 
 
 Match a game to RetroAchievements (requires credentials): computes the ROM hash (with header stripping for NES/SNES/7800/Lynx/PC Engine, byte swaps for N64, archive ROM extraction for ZIP/7z) and returns `API_GetGameInfoAndUserProgress` enriched with beaten/mastered totals and points. Missing credentials: `400` `"Configure RetroAchievements first."`; unmatched hashes raise `400`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/ra/inject">
+<ApiEndpoint method="POST" path="/api/v2/ra/inject">
 
 
 Write credentials into emulator configs (RetroArch `cheevos_*`, Dolphin, PCSX2) for both native and Flatpak paths. Returns `{"updated": [...], "skipped": [...]}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/ra/badge">
+<ApiEndpoint method="GET" path="/api/v2/ra/badge">
 
 
 `?name=<badge>&locked=0|1` serves a badge PNG, downloading it on demand from `media.retroachievements.org`. Unknown badge: `404`.
@@ -322,7 +338,7 @@ Write credentials into emulator configs (RetroArch `cheevos_*`, Dolphin, PCSX2) 
 
 <ApiEndpoint method="POST" path="/api/v2/achievements/refresh">
 
-Refreshes one non-RetroAchievements achievement source for a game: `{"game_id": "<stable>", "source": "steam"}` or `"source": "plugin:<plugin-id>:<source>"`. RetroAchievements is rejected here because ROM matching uses `POST /api/ra/game`; Steam requires `steam_app_id` and saved Steam credentials. Returns `{"ok": true, "game_id", "source"}` and invalidates the state cache. A plugin source refreshes that plugin's cached statistics.
+Refreshes one non-RetroAchievements achievement source for a game: `{"game_id": "<stable>", "source": "steam"}` or `"source": "plugin:<plugin-id>:<source>"`. RetroAchievements is rejected here because ROM matching uses `POST /api/v2/ra/game`; Steam requires `steam_app_id` and saved Steam credentials. Returns `{"ok": true, "game_id", "source"}` and invalidates the state cache. A plugin source refreshes that plugin's cached statistics.
 
 </ApiEndpoint>
 
@@ -334,21 +350,21 @@ Writes or clears a manual achievement override: `{"game_id", "source", "earned",
 
 ## Bezels and EmuMovies
 
-<ApiEndpoint method="POST" path="/api/bezels/download">
+<ApiEndpoint method="POST" path="/api/v2/bezels/download">
 
 
 `{"platform"}` downloads and safely extracts the Bezel Project set for the platform (NES, SNES, Nintendo 64, Game Boy Advance, Sega Genesis, PlayStation, Arcade). Unknown platform raises `400`. Returns `{"path"}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/emumovies/settings">
+<ApiEndpoint method="POST" path="/api/v2/emumovies/settings">
 
 
 `{"username", "password"}` persists EmuMovies credentials to `emumovies.json` (mode `0o600`). Returns `{"configured": true}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/emumovies/download">
+<ApiEndpoint method="POST" path="/api/v2/emumovies/download">
 
 
 `{"id"|"game_id", "type": "box"}` downloads media from EmuMovies with basic-auth credentials (32 MiB cap, image content type enforced). Missing credentials raise `400` `"Configure EmuMovies credentials in Settings first."`. Returns `{"path"}`.
@@ -357,7 +373,7 @@ Writes or clears a manual achievement override: `{"game_id", "source", "earned",
 
 <ApiEndpoint method="GET" path="/api/v2/backup/diff">
 
-Compare the current library state against a named backup archive. Query parameter: `archive=<name>` (the backup archive name as listed by `GET /api/backups`).
+Compare the current library state against a named backup archive. Query parameter: `archive=<name>` (the backup archive name as listed by `GET /api/v2/backups`).
 
 Returns `{"added": [...game_ids], "removed": [...game_ids], "changed": [...game_ids], "settings_changed": <bool>, "summary": {"added": <count>, "removed": <count>, "changed": <count>, "total": <count>}}` (`total` is the current library game count).
 
@@ -366,7 +382,7 @@ Returns `{"added": [...game_ids], "removed": [...game_ids], "changed": [...game_
 - `changed`: games present in both but with differing fields.
 - `settings_changed`: whether app settings differ between backup and current state.
 
-Invalid or missing archive name returns `404`. (v1.7.2+)
+A missing `archive` parameter returns `400 {"error":"archive parameter required"}`; a well-formed archive name that does not exist returns `404`. (v1.7.2+)
 
 **Restore Preview (v1.16.0+).** The three flat lists name the same three sets relative to the *current* library, which makes them easy to read backwards. The `restore` block names them the way a user experiences a restore, and it is the only one the UI reads:
 

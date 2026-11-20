@@ -30,7 +30,7 @@ A source with no storefront installed *and* no games already in the library is s
 | EA app (Windows) | Not imported | EA `installerdata.xml` manifests |
 | Ubisoft Connect (Windows) | Not imported | Ubisoft `Installs` registry keys |
 
-**Import Epic** (`POST /api/import/epic`) reads Epic on its own through Legendary, and also reads Epic Games Launcher Windows manifests when they are present. It is a source in its own right rather than part of Heroic: use it when you keep Epic games via a native Legendary install and have no Heroic profile to import. Imported titles carry `source: "Epic"` and are keyed by their Heroic app id, so they dedupe against a later Heroic import instead of appearing twice.
+**Import Epic** (`POST /api/v2/import/epic`) reads Epic on its own through Legendary, and also reads Epic Games Launcher Windows manifests when they are present. It is a source in its own right rather than part of Heroic: use it when you keep Epic games via a native Legendary install and have no Heroic profile to import. Imported titles carry `source: "Epic"` and are keyed by their Heroic app id, so they dedupe against a later Heroic import instead of appearing twice.
 
 The other per-source buttons are **Import Steam**, **Import Heroic**, **Import Lutris**, **Import Gameyfin**, **Import ScummVM**, **Import RPCS3**, and **Import Vita3K**. On Windows, three more buttons import installed games natively: **Import GOG**, **Import EA app**, and **Import Ubisoft Connect** (`POST /api/v2/import/gog`, `/ea`, and `/ubisoft`). They read installed games only, are offline, and never touch the launchers' files. **Import PICO-8**, **Import MSU-1**, and **Import WHDLoad** live in Tools → Imports & extras rather than this dialog because they scan a folder instead of a launcher; see [Importing](/guides/library/importing/#pico-8-msu-1-and-whdload).
 
@@ -48,7 +48,7 @@ An import can also be limited to **new games only** — the **Import only games 
 
 ## Import exclusions
 
-Per-source import exclusions keep specific titles out of future imports and rescans. Add one per title from the **Storefront Manager** dialog (or via `/api/import/exclusions`); excluded entries are filtered from storefront imports and rescans, and the key is the source plus that source's external id — `steam`, `heroic`, `lutris`, `gameyfin`, `gog`, `ea`, or `ubisoft`. Heroic exclusions can be store-specific (Epic/GOG/Amazon). Removing one takes the same pair through `/api/import/exclusions/delete`.
+Per-source import exclusions keep specific titles out of future imports and rescans. Add one per title from the **Storefront Manager** dialog (or via `/api/v2/import/exclusions`); excluded entries are filtered from storefront imports and rescans, and the key is the source plus that source's external id — `steam`, `heroic`, `lutris`, `gameyfin`, `gog`, `ea`, or `ubisoft`. Heroic exclusions can be store-specific (Epic/GOG/Amazon). Removing one takes the same pair through `/api/v2/import/exclusions/delete`.
 
 ## Troubleshooting
 

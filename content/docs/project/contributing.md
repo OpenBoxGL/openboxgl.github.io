@@ -3,14 +3,15 @@ title: Contributing
 description: Develop, test, and document OpenBoxGL.
 ---
 
-OpenBoxGL development requires Python 3.10+ and Git, on Linux, Windows, or macOS. The Linux workflow below uses bash and `make`; Windows is covered in [Windows development](#windows-development), and macOS in [macOS development](#macos-development). The application repository is [vindeckyy/OpenBoxGL](https://github.com/vindeckyy/OpenBoxGL); this site lives in [OpenBoxGL/openboxgl.github.io](https://github.com/OpenBoxGL/openboxgl.github.io).
+OpenBoxGL development requires Rust 1.92+ (the pinned toolchain is 1.99.1), Git, and—only for the Python fallback, plugins, and the Python test gates—Python 3.11+. The Linux workflow below uses bash and `make`; Windows is covered in [Windows development](#windows-development), and macOS in [macOS development](#macos-development). The application repository is [vindeckyy/OpenBoxGL](https://github.com/vindeckyy/OpenBoxGL); this site lives in [OpenBoxGL/openboxgl.github.io](https://github.com/OpenBoxGL/openboxgl.github.io).
 
 ## Development setup
 
 ```bash
 git clone https://github.com/vindeckyy/OpenBoxGL.git
 cd OpenBoxGL
-python3 web_app.py   # Web UI (development)
+cargo build --release --locked -p openbox-cli
+./openbox.sh --web   # Rust server, development
 make native-host    # build the native host, then ./openbox-native.sh
 ```
 
@@ -31,7 +32,7 @@ The version-sync gate (`scripts/check_version_sync.py`, also `make version-check
 
 ## Windows development
 
-On Windows the source tree, tests, and configuration steps are the same, but there is no bash or `make`, so the test and gate commands below replace the Linux ones above. Python 3.10 or newer is required, as `python.exe` or `py.exe` on `PATH` (CI runs the Windows job on 3.12); there is no `python3` on Windows — the name is a Microsoft Store alias that does not run scripts — so the examples use `python`.
+On Windows the source tree, tests, and configuration steps are the same, but there is no bash or `make`, so the test and gate commands below replace the Linux ones above. Build the Rust server with `cargo build --release --locked -p openbox-cli`. Python 3.11 or newer is required for the fallback, `.py` plugins, and the Python test gates, as `python.exe` or `py.exe` on `PATH` (CI runs the Windows Python job on 3.12); there is no `python3` on Windows — the name is a Microsoft Store alias that does not run scripts — so the examples use `python`.
 
 `python -B scripts/run_windows_tests.py` runs every `tests/test_*.py` in its own subprocess with a 120-second timeout, prints each file as `pass`/`fail`/`timeout`, and writes a JSON report to `%TEMP%\openbox-windows-test-results.json` (`OPENBOX_TEST_RESULTS` overrides the path). Pass test file names exactly as they appear in `tests/` to run a subset; the runner exits non-zero when any file fails.
 
@@ -70,7 +71,7 @@ powershell -ExecutionPolicy Bypass -File scripts\build_native_host_windows.ps1
 ## Coding guidelines
 
 - Match the style of surrounding code; prefer focused changes over broad refactors.
-- Target Python 3.10+ and the standard library only; new dependencies require approval.
+- The shipped runtime is Rust; new crates require a lockfile update and `cargo deny` review. The Python fallback targets 3.11+ and the standard library only.
 - Use explicit, user-facing error messages for validation failures.
 - Keep user-facing strings clear and neutral.
 - Do not commit ROMs, BIOS images, API tokens, or personal library data.

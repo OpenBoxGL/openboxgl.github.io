@@ -3,7 +3,7 @@ title: REST API
 description: Use the local authenticated HTTP API for automation.
 ---
 
-The app exposes a local REST API for automation and third-party tooling. The server binds to loopback only and requires a per-launch token on every request. This page is the index; each operation group has its own reference page, and [How OpenBoxGL works](/reference/how-it-works/) explains the server, the error contract, and the lifecycle.
+The app exposes a local REST API for automation and third-party tooling. The Rust server (`openbox-server`) binds to loopback only and requires a per-launch token on every request. The public surface is **`/api/v2/*`**; the native windows use **`/api/host/*`**. Unversioned `/api/*` paths were retired in 2.1 and `/api/v1` was removed in 2.1. This page is the index; each operation group has its own reference page, and [How OpenBoxGL works](/reference/how-it-works/) explains the server, the error contract, and the lifecycle.
 
 ## Quickstart
 
@@ -14,22 +14,22 @@ TOKEN=$(cat ~/.local/share/openbox-game-launcher/server.token)
 PORT=$(cat ~/.local/share/openbox-game-launcher/server.port)
 
 # List the whole library
-curl -s -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:$PORT/api/library | jq '.games | length'
+curl -s -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:$PORT/api/v2/library | jq '.games | length'
 
 # Launch a game by stable id
 curl -s -X POST -H "X-OpenBox-Token: $TOKEN" \
  -H "Content-Type: application/json" \
  -d '{"game_id": "GAME_ID"}' \
- http://127.0.0.1:$PORT/api/launch
+ http://127.0.0.1:$PORT/api/v2/launch
 
 # Toggle a favorite
 curl -s -X POST -H "X-OpenBox-Token: $TOKEN" \
  -H "Content-Type: application/json" \
  -d '{"game_id": "GAME_ID"}' \
- http://127.0.0.1:$PORT/api/favorite
+ http://127.0.0.1:$PORT/api/v2/favorite
 ```
 
-Replace `GAME_ID` with a real `game-<hex>` id from `/api/library`. The token and port live only while the app is running; both files are deleted when the server stops.
+Replace `GAME_ID` with a real `game-<hex>` id from `/api/v2/library`. The token and port live only while the app is running; both files are deleted when the server stops.
 
 <Callout type="caution" title="Prefer the header over the query string">
 
@@ -40,8 +40,8 @@ Replace `GAME_ID` with a real `game-<hex>` id from `/api/library`. The token and
 
 - The API listens at `http://127.0.0.1:SERVER_PORT` on a random port chosen at startup. The port and token are written to `server.port` and `server.token` inside the data directory and deleted when the server stops.
 - OpenBoxGL does not terminate HTTPS. The API is designed for the local host. If you expose it beyond the machine, put a trusted reverse proxy in front and understand the trust boundary first.
-- Requests time out after 30 seconds at the socket level (`Handler.REQUEST_TIMEOUT`).
-- JSON request bodies are limited to 65,536 bytes (`Handler.MAX_BODY`). A larger body returns HTTP 400 with `{"error": "Request is too large."}`.
+- Requests time out after 30 seconds at the socket level.
+- JSON request bodies are limited to 65,536 bytes. A larger body returns HTTP 400 with a problem document whose detail is "Request is too large.".
 
 ## Authentication
 
@@ -51,7 +51,7 @@ Every route except the static UI, locale JSON, and other explicitly public asset
 X-OpenBox-Token: TOKEN
 ```
 
-The query parameter `token=TOKEN` is also accepted but can leak through browser history, referrer logs, and proxy logs. Prefer the header in anything you write. The app scrubs `?token=` from history immediately (`history.replaceState`) and never logs the token-bearing URL; logs use the token-free `http://127.0.0.1:PORT/`. The token is compared with a constant-time comparison (`secrets.compare_digest`). Known protected routes check the token after route resolution, so an unknown route can return `404` before authentication. A missing or wrong token on a known protected route returns `403 {"error":"Unauthorized"}`. Ten failures in 60 seconds per IP return `429 {"error":"Too many authentication failures. Try again later.", "code":"RATE_LIMITED", "retry_after": 60}` with `Retry-After` (correct token still succeeds and clears the bucket).
+The query parameter `token=TOKEN` is also accepted but can leak through browser history, referrer logs, and proxy logs. Prefer the header in anything you write. The app scrubs `?token=` from history immediately (`history.replaceState`) and never logs the token-bearing URL; logs use the token-free `http://127.0.0.1:PORT/`. The token is compared in constant time. Authentication runs **before** host-version checks, retired-route guards, and route resolution, so an unknown route without a token returns `403`, not `404`. A missing or wrong token returns `403` with `{"error":"Unauthorized"}`. Ten failures in 60 seconds per IP return `429` with `code: "RATE_LIMITED"` and a `Retry-After` header; a correct token clears the bucket.
 
 ## Response envelope
 
@@ -65,13 +65,13 @@ Most API handlers return JSON objects. Since 2.0 every error is served as `appli
 | `400` | Validation error; the `error` field names the exact problem (absolute paths are sanitized: the server log keeps the full path, the client receives the prefix before the path) |
 | `403` | `{"error":"Unauthorized"}`; missing or wrong token on a known protected route |
 | `429` | `{"error":"Too many authentication failures. Try again later.", "code":"RATE_LIMITED"}`; 10 auth failures in 60 seconds per IP, with `Retry-After` |
-| `404` | `{"error":"Not found"}` or a route-specific error for unknown routes or missing games/media/documents; route lookup can happen before authentication |
+| `404` | `{"error":"Not found"}` or a route-specific error for unknown routes or missing games/media/documents, after authentication |
 | `409` | Required local prerequisite is missing (for example, the metadata database has not been downloaded) |
 | `416` | Invalid byte range on media |
 | `503` | `{"error":"OpenBox library data needs recovery before this operation can continue."}` when the state file is corrupt |
 | `500` | `{"error":"Unexpected server error. Copy the diagnostic log from Settings and include it in your report."}` |
 
-The `400` path catches `ValueError`, `OSError`, `TypeError`, `AttributeError`, `KeyError`, `IndexError`, `json.JSONDecodeError`, `GameyfinError`, `FileNotFoundError`, `RuntimeError`, and `subprocess.SubprocessError` from handlers, so most operation failures surface as `400` with a readable message. A corrupt state file raises `503` before the handler runs. Anything else is a `500` with a logged exception.
+Handlers return a typed `ApiError` with a status and stable `code`; validation failures surface as `400` with a readable `detail`. A corrupt or too-old state file returns `409 STATE_SCHEMA_TOO_OLD` / `STATE_FUTURE_VERSION` or `503 STATE_UNAVAILABLE` before the handler runs. An unhandled failure is a `500` with a logged exception and a `request_id`.
 
 ## Route groups
 
@@ -93,6 +93,8 @@ Each group has its own reference page with per-endpoint cards.
   { href: '/reference/api/one-eighteen/', title: 'API 1.18 additions', eyebrow: 'release', description: 'Platform administration, durable media queue control, save manifests and selective restore, plugin credentials/data/stats/repair, storefront scanning, integration tokens and Steam, new import formats, and emulator settings.' },
   { href: '/reference/api/one-nineteen/', title: 'API 1.19 changes', eyebrow: 'release', description: 'The platform-capability contract: one features object decides every platform-specific control, and storefront/battery behavior on Windows and macOS.' },
   { href: '/reference/api/two-zero/', title: 'API 2.0 changes', eyebrow: 'release', description: 'The public /api/v2 contract, the retired /api/v1 bridge, the /api/host channel, problem-details errors, migration, portable-library move, integrity, compat report, and version routes.' },
+  { href: '/reference/api/two-one/', title: 'API 2.1 changes', eyebrow: 'release', description: 'The v2-only dispatch, retired-surface 410 documents, the cursor jobs panel, and backup format 1 write retirement.' },
+  { href: '/reference/api/three-zero/', title: 'API 3.0 changes', eyebrow: 'release', description: 'The Rust backend, Save Vault, Achievement Trail, Deal Radar, Time Capsules, Milestones, Backlog Itinerary, and the version runtime field.' },
   { href: '/reference/api/local-admin/', title: 'Local administrator', eyebrow: 'admin', description: 'Updates, shutdown, state recovery, desktop integration, themes, plugins, premium read models.' },
  ]}
 />
@@ -108,7 +110,7 @@ Each group has its own reference page with per-endpoint cards.
 List the library with the header token:
 
 ```bash
-curl -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:$PORT/api/library
+curl -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:$PORT/api/v2/library
 ```
 
 Launch a game by stable id:
@@ -117,7 +119,7 @@ Launch a game by stable id:
 curl -X POST -H "X-OpenBox-Token: $TOKEN" \
  -H "Content-Type: application/json" \
  -d '{"game_id": "GAME_ID"}' \
- http://127.0.0.1:$PORT/api/launch
+ http://127.0.0.1:$PORT/api/v2/launch
 ```
 
-Where `$TOKEN` and the port come from the running server (`cat ~/.local/share/openbox-game-launcher/server.token`). On Windows the data directory is `%LOCALAPPDATA%\openbox-game-launcher`, and on macOS it is `~/Library/Application Support/openbox-game-launcher`. See [Configuration](/reference/configuration/) for the data directory and [the application repository](https://github.com/vindeckyy/OpenBoxGL) for the current route contract (`routes.py`).
+Where `$TOKEN` and the port come from the running server (`cat ~/.local/share/openbox-game-launcher/server.token`). On Windows the data directory is `%LOCALAPPDATA%\openbox-game-launcher`, and on macOS it is `~/Library/Application Support/openbox-game-launcher`. See [Configuration](/reference/configuration/) for the data directory and [the application repository](https://github.com/vindeckyy/OpenBoxGL) for the current route contract (`api_contracts.json`, mirrored by `docs/openapi.json`).

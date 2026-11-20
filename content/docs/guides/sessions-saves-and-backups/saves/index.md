@@ -45,7 +45,13 @@ The same card has a **State slot** field for RetroArch save states. Enter 1–32
 - After each backup, **Save backup retention limit** (0-500, default 10) trims the oldest archives.
 - **Back up saves when a game session ends** creates an `on-close` archive automatically and enforces the same retention.
 
-The CLI form is `python3 web_app.py --backup` for whole-library backups; per-game save backups are a UI/API operation (`POST /api/saves/backup`, returned as a durable job).
+The CLI form is `openbox --backup` for whole-library backups; per-game save backups are a UI/API operation (`POST /api/v2/saves/backup`, returned as a durable job).
+
+## Save Vault
+
+Save Vault is a separate, indexed snapshot store under `<data-dir>/save-vault/`. It takes manual, on-close, or scheduled snapshots, verifies every file with SHA-256, and takes a mandatory `pre-restore` safety snapshot before a restore. Configure it with `save_vault_enabled`, `save_vault_keep` (1-50, default 5), `save_vault_on_close`, and `save_vault_auto_days` (0-365).
+
+Use **Save management > Save Vault** to create, diff, restore, or delete a snapshot. The API routes are `/api/v2/saves/vault`, `/status`, `/diff`, `/snapshot`, `/restore`, and `/delete`. Vault data is **not** in library backups; copy `<data-dir>/save-vault/` separately if you need it off-machine. See [Save Vault](/guides/sessions-saves-and-backups/save-vault/).
 
 ## Version history
 
@@ -56,7 +62,7 @@ The CLI form is `python3 web_app.py --backup` for whole-library backups; per-gam
 - **unchanged** files whose SHA-256 already matches, and
 - **missing from archive** entries the manifest describes but the archive no longer holds.
 
-The preview is read-only. Counts come from `POST /api/saves/restore/preview`; each list is capped for transport while the counts stay exact, so a long history still reports the true totals. **Restore this version** opens the restore dialog; when files would be overwritten the button reads **Restore anyway**.
+The preview is read-only. Counts come from `POST /api/v2/saves/restore/preview`; each list is capped for transport while the counts stay exact, so a long history still reports the true totals. **Restore this version** opens the restore dialog; when files would be overwritten the button reads **Restore anyway**.
 
 ## Restore saves
 

@@ -3,15 +3,16 @@ title: Plugins
 description: Build trusted local plugins with the documented manifest, hook, and capability contract.
 ---
 
-Plugins are local Python packages that extend OpenBoxGL through documented hooks. They run as separate processes with a JSON stdin/stdout protocol, so a plugin that crashes or misbehaves cannot take down the library.
+Plugins are local packages that extend OpenBoxGL through documented hooks. A v2 entry may be a Python file or a native executable. They run as separate processes with a JSON Lines protocol, so a plugin that crashes or misbehaves cannot take down the library.
 
 ## Quick facts
 
-- A plugin manifest (`plugin.json`) requires `id`, `name`, and `version`. IDs match `^[a-z0-9][a-z0-9._-]{1,63}$`.
-- The implementation entry defaults to `plugin.py`; explicit entries such as `main.py` are supported and must be a Python file inside the package.
+- **Plugin API v1 was removed in 3.0.** Every manifest must declare `"api_version": 2`; a missing value or `1` fails with `PLUGIN_API_RETIRED`.
+- A plugin manifest (`plugin.json`) requires `id`, `name`, and `version`. IDs match `^[a-z0-9][a-z0-9._-]{1,63}$`; `data`, `credentials`, and `plugins-state.json` are reserved.
+- The implementation entry defaults to `plugin.py`; explicit entries such as `main.py` are supported. A `.py` entry runs through `plugin_runner_v2.py`; any other executable entry runs directly.
 - Base hooks are `library`, `before_launch`, `after_session`, `command`, `library_source`, and `events` (the last three added in v1.14.0). A declared base hook outside this set is rejected.
 - Capability hooks (1.18.0) are `storefront`, `metadata`, `media`, `stats`, `emulator`, and `discovery`. Each is declared through `capabilities`, and a capability without its hook is a manifest error. There is no standalone `services` hook; a capability hook may return `service_requests` instead.
-- The runner exchanges one JSON object per invocation over stdin/stdout, chains base hooks in sorted (alphabetical by directory) order, caps input and output at 2 MiB each, and stops a plugin after its hook timeout (5 seconds for base hooks; 30 s storefront, 15 s metadata/media/stats, 10 s emulator/discovery).
+- The runner exchanges one JSON Lines frame per invocation, chains base hooks in sorted (alphabetical by directory) order, caps input at 2 MiB and output at 4 MiB, and stops a plugin after its hook timeout (5 seconds for base hooks; 30 s storefront, 15 s metadata/media/stats, 10 s emulator/discovery). Each hook invocation starts a fresh process.
 - The plugin environment is cleaned before execution: `PYTHONPATH`, `PYTHONHOME`, `LD_PRELOAD`, and `LD_LIBRARY_PATH` are removed and `PYTHONNOUSERSITE=1` is set.
 - Capability hooks also receive a bounded data bag, non-secret settings, and capability credentials. Backups exclude the credential store and blank password-format settings.
 - Plugins are local code. Review them before installation. Safe mode (`OPENBOX_SAFE_MODE=1`) skips the lifecycle hooks (`library`, `before_launch`, `after_session`, `library_source`, `events`) and the webhook dispatcher, but not the capability hooks — an explicit storefront, metadata, media, stats, emulator-settings, or discovery call still invokes that plugin's hook. Failed installations roll back to the previous version.

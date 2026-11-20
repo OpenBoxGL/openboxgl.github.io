@@ -6,7 +6,7 @@ sidebar: false
 
 # Command line and deep links
 
-OpenBox is a local app, so the command line is a first-class surface. This page covers every flag the app entry point accepts and the `openbox://` URI scheme you can use to drive a running instance.
+OpenBox is a local app, so the command line is a first-class surface. The shipped launchers (`openbox`, `openbox-native`, `openbox.cmd`, `openbox.ps1`) start the Rust `openbox-server` and the native window. This page covers the flags the current release accepts, the Python-fallback-only flags, and the `openbox://` URI scheme.
 
 ## Entry points
 
@@ -14,37 +14,41 @@ OpenBox is a local app, so the command line is a first-class surface. This page 
 | --- | --- |
 | `openbox` | The native window (default) |
 | `openbox-native` | The native window (the same host) |
-| `openbox --web` | The loopback web UI in a browser (development) |
+| `openbox --web` | The Rust server without a native window; prints a tokenless loopback URL |
+| `openbox-server` | The Rust server directly (headless) |
 
-The native window renders the same UI as the web fallback; both serve `index.html` over the loopback server. Flags below apply to the app entry point unless noted.
+The native window renders the same UI as the web fallback; both serve `index.html` over the loopback server. The launchers resolve `openbox-server` first (`OPENBOX_SERVER_BIN`, bundle/share, `target/release`, then `PATH`) and fall back to `python3 web_app.py` only when `OPENBOX_BACKEND=python` is set or no Rust binary exists.
 
-On macOS, `openbox` is the launcher inside `OpenBox.app`, which `install-macos.sh` links into `~/.local/bin`. The native window is WKWebView, and `openbox --web` opens the same UI in your browser.
+On macOS, `openbox` is the launcher inside `OpenBox.app`, which `install-macos.sh` links into `~/.local/bin`. The native window is WKWebView, and `openbox --web` serves the same UI without a window.
 
 ## Flags
 
+Flags marked **server** are implemented by `openbox-server`; pass them through `openbox --web` or invoke `openbox-server` directly. Flags marked **launcher** are handled by `openbox.sh` / the native host. Flags marked **Python fallback** work only when `OPENBOX_BACKEND=python` runs `web_app.py`.
+
 | Flag | Behavior |
 | --- | --- |
-| `-h`, `--help` | Show command-line options and usage summary, then exit. |
-| `--bigbox` | Open the UI straight into Big Box mode by appending `&deeplink=bigbox` to the URL that is opened. Pairs with the **Start in Big Box mode** setting (`bigbox_start_at_launch`) for Deck/HTPC boot. Has no effect with `--no-browser`, since no URL is opened. Ignored by `--backup`/`--restore-backup`, which never start the server. (v1.14.0+) |
-| `--no-browser` | Start the server without opening a window. Useful for remote or scripted starts. The printed URL has no token; open `http://127.0.0.1:<port>/?token=<value>` with the `server.port` and `server.token` values from the data directory. |
-| `--game-mode` | Force gamescope guest behavior (Steam Deck / Bazzite Game Mode). On the web entry point this opens Big Box fullscreen in a kiosk browser; the native window detects gamescope guests from the environment and needs no flag. Linux only: on Windows and macOS the flag exits with status 2 and prints `Game Mode needs gamescope and is only available on Linux.` |
-| `--play <id>` | Launch a game by stable `game_id` or numeric library id, using the authenticated local launch route. This is the command used by Steam Bridge shortcuts. Without an id, prints usage and exits with status 2. |
-| `--uri <openbox://...>` | Dispatch a deep link against a running instance (or start one) and exit. You can also pass a bare `openbox://...` URI directly as a positional argument. Without a value, prints usage and exits with status 2. |
-| `--launcher` | Open the rofi/wofi/dmenu keyboard launcher against the running instance and exit. |
-| `--backup [--items a,b] [--keep N]` | Create a backup archive from the command line and print its path. `--items` takes a comma-separated list of `library`, `settings`, `media`, `plugins`, `themes`, and `extension_data`; unknown names are ignored, and the default is `library,settings`. `--keep N` keeps only the newest N archives in `backups/`; the default `0` keeps all of them. |
-| `--restore-backup <archive>` | Restore a backup archive. The archive must be a real `.zip` inside the data directory or `backups/`. Prints the restored item names. |
-| `--check-library` | Run the library integrity report (missing, unreadable, and outside-folder game paths, plus media manifest mismatches) and exit without starting a window. Exit 0 healthy, 1 warnings, 2 errors. (v2.0.0+) |
-| `--repair-library [--refresh-backup]` | Rebuild the media manifest and prune expired trash after confirmation, then exit. Exit 0 on success. (v2.0.0+) |
-| `--migrate-library` | Apply the format 7 library upgrade from the command line and exit; refuses while the server is running. (v2.0.0+) |
-| `--rollback-library [--yes]` | Restore `library.v6.backup.json`: lists the game edits made after the upgrade, then requires typing `ROLLBACK` (non-interactive refusal exits 3 with a rerun instruction; `--yes` skips the prompt). Library command usage errors exit 4. (v2.0.0+) |
-| `--web` | Start the loopback web UI in a browser instead of the native window (development). |
-| `--app-window` | Web entry point only: open the UI in a chrome-less app window (browser `--app=` mode) instead of a normal tab. The native window is unaffected. |
-| `--no-app-window` | Web entry point only: open the UI in a normal browser window; overrides the chrome-less app window default there. The native window is unaffected. |
-| `--fullscreen-width <W>` / `--width <W>` | Web entry point: customize the viewport width in kiosk and app window modes. A value that is not an integer is ignored. |
-| `--fullscreen-height <H>` / `--height <H>` | Web entry point: customize the viewport height in kiosk and app window modes. A value that is not an integer is ignored. |
-| `--resolution <WxH>` / `--resolution=<WxH>` | Web entry point: customize the viewport resolution (e.g. `--resolution 1920x1080`). A value without an `x` or with non-integer parts is ignored. |
+| `-h`, `--help` | **server** — print usage and exit. `openbox --help` is forwarded to the native host and does not print OpenBox usage; use `openbox --web --help` or `openbox-server --help`. |
+| `--web` | **launcher** — start the server without a native window. The server prints `http://127.0.0.1:<port>/` (no token); open it with `?token=<server.token>` or send `X-OpenBox-Token`. |
+| `--no-browser` | **server** — suppress browser auto-launch. The server is always headless; the native host passes this flag. The native window ignores it. |
+| `--game-mode` | **server** — Steam Game Mode / gamescope guest mode. Linux only: on Windows and macOS the server exits with status 2 and prints `Game Mode needs gamescope and is only available on Linux.` The native window ignores the flag and detects gamescope from the environment. |
+| `--play <id>` | **server** — launch a game by stable `game_id` or numeric library id. Without an id, prints usage and exits with status 2. |
+| `--uri <openbox://...>` | **server** — dispatch a deep link against a running instance (or start one) and exit. A bare `openbox://...` positional argument is also accepted. |
+| `--launcher` | **server** — run the keyboard quick launcher. The shipped `scripts/openbox-launcher.sh` still queries the retired unversioned paths (`/api/launcher/menu`, `/api/launch`); use the versioned routes directly until the helper is updated. |
+| `--backup [--items a,b]` | **server** — create a backup archive and print its path. `--items` takes a comma-separated list of `library`, `settings`, `media`, `plugins`, `themes`, and `extension_data`; unknown names are ignored, and the default is `library,settings`. The CLI does not implement `--keep`; use the API `keep` field or the UI for rotation. |
+| `--restore-backup <archive>` | **server** — restore a backup archive. The CLI accepts any readable archive path; the API/UI restore additionally restricts the path to the data directory or `backups/`. |
+| `--check-library` | **server** — run the library integrity report and exit without starting a window. Exit 0 healthy, 1 warnings, 2 errors, 3 refused (server running, active sessions, invalid library), 4 usage error. |
+| `--repair-library [--refresh-backup]` | **server** — rebuild the media manifest and prune expired trash, then exit. No confirmation prompt. Refuses with exit 3 while the server runs or the library is schema 6 or older. Also removes the derived `sqlite_readmodel.db` files. |
+| `--migrate-library` | **server** — upgrade a schema 6 library to schema 7 and exit. Refuses while the server runs. Writes `library.v6.backup.json`, `migration-in-progress.json`, and `migration-report.json`. Schemas 1-5 must be opened once on OpenBox 2.1 first. |
+| `--rollback-library` | **Removed in 3.0.** Prints `openbox --rollback-library was removed in 3.0. Use OpenBox 2.1.0 to restore library.v6.backup.json.` and exits 4. No file is changed. |
+| `--dump-contracts` | **server** — emit canonical API, settings, state, and catalog contract JSON for the contract ratchets. |
+| `--selftest` | **macOS native host only** — boot `openbox-server` in an isolated temporary data directory, verify `GET /api/host/capabilities`, and exit without opening a window. |
+| `--bigbox` | **Python fallback** — open straight into Big Box mode by appending `&deeplink=bigbox`. Ignored by the Rust server and the native host. |
+| `--app-window`, `--no-app-window` | **Python fallback** — web entry point only: open in a chrome-less app window or a normal tab. |
+| `--fullscreen-width <W>` / `--width <W>`, `--fullscreen-height <H>` / `--height <H>`, `--resolution <WxH>` | **Python fallback** — customize the web viewport in kiosk/app-window modes. |
 
 `--backup` and `--restore-backup` act on the library before the server starts, so they work even when no instance is running. They read `OPENBOX_DATA_DIR` from the environment, like every startup path.
+
+There is no `--version` flag. Read the version from Settings → About or `GET /api/v2/version`.
 
 ## Deep links
 
@@ -62,7 +66,7 @@ On macOS, `openbox` is the launcher inside `OpenBox.app`, which `install-macos.s
 | `openbox://bigbox` (alias `fullscreen`) | Switch the running UI to Big Box mode. |
 | `openbox://settings[/<panel>]` | Open Settings. A panel segment is parsed but not currently routed to a specific settings tab. |
 
-Arcade Room is opened from **Tools → 3D arcade room** or the Ctrl/Cmd-K command palette. The current URI parser and SPA do not register an `openbox://arcade` action, so do not substitute an unregistered URI for that UI entry point.
+Arcade Room is opened from **Tools → 3D arcade room** or the Ctrl/Cmd-K command palette. The current URI parser and SPA do not register an `openbox://arcade` action.
 
 Usage:
 
@@ -74,11 +78,11 @@ openbox --uri "openbox://moment/MOMENT_ID"
 openbox --uri "openbox://clip/CLIP_ID"
 ```
 
-`--uri` dispatches against the running server using the token and port files, or boots a server if none is running. The browser-facing actions currently wired by the SPA include `?deeplink=bigbox`, `?deeplink=search&q=chrono`, `?deeplink=showgame&id=GAME_ID`, `?deeplink=launch&id=GAME_ID`, `?deeplink=settings`, `?deeplink=recap`, `?deeplink=moment&id=MOMENT_ID`, and `?deeplink=clip&id=CLIP_ID`. The launch action is what the tray's recent-game menu uses (v1.18.0). Resume is dispatched by the URI/CLI path to the authenticated API; Arcade Room remains a Tools/palette action.
+`--uri` dispatches against the running server using the token and port files, or boots a server if none is running. The browser-facing actions currently wired by the SPA include `?deeplink=bigbox`, `?deeplink=search&q=chrono`, `?deeplink=showgame&id=GAME_ID`, `?deeplink=launch&id=GAME_ID`, `?deeplink=settings`, `?deeplink=recap`, `?deeplink=moment&id=MOMENT_ID`, and `?deeplink=clip&id=CLIP_ID`. The launch action is what the tray's recent-game menu uses. Resume is dispatched by the URI/CLI path to the authenticated API; Arcade Room remains a Tools/palette action.
 
 ## Keyboard launcher
 
-`openbox --launcher` (or `scripts/openbox-launcher.sh`) opens a rofi, wofi, or dmenu picker against the running instance. It queries `/api/launcher/menu`, which lists Big Box, Settings, Search, and up to 40 games. Selecting an entry dispatches it. The pickers are Linux programs.
+`openbox --launcher` (or `scripts/openbox-launcher.sh`) opens a rofi, wofi, or dmenu picker against the running instance. The live routes are `GET /api/v2/launcher/menu` (Big Box, Settings, Search, and up to 40 games) and `POST /api/v2/launch`. The pickers are Linux programs.
 
 ```bash
 # picker auto-detected (rofi > wofi > dmenu)

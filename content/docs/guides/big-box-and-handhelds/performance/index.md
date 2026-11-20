@@ -35,7 +35,7 @@ Because `auto` gates on battery or gamescope, a desktop session never applies or
 
 ## Battery reporting (v1.18.0)
 
-Big Box shows a battery indicator in its status bar when a battery is present; **Show the battery indicator in Big Box** (`battery_indicator`, default on) controls it. The indicator uses the browser Battery Status API when available and otherwise calls `GET /api/native/battery`, which reads the first `BAT*` device under `/sys/class/power_supply` on Linux, `pmset -g batt` on macOS, and `GetSystemPowerStatus` on Windows, and returns `present`, `percent`, and `charging`. A host with no battery returns `present: false`.
+Big Box shows a battery indicator in its status bar when a battery is present; **Show the battery indicator in Big Box** (`battery_indicator`, default on) controls it. The indicator uses the browser Battery Status API when available and otherwise calls `GET /api/v2/native/battery`, which reads the first `BAT*` device under `/sys/class/power_supply` on Linux, `pmset -g batt` on macOS, and `GetSystemPowerStatus` on Windows, and returns `present`, `percent`, and `charging`. A host with no battery returns `present: false`.
 
 This indicator is display-only. The `auto` performance gate keeps its own battery check and is unaffected by turning the indicator off, so hiding the badge never changes whether a TDP limit applies. Big Box requests the reading when it opens and reuses the 60-second cache, which keeps it off the launch hot path.
 
@@ -45,7 +45,7 @@ Missing `ryzenadj` on PATH, a permission failure, a non-Ryzen CPU, or a malforme
 
 ## Library scale and test gates
 
-Blocking performance gates cover **10k and 20k** libraries (`perf-20k` in CI; `docs/development/PERF.md`), and `scripts/check_tests.py` enforces **85.0% total** and **62.0% `web_app.py`** coverage floors. The optional SQLite FTS read model self-enables at **5,000+ games** (`OPENBOX_ENABLE_SQLITE_READ=0` opts out) for indexed search and facets on large libraries; in 2.0 it rebuilds on a background thread and falls back to `source: "json"` while stale, and JSON remains canonical. See [API 1.12 additions](/reference/api/one-twelve/) and [Configuration](/reference/configuration/).
+Formal support graduates to **50,000 games** on the Rust backend (ADR 0116); blocking performance gates cover 10k and 20k libraries (`perf-20k` in CI; `docs/development/PERF.md`), and `scripts/check_tests.py` enforces **85.0% total** and **62.0% `web_app.py`** coverage floors for the Python fallback. The optional SQLite FTS read model self-enables at **5,000+ games** (`OPENBOX_ENABLE_SQLITE_READ=0` opts out) for indexed search and facets on large libraries; in 2.0 it rebuilds on a background thread and falls back to `source: "json"` while stale, and JSON remains canonical. See [API 1.12 additions](/reference/api/one-twelve/) and [Configuration](/reference/configuration/).
 
 ## Safety
 

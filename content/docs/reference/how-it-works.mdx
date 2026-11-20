@@ -3,9 +3,13 @@ title: How OpenBoxGL works
 description: A code-level guide to startup, state, imports, launching, sessions, jobs, plugins, webhooks, and the local API.
 ---
 
-This page is for developers and maintainers who want to follow a real OpenBoxGL operation through the code. It starts at process startup, follows a library entry through import and launch, then covers the workers and extension points that sit around that path.
+<Callout type="note" title="Read this with the 3.0 architecture page">
+The shipped 3.0 backend is the Rust `openbox-server`; see [System architecture](/reference/architecture/) for the crate map, state store, native hosts, and job model. The sections below describe the **Python fallback** (`OPENBOX_BACKEND=python`, Python 3.11+) and are kept as a code-level reference for that path. Where a section names `web_app.py`, `handlers/`, `pkg/`, or `plugin_runner.py`, read it as fallback-only.
+</Callout>
 
-OpenBoxGL has a local application core with one presentation layer served by two hosts. The web UI is the loopback HTTP server; on Linux the native window is a small C WebKitGTK shim that spawns that same server as a child and renders the identical `index.html`, and on Windows the WebView2 host `native_host_win.c` plays the same role (see [Windows](/windows/)). Both hosts use the same data directory and state-store rules for durable library data, and both run the same server process, so there is no second presentation stack to keep in parity.
+This page is for developers and maintainers who want to follow a real OpenBoxGL operation through the code. It starts at process startup, follows a library entry through import and launch, then covers the workers and extension points that sit around that path. The 3.0 Rust path has the same boundaries; the implementation lives in `crates/openbox-cli`, `crates/openbox-http`, `crates/openbox-store`, `crates/openbox-runtime`, and the domain crates.
+
+OpenBoxGL has a local application core with one presentation layer served by two hosts. The web UI is the loopback HTTP server; on Linux the native window is a small C WebKitGTK shim that spawns `openbox-server --no-browser` (or `python3 web_app.py --no-browser` when `OPENBOX_BACKEND=python`) and renders the identical `index.html`, and on Windows the WebView2 host `native_host_win.c` plays the same role (see [Windows](/windows/)). Both hosts use the same data directory and state-store rules for durable library data, and both run the same server process, so there is no second presentation stack to keep in parity.
 
 That distinction explains most of the architecture. Durable facts such as games, settings, playlists, queue entries, notifications, and completed history belong in `library.json`. Temporary facts such as an open dialog, an active browser selection, a running `Popen` object, or a queued worker live in memory and disappear when their process stops.
 
@@ -168,7 +172,7 @@ The environment variable must be available before startup selects `DATA`. An `.e
  "format": "openbox-library",
  "schema_version": 7,
  "library_id": "<ulid>",
- "created_with": "2.0.0",
+ "created_with": "3.0.0",
  "path_mode": "absolute",
  "library_root": "",
  "games": [],
@@ -284,7 +288,7 @@ A folder import in the native window starts with a GTK file dialog (an `IFileDia
 
 ```text
 index.html import action
- -> POST /api/import
+ -> POST /api/v2/import
  -> import_folder_path()
  -> parity_import.import_multi_platform()
  -> candidate discovery and normalization
@@ -323,7 +327,7 @@ After a successful import, selected records can queue metadata or media work. Th
 The Web UI launch path starts from a stable game reference and passes through `web_app.start_game()` and `openbox.build_launch()`. The ordering matters because each stage owns a different class of failure.
 
 ```text
-POST /api/launch
+POST /api/v2/launch
  -> resolve stable ID or supported legacy reference
  -> copy and re-resolve current game state
  -> validate path
@@ -404,7 +408,7 @@ There are two practical limits to remember. First, although live session records
 
 ## Background jobs
 
-OpenBoxGL separates execution from bookkeeping: an in-process `JobManager` runs the work, and the durable **Operation Service** (`pkg/state/operations.py`) records it. Treating either alone as the whole job API would misdescribe the implementation.
+OpenBoxGL separates execution from bookkeeping: an in-process `JobManager` runs the work, and the durable **Operation Service** (`crates/openbox-store/src/operations.rs`) records it. Treating either alone as the whole job API would misdescribe the implementation.
 
 ### Job manager and durable operations
 
@@ -420,7 +424,7 @@ queued -> running -> done
 (on restart)       -> interrupted -> (resumed or retried)
 ```
 
-The service persists operations to `operations.json` and per-operation items to `operations_items/`, streams `job.queued`, `job.progress`, `job.cancelling`, `job.finished`, and `job.interrupted` over `/api/events`, and marks any operation left queued or running by a restart as `interrupted`. Interrupted and failed operations can be retried or resumed through `POST /api/v2/jobs/retry` and `/resume`; finished work is not duplicated.
+The service persists operations to `operations.json` and per-operation items to `operations_items/`, streams `job.queued`, `job.progress`, `job.cancelling`, `job.finished`, and `job.interrupted` over `/api/v2/events`, and marks any operation left queued or running by a restart as `interrupted`. Interrupted and failed operations can be retried or resumed through `POST /api/v2/jobs/retry` and `/resume`; finished work is not duplicated.
 
 The manager's own job records and cancellation events are in memory. The durable operation is what survives a restart, and workers may commit durable files or state before reporting `done`, so a restart can leave valid partial results.
 
@@ -431,10 +435,10 @@ Current status routes expose feature-specific shapes in several areas:
 | Work | Internal status | Browser status path |
 | --- | --- | --- |
 | Auto-import | Named manager job with an in-process watch loop | No general job endpoint; configuration and library state expose results |
-| Metadata sync | `METADATA_JOB` and manager work | `GET /api/metadata/status` |
-| Bulk media | `MEDIA_JOB` with current, total, updated, and recent errors | `GET /api/media/bulk/status` |
-| Emulator install/update | `INSTALLS` entries with install/update states | `GET /api/emulators` |
-| Gameyfin install | `INSTALLS` entries for the game operation | `GET /api/gameyfin/install/status` |
+| Metadata sync | `METADATA_JOB` and manager work | `GET /api/v2/metadata/status` |
+| Bulk media | `MEDIA_JOB` with current, total, updated, and recent errors | `GET /api/v2/media/bulk/status` |
+| Emulator install/update | `INSTALLS` entries with install/update states | `GET /api/v2/emulators` |
+| Gameyfin install | `INSTALLS` entries for the game operation | `GET /api/v2/gameyfin/install/status` |
 
 The automatic import worker starts with a short delay and backs off up to 300 seconds when state loading fails. Per-source errors are handled so a failing source does not necessarily stop the other source scans. Long work therefore needs two checks when being changed: the generic manager's lifecycle and the feature route's browser-visible state.
 

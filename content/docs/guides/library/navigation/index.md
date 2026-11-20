@@ -7,7 +7,7 @@ Since OpenBox 1.8.0, the library grid and list view support full keyboard and ga
 
 ## Keyboard navigation
 
-- **Arrow keys / Home / End / Page Up / Page Down** move the focus across the grid or list; scrolling is virtualization-aware, so focus reveal works in 20k-game libraries.
+- **Arrow keys / Home / End / Page Up / Page Down** move the focus across the grid or list; scrolling is virtualization-aware, so focus reveal works in 50k-game libraries.
 - **`f`** toggles favorite on the focused game; **Escape** clears the current selection.
 - **Enter** opens the focused game's detail pane.
 - **`F1`** or **`?`** opens **Help & shortcuts** — Start here, the glossary, and the shortcut table — unless focus is in a text field or a dialog is already open.

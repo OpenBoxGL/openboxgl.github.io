@@ -36,9 +36,9 @@ In `es`, `de`, `fr`, and `pt`, the 1.18.0 additions are present with the same ke
 
 1. Create `locales/{code}.json` with the same key structure as `locales/en.json`.
 2. Add the locale code to `SUPPORTED_LOCALES` in `static/i18n.js`.
-3. Add the locale file route in `routes.py` and `web_app.py`.
+3. Add the locale to the public GET list in `crates/openbox-http/src/middleware.rs` and `SUPPORTED_LOCALES` in `static/i18n.js`.
 4. Add the locale to `PUBLIC_GET_PATHS` in `routes.py`.
-5. Add the locale to `available_locales` in `pkg/state/cache.py`.
+5. Add the locale to `available_locales` in `crates/openbox-http/src/handlers/projection.rs`.
 6. Run `python3 scripts/check_i18n.py` to verify 100% key coverage.
 7. Run `make check` to verify the full gate passes.
 

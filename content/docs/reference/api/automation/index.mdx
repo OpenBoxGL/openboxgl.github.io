@@ -8,14 +8,14 @@ Queue, tags, notifications, and signed webhooks. All routes require `X-OpenBox-T
 
 ## Play queue
 
-<ApiEndpoint method="GET" path="/api/queue">
+<ApiEndpoint method="GET" path="/api/v2/queue">
 
 
 Returns `{"queue": [...]}`. Each entry: `game_id`, `added_at`, `note` (max 200 characters), `skip`, plus resolved fields `name`, `platform`, `cover`, `path_exists`, and `missing` (true when the game was deleted). The persisted queue is capped at 500 entries.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/queue">
+<ApiEndpoint method="POST" path="/api/v2/queue">
 
 
 Actions:
@@ -34,14 +34,14 @@ Response: `{"queue": [...], "next": <entry or null>}`.
 
 ## Tags
 
-<ApiEndpoint method="GET" path="/api/tags">
+<ApiEndpoint method="GET" path="/api/v2/tags">
 
 
 `{"tags": [{"tag": "...", "count": <n>}, ...]}` sorted by count descending then tag; hidden games are excluded.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/tags">
+<ApiEndpoint method="POST" path="/api/v2/tags">
 
 
 `{"ids": [...], "tags"|"tags_add"|"tags_remove": [...]}`. At least one tag change key is required. Normalization: each tag is trimmed, whitespace-collapsed, deduplicated case-insensitively, limited to 64 characters, and at most 50 tags per game; overlong tags raise `400`. Returns `{"updated": <count>, "tags": [...]}`.
@@ -50,14 +50,14 @@ Response: `{"queue": [...], "next": <entry or null>}`.
 
 ## Notifications
 
-<ApiEndpoint method="GET" path="/api/notifications">
+<ApiEndpoint method="GET" path="/api/v2/notifications">
 
 
 `{"notifications": [...], "unread": <count>}`. Notifications are newest first, capped at 200. Each item: `id` (`nt-<hex>`), `kind`, `level`, `title` (max 200 chars), `body` (max 2000 chars), `created_at`, `read`, and optional `source`, `correlation_id`, `dedupe_key`. Same-kind+same-title items within 600 seconds, or items with the same `dedupe_key`, collapse into the existing entry.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/notifications">
+<ApiEndpoint method="POST" path="/api/v2/notifications">
 
 
 - `{"action":"read", "ids": [...]}` mark read (no `ids` marks all).
@@ -70,14 +70,14 @@ Response: `{"notifications": [...], "unread": <count>}`.
 
 ## Webhooks
 
-<ApiEndpoint method="GET" path="/api/webhooks">
+<ApiEndpoint method="GET" path="/api/v2/webhooks">
 
 
 `{"webhooks": [...], "events": [...], "attempts": <default>, "timeout": <default>}`. Webhook configs are redacted: the `secret` value is replaced by `secret_set: true`, and delivery status fields (`last_status`, `last_error`, `last_sent_at`, `last_delivery_at`) are included. `events` lists the nine subscribable types: `session.started`, `session.stopped`, `queue.advanced`, `library.imported`, `library.changed`, `metadata.synced`, `backup.created`, `update.installed`, `plugin.changed`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/webhooks">
+<ApiEndpoint method="POST" path="/api/v2/webhooks">
 
 
 Save the full webhook list plus global defaults:
@@ -114,7 +114,7 @@ Returns `{"webhooks": [...redacted...], "events": [...]}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/webhooks/test">
+<ApiEndpoint method="POST" path="/api/v2/webhooks/test">
 
 
 `{"webhook": {...}}` or the config fields directly. Performs one bounded synchronous delivery of a `test.ping` envelope and returns `{"ok": bool, "status": int|null, "error": str}` without exposing the response body, resolved addresses, or credentials. The outbound request respects the config's timeout (1..15 s).
@@ -134,7 +134,7 @@ Retries: attempts (1..5, default 3) with exponential backoff 1, 2, 4, 8 seconds;
 
 ## Real-time events
 
-<ApiEndpoint method="GET" path="/api/events">
+<ApiEndpoint method="GET" path="/api/v2/events">
 
 Server-Sent Events (SSE) stream endpoint for live UI and client push. Clients receive real-time notifications for:
 - `ping`: Periodic keep-alive heartbeats
@@ -149,7 +149,7 @@ Max 16 concurrent subscribers; 64 KiB buffer per connection. Requires `X-OpenBox
 
 ## Launcher menu
 
-<ApiEndpoint method="GET" path="/api/launcher/menu">
+<ApiEndpoint method="GET" path="/api/v2/launcher/menu">
 
 
 `{"items": [{"id", "label"}, ...]}`: Big Box, Settings, Search, then up to 40 games with ids `launch:<index>`. Used by the rofi/wofi/dmenu keyboard launcher.
@@ -158,21 +158,21 @@ Max 16 concurrent subscribers; 64 KiB buffer per connection. Requires `X-OpenBox
 
 ## Import exclusions
 
-<ApiEndpoint method="GET" path="/api/import/exclusions">
+<ApiEndpoint method="GET" path="/api/v2/import/exclusions">
 
 
 `{"exclusions": [...]}`. Entries: `{"source": "steam"|"heroic"|"lutris"|"gameyfin", "external_id": "..."}`, optionally `{"heroic": ["heroic", "<source>", "<id>"]}` for store-specific Heroic exclusions.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/import/exclusions">
+<ApiEndpoint method="POST" path="/api/v2/import/exclusions">
 
 
 `{"source", "external_id", "heroic_source": ""}` adds an exclusion (deduplicated). Returns `{"exclusion": {...}}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/import/exclusions/delete">
+<ApiEndpoint method="POST" path="/api/v2/import/exclusions/delete">
 
 
 `{"source", "external_id"}` removes it. Returns `{"removed": bool, "count": int}`.

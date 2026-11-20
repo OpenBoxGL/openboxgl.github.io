@@ -1,118 +1,125 @@
 ---
 title: Updating
-description: Update AppImage, Windows portable, and macOS app bundle installations, and understand package boundaries.
+description: Update OpenBoxGL 3.0, migrate a library from 2.x or 1.x, and understand the package boundaries.
 ---
 
-OpenBoxGL has one built-in updater with three platform paths: the AppImage on Linux, the portable install on Windows, and the app bundle on macOS. This page explains what it verifies, what happens during an update, what can go wrong, and how the other installation types update instead.
+OpenBoxGL 3.0 ships the Rust `openbox-server` with no bundled Python. The in-app update **check** works on every platform, but the verified **install** step is implemented for the AppImage only. Windows and macOS install a new release by running the new release's installer. Flatpak, source, and system installs follow their own package or source workflow.
 
-## Upgrading from a pre-1.0 build
+## Upgrading to 3.0
 
-The Tk interface was removed as of 1.0.0; the app opens a native WebKitGTK window by default. If you are upgrading from any pre-1.0 build, the same notes apply. Your library data is untouched: the same `library.json` in `~/.local/share/openbox-game-launcher` (or `OPENBOX_DATA_DIR`) keeps working, and the schema migrates to the current format automatically on first launch (format 7 in 2.0). Later migrations add queue, notifications, `ui_state`, and `active_sessions` without requiring a re-import or re-download.
+3.0 keeps library schema 7, backup format 2, sync format 3, and `/api/v2`. A 2.0 or 2.1 library opens without migration. The breaks run the other way: 3.0 will not boot a schema 6 file, will not run a v1 plugin, will not roll a library back, and will not start on Python 3.10.
 
-The one behavioral change to expect is the window itself: instead of a browser tab, `openbox` opens the native window. `openbox --web` still opens the loopback web UI in a browser for development, and if WebKitGTK is missing the launcher falls back to a chrome-less app window rather than failing.
+### Before you upgrade
 
-## Upgrading to 2.0
+- **If the library is still schema 6** (a 1.19 library that 2.1 has not opened yet): quit OpenBox, then either run `openbox --migrate-library` on 3.0 or open the library once on 2.1 before you install 3.0. Startup does not upgrade it. The command keeps `library.v6.backup.json`.
+- **If the library is schema 1 through 5:** open it on OpenBox 2.1 before you install 3.0. 3.0 migrates schema 6 only and does not rewrite an older file.
+- **If a plugin omits `api_version` or still says `1`:** set `"api_version": 2` and follow the [plugin reference](/reference/plugins/). 3.0 does not run the v1 runner; the manifest fails with `PLUGIN_API_RETIRED`.
+- **If you run from source on Python 3.10:** install Python 3.11 or newer before you start the fallback. The Rust server itself needs no Python.
+- **If you still need `openbox --rollback-library`:** that command is gone. OpenBox 2.1.0 is the last build that restores `library.v6.backup.json`. 3.0 does not delete a backup that is already on disk.
 
-2.0 installs over any 1.19.x release and migrates the library to **format 7** on first launch. The migration is automatic and keeps a copy of the old file:
+### Upgrade
 
-- The pre-upgrade library is kept as `library.v6.backup.json`, and a `migration-report.json` records what changed. `openbox --rollback-library` restores the v6 file (with `--yes` for non-interactive use); 1.19.x cannot read a format 7 library, so this is the downgrade path.
-- On the first start a **readiness gate** lists anything that needs a look before the upgraded library is used — a theme with unknown tokens, a plugin API version this build does not serve, a missing sync folder, an archive with no format, a library over the formal scale, or a custom data directory — and a backup can be written from the gate before the library is opened.
-- Active sessions now live in `sessions.json` (crash recovery), not inside `library.json`.
-- The public API is `/api/v2`. `/api/v1` is off by default (`410 V1_API_DISABLED`); `OPENBOX_ENABLE_V1_API=1` restores it through 2.0.x. Unversioned `/api/*` paths keep answering as the internal layer.
-- Backups written by 2.0 use **format 2** (SHA-256 manifest per file, restore refuses corrupt or unlisted members). A 1.19-compatible export is still available in Settings > Sessions.
+1. Quit OpenBox.
+2. If the library is older than schema 7, migrate it as described above. A schema 7 library needs no migration.
+3. Install 3.0 over 2.1, or over an older build after the library is schema 7.
+4. Start OpenBox. `GET /api/v2/version` reports `version` 3.0.0, `api_version` 2, `state_schema` 7, `plugin_api_version` 2, `backup_format` 2, `sync_format` 3, and `runtime: "rust"`.
 
-## Upgrading from 1.18.x
+### What did not change
 
-1.19.0 and 1.19.1 install over any 1.18.x release. No v1 API route is removed or changed, and the library schema stays at version 6, so an existing library opens without a re-import. There is no data migration. The one new install type is the macOS app bundle, covered in [How the macOS app update works](#how-the-macos-app-update-works).
+- Library schema 7, the required envelope, and backup format 2 (format 1 is still read).
+- Sync format 3.
+- The public API at `/api/v2` and the host channel at `/api/host`.
+- The SQLite read model: it is still a projection. Deleting `sqlite_readmodel.db` loses nothing.
+- The AppImage glibc floor (`GLIBC_2.35` on Ubuntu 22.04).
 
-## Upgrading from 1.17.x
+### What you cannot do in 3.0
 
-1.18.0 installs over any 1.17.x release. No v1 API route is removed or changed, and the library schema stays at version 6, so an existing library opens without a re-import or re-download. Two behavior changes are worth knowing:
+- Roll the library back to the v6 copy. Use OpenBox 2.1.0 if you still have `library.v6.backup.json` and need that restore.
+- Start the Python fallback on Python 3.10.
+- Load a plugin whose manifest is missing `api_version` or sets it to 1.
 
-- `storefront_auto_import` entries become `{enabled, platform, include_uninstalled}` objects. Older boolean entries keep working until the next settings save migrates them, so an enabled store keeps importing across the upgrade.
-- Optional IGDB, ScreenScraper, SteamGridDB, Gameyfin, and RetroAchievements tokens are stored in `integration_tokens` and kept out of the public settings projection; the settings API returns only masked values. New 1.18.0 settings arrive with their defaults.
+## Upgrading from 2.0 or 2.1
+
+2.1 installs over 2.0 and makes the 2.0 contracts permanent: the public API is `/api/v2` only, the `/api/v1` bridge and unversioned `/api/*` aliases are gone, backups write format 2 only, and the media checksum toggle takes effect. 3.0 installs over 2.1 with no library migration.
+
+If you are coming from 2.0, note that 2.0's `/api/v1` bridge and 1.19-compatible backup export are not available in 2.1 or 3.0. Format 1 backups still restore; new format 1 writes return `BACKUP_FORMAT_RETIRED`.
+
+## Upgrading from 1.19.x
+
+1.19.x uses schema 6. 2.0 and 2.1 migrated it on first start; 3.0 does not. Before installing 3.0, either:
+
+- open the library once on OpenBox 2.1, or
+- install 3.0 and run `openbox --migrate-library` before starting the app.
+
+The migration writes `library.v6.backup.json`, `migration-in-progress.json`, and `migration-report.json`. A schema 6 library opened by 3.0 without migration raises `STATE_SCHEMA_TOO_OLD` and is left unchanged.
+
+## Upgrading from 1.18.x or earlier
+
+1.19.0 and 1.19.1 install over any 1.18.x release. No v1 API route is removed or changed, and the library schema stays at version 6, so an existing library opens without a re-import. There is no data migration. The macOS app bundle is the one new install type.
+
+Schema 1 through 5 libraries must be opened once on OpenBox 2.1 before 3.0. 3.0 migrates schema 6 only.
 
 ## Which installs get the built-in updater
 
-| Installation | Updater | How to update |
+| Installation | Update check | How to install the update |
 | --- | --- | --- |
-| AppImage | Built-in verified updater | Settings > Check for updates, then Install verified update |
-| Windows portable | Built-in verified updater | Settings > Check for updates, then Install verified update, then restart |
-| macOS app bundle (1.19.0 and later) | Built-in verified updater | Settings > Check for updates, then Install verified update, then restart. Quit running games first. |
-| Flatpak | None | Rebuild the manifest (`flatpak-builder --user --install --force-clean build-dir io.openbox.GameLauncher.yml`) or use your local Flatpak workflow |
-| Source | None | `git pull` in the checkout, then restart |
-| System install (`sudo make install`) | None | `git pull`, then `sudo make install` again |
+| AppImage | Built-in | Settings > Check for updates, then Install verified update |
+| Windows portable | Built-in check | Re-run the new release's `install.ps1` |
+| macOS app bundle | Built-in check | Re-run the new release's `install-macos.sh --replace` |
+| Flatpak | None | Install the new bundle or rebuild the manifest |
+| Source | None | `git pull`, rebuild with `cargo build --release --locked -p openbox-cli`, then restart |
+| System install (`sudo make install`) | None | `git pull`, `make build-rust`, then `sudo make install` again |
 
-The updater only recognizes an AppImage, a Windows portable install, or an `OpenBox.app` bundle. On Linux it refuses to run when `APPIMAGE` is not set (source and Flatpak launches never set it), on Windows it requires the launcher to live under the installed tree, and on macOS it requires the running app to be an `OpenBox.app` bundle in a writable folder. If you are on Flatpak or source, the update button reports the release channel but the install step will not replace anything, by design.
+The 3.0 Rust updater installs only when `APPIMAGE` is set. On Windows it returns "Automatic updates require an installed OpenBox copy."; on macOS it returns "Automatic updates require the OpenBox.app bundle." The check itself still reports the release channel on those platforms, and the manual installer path is the supported update route.
 
 ## How the AppImage update works
 
 When you click **Check for updates** in Settings, OpenBoxGL queries the GitHub releases API for the latest release of `vindeckyy/OpenBoxGL` and compares versions:
 
-1. **Version comparison.** The tag must be newer than the running version. Pre-release and build-suffixed tags (`-beta`, `+build`) are never offered as updates, even when their version number is higher. A malformed GitHub releases payload (non-object JSON) fails closed instead of crashing.
-2. **Asset verification.** The update is only offered when the release ships the AppImage asset matching the running architecture — `OpenBox-x86_64.AppImage` or `OpenBox-aarch64.AppImage` — from the trusted `https://github.com/vindeckyy/OpenBoxGL/releases/download/` prefix, a SHA-256 checksum is available (asset digest or `.sha256` file), and an Ed25519 release signature (the `.sig` asset) is present. A release missing any of the three is rejected with a clear error instead of an unsafe download. Inline checksums must be 64 hex chars; otherwise the `.sha256` URL is fetched only when it starts with the same trusted prefix, else the update fails with "The release checksum is unavailable."
-3. **Signature verification.** Before anything is downloaded, the Ed25519 signature is verified against the pinned production public key (`openbox-release.pub`, shipped with the app). The `.sig` asset is a JSON contract — `{"algorithm": "ed25519", "digest_algorithm": "sha256", "digest": "<64 hex>", "signature": "<base64, 64 bytes>"}` — and any deviation (unsupported algorithm, missing digest, bad length) rejects the update. The verification key itself is checked: non-canonical coordinates, off-curve points, and the full small-order blacklist (orders 1, 2, 4, and 8, matching the libsodium/ZIP-215 set) are rejected, so a weak key can never verify a forgery. If the key is unavailable or still the placeholder, the update refuses to proceed with a loud warning.
-4. **Checksummed download.** The new AppImage downloads to a staging file beside the current one, streaming with a 2 GiB cap. The download fails if the computed SHA-256 does not match the release's checksum.
-5. **Atomic swap with rollback.** The install destination is resolved through symlinks first, so a symlinked AppImage path replaces the real file rather than the link. The staged file takes the destination's permission bits (`chmod`), the current AppImage is renamed to `<arch>.previous.AppImage` (for example, `OpenBox-x86_64.previous.AppImage`; any older rollback file is removed first), then the new file is moved into place with the install directory fsynced. If the move fails, the previous file is restored and the update reports the error; the staging file is always cleaned up. **Install desktop shortcut** escapes the AppImage path (`\`, `"`, `` ` ``, `$`, and `%` doubled to `%%`) so a path cannot inject desktop-entry field codes, and rejects paths containing newlines.
+1. **Version comparison.** The tag must be newer than the running version. Pre-release and build-suffixed tags (`-beta`, `+build`) are never offered as updates, even when their version number is higher.
+2. **Asset verification.** The update is only offered when the release ships the AppImage asset matching the running architecture — `OpenBox-x86_64.AppImage` or `OpenBox-aarch64.AppImage` — from the trusted `https://github.com/vindeckyy/OpenBoxGL/releases/download/` prefix, a SHA-256 checksum is available, and an Ed25519 release signature (the `.sig` asset) is present. A release missing any of the three is rejected instead of downloaded.
+3. **Signature verification.** Before anything is downloaded, the Ed25519 signature is verified against the pinned production public key (`openbox-release.pub`, embedded in the Rust binary). The `.sig` asset is a JSON contract — `{"algorithm": "ed25519", "digest_algorithm": "sha256", "digest": "<64 hex>", "signature": "<base64, 64 bytes>"}` — and any deviation rejects the update.
+4. **Checksummed download.** The new AppImage downloads to a staging file beside the current one with a 512 MiB cap. The download fails if the computed SHA-256 does not match the release's checksum.
+5. **Atomic swap with rollback.** The install destination is resolved through symlinks first, so a symlinked AppImage path replaces the real file rather than the link. The staged file takes the destination's permission bits, the current AppImage is renamed to `<arch>.previous.AppImage`, then the new file is moved into place with the install directory fsynced. If the move fails, the previous file is restored and the update reports the error.
 
 That is why the Settings dialog says "The current AppImage will be retained as a backup" before you confirm: the `.previous.AppImage` file is the rollback copy, not a leftover.
 
 ### What you see
 
 - **Update status line** in Settings shows the running version and an install label: `· AppImage` for an AppImage, or `· source checkout` otherwise.
-- After a successful install, the status line reports the installed version and the backup path. **You must restart OpenBoxGL to use the update**; the running process still executes the old file (on Windows the swap only happens once the app exits).
-- The desktop entry does not change because it points at the same path; only the file contents at that path were replaced. On Windows the Start Menu shortcut points at `openbox.cmd` inside the install tree, which the swap replaces in place.
+- After a successful install, the status line reports the installed version and the backup path. **You must restart OpenBoxGL to use the update**; the running process still executes the old file.
+- The desktop entry does not change because it points at the same path; only the file contents at that path were replaced.
 
-## How the Windows portable update works
+## Windows and macOS updates
 
-The Windows path runs the same version comparison, asset selection, and verification ladder as the AppImage path, then swaps the whole installed tree instead of a single file:
+Run the new release's installer:
 
-1. **Asset selection.** The updater looks for `OpenBox-x86_64-windows.zip` under the trusted `https://github.com/vindeckyy/OpenBoxGL/releases/download/` prefix, together with its `.sha256` and `.sig` assets. A release missing any of the three is rejected before anything is downloaded.
-2. **Verification.** The pinned release public key, the SHA-256 checksum, and the Ed25519 signature are checked with the same standard-library RFC 8032 implementation the installer uses, so Windows needs neither curl nor OpenSSL. The signature is verified before the archive is downloaded.
-3. **Staged download.** The archive is downloaded with a 2 GiB cap into a scratch folder inside the install root and extracted there. The extracted tree must contain `web_app.py`, otherwise the update stops without touching the install.
-4. **Swap after exit.** A running install cannot be replaced in place, so a detached PowerShell applier waits for OpenBox to exit (up to ten minutes), moves the current tree to `share\openbox.previous`, moves the staged tree into place, and deletes the scratch folder. Restart OpenBoxGL to use the update; until the app exits, the update has not landed.
-5. **Rollback.** The previous tree stays at `share\openbox.previous`. To roll back, exit OpenBox, delete the current `share\openbox`, and rename `share\openbox.previous` to `share\openbox`.
+- **Windows:** download `OpenBox-x86_64-windows.zip` or `OpenBox-arm64-windows.zip`, extract it, and run `OpenBox\scripts\install.ps1 -Tag "v3.0.0"`. The installer verifies the archive, keeps the previous runtime at `share\openbox.previous`, and updates the Start Menu shortcut and `openbox://` handler.
+- **macOS:** download `OpenBox-macos.zip` and `install-macos.sh` from the new release, then run `OPENBOX_RELEASE_TAG="v3.0.0" bash install-macos.sh --replace`. The installer verifies the bundle and replaces `OpenBox.app` in `~/Applications`.
 
-Your library is never part of the swap: it lives in `%LOCALAPPDATA%\openbox-game-launcher` (or `OPENBOX_DATA_DIR`).
-
-## How the macOS app update works
-
-The macOS path runs the same version comparison and the same key-pin, SHA-256, and Ed25519 checks as the other platforms, using `OpenBox-macos.zip` with its `.sha256` and `.sig`. The staged bundle must also pass `codesign --verify --strict`, which confirms that the ad-hoc signature is intact.
-
-1. **Refusal while games run.** The updater will not install while a game session is running. Quit the game, then check again.
-2. **Writable folder.** The folder that holds `OpenBox.app` must be writable. If the update says it is not, move the app to a folder you own, such as `~/Applications`.
-3. **Swap after exit.** A running bundle cannot be replaced in place. A detached applier waits for the server to exit, replaces `OpenBox.app` with the staged bundle, and keeps the previous bundle as `OpenBox.app.previous`.
-4. **Rollback.** Quit OpenBox and move `OpenBox.app.previous` back over `OpenBox.app`.
-
-Restart OpenBox to use the update. Your library lives in `~/Library/Application Support/openbox-game-launcher` and is never part of the swap.
+Both installers need Python 3.11 or newer to run the release verifier. The installed application does not need Python.
 
 ## Common failures and recovery
 
 <Callout type="tip" title="The rollback file is your safety net">
-
-Every successful AppImage update renames the current file to an architecture-matched `.previous.AppImage` before swapping in the new one. If the new build will not start, you can always get back to a working launcher, the previous version is sitting right next to it. You never need to re-download to roll back.
-
+Every successful AppImage update renames the current file to an architecture-matched `.previous.AppImage` before swapping in the new one. If the new build will not start, the previous version is sitting right next to it.
 </Callout>
 
 ### "Automatic updates require the OpenBox AppImage"
 
 The app is not running from an AppImage. This is expected for Flatpak, source, and system installs; update those through their own workflow above.
 
-### "Automatic updates require an installed copy of OpenBox"
+### "Automatic updates require an installed OpenBox copy" / "require the OpenBox.app bundle"
 
-The Windows build is not running from a portable install (for example, you launched `web_app.py` from a source checkout). Install with `install.ps1`, or update a checkout with `git pull`.
+3.0's verified install step is AppImage-only. Use the Windows or macOS installer from the new release.
 
-### Windows: the update is downloaded but nothing changed yet
+### Windows: the installer cannot verify the release
 
-The staged tree is swapped in only after OpenBox exits, because Windows cannot replace files that are in use. Quit OpenBox (including the tray icon) and it lands within seconds; the applier gives up after ten minutes, and nothing is lost if it does — the staged tree and the current install are both intact.
-
-### macOS: "Close running games before installing an update."
-
-The updater checks for running game sessions before it replaces the app bundle. Quit the running games, then check for updates again.
+Install Python 3.11+ (or set `OPENBOX_PYTHON`), and run the installer from the extracted release so `updates.py` is one directory above it.
 
 ### macOS: "is not writable; move OpenBox to a writable folder"
 
-Move `OpenBox.app` to a folder you own, such as `~/Applications`, then check for updates again.
+Move `OpenBox.app` to a folder you own, such as `~/Applications`, then run the installer again.
 
 ### "GitHub releases request failed (4xx) or Could not reach GitHub releases"
 
@@ -124,24 +131,24 @@ The latest release lacks a verified asset or checksum. Nothing is downloaded; re
 
 ### Update installed but the app still shows the old version
 
-Restart OpenBoxGL. The new file only takes effect on the next launch. If it still shows old behavior after a restart, you are likely running a different file than the one that was updated (for example, a copy elsewhere on disk); update that copy, or move the updated AppImage and re-run **Install desktop shortcut** so the menu entry follows it.
+Restart OpenBoxGL. The new file only takes effect on the next launch. If it still shows old behavior after a restart, you are likely running a different file than the one that was updated.
 
 ### The new AppImage will not start
 
-The previous version is intact at the architecture-matched `.previous.AppImage` in the same directory. For x86_64, replace the new file with it:
+The previous version is intact at the architecture-matched `.previous.AppImage` in the same directory. For x86_64:
 
 ```bash
 mv OpenBox-x86_64.previous.AppImage OpenBox-x86_64.AppImage
 chmod +x OpenBox-x86_64.AppImage
 ```
 
-then report the failure with the diagnostic log (Settings > Advanced > Copy diagnostic log), which redacts tokens and passwords but can include game names and file paths.
+Then report the failure with the diagnostic log (Settings > Advanced > Copy diagnostic log), which redacts tokens and passwords but can include game names and file paths.
 
 ## Data safety during updates
 
 The updater touches only the installed AppImage, Windows tree, or macOS app bundle. Your library, media, backups, themes, and settings live in the data directory (`~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, `~/Library/Application Support/openbox-game-launcher` on macOS, or `OPENBOX_DATA_DIR`) and are never part of the update. Moving, replacing, or deleting the installed app does not touch them.
 
-Still, keep a library backup before major changes, and definitely before any rollback dance: [Library backups](/reference/library-backups/) and [Data and recovery](/reference/data-and-recovery/) cover both.
+Keep a library backup before major changes, and definitely before any rollback dance: [Library backups](/reference/library-backups/) and [Data and recovery](/reference/data-and-recovery/) cover both. Save Vault snapshots live under `<data-dir>/save-vault/` and are not part of a library backup; copy that folder separately if you need it off-machine.
 
 ## Related pages
 

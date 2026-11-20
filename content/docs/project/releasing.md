@@ -23,7 +23,7 @@ This page is for maintainers publishing a release from `master`. The AppImage, W
 
 ## Build and verify the artifact locally
 
-Prerequisites: `gcc`, `pkg-config`, and the WebKitGTK dev package (`libwebkit2gtk-4.1-dev` on Debian/Ubuntu, `webkit2gtk-4.1` on Fedora) — the build compiles `native_host.c` against `webkit2gtk-4.1` and bundles the host `python3` interpreter and stdlib.
+Prerequisites: Rust 1.92+ (the pinned toolchain is 1.99.1), `gcc`, `pkg-config`, and the WebKitGTK dev package (`libwebkit2gtk-4.1-dev` on Debian/Ubuntu, `webkit2gtk-4.1` on Fedora). The build compiles `openbox-server` with Cargo and `native_host.c` against `webkit2gtk-4.1`, and bundles no Python interpreter.
 
 ```bash
 bash build_appimage.sh
@@ -43,11 +43,11 @@ sha256sum OpenBox-x86_64.AppImage > OpenBox-x86_64.AppImage.sha256
 sha256sum -c OpenBox-x86_64.AppImage.sha256
 ```
 
-Confirm the embedded version matches the release by extracting the AppImage and checking `usr/share/openbox/updates.py` `VERSION`.
+Confirm the embedded version matches the release with `openbox-server --dump-contracts` (or `GET /api/v2/version` from the running build). `updates.py` is a build-time/installer file and is not installed into the AppDir.
 
 ## Push and tag
 
-1. Commit the version/changelog/metadata changes, push directly to `master`, and wait for the Python 3.10 and 3.12 CI jobs to pass for that exact commit.
+1. Commit the version/changelog/metadata changes, push directly to `master`, and wait for the Rust workspace checks and the Python 3.11/3.12 CI jobs to pass for that exact commit.
 2. Create and push an annotated tag:
   ```bash
   git tag -a vX.Y.Z -m "vX.Y.Z"
@@ -78,7 +78,7 @@ For the macOS bundle, the same `publish` job signs `OpenBox-macos.zip` with the 
 
 The Flatpak workflow (`release-flatpak.yml`) has two jobs:
 
-**build**: validates packaging metadata, compiles the native host, runs packaging tests, installs the GNOME 49 runtime/SDK, and creates `OpenBox-x86_64.flatpak`.
+**build**: validates packaging metadata, compiles the native host, runs packaging tests, installs the GNOME 51 runtime/SDK, and creates `OpenBox-x86_64.flatpak`.
 
 **publish** (requires the `release` environment, contents write): uploads the x86_64 Flatpak to the same release and uses the same `docs/RELEASE_NOTES.md` body. Its publish job is serialized with the shared publish job for that tag.
 
@@ -89,7 +89,7 @@ The release body is `docs/RELEASE_NOTES.md`, so update it before tagging; GitHub
 - Confirm GitHub's latest-release API returns the new version and the architecture matrix: x86_64 and aarch64 AppImages with `.zsync`, `.sha256`, and `.sig`, the release key, architecture-specific SBOMs, `install.sh`, `install.ps1`, `install-macos.sh`, `verify_release.py`, `OpenBox-x86_64.flatpak`, the signed `OpenBox-x86_64-windows.zip` and `OpenBox-x86_64-windows-native-host.exe` with their sidecars, and the signed `OpenBox-macos.zip` with its sidecars.
 - Download each AppImage and its `.sha256` remotely and run `sha256sum -c`.
 - Verify both signatures with `scripts/verify_release.py --key openbox-release.pub OpenBox-x86_64.AppImage OpenBox-x86_64.AppImage.sig` and the matching aarch64 paths, then repeat for the Windows zip and standalone host.
-- Check that the Windows zip contains a single top-level `OpenBox/` folder with `web_app.py` and the compiled `native_host.exe`.
+- Check that the Windows zip contains a single top-level `OpenBox/` folder with `openbox-server.exe`, `web_app.py` (the fallback), and the compiled `native_host.exe`.
 - Start the AppImage and confirm the updater reports the new version as current with no update available.
 
 ## Pitfalls

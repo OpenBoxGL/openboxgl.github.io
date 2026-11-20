@@ -124,7 +124,7 @@ export function buildSidebar(): DocNode[] {
 
   sections.push(
     section("Product", ["compare", "downloads", "showcase", "enterprise"]),
-    section("Start here", ["install", "getting-started", "interfaces-and-data", "updating", "faq"]),
+    section("Start here", ["install", "getting-started", "upgrading-3-0", "interfaces-and-data", "updating", "windows", "macos", "faq"]),
     section("Use OpenBox", [
       "guides/library",
       "guides/metadata-and-media",

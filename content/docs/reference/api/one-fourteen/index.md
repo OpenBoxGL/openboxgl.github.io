@@ -119,7 +119,7 @@ Checksum-bound per-plugin trust, Android-style permission prompts, settings form
 | `GET` | `/api/v2/plugins/settings` | Settings schema plus current values for one plugin: `?id=`. Returns `{"id", "schema"?, "values"}`. |
 | `POST` | `/api/v2/plugins/settings` | Validate and store per-plugin settings. Body: `{"id", "values": {...}}`. Returns `{"id", "values"}`. |
 
-The plugin hook contract (stdin/stdout shapes, the `events` lifecycle hook, the `library_source` importer hook) is documented in [Plugins](/reference/plugins/). The base-only `GET /api/plugins` and `GET /api/plugins/catalog` routes remain documented under [Local administrator](/reference/api/local-admin/).
+The plugin hook contract (stdin/stdout shapes, the `events` lifecycle hook, the `library_source` importer hook) is documented in [Plugins](/reference/plugins/). The base-only `GET /api/v2/plugins` and `GET /api/v2/plugins/catalog` routes remain documented under [Local administrator](/reference/api/local-admin/).
 
 ## Related pages
 

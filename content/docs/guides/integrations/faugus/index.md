@@ -30,14 +30,14 @@ Each imported title automatically receives:
 
 Automate Faugus scans or integrate with scripts:
 
-- `GET /api/faugus/status`: Reports whether Faugus data directories exist, and which ones.
-- `GET /api/faugus/scan`: Scans manifests and prefix directories and returns the discovered games with their prefix and runner metadata.
-- `POST /api/faugus/import`: Imports the scanned games into the OpenBox library.
+- `GET /api/v2/faugus/status`: Reports whether Faugus data directories exist, and which ones.
+- `GET /api/v2/faugus/scan`: Scans manifests and prefix directories and returns the discovered games with their prefix and runner metadata.
+- `POST /api/v2/faugus/import`: Imports the scanned games into the OpenBox library.
 
 ```bash
 # Check Faugus installation status
-curl -s -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:$PORT/api/faugus/status
+curl -s -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:$PORT/api/v2/faugus/status
 
 # Scan for installed titles
-curl -s -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:$PORT/api/faugus/scan
+curl -s -H "X-OpenBox-Token: $TOKEN" http://127.0.0.1:$PORT/api/v2/faugus/scan
 ```

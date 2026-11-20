@@ -17,13 +17,13 @@ If you run 1.15.x or older, these are the security defects 1.16.0 closes. **None
 - **Arbitrary file write through a game's `rom_name`.** Restoring a high-score bundle built the destination filename from `rom_name`, so a traversal string wrote outside the high-score folder. The name is reduced to a safe component and the destination is checked to stay inside that folder.
 - **Plugins reading your library.** The plugin sandbox masked a fixed list of paths, so if you had moved your OpenBox data folder with `OPENBOX_DATA_DIR`, a sandboxed plugin could read `library.json` and `settings.json`. The resolved data directory is now hidden from plugins wherever it lives.
 - **Unescaped text in the Wrapped report.** Game names reached the page without escaping. Your CSP blocked script execution, so this was one policy change away from being exploitable rather than exploitable directly; names are escaped now, and an automated check fails if the pattern returns.
-- **An outside package changing how your library is saved.** When a particular third-party Python package happened to be installed, OpenBox used it to serialize state, and it could write the file differently. The runtime is standard-library only now, and an automated check enforces it.
+- **An outside package changing how your library is saved.** The shipped runtime is the Rust `openbox-server` with a pinned dependency lockfile and `cargo deny` in CI. The Python fallback is standard-library only, and an automated check enforces it.
 
 ## Supported versions
 
 | Version | Support |
 | --- | --- |
-| 2.0.x | Yes (current; v2.0.0 is unreleased until the tag) |
+| 3.0.x | Yes (current) |
 | 1.19.x | Yes (latest published release) |
 | 1.18.x | No |
 | 1.17.x | No — upgrade required |
@@ -52,7 +52,7 @@ If you run 1.15.x or older, these are the security defects 1.16.0 closes. **None
 | 0.4.x | Best effort |
 | < 0.4.0 | No |
 
-Only the latest release on the `master` branch is maintained, and the 2.0.x line is the current maintained release (v2.0.0 is unreleased until the tag; 1.19.1 is the latest published release). The older rows document the historical support policy and do not promise backports; upgrade to 2.0.x to receive fixes.
+Only the latest release on the `master` branch is maintained, and the 3.0.x line is the current maintained release. The older rows document the historical support policy and do not promise backports; upgrade to 3.0.x to receive fixes.
 
 ## Protecting local data
 

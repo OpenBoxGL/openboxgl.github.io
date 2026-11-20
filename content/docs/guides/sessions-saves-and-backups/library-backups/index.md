@@ -16,7 +16,7 @@ The **Backup** dialog (Tools → Backup) creates whole-library ZIP archives unde
 The CLI form is:
 
 ```bash
-python3 web_app.py --backup --items library,settings,media --keep 7
+openbox --backup --items library,settings,media
 ```
 
 The archive is written via a temp file and `os.replace`, then the directory is fsynced. If you include `plugins`, the archive stores the installed packages and the plugin state file but **not** the capability credential store, and password-format plugin settings are blanked. Local password values are merged back when that archive is restored, so a backup cannot leak a plugin secret or erase one on restore. The other redacted values — the Gameyfin and OBS WebSocket passwords, the per-provider integration tokens, and webhook secrets — are handled the same way: stripped from the archive, merged back from your local copy on restore.
@@ -27,7 +27,7 @@ Settings can run the same engine on a weekly schedule: enable **automatic backup
 
 ### Backup format 2 (2.0)
 
-2.0 writes backups in **format 2** by default — the Settings > Sessions **Backup format** selector also offers format 1 for a 1.19-compatible export. Format 2 records a SHA-256 hash for every archive member, and restore validates every member's hash and refuses a corrupt member or a member the manifest does not list (`BACKUP_FORMAT_UNSUPPORTED` on an archive format this build cannot read) before writing anything. A format-1 export embeds a v1-shape library snapshot so a 1.19.x install can restore it; automatic backups always use format 2.
+2.1 and 3.0 write backups in **format 2 only**. Format 2 records a SHA-256 hash for every archive member, and restore validates every member's hash and refuses a corrupt member or a member the manifest does not list (`BACKUP_FORMAT_UNSUPPORTED` on an archive format this build cannot read) before writing anything. Format 1 archives still restore, but a new format 1 write returns `410 BACKUP_FORMAT_RETIRED`; use a 2.0.x build if you need a 1.19-compatible export. Save Vault snapshots are not in `BACKUP_ITEMS`; copy `<data-dir>/save-vault/` separately.
 
 ## Restore a backup
 
@@ -41,11 +41,11 @@ Restore is guarded at every step:
 6. When `library` is restored, the current `library.json` is copied to `library.before-restore.json` first, and archived `settings.json` values are merged into the restored library's settings.
 7. `media`/`plugins`/`themes`/`extension_data` members are written under the data directory with mode `0o600`, rejecting symlink destinations before and after intermediate `mkdir`s.
 
-The CLI form is `python3 web_app.py --restore-backup <archive>`; the archive must be a real `.zip` inside the data directory or `backups/`.
+The CLI form is `openbox --restore-backup <archive>`. The CLI accepts any readable archive path; the API/UI restore additionally restricts the path to the data directory or `backups/`.
 
 ## Inspect backups
 
-`GET /api/backups` lists archives newest first with `name`, `path`, `size`, `created`, `items`, and `invalid: true` when the archive or manifest cannot be read. `GET /api/backup/manifest` returns the six selectable item keys.
+`GET /api/v2/backups` lists archives newest first with `name`, `path`, `size`, `created`, `items`, and `invalid: true` when the archive or manifest cannot be read. `GET /api/v2/backup/manifest` returns the six selectable item keys.
 
 ## Troubleshooting
 

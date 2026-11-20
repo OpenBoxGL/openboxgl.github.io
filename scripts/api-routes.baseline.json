@@ -1,738 +1,14 @@
 {
- "_comment": "Authoritative OpenBoxGL HTTP route table, derived from @route decorators. Regenerate with: npm run routes:sync (requires OPENBOX_APP_DIR).",
- "count": 391,
+ "_comment": "Authoritative OpenBoxGL 3.0 route table, derived from api_contracts.json (format 2). Regenerate with: OPENBOX_APP_DIR=<path> npm run routes:sync.",
+ "count": 417,
  "routes": [
   {
    "method": "GET",
-   "path": "/api/backup"
-  },
-  {
-   "method": "GET",
-   "path": "/api/backup/manifest"
-  },
-  {
-   "method": "GET",
-   "path": "/api/backups"
-  },
-  {
-   "method": "GET",
-   "path": "/api/bigbox/startup-video"
-  },
-  {
-   "method": "GET",
-   "path": "/api/diagnostic"
-  },
-  {
-   "method": "GET",
-   "path": "/api/discovery"
-  },
-  {
-   "method": "GET",
-   "path": "/api/document"
-  },
-  {
-   "method": "GET",
-   "path": "/api/emulators"
-  },
-  {
-   "method": "GET",
-   "path": "/api/emulators/definitions"
-  },
-  {
-   "method": "GET",
-   "path": "/api/emulators/dependencies"
-  },
-  {
-   "method": "GET",
-   "path": "/api/emulators/recommend"
-  },
-  {
-   "method": "GET",
-   "path": "/api/emulators/scan-configs"
-  },
-  {
-   "method": "GET",
-   "path": "/api/events"
-  },
-  {
-   "method": "GET",
-   "path": "/api/explorer/facets"
-  },
-  {
-   "method": "GET",
-   "path": "/api/faugus/scan"
-  },
-  {
-   "method": "GET",
-   "path": "/api/faugus/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/filter-presets"
-  },
-  {
-   "method": "GET",
-   "path": "/api/gameyfin/install/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/gameyfin/providers"
-  },
-  {
-   "method": "GET",
-   "path": "/api/highscores"
-  },
-  {
-   "method": "GET",
-   "path": "/api/history"
-  },
-  {
-   "method": "GET",
-   "path": "/api/import/exclusions"
-  },
-  {
-   "method": "GET",
-   "path": "/api/jobs"
-  },
-  {
-   "method": "GET",
-   "path": "/api/launcher/menu"
-  },
-  {
-   "method": "GET",
-   "path": "/api/library"
-  },
-  {
-   "method": "GET",
-   "path": "/api/library/delta"
-  },
-  {
-   "method": "GET",
-   "path": "/api/log"
-  },
-  {
-   "method": "GET",
-   "path": "/api/media"
-  },
-  {
-   "method": "GET",
-   "path": "/api/media/audit"
-  },
-  {
-   "method": "GET",
-   "path": "/api/media/bulk/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/media/duplicates"
-  },
-  {
-   "method": "GET",
-   "path": "/api/media/queue"
-  },
-  {
-   "method": "GET",
-   "path": "/api/metadata/igdb/search"
-  },
-  {
-   "method": "GET",
-   "path": "/api/metadata/search"
-  },
-  {
-   "method": "GET",
-   "path": "/api/metadata/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/native/battery"
-  },
-  {
-   "method": "GET",
-   "path": "/api/native/capabilities"
-  },
-  {
-   "method": "GET",
-   "path": "/api/notifications"
-  },
-  {
-   "method": "GET",
-   "path": "/api/obs/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/perf_profiles"
-  },
-  {
-   "method": "GET",
-   "path": "/api/platform/document"
-  },
-  {
-   "method": "GET",
-   "path": "/api/platform/documents"
-  },
-  {
-   "method": "GET",
-   "path": "/api/platform/video"
-  },
-  {
-   "method": "GET",
-   "path": "/api/platform/videos"
-  },
-  {
-   "method": "GET",
-   "path": "/api/plugins"
-  },
-  {
-   "method": "GET",
-   "path": "/api/plugins/catalog"
-  },
-  {
-   "method": "GET",
-   "path": "/api/premium/media-packs"
-  },
-  {
-   "method": "GET",
-   "path": "/api/premium/platform-categories"
-  },
-  {
-   "method": "GET",
-   "path": "/api/premium/strings"
-  },
-  {
-   "method": "GET",
-   "path": "/api/profiles"
-  },
-  {
-   "method": "GET",
-   "path": "/api/queue"
-  },
-  {
-   "method": "GET",
-   "path": "/api/ra/badge"
-  },
-  {
-   "method": "GET",
-   "path": "/api/ra/settings"
-  },
-  {
-   "method": "GET",
-   "path": "/api/related"
-  },
-  {
-   "method": "GET",
-   "path": "/api/related/rich"
-  },
-  {
-   "method": "GET",
-   "path": "/api/running"
-  },
-  {
-   "method": "GET",
-   "path": "/api/save-tools/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/saves"
-  },
-  {
-   "method": "GET",
-   "path": "/api/saves/discover"
-  },
-  {
-   "method": "GET",
-   "path": "/api/saves/manifest"
-  },
-  {
-   "method": "GET",
-   "path": "/api/saves/scan"
-  },
-  {
-   "method": "GET",
-   "path": "/api/settings"
-  },
-  {
-   "method": "GET",
-   "path": "/api/storefront/catalog"
-  },
-  {
-   "method": "GET",
-   "path": "/api/tags"
-  },
-  {
-   "method": "GET",
-   "path": "/api/theme-asset"
-  },
-  {
-   "method": "GET",
-   "path": "/api/theme-sounds"
-  },
-  {
-   "method": "GET",
-   "path": "/api/theme.css"
-  },
-  {
-   "method": "GET",
-   "path": "/api/themes"
-  },
-  {
-   "method": "GET",
-   "path": "/api/update"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v1/jobs"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/arcade/kiosk/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/backup/diff"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/clips"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/collections"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/compat/report"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/emulators/defs/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/emulators/defs/update"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/emulators/registry"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/emulators/settings"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/highscores/table"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/history/timeline"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/household"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/household/leaderboard"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/insights/heatmap"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/insights/mastery"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/insights/radar"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/insights/radio"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/insights/summary"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/insights/trophies"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/insights/wrapped"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/integration-tokens"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/integrations/steam"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/jobs"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/jobs/items"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/launch/audit"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/launch/audit/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/launch/cores"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/constellation"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/dna/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/duplicates"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/export/download"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/export/exports"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/health"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/health/issues"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/integrity"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/repair"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/search"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/time-machine/as-of"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/time-machine/compare"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/time-machine/events"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/library/trash"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/memories"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/memories/media"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/memories/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/metadata/matches/items"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/metadata/matches/preview"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/metadata/media-candidates"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/metadata/scrape-settings"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/moments"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/netplay/lobby"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/party/decks"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/party/queue"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/plugin-stats"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/plugins/catalog"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/plugins/commands"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/plugins/credentials"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/plugins/data"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/plugins/settings"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/plugins/trust"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/reels"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/resume/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/screenscraper/search"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/screenscraper/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/sessions/recap"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/setup/migration/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/setup/preview"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/setup/preview/items"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/setup/summary"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/steambridge/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/steamgrid/hygiene/report"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/steamgrid/search"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/steamgrid/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/storefront/status"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/storefronts"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/story"
-  },
-  {
-   "method": "GET",
-   "path": "/api/v2/version"
-  },
-  {
-   "method": "GET",
-   "path": "/api/webhooks"
-  },
-  {
-   "method": "GET",
-   "path": "/api/wine/prefix-for-game"
-  },
-  {
-   "method": "GET",
-   "path": "/api/wine/prefixes"
-  },
-  {
-   "method": "GET",
-   "path": "/api/wine/protons"
+   "path": "/api/host/capabilities"
   },
   {
    "method": "POST",
-   "path": "/api/backup/create"
-  },
-  {
-   "method": "POST",
-   "path": "/api/backup/restore"
-  },
-  {
-   "method": "POST",
-   "path": "/api/bezels/download"
-  },
-  {
-   "method": "POST",
-   "path": "/api/bigbox/mode"
-  },
-  {
-   "method": "POST",
-   "path": "/api/cloud/sync"
-  },
-  {
-   "method": "POST",
-   "path": "/api/desktop/install"
-  },
-  {
-   "method": "POST",
-   "path": "/api/emulators/install"
-  },
-  {
-   "method": "POST",
-   "path": "/api/emulators/install-all"
-  },
-  {
-   "method": "POST",
-   "path": "/api/emulators/open"
-  },
-  {
-   "method": "POST",
-   "path": "/api/emulators/scan"
-  },
-  {
-   "method": "POST",
-   "path": "/api/emulators/scan-configs"
-  },
-  {
-   "method": "POST",
-   "path": "/api/emulators/update"
-  },
-  {
-   "method": "POST",
-   "path": "/api/emulators/update-all"
-  },
-  {
-   "method": "POST",
-   "path": "/api/emumovies/download"
-  },
-  {
-   "method": "POST",
-   "path": "/api/emumovies/settings"
-  },
-  {
-   "method": "POST",
-   "path": "/api/extra/launch"
-  },
-  {
-   "method": "POST",
-   "path": "/api/faugus/import"
-  },
-  {
-   "method": "POST",
-   "path": "/api/favorite"
-  },
-  {
-   "method": "POST",
-   "path": "/api/filter-presets"
-  },
-  {
-   "method": "POST",
-   "path": "/api/filter-presets/delete"
-  },
-  {
-   "method": "POST",
-   "path": "/api/game"
-  },
-  {
-   "method": "POST",
-   "path": "/api/game/delete"
-  },
-  {
-   "method": "POST",
-   "path": "/api/game/store-action"
-  },
-  {
-   "method": "POST",
-   "path": "/api/games/bulk"
-  },
-  {
-   "method": "POST",
-   "path": "/api/games/bulk-wizard"
-  },
-  {
-   "method": "POST",
-   "path": "/api/games/delete-steam"
-  },
-  {
-   "method": "POST",
-   "path": "/api/gameyfin/install"
-  },
-  {
-   "method": "POST",
-   "path": "/api/gameyfin/test"
-  },
-  {
-   "method": "POST",
-   "path": "/api/gameyfin/uninstall"
-  },
-  {
-   "method": "POST",
-   "path": "/api/health"
-  },
-  {
-   "method": "POST",
-   "path": "/api/health/dedupe"
-  },
-  {
-   "method": "POST",
-   "path": "/api/highscores/export"
-  },
-  {
-   "method": "POST",
-   "path": "/api/highscores/import"
+   "path": "/api/host/launch"
   },
   {
    "method": "POST",
@@ -740,287 +16,7 @@
   },
   {
    "method": "POST",
-   "path": "/api/image-group"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/arcade"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/epic"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/exclusions"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/exclusions/delete"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/heroic"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/loose-arcade"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/lutris"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/rpcs3"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/scummvm"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/steam"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/vita3k"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/watch"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/wizard"
-  },
-  {
-   "method": "POST",
-   "path": "/api/import/xbox360"
-  },
-  {
-   "method": "POST",
-   "path": "/api/launch"
-  },
-  {
-   "method": "POST",
-   "path": "/api/media/bulk"
-  },
-  {
-   "method": "POST",
-   "path": "/api/media/cache/cleanup"
-  },
-  {
-   "method": "POST",
-   "path": "/api/media/cleanup"
-  },
-  {
-   "method": "POST",
-   "path": "/api/media/queue/cancel"
-  },
-  {
-   "method": "POST",
-   "path": "/api/media/queue/pause"
-  },
-  {
-   "method": "POST",
-   "path": "/api/media/queue/resume"
-  },
-  {
-   "method": "POST",
-   "path": "/api/media/queue/retry"
-  },
-  {
-   "method": "POST",
-   "path": "/api/metadata/apply"
-  },
-  {
-   "method": "POST",
-   "path": "/api/metadata/gog"
-  },
-  {
-   "method": "POST",
-   "path": "/api/metadata/igdb/apply"
-  },
-  {
-   "method": "POST",
-   "path": "/api/metadata/match"
-  },
-  {
-   "method": "POST",
-   "path": "/api/metadata/steam"
-  },
-  {
-   "method": "POST",
-   "path": "/api/metadata/sync"
-  },
-  {
-   "method": "POST",
-   "path": "/api/metadata/trailer"
-  },
-  {
-   "method": "POST",
-   "path": "/api/native/dialog"
-  },
-  {
-   "method": "POST",
-   "path": "/api/native/open-external"
-  },
-  {
-   "method": "POST",
-   "path": "/api/native/reveal"
-  },
-  {
-   "method": "POST",
-   "path": "/api/native/window"
-  },
-  {
-   "method": "POST",
-   "path": "/api/notifications"
-  },
-  {
-   "method": "POST",
-   "path": "/api/obs/attach"
-  },
-  {
-   "method": "POST",
-   "path": "/api/perf_profiles"
-  },
-  {
-   "method": "POST",
-   "path": "/api/platform/documents"
-  },
-  {
-   "method": "POST",
-   "path": "/api/platform/videos"
-  },
-  {
-   "method": "POST",
-   "path": "/api/playlists"
-  },
-  {
-   "method": "POST",
-   "path": "/api/playlists/delete"
-  },
-  {
-   "method": "POST",
-   "path": "/api/plugins/catalog/install"
-  },
-  {
-   "method": "POST",
-   "path": "/api/plugins/install"
-  },
-  {
-   "method": "POST",
-   "path": "/api/plugins/remove"
-  },
-  {
-   "method": "POST",
-   "path": "/api/plugins/toggle"
-  },
-  {
-   "method": "POST",
-   "path": "/api/premium/media-packs/apply"
-  },
-  {
-   "method": "POST",
-   "path": "/api/profiles"
-  },
-  {
-   "method": "POST",
-   "path": "/api/queue"
-  },
-  {
-   "method": "POST",
-   "path": "/api/ra/game"
-  },
-  {
-   "method": "POST",
-   "path": "/api/ra/inject"
-  },
-  {
-   "method": "POST",
-   "path": "/api/ra/settings"
-  },
-  {
-   "method": "POST",
-   "path": "/api/save-tools/hoard"
-  },
-  {
-   "method": "POST",
-   "path": "/api/save-tools/ludusavi"
-  },
-  {
-   "method": "POST",
-   "path": "/api/saves/add"
-  },
-  {
-   "method": "POST",
-   "path": "/api/saves/backup"
-  },
-  {
-   "method": "POST",
-   "path": "/api/saves/restore"
-  },
-  {
-   "method": "POST",
-   "path": "/api/saves/restore/preview"
-  },
-  {
-   "method": "POST",
-   "path": "/api/saves/scan/apply"
-  },
-  {
-   "method": "POST",
-   "path": "/api/screenshot"
-  },
-  {
-   "method": "POST",
-   "path": "/api/session/cleanup"
-  },
-  {
-   "method": "POST",
-   "path": "/api/session/control"
-  },
-  {
-   "method": "POST",
-   "path": "/api/settings"
-  },
-  {
-   "method": "POST",
-   "path": "/api/shutdown"
-  },
-  {
-   "method": "POST",
-   "path": "/api/state/recover"
-  },
-  {
-   "method": "POST",
-   "path": "/api/storefront/import"
-  },
-  {
-   "method": "POST",
-   "path": "/api/tags"
-  },
-  {
-   "method": "POST",
-   "path": "/api/themes/import"
-  },
-  {
-   "method": "POST",
-   "path": "/api/themes/open-folder"
-  },
-  {
-   "method": "POST",
-   "path": "/api/themes/select"
-  },
-  {
-   "method": "POST",
-   "path": "/api/update/install"
+   "path": "/api/host/shutdown"
   },
   {
    "method": "POST",
@@ -1035,16 +31,88 @@
    "path": "/api/v2/arcade/kiosk/pin"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/arcade/kiosk/status"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/arcade/kiosk/verify"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/backup"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/backup/create"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/backup/diff"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/backup/manifest"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/backup/restore"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/backups"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/bezels/download"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/bigbox/mode"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/bigbox/startup-video"
   },
   {
    "method": "POST",
    "path": "/api/v2/bulk/find-replace"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/capsules"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/capsules"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/capsules/delete"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/capsules/next"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/capsules/open"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/clips"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/clips/capture"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/cloud/sync"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/collections"
   },
   {
    "method": "POST",
@@ -1055,16 +123,252 @@
    "path": "/api/v2/collections/delete"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/compat/report"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/deals"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/deals/entry"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/deals/refresh"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/deals/search"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/deals/unwatch"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/deals/watch"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/desktop/install"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/diagnostic"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/discovery"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/document"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/emulators"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/emulators/definitions"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/emulators/defs/rollback"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/emulators/defs/status"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/emulators/defs/update"
   },
   {
    "method": "POST",
    "path": "/api/v2/emulators/defs/update"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/emulators/dependencies"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/emulators/install"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/emulators/install-all"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/emulators/open"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/emulators/recommend"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/emulators/registry"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/emulators/scan"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/emulators/scan-configs"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/emulators/scan-configs"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/emulators/settings"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/emulators/settings"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/emulators/update"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/emulators/update-all"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/emumovies/download"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/emumovies/settings"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/events"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/explorer/facets"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/extra/launch"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/faugus/import"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/faugus/scan"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/faugus/status"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/favorite"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/filter-presets"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/filter-presets"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/filter-presets/delete"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/game"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/game/delete"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/game/store-action"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/games/bulk"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/games/bulk-wizard"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/games/delete-steam"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/gameyfin/install"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/gameyfin/install/status"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/gameyfin/providers"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/gameyfin/test"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/gameyfin/uninstall"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/health"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/health/dedupe"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/highscores"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/highscores/export"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/highscores/import"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/highscores/table"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/history"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/history/timeline"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/household"
   },
   {
    "method": "POST",
@@ -1073,6 +377,10 @@
   {
    "method": "POST",
    "path": "/api/v2/household/challenge/result"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/household/leaderboard"
   },
   {
    "method": "POST",
@@ -1100,7 +408,23 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/image-group"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/arcade"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/import/ea"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/epic"
   },
   {
    "method": "POST",
@@ -1111,8 +435,24 @@
    "path": "/api/v2/import/esde/preview"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/import/exclusions"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/exclusions"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/exclusions/delete"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/import/gog"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/heroic"
   },
   {
    "method": "POST",
@@ -1124,6 +464,14 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/import/loose-arcade"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/lutris"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/import/msu1"
   },
   {
@@ -1132,7 +480,27 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/import/rpcs3"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/scummvm"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/steam"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/import/ubisoft"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/vita3k"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/watch"
   },
   {
    "method": "POST",
@@ -1140,15 +508,59 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/import/wizard"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/import/xbox360"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/insights/heatmap"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/insights/mastery"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/insights/milestones"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/insights/radar"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/insights/radar/park"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/insights/radio"
   },
   {
    "method": "POST",
    "path": "/api/v2/insights/radio/refresh"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/insights/summary"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/insights/trophies"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/insights/trophies/evaluate"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/insights/wrapped"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/integration-tokens"
   },
   {
    "method": "POST",
@@ -1157,6 +569,10 @@
   {
    "method": "POST",
    "path": "/api/v2/integration-tokens/remove"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/integrations/steam"
   },
   {
    "method": "POST",
@@ -1171,8 +587,36 @@
    "path": "/api/v2/integrations/steam/test"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/itinerary"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/itinerary/abandon"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/itinerary/estimate"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/itinerary/plan"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/itinerary/replan"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/jobs"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/jobs/cancel"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/jobs/items"
   },
   {
    "method": "POST",
@@ -1184,6 +628,14 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/launch"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/launch/audit"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/launch/audit/refresh"
   },
   {
@@ -1191,8 +643,16 @@
    "path": "/api/v2/launch/audit/scan"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/launch/audit/status"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/launch/core"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/launch/cores"
   },
   {
    "method": "POST",
@@ -1211,12 +671,36 @@
    "path": "/api/v2/launch/preflight/batch"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/launcher/menu"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/constellation"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/delta"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/library/dna/index/rebuild"
   },
   {
    "method": "POST",
    "path": "/api/v2/library/dna/search"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/dna/status"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/duplicates"
   },
   {
    "method": "POST",
@@ -1231,8 +715,24 @@
    "path": "/api/v2/library/export"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/library/export/download"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/export/exports"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/health"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/library/health/fix"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/health/issues"
   },
   {
    "method": "POST",
@@ -1241,6 +741,10 @@
   {
    "method": "POST",
    "path": "/api/v2/library/health/undo"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/integrity"
   },
   {
    "method": "POST",
@@ -1303,12 +807,20 @@
    "path": "/api/v2/library/rating/set"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/library/repair"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/library/repair/apply"
   },
   {
    "method": "POST",
    "path": "/api/v2/library/repair/preview"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/search"
   },
   {
    "method": "POST",
@@ -1327,8 +839,24 @@
    "path": "/api/v2/library/sync/pull"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/library/time-machine/as-of"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/time-machine/compare"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/time-machine/events"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/library/time-machine/revert"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/library/trash"
   },
   {
    "method": "POST",
@@ -1343,8 +871,76 @@
    "path": "/api/v2/library/trash/restore"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/log"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/media"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/media/audit"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/media/bulk"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/media/bulk/status"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/media/cache/cleanup"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/media/cleanup"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/media/duplicates"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/media/queue"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/media/queue/cancel"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/media/queue/pause"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/media/queue/resume"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/media/queue/retry"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/memories"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/memories/import"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/memories/media"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/memories/status"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/metadata/apply"
   },
   {
    "method": "POST",
@@ -1356,6 +952,22 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/metadata/gog"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/metadata/igdb/apply"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/metadata/igdb/search"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/metadata/match"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/metadata/matches/apply"
   },
   {
@@ -1363,12 +975,52 @@
    "path": "/api/v2/metadata/matches/decisions"
   },
   {
-   "method": "POST",
+   "method": "GET",
+   "path": "/api/v2/metadata/matches/items"
+  },
+  {
+   "method": "GET",
    "path": "/api/v2/metadata/matches/preview"
   },
   {
    "method": "POST",
+   "path": "/api/v2/metadata/matches/preview"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/metadata/media-candidates"
+  },
+  {
+   "method": "GET",
    "path": "/api/v2/metadata/scrape-settings"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/metadata/scrape-settings"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/metadata/search"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/metadata/status"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/metadata/steam"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/metadata/sync"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/metadata/trailer"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/moments"
   },
   {
    "method": "POST",
@@ -1387,6 +1039,54 @@
    "path": "/api/v2/moments/update"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/native/battery"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/native/capabilities"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/native/dialog"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/native/open-external"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/native/reveal"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/native/window"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/netplay/lobby"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/notifications"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/notifications"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/obs/attach"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/obs/status"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/party/decks"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/party/decks"
   },
@@ -1399,28 +1099,100 @@
    "path": "/api/v2/party/next"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/party/queue"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/party/queue"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/perf_profiles"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/perf_profiles"
   },
   {
    "method": "POST",
    "path": "/api/v2/platform/delete"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/platform/document"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/platform/documents"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/platform/documents"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/platform/rename"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/platform/video"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/platform/videos"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/platform/videos"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/playlists"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/playlists/delete"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/plugin-stats"
   },
   {
    "method": "POST",
    "path": "/api/v2/plugin-stats/refresh"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/plugins"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/plugins/catalog"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/plugins/catalog/install"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/plugins/command"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/plugins/commands"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/plugins/credentials"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/plugins/credentials"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/plugins/data"
   },
   {
    "method": "POST",
@@ -1428,11 +1200,23 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/plugins/install"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/plugins/permissions"
   },
   {
    "method": "POST",
+   "path": "/api/v2/plugins/remove"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/plugins/repair"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/plugins/settings"
   },
   {
    "method": "POST",
@@ -1440,11 +1224,95 @@
   },
   {
    "method": "POST",
+   "path": "/api/v2/plugins/toggle"
+  },
+  {
+   "method": "GET",
    "path": "/api/v2/plugins/trust"
   },
   {
    "method": "POST",
+   "path": "/api/v2/plugins/trust"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/premium/media-packs"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/premium/media-packs/apply"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/premium/platform-categories"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/premium/strings"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/profiles"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/profiles"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/queue"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/queue"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/ra/badge"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/ra/game"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/ra/inject"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/ra/settings"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/ra/settings"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/ra/trail"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/ra/trail/game"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/ra/trail/refresh"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/reels"
+  },
+  {
+   "method": "POST",
    "path": "/api/v2/reels/create"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/related"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/related/rich"
   },
   {
    "method": "POST",
@@ -1459,6 +1327,86 @@
    "path": "/api/v2/resume/slot"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/resume/status"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/running"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/save-tools/hoard"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/save-tools/ludusavi"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/save-tools/status"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/saves"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/saves/add"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/saves/backup"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/saves/discover"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/saves/manifest"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/saves/restore"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/saves/restore/preview"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/saves/scan"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/saves/scan/apply"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/saves/vault"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/saves/vault/delete"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/saves/vault/diff"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/saves/vault/restore"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/saves/vault/snapshot"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/saves/vault/status"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/screenscraper/apply"
   },
@@ -1471,8 +1419,40 @@
    "path": "/api/v2/screenscraper/match"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/screenscraper/search"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/screenscraper/status"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/screenscraper/test"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/screenshot"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/session/cleanup"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/session/control"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/sessions/recap"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/settings"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/settings"
   },
   {
    "method": "POST",
@@ -1491,6 +1471,14 @@
    "path": "/api/v2/setup/migration/rollback"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/setup/migration/status"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/setup/preview"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/setup/preview"
   },
@@ -1499,8 +1487,24 @@
    "path": "/api/v2/setup/preview/decisions"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/setup/preview/items"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/setup/preview/revalidate"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/setup/summary"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/shutdown"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/state/recover"
   },
   {
    "method": "POST",
@@ -1523,12 +1527,20 @@
    "path": "/api/v2/steambridge/remove/preview"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/steambridge/status"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/steamgrid/apply"
   },
   {
    "method": "POST",
    "path": "/api/v2/steamgrid/hygiene/fix"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/steamgrid/hygiene/report"
   },
   {
    "method": "POST",
@@ -1543,12 +1555,36 @@
    "path": "/api/v2/steamgrid/match"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/steamgrid/search"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/steamgrid/status"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/steamgrid/test"
   },
   {
+   "method": "GET",
+   "path": "/api/v2/storefront/catalog"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/storefront/import"
+  },
+  {
    "method": "POST",
    "path": "/api/v2/storefront/scan"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/storefront/status"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/storefronts"
   },
   {
    "method": "POST",
@@ -1559,12 +1595,80 @@
    "path": "/api/v2/storefronts/plugin/import"
   },
   {
-   "method": "POST",
-   "path": "/api/webhooks"
+   "method": "GET",
+   "path": "/api/v2/story"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/tags"
   },
   {
    "method": "POST",
-   "path": "/api/webhooks/test"
+   "path": "/api/v2/tags"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/theme-asset"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/theme-sounds"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/theme.css"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/themes"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/themes/import"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/themes/open-folder"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/themes/select"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/update"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/update/install"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/version"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/webhooks"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/webhooks"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v2/webhooks/test"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/wine/prefix-for-game"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/wine/prefixes"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v2/wine/protons"
   }
  ]
 }

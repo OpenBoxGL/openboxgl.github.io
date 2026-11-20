@@ -3,7 +3,7 @@ title: API 1.18 additions
 description: Request and response guidance for platform administration, media automation, plugin capability storage, and save manifests in OpenBox 1.18.0.
 ---
 
-OpenBox 1.18.0 adds **49 method and path pairs across 43 routes**, all additive. No v1 route was removed, renamed, or re-mapped: the frozen contract still pins the same 61 `/api/v1/*` routes, and the route baseline's `retired` list is empty. The new routes either extend an existing base path (`/api/media/queue` now reports the durable queue in full) or add a local-workflow path under `/api` and `/api/v2`. None of them gained a `/api/v1/*` alias.
+OpenBox 1.18.0 adds **49 method and path pairs across 43 routes**, all additive. No v1 route was removed, renamed, or re-mapped: the frozen contract still pins the same 61 `/api/v1/*` routes, and the route baseline's `retired` list is empty. The new routes either extend an existing base path (`/api/v2/media/queue` now reports the durable queue in full) or add a local-workflow path under `/api` and `/api/v2`. None of them gained a `/api/v1/*` alias.
 
 The additions cluster around seven jobs: administering platforms in one place, keeping media downloads and cache under control, making saves inspectable before a restore, giving achievements and plugins durable state, scanning storefronts and importing the long tail of formats, storing optional service credentials privately, and driving the emulator and native-host surfaces.
 
@@ -70,13 +70,13 @@ The media queue is stored in `media-queue.json` and survives a restart. The read
 
 | Method | Route | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/media/queue` | The durable queue plus worker state and per-state counts. |
-| `POST` | `/api/media/queue/pause` | Ask the worker to stop taking new items. |
-| `POST` | `/api/media/queue/resume` | Clear pause/cancel and start the worker if it is not alive. |
-| `POST` | `/api/media/queue/cancel` | Cancel the current run without deleting queued items. |
-| `POST` | `/api/media/queue/retry` | Requeue one failed item. |
+| `GET` | `/api/v2/media/queue` | The durable queue plus worker state and per-state counts. |
+| `POST` | `/api/v2/media/queue/pause` | Ask the worker to stop taking new items. |
+| `POST` | `/api/v2/media/queue/resume` | Clear pause/cancel and start the worker if it is not alive. |
+| `POST` | `/api/v2/media/queue/cancel` | Cancel the current run without deleting queued items. |
+| `POST` | `/api/v2/media/queue/retry` | Requeue one failed item. |
 
-`GET /api/media/queue` returns:
+`GET /api/v2/media/queue` returns:
 
 ```json
 {
@@ -101,9 +101,9 @@ The three control routes take no body and return the worker state:
 
 Pause is cooperative: the in-flight download finishes and queued items stay queued. Cancel does not clear the queue; `resume` clears both the pause and cancel flags, and starts a worker when none is alive. Resuming an already-running worker is harmless.
 
-`POST /api/media/queue/retry` takes `{"id": "<queue item id>"}`. It clears that item's attempts and error, starts the worker if it is idle, and returns `{"ok": true, "id": "<id>"}`. A missing id returns `400 "A queue item id is required."`; an id that is not in the queue returns `400 "Queue item not found."`.
+`POST /api/v2/media/queue/retry` takes `{"id": "<queue item id>"}`. It clears that item's attempts and error, starts the worker if it is idle, and returns `{"ok": true, "id": "<id>"}`. A missing id returns `400 "A queue item id is required."`; an id that is not in the queue returns `400 "Queue item not found."`.
 
-### `POST /api/media/cache/cleanup`
+### `POST /api/v2/media/cache/cleanup`
 
 ```json
 { "days": 30 }
@@ -117,16 +117,16 @@ Returns `{"root": "<data>/cache/media", "deleted": 12, "bytes": 1048576, "skippe
 
 | Method | Route | Behavior |
 | --- | --- | --- |
-| `GET` | `/api/bigbox/startup-video` | Streams `settings.bigbox_startup_video`. |
-| `GET` | `/api/platform/videos` | Returns the per-platform video map. |
-| `GET` | `/api/platform/video?platform=<name>` | Streams one platform's video. |
-| `POST` | `/api/platform/videos` | Sets or clears one platform video. |
+| `GET` | `/api/v2/bigbox/startup-video` | Streams `settings.bigbox_startup_video`. |
+| `GET` | `/api/v2/platform/videos` | Returns the per-platform video map. |
+| `GET` | `/api/v2/platform/video?platform=<name>` | Streams one platform's video. |
+| `POST` | `/api/v2/platform/videos` | Sets or clears one platform video. |
 
-`GET /api/bigbox/startup-video` streams the configured file when it is an existing `.mp4`, `.webm`, `.ogv`, `.ogg`, or `.mkv`. An empty setting, a missing file, or an unsupported suffix returns `404 {"error": "Startup video not found"}`. The configured path is not echoed in the response.
+`GET /api/v2/bigbox/startup-video` streams the configured file when it is an existing `.mp4`, `.webm`, `.ogv`, `.ogg`, or `.mkv`. An empty setting, a missing file, or an unsupported suffix returns `404 {"error": "Startup video not found"}`. The configured path is not echoed in the response.
 
-`GET /api/platform/videos` returns `{"videos": {"SNES": "/absolute/path.mp4"}}`. A malformed stored value is reported as an empty map rather than an error. `GET /api/platform/video` requires `?platform=`; a missing platform, path, or file returns `404 {"error": "Platform video not found"}`.
+`GET /api/v2/platform/videos` returns `{"videos": {"SNES": "/absolute/path.mp4"}}`. A malformed stored value is reported as an empty map rather than an error. `GET /api/v2/platform/video` requires `?platform=`; a missing platform, path, or file returns `404 {"error": "Platform video not found"}`.
 
-`POST /api/platform/videos` accepts either shape:
+`POST /api/v2/platform/videos` accepts either shape:
 
 ```json
 { "platform": "SNES", "path": "/absolute/video.mp4" }
@@ -137,7 +137,7 @@ Returns `{"root": "<data>/cache/media", "deleted": 12, "bytes": 1048576, "skippe
 
 ### Theme sounds and audio assets
 
-A theme may ship background music and interaction sounds next to its CSS. `GET /api/theme-sounds?name=<theme stem>` reads the optional `<theme>.json` sidecar:
+A theme may ship background music and interaction sounds next to its CSS. `GET /api/v2/theme-sounds?name=<theme stem>` reads the optional `<theme>.json` sidecar:
 
 ```json
 {
@@ -148,11 +148,11 @@ A theme may ship background music and interaction sounds next to its CSS. `GET /
 
 Only relative `.ogg`, `.mp3`, and `.wav` paths of at most 300 characters that stay inside the theme folder are accepted. A missing theme, missing sidecar, sidecar larger than 64 KiB, malformed JSON, or non-object JSON returns empty values with HTTP `200` — a broken theme must not stop the UI from loading.
 
-`GET /api/theme-asset?name=<theme stem>&path=<relative audio path>` streams one accepted asset. The path is contained to the theme folder, must be an existing `.ogg`, `.mp3`, or `.wav` no larger than 20 MiB, and is served with `Cache-Control: private, max-age=3600`. Every refusal — missing theme, non-audio suffix, path escape, oversized file — returns the same `404 {"error": "Theme sound asset not found."}`.
+`GET /api/v2/theme-asset?name=<theme stem>&path=<relative audio path>` streams one accepted asset. The path is contained to the theme folder, must be an existing `.ogg`, `.mp3`, or `.wav` no larger than 20 MiB, and is served with `Cache-Control: private, max-age=3600`. Every refusal — missing theme, non-audio suffix, path escape, oversized file — returns the same `404 {"error": "Theme sound asset not found."}`.
 
 ## Save manifests, restore previews, and resume slots
 
-### `GET /api/saves/manifest`
+### `GET /api/v2/saves/manifest`
 
 Inspects one save backup without restoring it. Pass `?id=<index>` or `?game_id=<stable>`, plus `backup=<archive name>`.
 
@@ -167,7 +167,7 @@ Inspects one save backup without restoring it. Pass `?id=<index>` or `?game_id=<
 
 The archive is resolved strictly inside the game's backup directory; a traversal attempt or a missing archive returns `400` (`"Save backup not found."`), and a missing `backup` parameter returns `400 "A backup name is required."`. When `save_management_enabled` is off, the route returns `{"enabled": false}` with HTTP `200` and inspects nothing.
 
-### `POST /api/saves/restore/preview`
+### `POST /api/v2/saves/restore/preview`
 
 Describes what a restore would do, without writing:
 
@@ -220,7 +220,7 @@ Refreshes one non-RetroAchievements achievement source for a game:
 { "game_id": "game-abc123", "source": "steam" }
 ```
 
-`source` is `steam` or `plugin:<plugin-id>:<source>`. RetroAchievements is rejected (`400 "Use the RetroAchievements route to match a ROM."`) because ROM matching happens through `POST /api/ra/game`. Steam requires `steam_app_id` on the game and saved Steam credentials; a plugin source refreshes that plugin's cached statistics.
+`source` is `steam` or `plugin:<plugin-id>:<source>`. RetroAchievements is rejected (`400 "Use the RetroAchievements route to match a ROM."`) because ROM matching happens through `POST /api/v2/ra/game`. Steam requires `steam_app_id` on the game and saved Steam credentials; a plugin source refreshes that plugin's cached statistics.
 
 Returns `{"ok": true, "game_id": "...", "source": "steam"}` and invalidates the state cache. Other `400`s: missing `game_id` or `source`, a game without a Steam app id, missing Steam credentials, a malformed plugin source (`"Plugin achievement sources must be plugin:<id>:<source>."`), and an unknown source.
 
@@ -482,7 +482,7 @@ Only connectable rooms with a valid host and port are included, capped at 500 ro
 
 ## Native battery
 
-### `GET /api/native/battery`
+### `GET /api/v2/native/battery`
 
 Reports battery state for the native window:
 
@@ -497,11 +497,11 @@ On Linux the first `BAT*` device under `/sys/class/power_supply` is read; on mac
 | Method | Route | Purpose |
 | --- | --- | --- |
 | `POST` | `/api/v2/steam/action` | Open a Steam install or validate action by app id. |
-| `POST` | `/api/game/store-action` | The same action resolved from a library game. |
+| `POST` | `/api/v2/game/store-action` | The same action resolved from a library game. |
 
 `POST /api/v2/steam/action` takes `{"app_id": "440", "action": "install"}`. `action` is `install` or `repair`; `repair` opens Steam's validate dialog instead of the install dialog. The app id must be a positive integer below 100,000,000 (`400 "A numeric Steam app id is required."`); an unknown action returns `400 "Steam action must be install or repair."`. The handler opens `steam://install/<id>` or `steam://validate/<id>`; a missing or unopenable Steam handler returns `400` naming the OS error. Returns `{"app_id": "440", "action": "install"}`.
 
-`POST /api/game/store-action` takes `{"game_id": "game-abc123", "action": "install"}`. The game must resolve and carry `steam_app_id` (`400 "This game has no Steam app id."`). It runs the same validation and returns `{"game_id", "app_id", "action"}`.
+`POST /api/v2/game/store-action` takes `{"game_id": "game-abc123", "action": "install"}`. The game must resolve and carry `steam_app_id` (`400 "This game has no Steam app id."`). It runs the same validation and returns `{"game_id", "app_id", "action"}`.
 
 ## Metadata candidate apply
 
@@ -519,7 +519,7 @@ Returns `{"ok": true, "game_id": "game-abc123"}`. The write is a single state tr
 
 ## Compatibility notes
 
-- Every addition is backward compatible. Existing paths keep their old contract; where a response gained keys (`GET /api/media/queue` gained `items`, `item` states, and `counts`), the previous keys remain.
+- Every addition is backward compatible. Existing paths keep their old contract; where a response gained keys (`GET /api/v2/media/queue` gained `items`, `item` states, and `counts`), the previous keys remain.
 - The new routes are local workflow routes, not part of the frozen v1 remote contract. A client that only speaks `/api/v1/*` sees no change.
 - Credential-shaped values — integration tokens, Steam keys, plugin credentials — are never returned, and plugin data is deliberately separate from plugin credentials.
 - Destructive or semi-destructive routes validate their inputs before mutating: platform names, archive names, selected save files, and emulator option values are all checked first, and failed validation leaves state untouched.

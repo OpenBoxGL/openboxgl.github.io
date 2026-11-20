@@ -15,7 +15,7 @@ Since 1.13.0 OpenBox also runs natively on Windows, where Windows titles launch 
 
 OpenBox's Wine subsystem inspects standard local directories and lists what it finds. It is a **discovery and suggestion** layer, not a runtime wrapper: it reads directories and reads the `wine_prefix` field on a game record, but it does not construct the launch command for you.
 
-1. **Prefix Discovery** (`DEFAULT_PREFIX_ROOTS` in `pkg/parity/parity_wine.py`):
+1. **Prefix Discovery** (`DEFAULT_PREFIX_ROOTS` in `crates/openbox-emulators/src/wine.rs`):
    - `~/.wine`, `~/.local/share/wineprefixes/`
    - Faugus Launcher prefixes: `~/.config/faugus-launcher/prefixes`, `~/Faugus`
    - Bottles: `~/.local/share/bottles/bottles`
@@ -23,7 +23,7 @@ OpenBox's Wine subsystem inspects standard local directories and lists what it f
    - Custom folder: `~/Games`
    - Note: `~/.local/share/lutris/runners/wine` holds Wine **builds**, not game prefixes. The scanner only accepts a directory that actually contains a `drive_c`, so a runner tree is skipped even though the root is scanned. The `WINEPREFIX` environment variable is not a discovery root; it is only read when resolving a game's configured prefix.
 
-2. **Proton Runtime Discovery** (`DEFAULT_PROTON_ROOTS` in `pkg/parity/parity_wine.py`):
+2. **Proton Runtime Discovery** (`DEFAULT_PROTON_ROOTS` in `crates/openbox-emulators/src/wine.rs`):
    - Steam Proton: `~/.steam/root/compatibilitytools.d`, `~/.steam/steam/compatibilitytools.d`, `~/.local/share/Steam/compatibilitytools.d`
    - Faugus runners: `~/.config/faugus-launcher/runners`, `~/.local/share/faugus-launcher/runners`
    - Lutris runners: `~/.local/share/lutris/runners/wine`
@@ -34,7 +34,7 @@ OpenBox's Wine subsystem inspects standard local directories and lists what it f
 
 ## Assigning a Prefix to a Game
 
-`GET /api/wine/prefix-for-game?game_id=<id>` resolves a title's prefix by reading the `wine_prefix`, `prefix`, or `WINEPREFIX` field on the game record, including a `WINEPREFIX=` assignment inside the launch command.
+`GET /api/v2/wine/prefix-for-game?game_id=<id>` resolves a title's prefix by reading the `wine_prefix`, `prefix`, or `WINEPREFIX` field on the game record, including a `WINEPREFIX=` assignment inside the launch command.
 
 There is no control for setting this, and the library API cannot set it either: the game field cleaner copies only the fields in its accepted set, and `wine_prefix` is not one of them, so a `wine_prefix` key sent to the library API is dropped. The supported way to record a prefix on a title is the **Launch command** field of the **Edit Metadata** modal, because `WINEPREFIX=/path/to/prefix` written there is parsed out of the command and resolved like any other prefix. The one place OpenBox itself writes `wine_prefix` is the Faugus importer, which seeds imported titles with the prefix it found in the Faugus data. The prefix OpenBox reads is the one you assign; there is no automatic `WINEPREFIX` environment injection at spawn time, and no automatic UMU wrapper.
 
@@ -48,11 +48,11 @@ The prefix and Proton discovery is read-only. OpenBox will not prepend `wine` or
 
 The Wine and Proton discovery results are readable over OpenBox's local REST API:
 
-- `GET /api/wine/prefixes`: Returns all discovered Wine prefixes, each as `{path, has_drive_c, name}`.
-- `GET /api/wine/protons`: Returns all detected Proton runtime versions.
-- `GET /api/wine/prefix-for-game?game_id=<id>`: Resolves the prefix recorded for a library title.
+- `GET /api/v2/wine/prefixes`: Returns all discovered Wine prefixes, each as `{path, has_drive_c, name}`.
+- `GET /api/v2/wine/protons`: Returns all detected Proton runtime versions.
+- `GET /api/v2/wine/prefix-for-game?game_id=<id>`: Resolves the prefix recorded for a library title.
 
-All three return `available: false` when the host is not Linux or the Wine layer is unavailable: `GET /api/wine/prefixes` and `GET /api/wine/protons` return empty lists, and `GET /api/wine/prefix-for-game` returns an empty `prefix`. On a successful prefix lookup `available` reflects whether a prefix was actually found.
+All three return `available: false` when the host is not Linux or the Wine layer is unavailable: `GET /api/v2/wine/prefixes` and `GET /api/v2/wine/protons` return empty lists, and `GET /api/v2/wine/prefix-for-game` returns an empty `prefix`. On a successful prefix lookup `available` reflects whether a prefix was actually found.
 
 <Callout type="tip" title="Game saves inside prefixes">
 

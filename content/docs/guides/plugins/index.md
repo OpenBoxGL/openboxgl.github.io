@@ -1,9 +1,9 @@
 ---
 title: Plugins guide
-description: Install and use local Python plugins to extend OpenBoxGL.
+description: Install and use local plugins to extend OpenBoxGL.
 ---
 
-Plugins are optional local Python packages that observe or extend OpenBoxGL through lifecycle hooks. They run as separate processes with a JSON stdin/stdout protocol, so a plugin that crashes or misbehaves cannot take down the library.
+Plugins are optional local packages that observe or extend OpenBoxGL through lifecycle hooks. A v2 plugin entry may be a Python file or a native executable; each invocation runs in its own process, so a plugin that crashes or misbehaves cannot take down the library. Plugin API v1 was removed in 3.0: every manifest must declare `"api_version": 2` or it fails with `PLUGIN_API_RETIRED`.
 
 <Callout type="caution" title="What 'separate process' actually means">
 
@@ -17,12 +17,12 @@ Base hooks run on lifecycle events:
 
 | Hook | When it runs | What it can change |
 | --- | --- | --- |
-| `library` | On every library read | Rewrites the games list shown in the UI |
-| `before_launch` | At launch, after profile/archive resolution | Rewrites the launch `args`/`cwd`, or cancels the launch with an error |
-| `after_session` | After a session ends | Observes the session record; the result is discarded |
-| `command` | When a command-palette entry is picked (1.14.0+) | Returns a notification to display; adds entries to the palette |
-| `library_source` | On every library read, if declared (1.14.0+) | Contributes imported games to your library |
-| `events` | On lifecycle events (1.14.0+) | Observes `app_startup`, `app_shutdown`, `scan_finished`, `playtime_milestone`, `game_added`, `game_removed`, `game_updated` |
+| `library` | On every library read | Rewrites the games list shown in the UI. **Python fallback only in 3.0** — the Rust server does not invoke it yet. |
+| `before_launch` | At launch, after profile/archive resolution | Rewrites the launch `args`/`cwd`, or cancels the launch with an error. **Python fallback only in 3.0.** |
+| `after_session` | After a session ends | Observes the session record; the result is discarded. **Python fallback only in 3.0.** |
+| `command` | When a command-palette entry is picked (1.14.0+) | Returns a notification to display; adds entries to the palette. |
+| `library_source` | On every library read, if declared (1.14.0+) | Contributes imported games to your library. **Python fallback only in 3.0.** |
+| `events` | On lifecycle events (1.14.0+) | Observes lifecycle events. The Rust server emits `app_startup` and `app_shutdown`; the Python fallback also emits `scan_finished`, `playtime_milestone`, `game_added`, `game_removed`, and `game_updated`. |
 
 Capability hooks (1.18.0) let a plugin act like a built-in source. A manifest declares a `capabilities` object and must also declare the hook that implements each one:
 
@@ -43,17 +43,18 @@ Capability hooks receive the usual payload plus:
 
 They may also return `service_requests` (at most 8, one round only). The host answers read-only services — `library.query`, `achievements`, `profile`, `activity`, `leaderboards`, `catalog.search`, `metadata.search`, and `media.search` — and re-invokes the hook once with `service_results`. There is no standalone `services` hook: services exist only as a request from a capability hook. Credentials cannot be written from a hook result.
 
-## Plugin API v2 (2.0)
+## Plugin API v2
 
-A manifest may declare `"api_version": 2` (2.0.0+). Version 2 adds:
+`"api_version": 2` is **required** in 3.0. A manifest without it, or with `1`, fails with `PLUGIN_API_RETIRED` ("Plugin api_version is required and must be 2. OpenBox 3.0 removed the v1 runner."). Version 2 provides:
 
 - **`min_openbox`** — the oldest OpenBox release that may serve the plugin; a host older than that refuses it at load.
 - **`subscriptions`** — named events the plugin asks to receive, on top of the base `events` hook.
-- **A JSON Lines runner** — request/response framing with per-request timeout and cancellation, instead of the v1 runner's one-shot payloads.
+- **A JSON Lines runner** — request/response framing with per-request timeout and cancellation. Each hook invocation starts a fresh `plugin_runner_v2.py` process for a `.py` entry, or runs the native entry executable directly; there is no persistent runner process.
 - **Versioned, read-only host services** — `library.query` and `media.search` descriptors the plugin can call through the runner; writes are refused.
 - **A 4 MiB plugin output cap** (the request/input cap stays 2 MiB).
+- **Native executable entries** — a v2 `entry` may be any executable file inside the package, not only a `.py` file. Native entries need no Python at runtime.
 
-A manifest without `api_version` stays on the v1 runner with byte-identical v1 payloads; the v1 runner is scheduled for removal in 3.0. The same bubblewrap masks apply to both versions, and `plugins/openbox.sample-v2/` in the app repository is a working sample.
+The same bubblewrap masks apply to `.py` and native entries, and `plugins/openbox.sample-v2/` in the app repository is a working sample.
 
 ## Install a plugin
 
@@ -63,7 +64,7 @@ A manifest without `api_version` stays on the v1 runner with byte-identical v1 p
 4. Installed plugins list their id, name, version, entry, hooks, capabilities, and enabled state. Toggle them on/off per plugin (persisted in `plugins-state.json`).
 5. **Reinstall** (repair) reinstalls an installed plugin from its catalog entry, or from the recorded local package when the catalog has no entry. Settings and cached stats are preserved — including for local packages, whose recorded SHA-256 is re-verified before reinstalling. The trust record is kept but re-evaluated against the new package checksum, so a reinstall with different bytes leaves the plugin untrusted and asks for approval again.
 
-Installing from the **catalog** is also possible (`GET /api/plugins/catalog`, or `GET /api/v2/plugins/catalog` for the version that also reports what is already installed and the current sandbox status). The catalog browser shows each entry's author and homepage when the entry declares them. The bundled catalog ships two `local_only` documentation examples — `openbox.library-stats` and `openbox.hello-palette` — so manual installs remain the reliable path.
+Installing from the **catalog** is also possible (`GET /api/v2/plugins/catalog`, or `GET /api/v2/plugins/catalog` for the version that also reports what is already installed and the current sandbox status). The catalog browser shows each entry's author and homepage when the entry declares them. The bundled catalog ships two `local_only` documentation examples — `openbox.library-stats` and `openbox.hello-palette` — so manual installs remain the reliable path.
 
 ## Settings, credentials, and storage
 
@@ -82,7 +83,7 @@ Capability credentials are a separate store, written with `POST /api/v2/plugins/
 - **Storefronts.** A plugin storefront appears in the storefronts screen next to built-in stores. It uses the normal catalog and import actions (`POST /api/v2/storefronts/plugin/catalog` and `/import`), supports installed/uninstalled filters, auto-import settings, and the shared plugin settings form. Its games carry `plugin_source`/`plugin_source_name` provenance and a source badge; plugin sources also appear by display name in Library checkup.
 - **Metadata and media.** Results carry their source, can be mixed with built-in providers in a configured priority order, and a bulk metadata result persists `metadata_provider` so bulk media download can prioritize plugin candidates.
 - **Stats.** Plugin playtime and achievement summaries merge monotonically into the library: playtime never decreases and `last_played` only moves forward. Achievement sources are namespaced `plugin:<plugin_id>:<source>`, appear in the achievement tabs with provider totals, and can be included or excluded through the library's **Achievement source** filter.
-- **Discovery.** Each `discovery` plugin may publish up to ten named lists of up to 50 library game ids. The host resolves them to the existing `/api/discovery` row shape under `plugin:<plugin_id>:<list_id>`, so they render as shelves in the Discovery Center with no separate payload.
+- **Discovery.** Each `discovery` plugin may publish up to ten named lists of up to 50 library game ids. The host resolves them to the existing `/api/v2/discovery` row shape under `plugin:<plugin_id>:<list_id>`, so they render as shelves in the Discovery Center with no separate payload.
 - **Notifications.** A hook notification may use a manifest `messages` key and parameters instead of a fixed string; the host resolves the active locale, then English, then the raw key.
 
 ## Repair, disable, and remove

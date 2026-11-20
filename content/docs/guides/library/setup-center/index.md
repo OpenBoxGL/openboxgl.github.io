@@ -3,7 +3,7 @@ title: Library Setup Center
 description: Guided first-run setup with non-destructive scan previews, candidate resolution, and safe commits.
 ---
 
-The **Library Setup Center** (`#setupLibraryButton`, reached from **Add games → Guided setup…`) provides a safe, guided workflow for importing games, checking emulator readiness, and resolving multi-platform ambiguities before altering your library. It opens on a **six-step quick path** and leaves two expert stages behind a **Show advanced options** toggle, so a first run never starts with a dashboard to interpret.
+The **Library Setup Center** (`#setupLibraryButton`, reached from **Add games → Guided setup…`) provides a safe, guided workflow for importing games, checking emulator readiness, and resolving multi-platform ambiguities before altering your library. It opens on a **six-step quick path** numbered sequentially **1-6** and leaves two expert stages behind a **Show advanced options** toggle, so a first run never starts with a dashboard to interpret. **Continue** stays disabled until at least one source is selected.
 
 ## Workflow Stepper
 

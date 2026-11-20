@@ -3,12 +3,12 @@ title: Activity Center & Durable Operations
 description: Monitor running tasks, background operations, cancellations, and restart recovery.
 ---
 
-OpenBox manages all background operations through the durable **Operation Service** (`pkg/state/operations.py`), backed by `operations.json` in your data directory.
+OpenBox manages all background operations through the durable **Operation Service** (`crates/openbox-store/src/operations.rs`), backed by `operations.json` in your data directory.
 
 ## Features
 
-- **Activity Drawer**: Click the **Activity** button (`#activityButton`) in the top bar to inspect running and historical operations.
-- **Real-Time Progress**: Live Server-Sent Events (SSE) stream progress updates, byte counters, and status messages (`GET /api/events`).
+- **Activity Drawer**: Click the **Activity** button (`#activityButton`) in the top bar to inspect running and historical operations. In 3.0 routine running-job badges are calm neutral pills (red is reserved for errors), filters are a 2-column row, internal job types are humanized, and redundant single-job "Grouped by run" duplicates are removed.
+- **Real-Time Progress**: Live Server-Sent Events (SSE) stream progress updates, byte counters, and status messages (`GET /api/v2/events`).
 - **Cancellation & Safety**: In-flight operations can be cancelled cleanly without leaving corrupted or half-written states (`POST /api/v2/jobs/cancel` with `job_id` in the JSON body).
 - **Restart Recovery**: If OpenBox is closed or restarted while an operation is running, the task is marked `interrupted`. You can resume or retry it with one click.
 

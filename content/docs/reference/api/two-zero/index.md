@@ -3,19 +3,23 @@ title: API 2.0 changes
 description: The 2.0 contract surface — /api/v2 becomes the public API, /api/v1 retires behind an opt-in bridge, the /api/host channel, problem+json errors, and the migration, portable-library, and version routes.
 ---
 
-OpenBox 2.0 promotes `/api/v2` from an additive surface to **the** public API, retires `/api/v1` behind an opt-in bridge, gives the native windows their own `/api/host` channel, and answers every error as an RFC 9457 problem document. It adds **10 routes and 3 settings** (`library_root`, `path_mode`, `media_manifest_enabled`). Every route still requires the per-launch token described in the [API overview](/reference/api/overview/). These changes are in the unreleased 2.0 build; the current published release is 1.19.1.
+<Callout type="note" title="Historical page — 2.0 shipped on 2026-10-31">
+This page records the 2.0 contract. The current release is 3.0.0. The `/api/v1` bridge described here was removed in 2.1, and 3.0 moved the server to Rust. See [API 2.1 changes](/reference/api/two-one/) and [API 3.0 changes](/reference/api/three-zero/).
+</Callout>
+
+OpenBox 2.0 promoted `/api/v2` from an additive surface to **the** public API, retired `/api/v1` behind an opt-in bridge, gave the native windows their own `/api/host` channel, and answered every error as an RFC 9457 problem document. It added **10 routes and 3 settings** (`library_root`, `path_mode`, `media_manifest_enabled`). Every route still requires the per-launch token described in the [API overview](/reference/api/overview/).
 
 ## The public API is `/api/v2`
 
-`/api/v2` and `/api/host` are the supported surfaces. `/api/v1` is **off by default**: a request to a v1 path returns `410 V1_API_DISABLED`.
+`/api/v2` and `/api/host` are the supported surfaces. In 2.0 `/api/v1` was **off by default**; it was removed entirely in 2.1.
 
-| Surface | State in 2.0 |
-| --- | --- |
-| `/api/v2/*` | The public API. Everything new lands here. |
-| `/api/host/*` | The native-window channel. Guarded by `X-OpenBox-API-Version` (below). |
-| `/api/v1/*` | Off by default. `OPENBOX_ENABLE_V1_API=1` restores it through 2.0.x; it is removed in 2.1. |
+| Surface | State in 2.0 | State in 3.0 |
+| --- | --- | --- |
+| `/api/v2/*` | The public API. Everything new lands here. | The public API. |
+| `/api/host/*` | The native-window channel. Guarded by `X-OpenBox-API-Version` (below). | The native-window channel. |
+| `/api/v1/*` | Off by default. `OPENBOX_ENABLE_V1_API=1` restored it through 2.0.x. | Removed: `410 V1_API_REMOVED`; the environment variable is ignored. |
 
-While the v1 bridge is enabled, every `/api/v1` response carries `Deprecation: true` and `Sunset: Mon, 19 Sep 2027 00:00:00 GMT`. The frozen 61-route v1 list is archived at `docs/archive/v1_contracts.json` in the app repo; the live route contract is `api_contracts.json`, enforced by `scripts/check_api_contract.py`.
+The frozen 61-route v1 list is archived at `docs/archive/v1_contracts.json` in the app repo; the live route contract is `api_contracts.json`, enforced by `scripts/check_api_contract.py`.
 
 ## The host channel
 
@@ -50,14 +54,15 @@ Every error response (status 400 and up) is now an RFC 9457 problem document ser
 
 ```json
 {
-  "version": "2.0.0",
+  "version": "3.0.0",
   "api_version": 2,
   "state_schema": 7,
   "plugin_api_version": 2,
   "backup_format": 2,
   "sync_format": 3,
   "platform": "linux",
-  "python": "3.12.x"
+  "python": "",
+  "runtime": "rust"
 }
 ```
 
@@ -65,14 +70,14 @@ Every error response (status 400 and up) is now an RFC 9457 problem document ser
 
 ## Migration gate
 
-When a format 6 library is upgraded on first start, a readiness gate lists what needs a look before the migrated library is used. The four routes back it:
+In 2.0 a format 6 library was upgraded on first start. In 3.0 opening does **not** migrate: run `openbox --migrate-library` first. A readiness gate then lists what needs a look before the migrated library is used. The four routes back it:
 
 | Route | Behavior |
 | --- | --- |
 | `GET /api/v2/setup/migration/status` | What the last migration did, whether the user has acknowledged it, and the `readiness` items. |
 | `POST /api/v2/setup/migration/backup` | Writes a `library`+`settings` backup before the migrated library is opened. Returns `{archive, name}`. |
 | `POST /api/v2/setup/migration/acknowledge` | Records that the user has seen the migration report. |
-| `POST /api/v2/setup/migration/rollback` | Without `confirmed`, returns what a rollback would discard. With `{"confirmed": true}`, restores `library.v6.backup.json`, keeps the replaced v7 file as `library.v7.kept-<stamp>.json`, writes `rollback-report.json`, freezes library writes, and stops the server. |
+| `POST /api/v2/setup/migration/rollback` | **Removed in 3.0.** The route is registered but always returns `409 ROLLBACK_REMOVED`. Use OpenBox 2.1.0 to restore `library.v6.backup.json`. |
 
 ## Portable library
 
@@ -92,9 +97,10 @@ The portable library stores game paths under one library folder as `@library/...
 
 | Code | Status | When |
 | --- | --- | --- |
-| `V1_API_DISABLED` | 410 | A `/api/v1` path was called while the v1 bridge is off (the default). |
+| `V1_API_REMOVED` | 410 | A `/api/v1` path was called in 2.1 or later. (2.0 used `V1_API_DISABLED` while the bridge was off.) |
 | `HOST_API_UNSUPPORTED` | 409 | A native host sent an `X-OpenBox-API-Version` major other than 2. |
 | `MOVE_PLAN_STALE` | 409 | The library changed between move preview and apply. |
 | `BACKUP_FORMAT_UNSUPPORTED` | 400 | A backup manifest declares a format this build cannot read or write. |
+| `ROLLBACK_REMOVED` | 409 | `POST /api/v2/setup/migration/rollback` was called in 3.0. |
 
-See [Updating](/updating/) for the 2.0 upgrade and rollback story, [Backups](/guides/sessions-saves-and-backups/library-backups/) for backup format 2, and [Plugins](/reference/plugins/) for plugin API v2.
+See [Updating](/updating/) for the 3.0 upgrade story, [Backups](/guides/sessions-saves-and-backups/library-backups/) for backup format 2, and [Plugins](/reference/plugins/) for plugin API v2.

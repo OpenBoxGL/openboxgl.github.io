@@ -39,7 +39,7 @@ On macOS, the signed universal app bundle is verified by `install-macos.sh` and 
 | `install-macos.sh` | Cryptographically verified macOS installer (bash) | Same release assets |
 | `verify_release.py` | Standard-library release signature verifier that `install-macos.sh` runs | Same release assets |
 
-Verify path: on Linux, download the AppImage matching your architecture, its `.sig` and `.sha256`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v2.0.0"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. On Windows, download the archive for your architecture (`OpenBox-x86_64-windows.zip` or `OpenBox-arm64-windows.zip`) with its `.sha256` and `.sig` and run the released `install.ps1`, which applies the same key-pin, checksum, and signature checks before extracting. On macOS, download `install-macos.sh` and run it with the tag pinned; it applies the same checks to `OpenBox-macos.zip` before it installs. The uninstaller is not a standalone release asset — it ships **inside** the zip and the installed tree, so it is run from the install at `scripts\uninstall.ps1` (for a default install, `%LOCALAPPDATA%\OpenBox\share\openbox\scripts\uninstall.ps1`); it removes exactly what the installer created and never touches your library. See [Updating](/updating/) for architecture-matched rollback, [Windows](/windows/) for the platform guide, and [macOS](/macos/) for the app bundle.
+Verify path: on Linux, download the AppImage matching your architecture, its `.sig` and `.sha256`, and the `openbox-release.pub` you pin, then run the installer with `OPENBOX_RELEASE_TAG="v3.0.0"` as shown in [Downloads](/downloads/). The installer refuses a release when the key, checksum, or signature does not match. On Windows, download the archive for your architecture (`OpenBox-x86_64-windows.zip` or `OpenBox-arm64-windows.zip`) with its `.sha256` and `.sig` and run the released `install.ps1`, which applies the same key-pin, checksum, and signature checks before extracting. On macOS, download `install-macos.sh` and run it with the tag pinned; it applies the same checks to `OpenBox-macos.zip` before it installs. The uninstaller is not a standalone release asset — it ships **inside** the zip and the installed tree, so it is run from the install at `scripts\uninstall.ps1` (for a default install, `%LOCALAPPDATA%\OpenBox\share\openbox\scripts\uninstall.ps1`); it removes exactly what the installer created and never touches your library. See [Updating](/updating/) for architecture-matched rollback, [Windows](/windows/) for the platform guide, and [macOS](/macos/) for the app bundle.
 
 ## Build and CI
 
@@ -49,7 +49,7 @@ Verify path: on Linux, download the AppImage matching your architecture, its `.s
 | Lint, type, and test gates | `make check` and `scripts/check_tests.py` |
 | Release verification | `test_release_signing.py` |
 
-The application uses only the Python standard library at runtime (plus `ctypes` on Windows). Build tooling is described in [Project and policies](/project/contributing/).
+The shipped application is the Rust `openbox-server` with a pinned Cargo lockfile and no bundled Python runtime. The Python fallback (`OPENBOX_BACKEND=python`) uses only the standard library and Python 3.11+. Build tooling is described in [Project and policies](/project/contributing/).
 
 ## Data and privacy
 

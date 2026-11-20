@@ -22,11 +22,11 @@ The original file is preserved, never overwritten.
 
 ## Recover
 
-Recovery (`POST /api/state/recover`) can inspect available backups or restore either the `.bak` file or a rolling snapshot:
+Recovery (`POST /api/v2/state/recover`) can inspect available backups or restore either the `.bak` file or a rolling snapshot:
 
 ### Dry-run inspection
 
-Send `POST /api/state/recover` with `{"dry_run": true}` to inspect recovery options without modifying state:
+Send `POST /api/v2/state/recover` with `{"dry_run": true}` to inspect recovery options without modifying state:
 
 ```json
 {
@@ -47,8 +47,8 @@ Snapshot names embed the UTC timestamp to microseconds, a sequence number, and a
 
 ### Restoring state
 
-- **Restore last-known-good backup**: `POST /api/state/recover` with `{}` loads `library.json.bak`, validates/normalizes it, and commits it atomically.
-- **Restore specific snapshot**: `POST /api/state/recover` with `{"snapshot": "20260823T153000123456Z-00000007-a1b2c3d4.json"}` restores a point-in-time snapshot from `library.json.snapshots/` (retains the 5 most recent rolling snapshots).
+- **Restore last-known-good backup**: `POST /api/v2/state/recover` with `{}` loads `library.json.bak`, validates/normalizes it, and commits it atomically.
+- **Restore specific snapshot**: `POST /api/v2/state/recover` with `{"snapshot": "20260823T153000123456Z-00000007-a1b2c3d4.json"}` restores a point-in-time snapshot from `library.json.snapshots/` (retains the 5 most recent rolling snapshots).
 
 Success returns `{"ok": true, "games": <count>}`.
 
@@ -58,19 +58,21 @@ Success returns `{"ok": true, "games": <count>}`.
 | `"The last-known-good state is also unusable: <bak path>"` | Both primary and backup are bad; recovery fails clearly rather than guessing. |
 | `"Unknown snapshot: <name>"` | Specified snapshot filename does not exist in `library.json.snapshots/`. |
 
-## Upgrading to 2.0
+## Upgrading to 3.0
 
-On the first start after a 2.0 upgrade, OpenBox migrates the library to format 7 and shows a **readiness gate** listing anything that needs a look before the migrated library is used — a theme with unknown tokens, a plugin API version this build does not serve, a missing sync folder, an archive with no format, a library over the formal scale, or a custom data directory. A `library`+`settings` backup can be written from the gate before the library opens. The migration writes `migration-report.json` and keeps `library.v6.backup.json`; `migration-in-progress.json` is a crash marker removed when the migration completes. `openbox --rollback-library` restores the v6 file, lists the edits made after the upgrade, and writes `rollback-report.json` (the replaced v7 file is kept as `library.v7.kept-<stamp>.json`).
+3.0 does **not** migrate a library on open. Schema 7 opens directly. A schema 6 library raises `STATE_SCHEMA_TOO_OLD` and is left unchanged until you run `openbox --migrate-library`; the command writes `library.v6.backup.json`, `migration-in-progress.json`, and `migration-report.json`. A schema 1-5 library must be opened once on OpenBox 2.1 first. After a migration, the readiness gate lists anything that needs a look — a theme with unknown tokens, a plugin API version this build does not serve, a missing sync folder, an archive with no format, a library over the formal scale, or a custom data directory.
+
+`openbox --rollback-library` was removed in 3.0: it exits 4 and changes no file. OpenBox 2.1.0 is the last build that restores `library.v6.backup.json`. 3.0 does not delete an existing v6 backup.
 
 ## Preventing data loss
 
 - Back up the whole data directory before manual intervention: copy `library.json` and `library.json.bak` together.
 - Rolling snapshots are automatically saved in `library.json.snapshots/` before schema migrations or major updates (capped at 5 rotating snapshots).
-- Schema versions migrate in place on load from v1 through v7; a version above 7 raises `StateFutureVersionError` (never rewritten or auto-recovered), and below 1 or with no migration available raises `StateCorruptError` instead of guessing. The v6→v7 upgrade keeps `library.v6.backup.json` and `openbox --rollback-library` restores it.
+- A schema above 7 raises `STATE_FUTURE_VERSION` and is never rewritten. A schema below 7 raises `STATE_SCHEMA_TOO_OLD` on open; use `openbox --migrate-library` for schema 6, and OpenBox 2.1 for schema 1-5.
 - The `.bak` is always at least as fresh as the primary commit that preceded the last write, because it is written before the swap.
 
 ## See also
 
 - [Data and recovery](/reference/data-and-recovery/), full schema, write path, migration table, caps
-- [API local administrator](/reference/api/local-admin/), `POST /api/state/recover`
+- [API local administrator](/reference/api/local-admin/), `POST /api/v2/state/recover`
 - [Interfaces and data](/interfaces-and-data/), where the state files live

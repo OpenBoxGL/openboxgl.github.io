@@ -53,7 +53,7 @@ Symmetric limits apply on create and restore. Symlinks anywhere in the backup so
 
 ## Rotation
 
-`rotate_backups(folder, keep)` keeps the newest `keep` archives and deletes the rest. `keep` must be at least 1 (`"Backup retention must be at least 1."`). The API `POST /api/backup/create` accepts `keep` (default 0 = no rotation).
+`rotate_backups(folder, keep)` keeps the newest `keep` archives and deletes the rest. `keep` must be at least 1 (`"Backup retention must be at least 1."`). The API `POST /api/v2/backup/create` accepts `keep` (default 0 = no rotation).
 
 ## Restore rules
 
@@ -67,11 +67,11 @@ Symmetric limits apply on create and restore. Symlinks anywhere in the backup so
 6. When `library` is restored, the current `library.json` is copied to `library.before-restore.json` first, and archived `settings.json` values are merged into the restored library's settings (so settings always come back with the library).
 7. `media`/`plugins`/`themes`/`extension_data` members are written under the data directory with mode `0o600`, rejecting symlink destinations before and after intermediate `mkdir`s.
 
-The CLI form is `python3 web_app.py --backup [--items a,b] [--keep N]` for creation and `python3 web_app.py --restore-backup <archive>` (the archive must be a real `.zip` inside the data directory or `backups/`).
+The CLI form is `openbox --backup [--items a,b]` for creation and `openbox --restore-backup <archive>`. The CLI does not implement `--keep`; the API `keep` field and the UI provide rotation. The CLI accepts any readable archive path; the API/UI restore restricts the path to the data directory or `backups/`.
 
 ## Listing and inspection
 
-`GET /api/backups` lists archives newest first with `name`, `path`, `size`, `created` and `items` from the manifest, and `invalid: true` when the ZIP or manifest cannot be read. `GET /api/backup/manifest` returns the six selectable item keys.
+`GET /api/v2/backups` lists archives newest first with `name`, `path`, `size`, `created` and `items` from the manifest, and `invalid: true` when the ZIP or manifest cannot be read. `GET /api/v2/backup/manifest` returns the six selectable item keys.
 
 ## Backup diff (v1.7.2+)
 

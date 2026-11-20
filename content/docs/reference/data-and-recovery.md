@@ -11,15 +11,16 @@ Inside the data directory (default `~/.local/share/openbox-game-launcher`, or `O
 
 | Path | Purpose |
 | --- | --- |
-| `library.json` | The primary state: `format` (`openbox-library`), `schema_version` (7), `games`, `profiles`, `history`, `settings`, `playlists`, `queue`, `notifications`, `ui_state` |
+| `library.json` | The primary state: `format` (`openbox-library`), `schema_version` (7), `games`, `profiles`, `history`, `settings`, `playlists`, `queue`, `notifications`, `ui_state`, `trash`, `party_decks`, `emulator_settings`, `achievement_overrides`, `deals`, `time_capsules`, `itinerary` |
 | `library.json.bak` | Last-known-good copy, rewritten before every commit |
 | `library.json.snapshots/` | Rolling snapshots of the last 5 committed states, kept as timestamped JSON copies for point-in-time recovery |
 | `.library.json.lock` | Cross-process `flock` lock coordinating concurrent writers |
 | `sessions.json` | Active sessions mirrored out of the library (format 1) for crash recovery; reconciled at startup and removed when no sessions remain |
-| `library.v6.backup.json` | Pre-migration copy of the v6 library, written when 2.0 upgrades the file; the `openbox --rollback-library` source |
+| `library.v6.backup.json` | Pre-migration copy of the v6 library, written by `openbox --migrate-library` (or by a 2.0/2.1 first start). OpenBox 3.0 does not restore it; use OpenBox 2.1.0. |
 | `migration-report.json` | Record of the v6→v7 migration (counts, sessions moved) |
 | `migration-in-progress.json` | Crash marker present while a migration runs; a leftover marker lets startup reconstruct the report |
-| `rollback-report.json` | Record of a rollback: the discarded game edits made after the upgrade |
+| `migration-acknowledged.json` | Records that the user has seen the migration report |
+| `rollback-report.json` | Legacy 2.0 record of a rollback. 3.0 never writes it. |
 | `media/manifest.json` | Per-file SHA-256, size, and mtime for downloads and captures, feeding the integrity check |
 | `server.token`, `server.port` | Per-launch credentials for the running Web UI; deleted on exit |
 
@@ -27,7 +28,7 @@ Catalog synchronization is separate from this local state directory. When enable
 
 ## Write path
 
-`JsonStateStore` (`state_store.py`) commits like this:
+The Rust `JsonStateStore` (`crates/openbox-store/src/json_store.rs`) commits like this. The Python `state_store.py` implementation mirrors it for the fallback.
 
 1. Serialize with compact JSON when the pretty-printed payload exceeds 1 MiB (`COMPACT_JSON_THRESHOLD`) or the library exceeds 500 games; pretty-printed below it; always write a trailing newline.
 2. Write to a temp file in the same directory, `fsync` it, chmod `0o600`.
@@ -38,7 +39,7 @@ Every read and write happens under the file lock, so two OpenBoxGL processes (We
 
 ## Schema versions and migration
 
-The current schema is version 7 (`STATE_SCHEMA_VERSION`). Older files migrate in place on load:
+The current schema is version 7 (`STATE_SCHEMA_VERSION`). **3.0 does not migrate on open.** Schema 7 opens directly; schema 6 raises `STATE_SCHEMA_TOO_OLD` and is left unchanged until `openbox --migrate-library` runs; schema 1-5 must be opened once on OpenBox 2.1. The historical migration chain is:
 
 | From | Migration |
 | --- | --- |
@@ -49,9 +50,9 @@ The current schema is version 7 (`STATE_SCHEMA_VERSION`). Older files migrate in
 | v5→v6 | Gains the `active_sessions` collection used to reconcile running sessions across restart |
 | v6→v7 | Adds the `"format": "openbox-library"` envelope; `active_sessions` move out to `sessions.json`; the pre-migration file is kept as `library.v6.backup.json` |
 
-Unknown fields survive migration; only known collections are normalized. A schema version above 7, below 1, or with no migration available raises `StateCorruptError` (a future version raises `StateFutureVersionError`, which is never rewritten or auto-recovered) instead of guessing. A complete v7 object takes a fast path without normalization.
+Unknown fields survive migration; only known collections are normalized. A schema above 7 raises `STATE_FUTURE_VERSION` and is never rewritten. A schema below 7 raises `STATE_SCHEMA_TOO_OLD` on open; `openbox --migrate-library` is the only writer for schema 6, and schema 1-5 must be opened on OpenBox 2.1 first. Invalid JSON or a missing `games` collection raises `STATE_UNAVAILABLE`/corrupt-state handling. A complete v7 object takes a fast path without normalization.
 
-`openbox --rollback-library` restores `library.v6.backup.json`: it lists the game edits made after the upgrade, requires confirmation (or `--yes`), and refuses while OpenBox is running or sessions are recorded.
+`openbox --rollback-library` was removed in 3.0. It exits 4, changes no file, and names OpenBox 2.1.0 as the build that restores `library.v6.backup.json`.
 
 ## Stable game IDs
 
@@ -85,7 +86,7 @@ Save manifests are not a separate data file: each save backup archive carries a 
 
 If `library.json` fails to decode (invalid JSON, wrong type, game without identity, invalid games collection), the original file is preserved untouched and `StateCorruptError` is raised. The API answers `503` with `{"error":"OpenBox library data needs recovery before this operation can continue."}` until you recover.
 
-Recovery (`/api/state/recover` or `recover_state()`) requires authentication and replaces the primary with the `.bak` copy:
+Recovery (`/api/v2/state/recover` or `recover_state()`) requires authentication and replaces the primary with the `.bak` copy:
 
 - If no `.bak` exists: `"No last-known-good state exists at <bak path>."`
 - If the backup is also unusable: `"The last-known-good state is also unusable: <bak path>"`
@@ -95,7 +96,7 @@ The `.bak` is always at least as fresh as the primary commit that preceded the l
 
 ### Dry-run and snapshots
 
-`/api/state/recover` accepts two extensions beyond the bare restore:
+`/api/v2/state/recover` accepts two extensions beyond the bare restore:
 
 - `{"dry_run": true}` previews recovery without touching the file: it reports whether `.bak` exists, lists the available snapshots, and returns the current game count.
 - `{"snapshot": "<name>"}` restores a named snapshot from `library.json.snapshots/` instead of the backup. Snapshot names are strictly the file names inside that directory; anything else is rejected.
@@ -109,4 +110,4 @@ Since 1.16.1 the newest snapshot is reliably the one you want. Rotation prunes i
 - All state files are owner-only (`0o600`), including the backup and lock.
 - Back up the whole data directory before manual intervention: `library.json`, the sidecar, media, backups, and settings move together.
 - Exported library data and local paths are sensitive; keep `library.json` exports private.
-- The application state store (`state_store.py`) and `test_state_v4.py` are the maintenance sources.
+- The application state store is `crates/openbox-store/src/json_store.rs` (Python `state_store.py` is the fallback). `tests/test_state_v4.py` and the Rust store tests are the maintenance sources.

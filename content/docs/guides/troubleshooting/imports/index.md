@@ -13,7 +13,7 @@ Check that one of `~/.local/share/Steam`, `~/.steam/steam`, or the Flatpak path 
 "Steam, the Steam Flatpak, or xdg-open is required to launch imported Steam games."
 ```
 
-`POST /api/import/steam` returns `{"added", "found", "errors"}`: unreadable libraries are reported, not skipped silently. Each `errors` entry names the path and the OS error (`"<steamapps path>: <strerror>"`). A library on a read-only mount shows up here (for example `"<steamapps>: Read-only file system"`) instead of importing zero games with no explanation. `POST /api/import/watch` reports per-folder errors the same way.
+`POST /api/v2/import/steam` returns `{"added", "found", "errors"}`: unreadable libraries are reported, not skipped silently. Each `errors` entry names the path and the OS error (`"<steamapps path>: <strerror>"`). A library on a read-only mount shows up here (for example `"<steamapps>: Read-only file system"`) instead of importing zero games with no explanation. `POST /api/v2/import/watch` reports per-folder errors the same way.
 
 Imported Steam games record whether their install folder still exists. In the library, a missing install shows a red **Missing** badge and the play button becomes **Install**, which hands the game to Steam to install. An installed game offers **Verify Steam files**, which opens `steam://validate/<app_id>` so Steam performs verification and repair; OpenBox does not hash or replace the files. Neither action rewrites the imported record, so the badge clears on the next storefront scan once the install folder exists.
 

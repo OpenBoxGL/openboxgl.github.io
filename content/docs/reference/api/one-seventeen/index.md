@@ -67,7 +67,7 @@ Deletion matches the stored name exactly, including case and spacing. Returns `{
 
 ## Native Windows storefront imports
 
-These routes discover games installed by GOG Galaxy, the EA app, and Ubisoft Connect from their registry entries and launcher manifests. They are additive `/api/v2/*` routes; the older `/api/import/steam`, `/api/import/heroic`, and `/api/import/lutris` routes are unchanged.
+These routes discover games installed by GOG Galaxy, the EA app, and Ubisoft Connect from their registry entries and launcher manifests. They are additive `/api/v2/*` routes; the older `/api/v2/import/steam`, `/api/v2/import/heroic`, and `/api/v2/import/lutris` routes are unchanged.
 
 | Method | Route | Source |
 | --- | --- | --- |

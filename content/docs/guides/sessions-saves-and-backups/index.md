@@ -13,7 +13,7 @@ Every active session, queue entry, and save backup points at a `game_id` derived
 
 ## Sessions and history
 
-Every launch starts a session: play count increments, last-played stamps, and the first-launch progress setting applies. When the session ends (see tracking modes in [Emulators and launching](/guides/emulators-and-launching/)), play time adds, the session history records game, start time, duration, and exit code (history keeps the last 500 entries), and progress automation may move the game to Playing or Paused. **Track play session history** in Settings disables history recording while still tracking current sessions. **Back up saves when a game session ends** creates a save backup with an `on-close` label and enforces the save retention limit.
+Every launch starts a session: play count increments, last-played stamps, and the first-launch progress setting applies. When the session ends (see tracking modes in [Emulators and launching](/guides/emulators-and-launching/)), play time adds, the session history records game, start time, duration, and exit code (history keeps the last 2,000 entries), and progress automation may move the game to Playing or Paused. **Track play session history** in Settings disables history recording while still tracking current sessions. **Back up saves when a game session ends** is a 2.x behavior; the 3.0 Rust server does not currently call the session-end save/vault/OBS/stats hooks. Use the manual Save management actions until those hooks are wired.
 
 Active sessions are mirrored to `sessions.json` beside `library.json` (2.0) so a crash can reconcile them at startup; the file is removed when no sessions remain.
 
@@ -50,7 +50,7 @@ Restore validates hard: the archive must belong to this game (its manifest roots
 
 ## Library backups
 
-The **Backup** dialog (Tools → Backup) creates a ZIP under `<data-dir>/backups/` named `OpenBoxBackup-<timestamp>.zip` containing a manifest plus any of: settings, library, media, plugins, themes, and extension data. The dialog has no item picker and no rotation control: **Create backup** always archives the library, settings, media, plugins, and themes, and it keeps the newest 7 archives, deleting older ones. `extension_data` is opt-in through the API or the CLI only (`--backup --items ...,extension_data`); when `items` is omitted, the API and the CLI default to library + settings. The opt-in weekly automatic backup covers library, settings, media, plugins, and themes (no extension data).
+The **Backup** dialog (Tools → Backup) creates a ZIP under `<data-dir>/backups/` named `OpenBoxBackup-<timestamp>.zip` containing a manifest plus any of: settings, library, media, plugins, themes, and extension data. The dialog has no item picker and no rotation control: **Create backup** always archives the library, settings, media, plugins, and themes, and it keeps the newest 7 archives, deleting older ones. `extension_data` is opt-in through the API or the CLI only (`--backup --items ...,extension_data`); when `items` is omitted, the API and the CLI default to library + settings. The opt-in weekly automatic backup covers library, settings, media, plugins, and themes (no extension data). **3.0 note:** the Rust server's hourly tick does not currently call `auto_backup_due`, so scheduled automatic backups do not fire under `openbox-server`; use the manual backup action.
 
 Restore is guarded:
 
@@ -65,7 +65,7 @@ Plugin archives deliberately exclude the capability credential store (`plugins/c
 
 Backup archives can be inspected from the API (manifest listing); the CLI also offers `--backup --items a,b --keep N` and `--restore-backup <file>`.
 
-Settings also offers an opt-in **weekly automatic backup** (v1.12.0): enable it, choose a retention count (`backup_auto_keep`, 1-52, default 4), and the scheduler runs the same backup engine on an hourly tick once seven days have passed since `last_auto_backup`. The Settings line shows the last automatic run; archives are identical to manual ones and land in the same `backups/` folder.
+Settings also offers an opt-in **weekly automatic backup** (v1.12.0): enable it and choose a retention count (`backup_auto_keep`, 1-52, default 4). In 2.x an hourly tick ran the backup once seven days had passed; the 3.0 Rust server does not currently call that scheduler, so use the manual backup action until it is wired. Archives are identical to manual ones and land in the same `backups/` folder.
 
 ### Preview a restore before you restore
 
@@ -87,7 +87,7 @@ The same data is available from `GET /api/v2/backup/diff`; see [API 1.16 additio
 
 **Settings** has a **Mounted cloud folder** field (any mounted folder: Syncthing, Dropbox, Nextcloud, Drive, or a local path) and a **Sync statistics now** button. Sync reads and writes `openbox-statistics.json` (format 1) in that folder under a file lock. Per game it merges `play_count` and `playtime_seconds` by maximum, `last_played` by newer timestamp, and resolves progress, rating, and favorite by whoever played last (the side with the newer `last_played` is authoritative; if neither side has played, file freshness decides). The file's `generated_at` timestamp is preserved when the remote was newer, and bumped when local state is newer, so later comparisons stay correct. Deleted local games are not resurrected: games present only in the cloud file are dropped from the merged output. Only games that exist locally are written back.
 
-The sync runs automatically after each session ends, so play time propagates to the mounted folder without manual action. Configure the same folder on another machine to merge stats there.
+The sync runs automatically after each session ends in the Python fallback. The 3.0 Rust server does not currently call `sync_statistics` from session end; use **Sync statistics now** (`POST /api/v2/cloud/sync`) until the hook is wired. Configure the same folder on another machine to merge stats there.
 
 ## Library catalog sync
 

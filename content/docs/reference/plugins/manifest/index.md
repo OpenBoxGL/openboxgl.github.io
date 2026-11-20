@@ -19,10 +19,10 @@ A manifest missing any of these raises `"Plugin id, name, and version are requir
 
 | Field | Type | Default | Rules |
 | --- | --- | --- | --- |
-| `api_version` | integer | `1` | `1` or `2` (2.0.0+; the host serves both). A value above the host's supported versions is refused. Version 2 switches to the persistent JSON Lines runner and unlocks `min_openbox` and `subscriptions`. |
+| `api_version` | integer | — | **Required. Must be `2` in 3.0.** A missing value or `1` fails with `PLUGIN_API_RETIRED`. Version 2 uses the JSON Lines runner and unlocks `min_openbox` and `subscriptions`. |
 | `min_openbox` | string | — | v2 only: oldest OpenBox release that may serve the plugin (for example `"2.0.0"`); an older host refuses the plugin at load. |
 | `subscriptions` | array of strings | `[]` | v2 only: up to 8 named events the runner delivers — `library.changed`, `library.progress`, `session.started`, `session.ended`, `game.launched`. |
-| `entry` | string | `plugin.py` | Python file name inside the package. Must be a real file, with a `.py` suffix, and must resolve inside the package (no symlinks or `..` escapes); otherwise `"Plugin entry must be a Python file inside the package."` |
+| `entry` | string | `plugin.py` | File inside the package. A `.py` entry runs through `plugin_runner_v2.py`; any other executable entry runs directly. Must be a real file and resolve inside the package (no symlinks or `..` escapes); otherwise `"Plugin entry must be a Python file inside the package."` (the message predates native entries). |
 | `hooks` | array of strings | `[]` | The six base hooks plus the capability hooks: `before_launch`, `after_session`, `library`, `command`, `library_source`, `events`, `storefront`, `metadata`, `media`, `stats`, `emulator`, `discovery`. An unknown hook raises `"Plugin declares an unsupported hook."` |
 | `commands` | array of objects | `[]` | Up to 32 unique `{id, label, description?}` entries used by the `command` hook. `id` must match `^[a-z0-9][a-z0-9._-]{0,63}$`; `label` is required; `description` is capped at 280 characters. |
 | `permissions` | array of strings | `[]` | Subset of the declared-permission whitelist, which currently contains exactly one permission: `network`. Anything else raises `"Plugin requests unknown permissions: <names>."` |
@@ -72,7 +72,7 @@ Every capability except `emulator_settings` takes `{id, name}`:
   "id": "vendor.plugin",
   "name": "Vendor Plugin",
   "version": "1.2.0",
-  "api_version": 1,
+  "api_version": 2,
   "entry": "plugin.py",
   "hooks": ["metadata", "storefront"],
   "capabilities": {
@@ -106,7 +106,7 @@ Rules:
  "id": "example-plugin",
  "name": "Example Plugin",
  "version": "1.0.0",
- "api_version": 1,
+ "api_version": 2,
  "entry": "main.py",
  "hooks": ["library"],
  "commands": [
@@ -117,14 +117,15 @@ Rules:
 
 ## Validation summary
 
-The `read_manifest` validator (in `plugins.py`) checks, in order:
+The manifest validator (`crates/openbox-plugins/src/host.rs`; `plugins.py` mirrors it for the Python fallback) checks, in order:
 
 1. `plugin.json` exists and decodes.
 2. `id` matches the pattern, and `name` and `version` are non-empty.
 3. `hooks` is a list and a subset of the twelve supported hooks (six base, six capability).
-4. `api_version` is `1` or `2` (v2 manifests may add `min_openbox` and `subscriptions`).
-5. `entry` is a `.py` file that resolves strictly inside the package directory.
-6. `commands`, `permissions`, `settings`, `messages`, and `capabilities` each validate against their own rules, including capability-hook pairing and unique capability ids.
+4. `api_version` is exactly `2` (a v2 manifest may add `min_openbox` and `subscriptions`); anything else fails with `PLUGIN_API_RETIRED`.
+5. `entry` resolves strictly inside the package directory and is either a `.py` file or an executable file.
+6. The plugin id is not one of the reserved ids `data`, `credentials`, or `plugins-state.json`.
+7. `commands`, `permissions`, `settings`, `messages`, and `capabilities` each validate against their own rules, including capability-hook pairing and unique capability ids.
 
 Invalid packages are **not** hidden: `list_plugins` surfaces them with `valid: False` and a sandbox status so the Plugins manager can explain why they cannot run, and `install_plugin` refuses them, so a bad manifest never lands in the installed set.
 

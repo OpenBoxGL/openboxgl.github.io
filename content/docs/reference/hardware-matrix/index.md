@@ -3,7 +3,7 @@ title: Handheld Hardware Matrix
 description: Compatibility, performance flags, and configuration recommendations for Steam Deck, ROG Ally, Legion Go, and Linux handhelds.
 ---
 
-OpenBox supports Linux gaming handheld workflows with gamepad navigation and SteamOS / gamescope integration. The profiles below are configuration guidance, not a performance guarantee for every device or image.
+OpenBox supports Linux gaming handheld workflows with gamepad navigation and SteamOS / gamescope integration. The profiles below are configuration guidance, not a performance guarantee for every device or image. On the Rust backend, formal support graduates to **50,000 games** (ADR 0116); the 50,000-game benchmark finishes at 468.8 MB RSS, with 10,000 games at 113.4 MB and 20,000 at 204.1 MB.
 
 ## Validation profiles
 
@@ -33,5 +33,5 @@ To run OpenBox directly in Steam Deck Gaming Mode:
 Power, frame pacing, and memory use depend on the installed image, browser/native host, display mode, library size, and running integrations. Use the [configuration guidance](/reference/configuration/) and [Handheld performance](/guides/big-box-and-handhelds/performance/) pages, then validate the result with the handheld's own TDP/FPS tools:
 - **Display sizing**: use `--resolution <WxH>` or the supported fullscreen width/height options for a web/app-window launch when the viewport needs an explicit size.
 - **Game Mode**: `--game-mode` selects the gamescope guest behavior; it is not a generic `--kiosk` or `--fullscreen` flag.
-- **Battery indicator**: the `battery_indicator` setting shows charge percentage in the Big Box status area. It reads the browser battery API first and falls back to `GET /api/native/battery`, which reads Linux sysfs, `pmset` on macOS, or `GetSystemPowerStatus` on Windows.
+- **Battery indicator**: the `battery_indicator` setting shows charge percentage in the Big Box status area. It reads the browser battery API first and falls back to `GET /api/v2/native/battery`, which reads Linux sysfs, `pmset` on macOS, or `GetSystemPowerStatus` on Windows.
 - **Sleep / resume safety**: confirm behavior on the installed host, especially while a game, capture job, or background import is active.

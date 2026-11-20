@@ -95,15 +95,18 @@ Theme (light/dark) and layout (single/spread) are toggled with the reader's own 
 | <kbd>Home</kbd> / <kbd>End</kbd> | Jump to the first / last entry |
 | <kbd>Enter</kbd> | Show the current game |
 | <kbd>Space</kbd> / <kbd>P</kbd> | Launch the current game |
+| <kbd>M</kbd> | Toggle Museum (kiosk) mode; any key leaves it |
 | <kbd>Escape</kbd> / <kbd>Backspace</kbd> | Leave Arcade Room |
 
 ## Tools Menu Keyboard Navigation (WAI-ARIA)
 
 | Shortcut | Action | Description |
 | --- | --- | --- |
-| <kbd>ArrowDown</kbd> / <kbd>ArrowUp</kbd> | **Navigate Items** | Cycles through tools dropdown items with circular wrapping. |
+| Type in **Filter tools…** | **Filter** | Filters the menu items as you type. |
+| <kbd>ArrowDown</kbd> / <kbd>ArrowUp</kbd> | **Navigate Items** | Cycles through the filtered tools dropdown items with circular wrapping. |
+| <kbd>Enter</kbd> | **Activate** | Activates the focused tool. |
 | <kbd>Home</kbd> / <kbd>End</kbd> | **First / Last** | Jumps focus to the first or last tools menu option. |
-| <kbd>Escape</kbd> | **Close Menu** | Dismisses the menu and returns focus to the Tools trigger button. |
+| <kbd>Escape</kbd> | **Clear / Close** | Clears the filter field first; when the field is empty, dismisses the menu and returns focus to the Tools trigger button. |
 | <kbd>Tab</kbd> | **Exit Focus** | Closes the menu when tabbing away. |
 
 ## Big Box Keyboard Navigation
@@ -120,7 +123,9 @@ The same `keyboard_map` bindings drive Big Box, so a key you remap for the libra
 | <kbd>R</kbd> | **Shuffle** | Jumps to a random title in the current list. Rebindable as *Random game*. |
 | <kbd>F</kbd> | **Favorite** | Toggles the Favorite flag on the active title. Rebindable as *Favorite*. |
 | <kbd>Space</kbd> | **Video pause** | Pauses or resumes the Big Box preview video while one is showing. |
-| <kbd>Escape</kbd> | **Back / Exit** | Blurs the Big Box search field, closes the filter menu or the pause overlay, or exits Big Box mode on a tap. Holding Back opens the Big Box menu instead; the hold time defaults to 0.8 s and is configurable from 0 to 2 s (0 exits immediately). |
+| <kbd>F</kbd> | **Video fullscreen** | While a preview video is showing, requests fullscreen (the video handler takes precedence over the favorite binding). |
+| <kbd>ArrowUp</kbd> / <kbd>ArrowDown</kbd> | **Video volume** | While a preview video is showing, raises or lowers the volume by 0.05 (the video handler takes precedence over navigation). |
+| <kbd>Escape</kbd> | **Back / Exit** | Blurs the Big Box search field, closes the filter menu or the pause overlay, or exits Big Box mode on a tap. Holding Back opens the Big Box menu instead; the hold time defaults to 0.8 s and is configurable from 0 to 2 s (0 exits immediately). The top-bar **Exit** button also leaves Big Box. |
 | <kbd>Backspace</kbd> | **Back / Exit** | Same as <kbd>Escape</kbd> while Back is still bound to `Escape`. |
 
 ## 1.11 deep-link shortcuts

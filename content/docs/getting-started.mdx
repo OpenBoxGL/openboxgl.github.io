@@ -15,7 +15,7 @@ The goal is a full loop: install, import one game, see it in the library, launch
 
 ## Before you start
 
-- Follow [Installation](/install/) and start OpenBox. On Linux, run the AppImage, Flatpak, or source entry point (`./openbox` or `python3 web_app.py`). On Windows, double-click `openbox.cmd` or run `powershell -File .\openbox.ps1` from the runtime directory; add `--web` to either one to force the browser app window instead of the native window. On macOS, open `OpenBox.app` from Applications or run `openbox` from a terminal. The full Windows path is in [Windows](/windows/), and the macOS path is in [macOS](/macos/). You should see the three-column workspace: filters on the left, an empty cover grid in the center, and the detail pane on the right.
+- Follow [Installation](/install/) and start OpenBox. On Linux, run the AppImage, Flatpak, or source entry point (`./openbox` or `./openbox --web`). On Windows, double-click `openbox.cmd` or run `powershell -File .\openbox.ps1` from the runtime directory; add `--web` to either one to force the browser app window instead of the native window. On macOS, open `OpenBox.app` from Applications or run `openbox` from a terminal. The full Windows path is in [Windows](/windows/), and the macOS path is in [macOS](/macos/). You should see the three-column workspace: filters on the left, an empty cover grid in the center, and the detail pane on the right.
 - Make one folder containing a single launchable file. On Linux that is an executable `.sh` file; on Windows use an `.exe` (or a `.cmd`/`.bat` script). For a realistic first test on Linux, use a short script like this:
 
 ```bash
@@ -37,7 +37,7 @@ The workspace looks like this once you have a library entry: filters on the left
 
 <Callout type="note">
 
-**You should see:** An empty cover grid in the center with a single illustrated start card offering **Scan a folder**, **Connect a game store**, and **Add one game**. The setup dialog suggests scanning game folders or connecting storefronts with a safe, non-destructive preview before committing to your library. If the window did not open, start OpenBox from a terminal (`./openbox` or `python3 web_app.py` on Linux; `powershell -File .\openbox.ps1` on Windows) and read the printed error. In `--web` mode OpenBoxGL prints `http://127.0.0.1:PORT/?token=...`; open that URL yourself.
+**You should see:** An empty cover grid in the center with a single illustrated start card offering **Scan a folder**, **Connect a game store**, and **Add one game**. The setup dialog suggests scanning game folders or connecting storefronts with a safe, non-destructive preview before committing to your library. If the window did not open, start OpenBox from a terminal (`./openbox` or `./openbox --web` on Linux; `powershell -File .\openbox.ps1` on Windows) and read the printed error. In `--web` mode OpenBoxGL prints `http://127.0.0.1:PORT/?token=...`; open that URL yourself.
 
 </Callout>
 
@@ -137,9 +137,11 @@ Nothing is sent anywhere: no account, no telemetry, and no network traffic unles
 - [Interfaces and data](/interfaces-and-data/) for where every file lives.
 - [Metadata and media](/guides/metadata-and-media/) for enrichment after the first import.
 
-## What's new in 1.11 through 2.0
+## What's new in 1.11 through 3.0
 
-**2.0 (unreleased)** adds library format 7 with `openbox --rollback-library`, `/api/v2` as the public contract with the `/api/v1` bridge retired, the portable library with Move library, backup format 2, plugin API v2, the migration readiness gate, and the Windows ARM64 lane — see the [changelog](/changelog/) and [API 2.0 changes](/reference/api/two-zero/).
+**3.0** replaces the Python backend with the native Rust `openbox-server`, graduates formal support to 50,000 games, and ships Save Vault, Achievement Trail, Deal Radar, Player's Log (Time Capsules and Milestone Cards), and Backlog Itinerary. It also redesigns the library workspace and makes plugin API v2 mandatory. Library schema 7 and `/api/v2` are unchanged; a 2.0 or 2.1 library opens without migration. See the [changelog](/changelog/), [Upgrading to 3.0](/upgrading-3-0/), and [API 3.0 changes](/reference/api/three-zero/).
+
+**2.1** makes the 2.0 contracts permanent: `/api/v2` only, no `/api/v1` bridge, no unversioned dispatch, and backup format 2 writes only.
 
 ## What's new in 1.11 through 1.19
 

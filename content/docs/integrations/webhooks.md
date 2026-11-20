@@ -66,7 +66,7 @@ assert mac.hexdigest() == provided_signature
 
 ## URL validation
 
-`POST /api/webhooks` and `POST /api/webhooks/test` reject unsafe targets before saving:
+`POST /api/v2/webhooks` and `POST /api/v2/webhooks/test` reject unsafe targets before saving:
 
 - Scheme must be `https` by default. Plain `http` is refused unless `OPENBOX_ALLOW_HTTP_WEBHOOKS=1` is set for trusted local testing.
 - No embedded credentials, no fragments, port within 1..65535.
@@ -84,7 +84,7 @@ assert mac.hexdigest() == provided_signature
 
 ## Testing
 
-`POST /api/webhooks/test` with a webhook config performs one bounded synchronous `test.ping` delivery and returns `{"ok": bool, "status": int|null, "error": str}`. The test respects the same URL validation, so a bad target fails immediately. Receivers can distinguish tests by the `test.ping` event type.
+`POST /api/v2/webhooks/test` with a webhook config performs one bounded synchronous `test.ping` delivery and returns `{"ok": bool, "status": int|null, "error": str}`. The test respects the same URL validation, so a bad target fails immediately. Receivers can distinguish tests by the `test.ping` event type.
 
 ## Worked receiver example
 
@@ -124,6 +124,6 @@ The signature covers the exact transmitted body bytes, so read the raw request b
 
 ## Related
 
-- [API automation](/reference/api/automation/) for the request shapes and `POST /api/webhooks`
+- [API automation](/reference/api/automation/) for the request shapes and `POST /api/v2/webhooks`
 - [Configuration](/reference/configuration/) for `OPENBOX_ALLOW_HTTP_WEBHOOKS`
 - [API local administrator](/reference/api/local-admin/) for the diagnostic log

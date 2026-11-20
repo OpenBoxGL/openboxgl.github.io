@@ -3,7 +3,7 @@ title: Troubleshooting
 description: Start with safe checks for startup, imports, launches, state, and integrations.
 ---
 
-Start with the diagnostic log and the exact visible error. **Settings > Advanced** has **Copy diagnostic log**: it copies a redacted diagnostic **summary** (the `/api/diagnostic` preview) that excludes secrets and the full log. The rotating log itself is `<data-dir>/openbox.log` (2 MiB per file, 4 rotations); it redacts tokens, passwords, secrets, API keys, and authorization values, but may include game names and local file paths. Review it before sharing. Confirm the data directory, token, executable path, and platform profile before changing state.
+Start with the diagnostic log and the exact visible error. **Settings > Advanced** has **Copy diagnostic log**: it copies a redacted diagnostic **summary** (the `/api/v2/diagnostic` preview) that excludes secrets and the full log. The rotating log itself is `<data-dir>/openbox.log` (2 MiB per file, 4 rotations); it redacts tokens, passwords, secrets, API keys, and authorization values, but may include game names and local file paths. Review it before sharing. Confirm the data directory, token, executable path, and platform profile before changing state.
 
 ## Startup and browser issues
 
@@ -19,7 +19,7 @@ Start with the diagnostic log and the exact visible error. **Settings > Advanced
 ## Big Box input and display
 
 - Pointer drag, mouse wheel, trackball, and spinner navigation are separate settings. If a wheel or trackball does nothing, check **Settings > Big Box** (`pointer_nav_enabled`, `mouse_wheel_nav`, `spinner_sensitivity`, `bigbox_wheel_speed`); a spinner that jumps too far is a sensitivity problem, not a missing input.
-- The battery indicator reads Linux sysfs through `GET /api/native/battery`. It reports `present: false` on non-Linux hosts or when no battery is exposed, and shows nothing when the setting is off; the route never returns a battery path.
+- The battery indicator reads Linux sysfs through `GET /api/v2/native/battery`. It reports `present: false` on non-Linux hosts or when no battery is exposed, and shows nothing when the setting is off; the route never returns a battery path.
 - Video problems usually start in **Settings > Big Box**: controls need `bigbox_video_controls`, the audio mix needs `video_bgm_mix`, and a startup video that should not repeat needs `bigbox_startup_video_loop` off. Themes may add background music and a sound pack, so silence can be a theme asset problem.
 - Hidden platforms, categories, and playlists are stored in the `bigbox_hidden_*` settings. A platform that is missing from Big Box but present in the library is usually hidden there, not deleted.
 
@@ -63,14 +63,14 @@ Start with the diagnostic log and the exact visible error. **Settings > Advanced
 
 ## Metadata and media
 
-- `/api/metadata/search` and bulk media return HTTP 409 until the metadata database is downloaded (Artwork & details dialog, **Download database**).
-- The media queue is durable: closing OpenBox does not lose queued artwork or media. `GET /api/media/queue` reports `items`, `queue`, and per-state `counts`; a failed item keeps its `last_error` and attempts, and `POST /api/media/queue/retry` with the item `id` re-queues it. Pause, resume, cancel, and per-item retry exist as separate routes.
+- `/api/v2/metadata/search` and bulk media return HTTP 409 until the metadata database is downloaded (Artwork & details dialog, **Download database**).
+- The media queue is durable: closing OpenBox does not lose queued artwork or media. `GET /api/v2/media/queue` reports `items`, `queue`, and per-state `counts`; a failed item keeps its `last_error` and attempts, and `POST /api/v2/media/queue/retry` with the item `id` re-queues it. Pause, resume, cancel, and per-item retry exist as separate routes.
 - Downloads validate HTTP status, content type, and payload before writing. A provider that returns the wrong type fails with `"The remote server returned an unsupported content type: <type>"`, and an oversized response with `"The download is too large."`; LaunchBox database downloads keep retry/progress reporting.
 - Provider media caps depend on the kind: images 64 MiB, video 512 MiB, music 32 MiB, and manuals 64 MiB (PDF only). LaunchBox Games Database images keep their 32 MiB cap. Every image needs an `image/` content type.
 - Metadata and media searches honour the configured provider priority (`metadata_provider_priority`), and each result carries its source. A bulk download can prefer plugin results (`plugin_metadata_priority`).
 - Check credentials and rate limits for EmuMovies and IGDB; both are optional integrations.
 - A corrupt bezel download never destroys the existing set; re-run **Download bezel** after fixing the archive.
-- **Media cache cleanup** (`POST /api/media/cache/cleanup`, `days` 1..3650, default 30) removes only stale regular files under `<data-dir>/cache/media`, skips symlinks, and returns `{root, deleted, bytes, skipped}`. User media is never touched.
+- **Media cache cleanup** (`POST /api/v2/media/cache/cleanup`, `days` 1..3650, default 30) removes only stale regular files under `<data-dir>/cache/media`, skips symlinks, and returns `{root, deleted, bytes, skipped}`. User media is never touched.
 - Duplicate-media cleanup deletes only files inside the OpenBox data directory, never symlinks; run the scan, review the group count, then apply.
 
 ## Integrations and credentials

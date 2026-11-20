@@ -312,7 +312,7 @@ export function ThemePreviewer() {
                     border: `1px solid ${customBorder}`,
                   }}
                 >
-                  v2.0.0
+                  v3.0.0
                 </span>
               </div>
               <div className="flex items-center gap-2">

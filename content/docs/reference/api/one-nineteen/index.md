@@ -7,7 +7,7 @@ OpenBox 1.19 adds **no routes and no settings**. The route baseline is unchanged
 
 ## Capability features (1.19.1)
 
-`GET /api/native/capabilities` carries a `features` object alongside its existing fields, such as `version`, `platform`, and `data_dir`. Each key is `true` only when the host supports that feature. A missing object, or a missing key, must be read as `false`. A failed request therefore hides controls instead of exposing broken ones.
+`GET /api/v2/native/capabilities` carries a `features` object alongside its existing fields, such as `version`, `platform`, and `data_dir`. Each key is `true` only when the host supports that feature. A missing object, or a missing key, must be read as `false`. A failed request therefore hides controls instead of exposing broken ones.
 
 | Feature | Linux | Windows | macOS | Gates |
 | --- | --- | --- | --- | --- |
@@ -48,7 +48,7 @@ A macOS response includes, for example, the following. Other fields are omitted 
 
 ## Battery (1.19.1)
 
-`GET /api/native/battery` returns `{"present": bool, "percent": 0-100, "charging": bool}` on every platform. The device path is never returned.
+`GET /api/v2/native/battery` returns `{"present": bool, "percent": 0-100, "charging": bool}` on every platform. The device path is never returned.
 
 | Platform | Source | Server cache |
 | --- | --- | --- |
@@ -81,10 +81,10 @@ These routes answer on Linux only. Elsewhere they report nothing and do not scan
 
 | Route | Off Linux |
 | --- | --- |
-| `GET /api/wine/prefixes` | `{"prefixes": [], "available": false}` |
-| `GET /api/wine/protons` | `{"protons": [], "available": false}` |
-| `GET /api/wine/prefix-for-game` | `{"prefix": "", "available": false}` |
-| `GET /api/faugus/status`, `GET /api/faugus/scan`, `POST /api/faugus/import` | The Faugus scanner finds no data directories and returns no games. |
+| `GET /api/v2/wine/prefixes` | `{"prefixes": [], "available": false}` |
+| `GET /api/v2/wine/protons` | `{"protons": [], "available": false}` |
+| `GET /api/v2/wine/prefix-for-game` | `{"prefix": "", "available": false}` |
+| `GET /api/v2/faugus/status`, `GET /api/v2/faugus/scan`, `POST /api/v2/faugus/import` | The Faugus scanner finds no data directories and returns no games. |
 | `POST /api/v2/launch/grant` and `POST /api/v2/launch/grant/undo` | `400` with "Flatpak grants are only available on Linux." The request is refused before any subprocess runs. |
 
 ## Heroic and Lutris on macOS

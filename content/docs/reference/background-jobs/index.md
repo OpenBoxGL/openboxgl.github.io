@@ -3,7 +3,7 @@ title: Background jobs
 description: Observable states, retry limits, replacement, cancellation, and volatility.
 ---
 
-Background work in OpenBoxGL runs through the durable **Operation Service** (`pkg/state/operations.py`). Operations are persisted to disk in `operations.json`, surviving application restarts and supporting progress streaming, cancellation, retries, and resume flows.
+Background work in OpenBoxGL runs through the durable **Operation Service** in `crates/openbox-store/src/operations.rs`. Operations are persisted to `operations.json` plus one `operations_items/<job_id>.json` per job, surviving application restarts and supporting progress streaming, cancellation, retries, and resume flows. The Python `crates/openbox-store/src/operations.rs` path remains only for `OPENBOX_BACKEND=python`.
 
 ## The operation object
 
@@ -38,9 +38,9 @@ Progress is flat: `phase`, `current`, `total`, and `message` are top-level keys,
 
 ## Supported operation types
 
-Jobs carry a dotted `type`, not a legacy queue name: `setup.scan`, `setup.revalidate`, `setup.commit`, `metadata.db_sync`, `metadata.match_preview`, `metadata.match_auto`, `metadata.apply`, `metadata.media_auto`, `media.bulk_download`, `media.cleanup`, `media.memories_import`, `emulator.install`, `emulator.update`, `gameyfin.install`, `saves.scan`, `saves.backup`, `saves.restore`, `library.backup`, `library.restore`, `library.export`, `screenscraper.match`, `screenscraper.apply`, `steamgrid.match`, `steamgrid.apply`, `storefront.auto_import`, `storefront.scan`, `clips.reel`, `cloud.sync`, `updater.install`. Legacy job names (for example `library-export`, `screenscraper-match`, `auto-import`) map to these types with the matching retry policy, so export, SteamGridDB, ScreenScraper, auto-import, and reel jobs no longer masquerade as `setup.scan`. At most `MAX_OPERATIONS=100` operations are retained (plus 30-day retention for finished runs).
+Jobs carry a dotted `type`: `setup.scan`, `setup.revalidate`, `setup.commit`, `metadata.db_sync`, `metadata.match_preview`, `metadata.match_auto`, `metadata.apply`, `metadata.media_auto`, `media.bulk_download`, `media.cleanup`, `media.memories_import`, `emulator.install`, `emulator.update`, `gameyfin.install`, `saves.scan`, `saves.backup`, `saves.restore`, `library.backup`, `library.restore`, `library.export`, `screenscraper.match`, `screenscraper.apply`, `steamgrid.match`, `steamgrid.apply`, `storefront.auto_import`, `storefront.scan`, `clips.reel`, `cloud.sync`, `updater.install`, `trail.refresh`, and `itinerary.igdb`. The legacy job-name map was removed in 2.1; the v2 list returns typed rows. At most `MAX_OPERATIONS=100` operations are retained.
 
-Workers execute on a managed `ThreadPoolExecutor` with 4 concurrent slots (`openbox-job-*`). Live status and incremental events stream to the frontend over Server-Sent Events (SSE) via `/api/events`.
+Workers run as Tokio blocking tasks behind a semaphore with 4 concurrent slots (`DEFAULT_MAX_WORKERS=4`). Live status and incremental events stream to the frontend over Server-Sent Events (SSE) via `/api/v2/events`.
 
 ## States and lifecycle transitions
 
@@ -63,24 +63,24 @@ queued -> running -> cancelling -> cancelled
 
 ## Durability & Recovery (`operations.json`)
 
-Unlike legacy in-memory job queues, all operations are persisted atomically to `operations.json` in the data directory.
+All operations are persisted atomically to `operations.json` in the data directory, with per-job item rows under `operations_items/<job_id>.json`.
 - On startup, any operation previously left in `running`, `queued`, or `cancelling` state is automatically marked `interrupted`.
 - The **Activity drawer** (`#activityButton`) displays live and historical operations.
 - Interrupted jobs can be cleanly retried or resumed without duplicating finished work.
 
 ## Durable media queue
 
-The media automation queue is a separate durable worker rather than an Operation Service job. It is stored in `media-queue.json` (at most 5,000 items) and reached through `GET /api/media/queue` plus `POST /api/media/queue/pause`, `/resume`, `/cancel`, and `/retry` (the retry body names one `id`). The response reports worker state, `items`, `queue`, and per-state `counts`. Because the list lives on disk, closing OpenBox does not lose queued downloads.
+The media automation queue is a separate durable worker rather than an Operation Service job. It is stored in `media-queue.json` (at most 5,000 items) and reached through `GET /api/v2/media/queue` plus `POST /api/v2/media/queue/pause`, `/resume`, `/cancel`, and `/retry` (the retry body names one `id`). The response reports worker state, `items`, `queue`, and per-state `counts`. Because the list lives on disk, closing OpenBox does not lose queued downloads.
 
 ## Observability & Endpoints
 
-- `GET /api/v2/jobs`: Lists active, pending, and recent operations.
+- `GET /api/v2/jobs`: Cursor-paginated operations (`limit`, `cursor`, `type`/`type_filter`, `state`/`state_filter`, `root_job_id`, `group_by`).
 - `GET /api/v2/jobs/items`: Paginated list of operation items for a specific job (`?job_id=`).
 - `POST /api/v2/jobs/cancel`: Cancels an in-flight operation (accepts `job_id` in JSON body).
 - `POST /api/v2/jobs/retry`: Retries a failed or interrupted operation (accepts `job_id` in JSON body).
 - `POST /api/v2/jobs/resume`: Resumes an interrupted operation (accepts `job_id` in JSON body).
-- `GET /api/events`: SSE stream of real-time operation state and progress updates.
-- `GET /api/jobs`: Backwards-compatible legacy route returning combined live and finished jobs.
+- `GET /api/v2/events`: SSE stream of real-time operation state and progress updates.
+- `GET /api/jobs` and `GET /api/v1/jobs`: Retired. They return `410` (`API_VERSION_REQUIRED` or `V1_API_REMOVED`); use `/api/v2/jobs`.
 
 ## Related
 

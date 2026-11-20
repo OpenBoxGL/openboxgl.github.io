@@ -13,11 +13,11 @@ OpenBox is designed so your library, saves, and metadata never leave your machin
 - **No telemetry.** No analytics beacons, no crash reports, no usage statistics are sent anywhere. There is nothing to opt out of.
 - **No account.** There is no OpenBox account, no login, no license key. Downloading the AppImage or cloning the repository is the entire installation.
 - **No cloud library.** Library data lives in `library.json` on your machine. The local server binds to `127.0.0.1` only and every API request must carry a per-launch token, so the window (or tab) you open is the only client.
-- **No hidden network calls.** The app does not phone home at startup or on any schedule.
+- **No hidden network calls.** The app does not phone home at startup. The only scheduled outbound feature is opt-in Deal Radar, which polls `https://store.steampowered.com` at the interval you set.
 
 ## What leaves your machine, and when
 
-Every outbound action is user-initiated and visible in the UI:
+Most outbound actions are user-initiated and visible in the UI. Deal Radar is the one opt-in scheduled exception:
 
 - **LaunchBox metadata database.** Downloading or updating the LaunchBox metadata database fetches the archive from `gamesdb.launchbox-app.com` and builds a local SQLite copy. OpenBox then matches titles locally against that database, so no game title or library entry is sent for an individual lookup. The download happens when you trigger it — for example after an import, or from the metadata screen.
 - **IGDB search.** A search you type is sent to IGDB. IGDB API failures surface readable errors.
@@ -29,6 +29,7 @@ Every outbound action is user-initiated and visible in the UI:
 - **Netplay lobby.** Opening **Online play** fetches RetroArch's public HTTPS lobby listing. No credentials are sent, and RetroArch itself makes the room connection.
 - **Webhooks.** If you configure webhooks, event deliveries go to the URLs you specify, signed with your HMAC secret. Destinations are validated against loopback and local address rules before anything is sent.
 - **Statistics sync.** If you enable it, play statistics sync to a local folder you choose (for example a Syncthing folder). You control the destination.
+- **Deal Radar.** If you enable it (`deals_enabled`), OpenBox queries `https://store.steampowered.com` for the app ids on your watchlist at `deals_poll_hours` (default 168). Requests and redirects are restricted to that host. No Steam account, cookies, library, or play history are sent. Disable the feature to stop the poll; the Rust 3.0 server currently polls only on **Refresh now** because the scheduled hook is not wired.
 - **Update checks.** Settings > Check for updates queries the GitHub releases API. It is read-only.
 
 ## What is stored locally

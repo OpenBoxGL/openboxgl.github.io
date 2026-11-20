@@ -104,4 +104,4 @@ A theme may also provide background music and navigation sounds. Put a sidecar J
 - A missing, oversized, or malformed sidecar is silent, never an error: a theme without audio needs no JSON file.
 - **Play theme music and navigation sounds in Big Box** (`bigbox_sounds_enabled`, default on) controls both. Music starts when Big Box opens and stops when Big Box closes.
 
-The app reads the config from `GET /api/theme-sounds?name=<theme>` and serves each relative file through `GET /api/theme-asset?name=<theme>&path=<relative>`, so dropping the CSS and JSON pair into the user themes folder is enough.
+The app reads the config from `GET /api/v2/theme-sounds?name=<theme>` and serves each relative file through `GET /api/v2/theme-asset?name=<theme>&path=<relative>`, so dropping the CSS and JSON pair into the user themes folder is enough.

@@ -3,7 +3,15 @@ title: Library overview
 description: Browse, search, and safely maintain a mixed-platform game library.
 ---
 
-OpenBoxGL presents imported games in a searchable grid or list. Select a card to open its detail pane, where metadata, artwork, launch, saves, and history stay together. The top bar is grouped into three zones:
+OpenBoxGL presents imported games in a searchable grid or list. Select a card to open its detail pane, where metadata, artwork, launch, saves, and history stay together.
+
+## The 3.0 workspace
+
+The 3.0 redesign puts games above the fold. The sticky library header is a single **94 px** row; **Artwork** and **Layout** live in a **Display** popover, **Settings** sits directly in the top bar, and the **Tools** menu has a **Filter tools…** field and a 3-column layout that fits all 41 entries at 1440x900. The drag-and-drop banner stays hidden until you drag files over the window, **Jump back in** is a slim dismissible strip, and the empty right **Details** pane auto-collapses until you select a game or collection. Close Details with its **x** button or <kbd>Escape</kbd>. The sidebar is ordered **Search**, **View**, **Platforms**, **Categories**, **Playlists**, and a collapsed **More filters** section (ESRB, Source, Exclude, Explorer).
+
+Game Details keeps four primary actions upfront and folds **More actions**, **Save management**, and **Launch check** into collapsible cards; Launch check expands on its own only when an issue needs attention. **Surprise me** is a one-click instant pick, while the **What should I play?** picker remains available for constraint-scored picks.
+
+The top bar is grouped into three zones:
 
 - The **Library** zone holds **Library** and one **Add games** menu (`#addMenuButton`) that gathers every way in: **Add one game…**, **Scan a folder…**, **Add a game without files…**, **Guided setup…**, and the store shortcuts **Steam**, **Heroic**, **Lutris**, and **More game stores…**. **Guided setup** opens the [Setup Center](/guides/library/setup-center/).
 - The **Actions** zone holds **Big Box**, **Running now**, **Play queue**, and **Activity** (`#activityButton` with live running operation count).

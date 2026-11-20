@@ -9,9 +9,9 @@ OpenBoxGL imports installed libraries and local files from the sources you alrea
 
 - **Manifests**: `steamapps/appmanifest_*.acf` in every Steam library folder (`~/.local/share/Steam`, `~/.steam/steam`, the Flatpak `~/.var/app/com.valvesoftware.Steam/.local/share/Steam`, plus any library listed in `steamapps/libraryfolders.vdf`).
 - **Records**: name, platform `PC`, source `Steam`, `steam_app_id`, install dir, `store_installed`, and a launch command that prefers `steam -applaunch {app_id}`, falls back to `flatpak run com.valvesoftware.Steam -applaunch {app_id}`, then `xdg-open steam://rungameid/{app_id}`.
-- **Install state**: `store_installed` is `install_dir.is_dir()` at import time, so a manifest whose game folder is gone still imports but is marked missing. Those games show a red **Missing** badge and an **INSTALL** handoff instead of Play; installed games offer **Verify files**, which calls `POST /api/game/store-action` with `action: "repair"` and opens `steam://validate/<app_id>`. A storefront scan refreshes the flag in place.
+- **Install state**: `store_installed` is `install_dir.is_dir()` at import time, so a manifest whose game folder is gone still imports but is marked missing. Those games show a red **Missing** badge and an **INSTALL** handoff instead of Play; installed games offer **Verify files**, which calls `POST /api/v2/game/store-action` with `action: "repair"` and opens `steam://validate/<app_id>`. A storefront scan refreshes the flag in place.
 - **Prerequisite**: one of `steam`, `flatpak`, or `xdg-open` on `PATH`, else `"Steam, Flatpak, or xdg-open is required to launch imported Steam games."`
-- `POST /api/import/steam` imports installed games; the storefront catalog also reads owned app ids from `userdata/*/config/localconfig.vdf`.
+- `POST /api/v2/import/steam` imports installed games; the storefront catalog also reads owned app ids from `userdata/*/config/localconfig.vdf`.
 
 ## Heroic
 
@@ -56,18 +56,18 @@ Lutris is offered on Linux only.
 
 ## Arcade sets (MAME / FinalBurn Neo)
 
-- **Import**: `POST /api/import/arcade` with a ROM folder and optionally a DAT/XML file. Without a DAT, MAME's own `mame -listxml` output is used (`mame` must be installed, 300 s timeout, 256 MiB cap).
+- **Import**: `POST /api/v2/import/arcade` with a ROM folder and optionally a DAT/XML file. Without a DAT, MAME's own `mame -listxml` output is used (`mame` must be installed, 300 s timeout, 256 MiB cap).
 - **Classification** from the DAT (`cloneof` and per-set ROMs compared to ZIP contents): `parent`, `merged` (clone runs from the parent archive), `split` (own archive missing parent ROMs), `non-merged` (complete own archive).
 - Launch command defaults to `mame -rompath <folder> {rom_name}` or `fbneo {path}`; an explicit `command` overrides.
 - The set type counts are returned so you can verify classification.
 
 ## Loose arcade, console, and small-format helpers
 
-- `POST /api/import/loose-arcade`: `.zip`/`.7z`/`.singe`/`.rom` files, defaulting to `hypseus`/`singe` commands.
-- `POST /api/import/xbox360`: folders with `default.xex`, `.xex`, `.xbe`; title from the parent folder for `default.xex`.
-- `POST /api/import/scummvm`: games from `scummvm.ini` sections.
-- `POST /api/import/rpcs3`: titles from `dev_hdd0/game/*/PARAM.SFO` (PS3), plus external game folders and ISOs declared in `games.yml` (or the `games:` list of `config.yml`) in both the native `~/.config/rpcs3` and Flatpak config directories. A path that no longer exists, a folder without `PARAM.SFO`, or a non-ISO file is reported and skipped; one bad entry never aborts the scan.
-- `POST /api/import/vita3k`: titles from `ux0/app/*/sce_sys/param.sfo` (Vita), resolving title ids to readable names.
+- `POST /api/v2/import/loose-arcade`: `.zip`/`.7z`/`.singe`/`.rom` files, defaulting to `hypseus`/`singe` commands.
+- `POST /api/v2/import/xbox360`: folders with `default.xex`, `.xex`, `.xbe`; title from the parent folder for `default.xex`.
+- `POST /api/v2/import/scummvm`: games from `scummvm.ini` sections.
+- `POST /api/v2/import/rpcs3`: titles from `dev_hdd0/game/*/PARAM.SFO` (PS3), plus external game folders and ISOs declared in `games.yml` (or the `games:` list of `config.yml`) in both the native `~/.config/rpcs3` and Flatpak config directories. A path that no longer exists, a folder without `PARAM.SFO`, or a non-ISO file is reported and skipped; one bad entry never aborts the scan.
+- `POST /api/v2/import/vita3k`: titles from `ux0/app/*/sce_sys/param.sfo` (Vita), resolving title ids to readable names.
 - `POST /api/v2/import/pico8`: `.p8` and exported `.p8.png` carts, imported on the `pico8-pico8` adapter.
 - `POST /api/v2/import/msu1`: pairs a `*.msu` audio-pack folder with its sibling `.sfc`/`.smc` ROM and records `msu1: true` plus `msu_path`; a pack with no matching ROM is an error, not a game.
 - `POST /api/v2/import/whdload`: `.lha`/`.slave`/`.hdf` Amiga installs, skipping WHDLoad system drawers, on the `amiga-whdload` adapter.
@@ -76,16 +76,16 @@ Lutris is offered on Linux only.
 
 - **Source**: Faugus data directories and manifests (`~/.config/faugus-launcher`, `~/.local/share/faugus-launcher`, `~/Faugus`, and prefix directories with `drive_c`).
 - **Records**: name, path, source `Faugus`, `faugus_id`, `wine_prefix`, and launch command defaulting to `umu-run {path}`.
-- `GET /api/faugus/status` checks if Faugus is installed; `GET /api/faugus/scan` scans available games; `POST /api/faugus/import` imports scanned games with canonical identity deduplication.
+- `GET /api/v2/faugus/status` checks if Faugus is installed; `GET /api/v2/faugus/scan` scans available games; `POST /api/v2/faugus/import` imports scanned games with canonical identity deduplication.
 
 ## Proton & Wine prefix manager
 
 - **Discovery**: discovers active Wine prefixes across standard locations (`~/.wine`, `~/.local/share/wineprefixes`, Heroic, Lutris, Bottles, and Steam Proton prefixes) and detected Proton installations (`~/.local/share/Steam/compatibilitytools.d`, Steam common Proton runtimes).
-- **Endpoints**: `GET /api/wine/prefixes` lists known prefixes, `GET /api/wine/protons` lists detected Proton versions, and `GET /api/wine/prefix-for-game?game_id=...` resolves or recommends a prefix for a specific title.
+- **Endpoints**: `GET /api/v2/wine/prefixes` lists known prefixes, `GET /api/v2/wine/protons` lists detected Proton versions, and `GET /api/v2/wine/prefix-for-game?game_id=...` resolves or recommends a prefix for a specific title.
 
 ## Import exclusions
 
-Entries added via `/api/import/exclusions` block specific storefront titles from future imports and rescans, keyed by source + external id (Heroic entries can carry a three-part `heroic` key for store-specific exclusions). The sources are Steam, Heroic, Lutris, Gameyfin, GOG, EA, and Ubisoft; Gameyfin exclusions work the same as the other storefronts, including on startup auto-import.
+Entries added via `/api/v2/import/exclusions` block specific storefront titles from future imports and rescans, keyed by source + external id (Heroic entries can carry a three-part `heroic` key for store-specific exclusions). The sources are Steam, Heroic, Lutris, Gameyfin, GOG, EA, and Ubisoft; Gameyfin exclusions work the same as the other storefronts, including on startup auto-import.
 
 ## Failure model
 

@@ -117,7 +117,13 @@ function apiPaths(text) {
  */
 function isDocumented(path) {
   const target = shape(path);
-  for (const found of allDocPaths) if (found === target) return true;
+  for (const found of allDocPaths) {
+    if (found === target) return true;
+    // A documented family covers its members, and a documented child names
+    // the family it belongs to. This keeps a reference page readable while
+    // still requiring every route to be reachable from some documented path.
+    if (target.startsWith(`${found}/`) || found.startsWith(`${target}/`)) return true;
+  }
   return false;
 }
 
@@ -128,8 +134,26 @@ const undocumented = baseline.routes.filter((r) => !isDocumented(r.path)).map((r
 // Reverse direction: an API path the docs promise that no longer exists.
 const known = baseline.routes.map((r) => shape(r.path));
 const phantom = new Set();
+// Namespace mentions and deliberately retired paths that the docs name in
+// order to explain their retirement. They are not phantom routes.
+const RETIRED_OR_NAMESPACE = new Set([
+  '/api/faugus',
+  '/api/jobs',
+  '/api/launch',
+  '/api/launcher/menu',
+  '/api/native',
+  '/api/native/capabilities',
+  '/api/ra',
+  '/api/shutdown',
+  '/api/wine',
+  '/api/v2-only',
+]);
+
 for (const [file, text] of docs) {
+  // Historical release notes legitimately name the pre-2.1 unversioned paths.
+  if (file.endsWith('changelog.md')) continue;
   for (const p of apiPaths(text)) {
+    if (RETIRED_OR_NAMESPACE.has(p)) continue;
     // A documented family covers its members.
     if (known.some((k) => p === k || p.startsWith(`${k}/`) || k.startsWith(`${p}/`))) continue;
     phantom.add(`${p}  (${file})`);

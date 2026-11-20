@@ -12,7 +12,7 @@ OpenBoxGL brings mixed game collections into one searchable catalog. Keep librar
 
 <ProductShot src="/openbox-screenshot.png" alt="The OpenBox native window: filter rail on the left, grouped cover grid in the center, and the selected game's detail pane on the right." caption="The native window: filter rail, grouped cover grid, and game detail pane in one workspace." />
 
-[**Install OpenBoxGL 1.19.1**](/install/) [**Read the quick start**](/getting-started/) [**Read the release notes**](/changelog/)
+[**Install OpenBoxGL 3.0.0**](/install/) [**Read the quick start**](/getting-started/) [**Read the release notes**](/changelog/)
 
 ## What OpenBoxGL is
 
@@ -25,7 +25,7 @@ The application ships one UI over two hosts, both over the same local data:
 | Native window (Linux) | `openbox` or `openbox-native` | Default desktop window (WebKitGTK), full feature set |
 | Native window (Windows) | `openbox.cmd` or `powershell -File .\openbox.ps1` | WebView2 desktop window; the released install ships the compiled host, so no build step is needed |
 | Native window (macOS) | `openbox` | WKWebView window with the same tray, dialogs, and deeplinks; installed from the app bundle |
-| Web UI | `openbox --web` or `python3 web_app.py` (Linux and macOS); `openbox.cmd --web` (Windows) | Development and debugging, REST API, Big Box mode |
+| Web UI | `openbox --web` (Linux/macOS); `openbox.cmd --web` (Windows) | Development and debugging, REST API, Big Box mode |
 
 When you start OpenBox, a local server starts on `127.0.0.1` and the native window renders the UI against it. With `--web`, your browser opens to the same server instead. The server never listens on the network, and every API request must carry a per-launch token, so the window (or tab) you open is the only client.
 
@@ -62,7 +62,7 @@ Each area has its own guide. The cards below say what you will find there.
   { href: '/changelog/', title: 'Library intelligence', eyebrow: 'New in 1.14', description: 'A 0-100 library health score, the Artwork Doctor, missing-file repair and duplicate merge, offline Game DNA search, Plugins 2.0, and a personal backlog layer.' },
   { href: '/guides/emulators-and-launching/#check-every-game-v1160', title: 'Check every game', eyebrow: 'New in 1.16', description: 'Find every game that will not launch before you try it. Problems grouped by cause, so 412 games blocked by one missing emulator read as one line with one Install button.' },
   { href: '/guides/sessions-saves-and-backups/#preview-a-restore-before-you-restore', title: 'Preview a restore', eyebrow: 'New in 1.16', description: 'See what restoring a backup would remove, bring back, and overwrite field by field before anything happens. The Restore button only appears after a preview loads.' },
-  { href: '/changelog/', title: 'Portable library and API v2', eyebrow: 'New in 2.0', description: 'Library format 7 with rollback, /api/v2 as the public contract, portable @library paths with Move library, backup format 2, plugin API v2, and the Windows ARM64 lane. Unreleased until the v2.0.0 tag.' },
+  { href: '/changelog/', title: 'Rust backend and 50,000 games', eyebrow: 'New in 3.0', description: 'Native openbox-server with zero bundled Python, 50,000-game scale, Save Vault, Achievement Trail, Deal Radar, Player\'s Log, Backlog Itinerary, and the redesigned library workspace.' },
   { href: '/changelog/', title: 'A clearer, deeper library', eyebrow: 'New in 1.18', description: 'One Add games menu, a six-step Setup Center, F1 Help & shortcuts, a Jump back in card, a media queue that survives a restart, selective save restore, and plugin capabilities.' },
   { href: '/reference/api/one-seventeen/', title: 'Every Launcher', eyebrow: 'New in 1.17', description: 'Native installed-game imports for GOG Galaxy, the EA app, and Ubisoft Connect on Windows, plus Game Night decks, price paid with cost per hour, and translated server notices.' },
   { href: '/guides/library/importing/', title: 'Imports', eyebrow: 'Bring in', description: 'Steam, Heroic, Lutris, Gameyfin, native GOG/EA/Ubisoft on Windows, ROM folders, arcade DAT files, standalone games, and local services.' },
@@ -74,7 +74,7 @@ Each area has its own guide. The cards below say what you will find there.
   { href: '/guides/library/time-machine/', title: 'Time Machine', eyebrow: 'Rewind', description: 'Inspect the journal, browse bounded as-of views, compare two dates to see exactly what changed, and preview safe catalog reverts.' },
   { href: '/guides/library/queue-tags-notifications/', title: 'Organization', eyebrow: 'Automate', description: 'Play queue, normalized tags, notifications, and signed webhook automation.' },
   { href: '/guides/retroachievements/', title: 'RetroAchievements', eyebrow: 'Achieve', description: 'Match ROMs to achievement sets and track hardcore, beaten, and mastered progress.' },
-  { href: '/guides/plugins/', title: 'Plugins', eyebrow: 'Extend', description: 'Install local Python extensions that observe or change the library and launches.' },
+  { href: '/guides/plugins/', title: 'Plugins', eyebrow: 'Extend', description: 'Install local plugins — Python or native executable — that observe or change the library and launches.' },
   { href: '/guides/discovery/', title: 'Discovery', eyebrow: 'Decide', description: 'Recently added, never played, continue playing, and short-session views.' },
   { href: '/guides/discovery/backlog-radio/', title: 'Backlog Radio', eyebrow: 'Ask', description: 'Get explainable local recommendations, query with natural-language chips, and use Ctrl/Cmd-K.' },
   { href: '/guides/big-box-and-handhelds/arcade-room/', title: 'Arcade Room', eyebrow: 'Showcase', description: 'Walk a controller-friendly platform showroom, enter Kiosk mode, and configure kiosk convenience.' },
@@ -145,7 +145,7 @@ No OpenBox account is required. Optional integrations may have their own account
 
 ### What operating systems are supported?
 
-OpenBoxGL targets Linux desktops, laptops, Steam Deck systems, and handheld PCs on x86_64 and aarch64, plus Windows x86_64 since 1.13.0 and ARM64 since 2.0 and macOS 11 or newer on Apple Silicon and Intel since 1.19.0. Linux installs from the AppImage, Flatpak, or source; source installs require Python 3.10 or newer, while the AppImage bundles its own Python runtime. Windows installs from the signed portable package using the published `install.ps1`, requires Windows PowerShell 5.1, and needs neither curl nor OpenSSL. macOS installs from the signed universal app bundle with `install-macos.sh`, and the app bundle carries its own Python. The runtime itself stays dependency-free on every platform: standard library only, no `pip install`, no `requirements.txt`, no virtualenv. The current requirements and package paths are listed in [Installation](/install/), and the platform guides are [Windows](/windows/) and [macOS](/macos/).
+OpenBoxGL targets Linux desktops, laptops, Steam Deck systems, and handheld PCs on x86_64 and aarch64, plus Windows x86_64 since 1.13.0 and ARM64 since 2.0 and macOS 11 or newer on Apple Silicon and Intel since 1.19.0. Linux installs from the AppImage, Flatpak, or source; packaged builds ship the Rust `openbox-server` with no bundled Python; source builds need Rust 1.92+, and Python 3.11+ is only for the `OPENBOX_BACKEND=python` fallback and `.py` plugins. Windows installs from the signed portable package using the published `install.ps1`, requires Windows PowerShell 5.1, and needs Python only for the installer and `.py` plugins. macOS installs from the signed universal app bundle with `install-macos.sh`, and the bundle ships the Rust server with no Python runtime. The current requirements and package paths are listed in [Installation](/install/), and the platform guides are [Windows](/windows/) and [macOS](/macos/).
 
 ### Is my data sent anywhere?
 

@@ -3,7 +3,7 @@ title: Troubleshooting startup and window
 description: Diagnose why the app does not start or the window does not open.
 ---
 
-Start with the diagnostic log and the exact visible error. **Settings > Advanced** has **Copy diagnostic log**: it copies a redacted diagnostic **summary** (the `/api/diagnostic` preview, with secrets and the full log excluded). The rotating log is `<data-dir>/openbox.log` (2 MiB per file, 4 rotations); it redacts tokens, passwords, secrets, API keys, and authorization values, but may include game names and local file paths. Review it before sharing.
+Start with the diagnostic log and the exact visible error. **Settings > Advanced** has **Copy diagnostic log**: it copies a redacted diagnostic **summary** (the `/api/v2/diagnostic` preview, with secrets and the full log excluded). The rotating log is `<data-dir>/openbox.log` (2 MiB per file, 4 rotations); it redacts tokens, passwords, secrets, API keys, and authorization values, but may include game names and local file paths. Review it before sharing.
 
 ## The window did not open
 
@@ -11,7 +11,7 @@ The native window renders the same UI as the web UI; both are served by the loop
 
 - When WebKitGTK is missing, `openbox` prints an install hint and falls back to a chrome-less app window (then your default browser). Install `libwebkit2gtk-4.1-dev` (Debian/Ubuntu) or `webkit2gtk-4.1` (Fedora) for the native window.
 - `openbox --web` forces the loopback web UI in a browser instead of the native window.
-- `python3 web_app.py --no-browser` starts the server without opening any window; open the printed `http://127.0.0.1:PORT/?token=...` URL yourself.
+- `openbox --web` starts the Rust server without opening a native window; open the printed `http://127.0.0.1:PORT/?token=...` URL yourself.
 
 ## Nothing starts at all
 
@@ -30,7 +30,7 @@ Check `OPENBOX_DATA_DIR`. The server is reading a different directory than the o
 
 - **Pointer or wheel navigation does nothing.** Pointer drag and mouse wheel are separate switches (`pointer_nav_enabled`, `mouse_wheel_nav`). A trackball or spinner needs the pointer path and a usable `spinner_sensitivity` (1..20, default 6); wheel speed is `bigbox_wheel_speed` (0.25..3.0, default 1).
 - **Back does not open the menu.** Holding Back opens the Big Box menu once `bigbox_back_hold_seconds` (0–2, default 0.8) has elapsed; a short tap closes Big Box instead. A zero value makes Back close immediately with no menu. Check controller remapping if Back was reassigned.
-- **The battery indicator is missing.** It reads the battery on each platform: Linux sysfs, `pmset` on macOS, and `GetSystemPowerStatus` on Windows. `GET /api/native/battery` returns `present: false` on a host with no battery, such as a desktop, and the indicator is hidden when `battery_indicator` is off.
+- **The battery indicator is missing.** It reads the battery on each platform: Linux sysfs, `pmset` on macOS, and `GetSystemPowerStatus` on Windows. `GET /api/v2/native/battery` returns `present: false` on a host with no battery, such as a desktop, and the indicator is hidden when `battery_indicator` is off.
 - **Video has no sound or fights the music.** Video controls and the audio mix are settings: `bigbox_video_controls` adds the play/seek/mute/full-screen bar, `bigbox_video_volume` sets the video level (0.0–1.0, default 0.8), and `video_bgm_mix` lowers background music under video audio instead of muting the video. A startup video that should play once needs `bigbox_startup_video_loop` off.
 - **No sounds or background music.** Themes may supply a sound pack and background music; a theme without those assets is silent. Missing theme assets are skipped, not an error.
 - **A helper app should stop when Big Box exits.** `bigbox_shutdown_commands` runs shell-free commands when Big Box mode is left; a command that cannot start is skipped and logged, and does not block the exit.

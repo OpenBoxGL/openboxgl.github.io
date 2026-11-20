@@ -14,7 +14,7 @@ The diagnostic log is the first place to look when anything misbehaves. It recor
 
 ## Copy it
 
-**Settings > Advanced > Copy diagnostic log** copies a redacted diagnostic **summary** to the clipboard (it excludes secrets and the full log). This is the canonical way to attach diagnostics to an issue. The complete rotating log is available separately: `GET /api/log` returns its last 250 KB for local scripting, and `GET /api/diagnostic` returns the same summary preview the button copies.
+**Settings > Advanced > Copy diagnostic log** copies a redacted diagnostic **summary** to the clipboard (it excludes secrets and the full log). This is the canonical way to attach diagnostics to an issue. The complete rotating log is available separately: `GET /api/v2/log` returns its last 64 KiB for local scripting, and `GET /api/v2/diagnostic` returns the same summary preview the button copies.
 
 ## How to use it
 
@@ -30,8 +30,7 @@ The diagnostic log is the first place to look when anything misbehaves. It recor
 
 ## Related diagnostic files
 
-- `<data-dir>/cache/launch_audit.json` holds the last launch audit report.
-- `<data-dir>/cache/launch_audit.jsonl` is the compact rolling audit history (rotates to `.1` at 5 MiB).
+- `<data-dir>/cache/launch_audit.json` is the cached Launch Audit report read by the grid badges. The Python fallback also writes a rolling `launch_audit.jsonl` history (rotates to `.1` at 5 MiB); the Rust server does not.
 - `<data-dir>/media-queue.json` is the durable media queue; failed items carry `last_error` and attempts.
 - `<data-dir>/storefront-status.json` (or the status file reported by `GET /api/v2/storefront/status`) holds the last per-source scan state.
 
@@ -41,4 +40,4 @@ These are caches, not library state; removing them loses history, not games.
 
 - [Interfaces and data](/interfaces-and-data/), data directory layout and rotation
 - [Troubleshooting](/guides/troubleshooting/), the index of every troubleshooting area
-- [API local administrator](/reference/api/local-admin/), `GET /api/log`
+- [API local administrator](/reference/api/local-admin/), `GET /api/v2/log`

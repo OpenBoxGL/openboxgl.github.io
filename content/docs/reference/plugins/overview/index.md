@@ -3,7 +3,7 @@ title: Plugin API overview
 description: Trust boundary, the local plugin lifecycle, and capability services.
 ---
 
-Plugins are optional local Python packages that observe or extend OpenBoxGL. They are untrusted-by-default third-party code: review a package before installing it, and use safe mode to disable all plugins when something misbehaves.
+Plugins are optional local packages that observe or extend OpenBoxGL. A v2 entry may be a Python file or a native executable. They are untrusted-by-default third-party code: review a package before installing it, and use safe mode to disable lifecycle hooks and webhooks when something misbehaves. Plugin API v1 was removed in 3.0; every manifest must declare `"api_version": 2`.
 
 ## Trust boundary
 
@@ -14,13 +14,13 @@ Plugins are optional local Python packages that observe or extend OpenBoxGL. The
 
 ## Lifecycle
 
-1. **Install** (`/api/plugins/install`): a directory or ZIP package is staged, validated, and moved into `plugins/<id>/`. Updates replace the previous version atomically; a failed install or update restores the previous version.
-2. **Enable/disable** (`/api/plugins/toggle`): disabled plugin ids persist in `plugins-state.json`; disabled plugins are skipped by every hook. Disabling also deletes the games the plugin imported and stops its cached stats from merging, while keeping its stored settings, trust, grants, data, and credentials.
+1. **Install** (`/api/v2/plugins/install`): a directory or ZIP package is staged, validated, and moved into `plugins/<id>/`. Updates replace the previous version atomically; a failed install or update restores the previous version.
+2. **Enable/disable** (`/api/v2/plugins/toggle`): disabled plugin ids persist in `plugins-state.json`; disabled plugins are skipped by every hook. Disabling also deletes the games the plugin imported and stops its cached stats from merging, while keeping its stored settings, trust, grants, data, and credentials.
 3. **Run**: on each hook event, enabled plugins that declare the hook execute in sorted (alphabetical) directory order, each as a separate process.
-4. **Remove** (`/api/plugins/remove`): the package moves to `plugins/.removed/<id>-<timestamp>` (recoverable), imported games are deleted, and its disabled state, trust grant, permission grants, settings, data bag, credentials, and stats cache are cleared, so a reinstall comes back enabled and untrusted.
+4. **Remove** (`/api/v2/plugins/remove`): the package moves to `plugins/.removed/<id>-<timestamp>` (recoverable), imported games are deleted, and its disabled state, trust grant, permission grants, settings, data bag, credentials, and stats cache are cleared, so a reinstall comes back enabled and untrusted.
 5. **Repair/reinstall** (`POST /api/v2/plugins/repair`, 1.18.0+): reinstalls an installed plugin from its catalog entry, or from its recorded local package when the catalog has no entry (the recorded SHA-256 is re-verified). Settings and cached stats are preserved, and the trust record is kept but re-evaluated against the new package checksum: a reinstall whose bytes differ leaves the plugin untrusted and asks for approval again.
 6. **Trust** (`GET`/`POST /api/v2/plugins/trust`, 1.14.0+): on a host where the bubblewrap sandbox cannot be created, a plugin does nothing until you grant per-plugin trust in the Plugins manager. The grant is bound to the installed package's SHA-256, so any update that changes the package invalidates it and re-prompts. There is deliberately no global "trust everything" switch; `OPENBOX_ALLOW_UNSANDBOXED_PLUGINS=1` remains the operator-level override.
-7. **Permissions** (`POST /api/v2/plugins/permissions`, 1.14.0+): declared permissions are denied by default. The only permission in 1.x is `network`; granting it adds `--share-net` to the plugin's sandbox argv, and without the grant the plugin keeps the no-network sandbox. A grant can never exceed the manifest declaration.
+7. **Permissions** (`POST /api/v2/plugins/permissions`, 1.14.0+): declared permissions are denied by default. The only permission is `network`; granting it adds `--share-net` to the plugin's sandbox argv, and without the grant the plugin keeps the no-network sandbox. A grant can never exceed the manifest declaration.
 8. **Settings** (`GET`/`POST /api/v2/plugins/settings`, 1.14.0+): a manifest `settings` JSON Schema subset renders a form under Settings > Plugins; validated values are stored per plugin and delivered to the hook as `payload["settings"]`.
 9. **Data and credentials** (1.18.0+): `GET`/`POST /api/v2/plugins/data` reads or shallow-merges the bounded data bag; `GET`/`POST /api/v2/plugins/credentials` writes capability credentials and only ever returns key names and presence flags.
 
@@ -28,12 +28,12 @@ Plugins are optional local Python packages that observe or extend OpenBoxGL. The
 
 | Hook | When | Effect on result |
 | --- | --- | --- |
-| `library` | Every `/api/library` read (cached for 30 seconds), skipped in safe mode | May rewrite the `games` list; the response uses the last plugin's output when it is a dict with a `games` list of the same length |
-| `before_launch` | At launch, after profile/archive resolution, skipped in safe mode | May rewrite `args`/`cwd` or cancel with `{"cancel": true, "error": "..."}`; structurally invalid output is discarded with a warning and the original launch command is used |
-| `after_session` | After a session ends (history recorded, plugins run unless safe mode) | Ignored (return value discarded) |
+| `library` | Every `/api/v2/library` read (cached for 30 seconds), skipped in safe mode. **Python fallback only in 3.0.** | May rewrite the `games` list; the response uses the last plugin's output when it is a dict with a `games` list of the same length |
+| `before_launch` | At launch, after profile/archive resolution, skipped in safe mode. **Python fallback only in 3.0.** | May rewrite `args`/`cwd` or cancel with `{"cancel": true, "error": "..."}`; structurally invalid output is discarded with a warning and the original launch command is used |
+| `after_session` | After a session ends (history recorded, plugins run unless safe mode). **Python fallback only in 3.0.** | Ignored (return value discarded) |
 | `command` | When a palette command is invoked (1.14.0+) | Returns an optional `notification` to show; unlike the chained hooks, its errors surface to the caller |
-| `library_source` | On every library read, for manifests declaring it (1.14.0+) | Contributes imported games, namespaced `plugin:<plugin_id>:<id>` and merged into the public library |
-| `events` | On each lifecycle event: `app_startup`, `app_shutdown`, `scan_finished`, `playtime_milestone`, `game_added`, `game_removed`, `game_updated` (1.14.0+) | Result discarded; a failure is logged and never breaks the emitting operation |
+| `library_source` | On every library read, for manifests declaring it (1.14.0+). **Python fallback only in 3.0.** | Contributes imported games, namespaced `plugin:<plugin_id>:<id>` and merged into the public library |
+| `events` | On lifecycle events. The Rust server emits `app_startup` and `app_shutdown`; the Python fallback also emits `scan_finished`, `playtime_milestone`, `game_added`, `game_removed`, and `game_updated` (1.14.0+) | Result discarded; a failure is logged and never breaks the emitting operation |
 | `storefront`, `metadata`, `media`, `stats`, `emulator`, `discovery` | Only for plugins that declare the matching capability (1.18.0+) | Provides source-style data; see [Hooks](/reference/plugins/hooks/#capability-hooks) |
 
 ## Capability services
@@ -62,7 +62,7 @@ There is no standalone `services` hook. Declaring one is rejected, and `service_
 ## Limits and failure behavior
 
 - One JSON object per invocation over stdin/stdout.
-- Input payload capped at 2 MiB; output capped at 2 MiB for `api_version: 1` and 4 MiB for `api_version: 2` (2.0.0+). Oversized output is ignored with a warning.
+- Input payload capped at 2 MiB; output capped at 4 MiB for `api_version: 2`. Oversized output is ignored with a warning.
 - Per-hook timeout: 5 seconds for base hooks, 30 seconds for `storefront`, 15 seconds for `metadata`/`media`/`stats`, and 10 seconds for `emulator`/`discovery`. A timeout, crash, or invalid JSON logs a warning and the plugin's result is skipped (the previous result passes through). Palette `command` runs are the exception: a hook error there is surfaced to the API caller as a `400`.
 - A nonzero exit is logged with the last 400 bytes of stderr.
 - The plugin environment is cleaned: `PYTHONPATH`, `PYTHONHOME`, `LD_PRELOAD`, `LD_LIBRARY_PATH` removed, `PYTHONNOUSERSITE=1`.

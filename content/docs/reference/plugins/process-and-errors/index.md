@@ -3,27 +3,23 @@ title: Plugin processes and errors reference
 description: Protocol limits, per-hook timeouts, safe mode, and rollback.
 ---
 
-Every plugin invocation runs in a child process with JSON on stdin/stdout — a one-shot `plugin_runner.py` per call for `api_version: 1`, or a persistent JSON Lines session (`plugin_runner_v2.py`) for `api_version: 2` plugins (2.0.0+). This page documents the exact limits and failure handling.
+Every plugin invocation runs in a fresh child process with a JSON Lines frame on stdin/stdout. Plugin API v1 and `plugin_runner.py` were removed in 3.0; every manifest must declare `"api_version": 2` or it fails with `PLUGIN_API_RETIRED`. This page documents the exact limits and failure handling.
 
-## Protocol (v1)
+## Protocol (v2)
 
-- The runner passes the current payload as one JSON object on stdin and reads one JSON object from stdout.
+- A `.py` entry is started through `python3 -B plugin_runner_v2.py <entry>`; a native executable entry is started directly. The host writes one `{"type":"invoke", "hook": ..., "payload": ...}` frame and reads a `result`, `error`, or `cancelled` frame.
 - A plugin whose module lacks the hook function gets the input payload and echoes it back.
-- A plugin whose return value is not a dict falls back to the input payload (`json.dump(result if isinstance(result, dict) else payload, ...)`).
+- A plugin whose return value is not a dict falls back to the input payload.
 - Capability hooks get one optional extra round for `service_requests`: the host runs at most 8 read-only services and re-invokes the same hook once with `service_results`. A second request list is dropped with a warning.
-
-## Protocol (v2, 2.0.0+)
-
-- The entry point is loaded once in a persistent process; each invocation is an `invoke` request on one JSON Lines frame and answers a `result`, `error`, or `cancelled` frame. A `cancel` request interrupts an in-flight call.
 - Host services are versioned, read-only descriptors (`library.query`, `media.search`) requested through the runner rather than a re-invoked hook.
-- A `api_version: 1` manifest stays on the v1 runner with byte-identical v1 payloads; the v1 runner is scheduled for removal in 3.0.
+- There is no persistent runner process; each hook call starts a new process. A timeout kills that process.
 
 ## Limits
 
 | Limit | Value | Behavior when exceeded |
 | --- | --- | --- |
 | Input payload | 2 MiB (`MAX_PLUGIN_PAYLOAD`) | The plugin is skipped with `"Payload is too large for plugin execution."` |
-| Output | 2 MiB (v1); 4 MiB (v2) | Output beyond the cap is ignored: `"Plugin output exceeded the payload limit."` |
+| Output | 4 MiB (v2 only) | Output beyond the cap is ignored: `"Plugin output exceeded the payload limit."` |
 | Execution time, base hooks | 5 seconds | The process is killed; a warning is logged and the plugin's result is skipped |
 | Execution time, `storefront` | 30 seconds | Above |
 | Execution time, `metadata` / `media` / `stats` | 15 seconds | Above |

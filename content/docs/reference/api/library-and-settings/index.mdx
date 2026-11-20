@@ -8,7 +8,7 @@ Read and write the library, settings, profiles, launch configuration, and game r
 
 ## Library and state
 
-<ApiEndpoint method="GET" path="/api/library">
+<ApiEndpoint method="GET" path="/api/v2/library">
 
 
 Returns the public library projection, cached until the library file, media epoch, or plugin epoch changes. Supports pagination via `?offset=<int>&limit=<int>`. Served gzip-compressed to clients that accept it with an ETag for conditional GET (`If-None-Match` returns `304 Not Modified`). Top-level keys:
@@ -21,7 +21,7 @@ In safe mode the `library` hook is skipped; otherwise plugin `library` hooks can
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/library/delta">
+<ApiEndpoint method="GET" path="/api/v2/library/delta">
 
 Incremental sync endpoint returning updated projections for a specific subset of games. Accepts `?ids=id1,id2,...` (up to 1,000 game IDs).
 
@@ -35,7 +35,7 @@ Returns:
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/game">
+<ApiEndpoint method="POST" path="/api/v2/game">
 
 
 Create or update one game. Locate by top-level `id` (numeric) or `game_id` (stable) for updates; omit both to create. The game properties must be nested under `"game"`: `{"id": int (opt), "game_id": str (opt), "game": {"name": "...", "path": "...", ...}}`. Validation:
@@ -53,21 +53,21 @@ Returns `{"ok": true}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/game/delete">
+<ApiEndpoint method="POST" path="/api/v2/game/delete">
 
 
 Remove a game by `id` or `game_id`. With `delete_media: true`, associated media files (cover, background, screenshots, and all media fields) are removed only when they are safe files inside the data directory; media deletions bump the media epoch. Returns `{"removed": "<name>", "deleted_media": [...], "shared_media": [...]}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/games/delete-steam">
+<ApiEndpoint method="POST" path="/api/v2/games/delete-steam">
 
 
-Remove every game with `source` equal to `Steam` (case-insensitive). Returns `{"removed": <count>}`.
+Remove every game with `source` equal to `Steam` (case-insensitive). Returns `{"removed": <count>, "left": <count>}`; `left` counts Steam games kept because the trash cap was reached.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/games/bulk">
+<ApiEndpoint method="POST" path="/api/v2/games/bulk">
 
 
 Apply the same change to many games. Body: `{"ids": [...], "changes": {...}}`. Allowed change keys include `platform`, `genre`, `progress`, `rating`, `favorite`, `hidden`, `esrb`, `custom_fields`, `tags`, `tags_add`, `tags_remove`, `play_count`, `playtime_seconds`, `last_played`, and `reset_stats`. Rules:
@@ -79,14 +79,14 @@ Apply the same change to many games. Body: `{"ids": [...], "changes": {...}}`. A
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/games/bulk-wizard">
+<ApiEndpoint method="POST" path="/api/v2/games/bulk-wizard">
 
 
 Same as bulk edit but validates against the bulk wizard fields (`platform`, `genre`, `progress`, `rating`, `favorite`, `hidden`, `esrb`, `custom_fields`). The wizard route is for guided edits and does not accept `reset_stats`, play counts, raw tags, or arbitrary fields. Returns `{"updated": <count>, "fields": [...], "media_moved": <count>, "media_errors": [...]}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/favorite">
+<ApiEndpoint method="POST" path="/api/v2/favorite">
 
 
 Toggle a game's favorite flag by `id` or `game_id`. Returns `{"favorite": <bool>}`.
@@ -95,14 +95,14 @@ Toggle a game's favorite flag by `id` or `game_id`. Returns `{"favorite": <bool>
 
 ## Settings
 
-<ApiEndpoint method="GET" path="/api/settings">
+<ApiEndpoint method="GET" path="/api/v2/settings">
 
 
 Returns the public settings projection: every validated setting key with defaults, plus `save_tools` (ludusavi/hoard presence), `safe_mode`, `version`, `appimage`, `gamescope_guest`, and `premium_features_free: true`. Secrets are never included; credential presence is exposed as booleans (`gameyfin_password_set`, `emumovies_configured`).
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/settings">
+<ApiEndpoint method="POST" path="/api/v2/settings">
 
 
 Partial save: merge the posted keys into existing settings and validate. See [Configuration](/reference/configuration/) for the full validation table. Empty `gameyfin_password` keeps the stored password. Returns the new public settings. A save that would change `library_root` or `path_mode` is refused — use the Move library flow, which previews the change first. Keys outside the registry are dropped with a diagnostic warning rather than persisted.
@@ -155,27 +155,27 @@ Starts a background `steam.stats` job that refreshes owned-game statistics into 
 
 ## Profiles
 
-<ApiEndpoint method="GET" path="/api/profiles">
+<ApiEndpoint method="GET" path="/api/v2/profiles">
 
 
 Returns `{"profiles": state.profiles, "detected": discover_profiles()}` where `detected` lists launchable platform defaults from binaries on `PATH` (DOSBox, Wine, MAME, Dolphin, PCSX2, PPSSPP, RPCS3, DuckStation).
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/profiles">
+<ApiEndpoint method="POST" path="/api/v2/profiles">
 
 
 Replace all profiles: `{"profiles": {"Platform": "command {path}", ...}}` (blank entries dropped). Returns `{"saved": <count>}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/perf_profiles">
+<ApiEndpoint method="GET" path="/api/v2/perf_profiles">
 
 Reads per-launch-profile TDP limits for handheld tuning. Each entry: `{"enabled": bool, "tdp_w": float, "restore_tdp_w": float}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/perf_profiles">
+<ApiEndpoint method="POST" path="/api/v2/perf_profiles">
 
 Saves per-launch-profile TDP limits for handheld tuning. Each entry: `{"enabled": bool, "tdp_w": float, "restore_tdp_w": float}`; blank names and all-zero entries are dropped; non-numeric TDP raises `400`. Returns `{"saved": <count>}`.
 
@@ -183,27 +183,27 @@ Saves per-launch-profile TDP limits for handheld tuning. Each entry: `{"enabled"
 
 ## Running sessions and history
 
-<ApiEndpoint method="GET" path="/api/running">
+<ApiEndpoint method="GET" path="/api/v2/running">
 
 
 `{"running": [...], "abandoned": [...], "events": [...], "last_event": <sequence>}`. Poll with `?after=<sequence>` to receive only new session lifecycle events (id, kind `started|stopped|paused|resumed`, launch_id, game, time, optional exit_code/seconds). In-memory event buffer holds the last 100 events.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/session/control">
+<ApiEndpoint method="POST" path="/api/v2/session/control">
 
 
 `{"launch_id": "...", "action": "pause"|"resume"|"stop"|"restart"|"kill"}`. `stop`/`restart` send SIGTERM to the process group, `kill` sends SIGKILL; paused games are resumed first except for `kill`. A game that is no longer running raises `400`. Returns `{"ok": true, "action": action}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/session/cleanup">
+<ApiEndpoint method="POST" path="/api/v2/session/cleanup">
 
 Removes an abandoned persisted active-session row by `launch_id`; it does not signal a running process. Returns `{"ok": true}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/history">
+<ApiEndpoint method="GET" path="/api/v2/history">
 
 
 `{"history": [...], "enabled": <track_session_history>}`. Sessions are newest first; `?limit=` clamps to 1..500 (default 100). Each session: `game`, `started`, `seconds`, `exit_code`.
@@ -227,14 +227,14 @@ Read-only browser over RetroArch's public netplay lobby. Returns `{"available": 
 
 ## Launch
 
-<ApiEndpoint method="POST" path="/api/launch">
+<ApiEndpoint method="POST" path="/api/v2/launch">
 
 
 Start a game. Body: `{"id": <index>}` or `{"game_id": "<stable>"}` (or both). Resolution prefers `game_id`; a missing game raises `400`. Before launch: archive extraction (if configured), performance profile apply, then `before_launch` plugins (unless safe mode) which may rewrite `args`/`cwd` or cancel the launch with an error. The process starts in a new session; the response returns the running-session entry (`launch_id`, `pid`, `game`, `game_path`, `started`, and storefront ids). Launch validation errors include missing path, nonexistent path, non-executable file without a command, and plugin failures.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/extra/launch">
+<ApiEndpoint method="POST" path="/api/v2/extra/launch">
 
 
 Launch an application/version/document extra: `{"id"|"game_id", "kind": "applications"|"versions"|"documents", "index": <n>}`. Documents open with `xdg-open`; extras with a `command` substitute `{path}`; others execute directly. Missing file or `xdg-open` raises `400`.
@@ -249,7 +249,7 @@ Opens a Steam store action for an app id: `{"app_id": "440", "action": "install"
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/game/store-action">
+<ApiEndpoint method="POST" path="/api/v2/game/store-action">
 
 The same action resolved from a library game: `{"id"|"game_id", "action": "install"|"repair"}`. The game must have a `steam_app_id`. Returns `{"game_id", "app_id", "action"}`.
 
@@ -257,14 +257,14 @@ The same action resolved from a library game: `{"id"|"game_id", "action": "insta
 
 ## Related games
 
-<ApiEndpoint method="GET" path="/api/related">
+<ApiEndpoint method="GET" path="/api/v2/related">
 
 
 `?id=<index>` returns `{"ids": [indexes]}` scored from local metadata only (genre overlap, series, collection, developer, platform, publisher). Unknown game returns `404`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/related/rich">
+<ApiEndpoint method="GET" path="/api/v2/related/rich">
 
 
 `?id=<index>` returns `{"items": [{"id", "score", "reasons": [...]}]}` with human-readable reasons. `404` when the game is missing.
@@ -461,14 +461,14 @@ Queues a full DNA index rebuild as a background job. Returns `202` with a `job_i
 
 ## Playlists
 
-<ApiEndpoint method="POST" path="/api/playlists">
+<ApiEndpoint method="POST" path="/api/v2/playlists">
 
 
 Save a playlist: `{"name", "type": "filter"|"manual", "rules": {...}, "members"|"ids": [...], "parent", "notes"}`. Filter playlists keep rules and drop members; manual playlists store stable `game_id`s in order (deduplicated, at most 100,000). Updating an existing name replaces it. Returns `{"saved": "<name>"}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/playlists/delete">
+<ApiEndpoint method="POST" path="/api/v2/playlists/delete">
 
 
 `{"name": "..."}` removes the playlist. Returns `{"deleted": "<name>"}`. Deleting a playlist that does not exist returns `404 "Playlist not found: <name>"` instead of a false success. Scoped library exports against an unknown playlist fail with the same `"Playlist not found: <name>"` string (as the export job error).
@@ -477,21 +477,21 @@ Save a playlist: `{"name", "type": "filter"|"manual", "rules": {...}, "members"|
 
 ## Filter presets
 
-<ApiEndpoint method="GET" path="/api/filter-presets">
+<ApiEndpoint method="GET" path="/api/v2/filter-presets">
 
 
 `{"presets": [...], "bigbox_quick": [...]}` (at most 8 quick presets).
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/filter-presets">
+<ApiEndpoint method="POST" path="/api/v2/filter-presets">
 
 
 `{"name", "rules", "bigbox_quick": bool}`. Rules keys: `platform`, `view`, `query`, `esrb`, `progress`, `favorite`, `installed`, `platform_category`, `genre`, `developer`, `publisher`, `hidden`, `has_saves`, `has_achievements`, `has_missing_media`, and `has_highscores`. At least one rule required. Returns `{"saved": "<name>"}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/filter-presets/delete">
+<ApiEndpoint method="POST" path="/api/v2/filter-presets/delete">
 
 
 `{"name"}` removes it; unknown names raise `400`.
@@ -500,7 +500,7 @@ Save a playlist: `{"name", "type": "filter"|"manual", "rules": {...}, "members"|
 
 ## Image groups
 
-<ApiEndpoint method="POST" path="/api/image-group">
+<ApiEndpoint method="POST" path="/api/v2/image-group">
 
 
 `{"group": "default"|"cover"|"background"|"screenshot"|"clear_logo"|"fanart"|"banner"|"icon"|"box_back"|"box_spine"|"box_3d"|"title_screen"|"cart_front"|"cart_back"|"disc"|"advertisement"|"manual", "scope": "global"|"platform"|"playlist", "name": "<platform or playlist>"}`. Global sets `image_group`; scoped sets/clears `image_group_by_platform` or `image_group_by_playlist`. Returns updated settings.

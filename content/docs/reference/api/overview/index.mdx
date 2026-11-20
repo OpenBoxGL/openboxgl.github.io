@@ -3,14 +3,14 @@ title: REST API overview
 description: Loopback boundary, authentication, body limits, and the request lifecycle.
 ---
 
-The Web UI starts a `ThreadingHTTPServer` bound to `127.0.0.1` on a random port. This page documents the shared contract every route follows and the lifecycle a request goes through. Route lists live on the group pages.
+The Rust server (`openbox-server`) binds to `127.0.0.1` on an ephemeral port, or the port in `OPENBOX_PORT`. This page documents the shared contract every route follows and the lifecycle a request goes through. Route lists live on the group pages. The public surface is `/api/v2/*`; the native windows use `/api/host/*`.
 
 ## Loopback boundary
 
-- The server binds to `("127.0.0.1", 0)`, so nothing is reachable from the network.
+- The server binds to `127.0.0.1` only, so nothing is reachable from the network. `OPENBOX_PORT` can pin the port; the default is `0`.
 - OpenBoxGL does not terminate HTTPS. Use a trusted network and an external reverse proxy if you must expose it beyond the host.
-- Requests carry a 30-second socket timeout (`Handler.REQUEST_TIMEOUT`).
-- The static UI is served at `/` and `/index.html`; locale JSON and the favicon are public assets. Every other API route requires authentication.
+- Requests carry a 30-second timeout.
+- The public GET surface is `/`, `/index.html`, `/static/*.js|*.svg`, `/static/app.css`, `/static/logo.png`, `/assets/placeholder-cover.svg`, `/locales/{en,es,de,fr,pt}.json`, `/favicon.ico`, and `/favicon.svg`. Every other route requires authentication.
 
 ## Authentication
 
@@ -19,74 +19,69 @@ All API routes require the session token. The server writes it to `server.token`
 - Header: `X-OpenBox-Token: TOKEN` (preferred)
 - Query parameter: `?token=TOKEN` (can leak through history and logs)
 
-The check uses `secrets.compare_digest`. Known protected routes are checked after route resolution; an unknown route can therefore return `404` before authentication. A missing or wrong token on a known protected route returns `403 {"error":"Unauthorized"}`. Repeated failures can return `429` with `code: "RATE_LIMITED"`, `retry_after`, and a `Retry-After` header.
+The token is compared in constant time. Authentication runs before the host-version guard, the retired-route guard, and route resolution, so an unknown route without a token returns `403`, not `404`. A missing or wrong token returns `403 {"error":"Unauthorized"}`. Ten failures in 60 seconds per IP return `429` with `code: "RATE_LIMITED"`, `retry_after`, and a `Retry-After` header; a correct token clears the bucket.
 
 ## Request lifecycle
 
 A request flows through a fixed set of stages. Knowing the order tells you which status code you will get and why:
 
 ```text
-GET: resolve public/static/known route
- └─ unknown route? → 404 ROUTE_NOT_FOUND
- └─ protected route with wrong/missing token? → 403 Unauthorized
- └─ dispatch to handler
-
-POST: read body (Content-Length, ≤ 65536 bytes, valid JSON object)
- ├─ too large → 400 "Request is too large."
- ├─ truncated → 400 "Request body was truncated."
- └─ not a JSON object → 400
-resolve known route
- └─ unknown route? → 404 ROUTE_NOT_FOUND
-protected route with wrong/missing token? → 403 Unauthorized
-dispatch to handler (routes.py → Handler.<method>)
- ├─ state corrupt? → 503 STATE_UNAVAILABLE "OpenBox library data needs recovery…"
- ├─ handler raises ApiError → its status + code (GAME_NOT_FOUND, MEDIA_NOT_FOUND, …)
- ├─ POST handler raises ValueError/OSError/… → 400 BAD_REQUEST {error: message}
- └─ any other exception → 500 INTERNAL_ERROR "Unexpected server error. Copy the diagnostic log…"
-send JSON response (nosniff, CSP, Referrer-Policy: no-referrer)
+request
+ ├─ host header not loopback? → 403 BAD_HOST
+ ├─ public GET path? → serve asset, no token
+ ├─ method not GET/POST? → 404 ROUTE_NOT_FOUND
+ ├─ missing/wrong token? → 403 Unauthorized (429 RATE_LIMITED after 10/60s)
+ ├─ /api/host/* with X-OpenBox-API-Version major ≠ 2? → 409 HOST_API_UNSUPPORTED
+ ├─ /api/v1/* → 410 V1_API_REMOVED
+ ├─ legacy host path → 410 HOST_CHANNEL_RETIRED
+ ├─ unversioned /api/* with a v2 twin → 410 API_VERSION_REQUIRED
+ ├─ POST body over 65,536 bytes or not a JSON object → 400
+ ├─ state schema <7 / >7 / frozen → 409 STATE_SCHEMA_TOO_OLD / STATE_FUTURE_VERSION / LIBRARY_FROZEN
+ ├─ state corrupt → 503 STATE_UNAVAILABLE "OpenBox library data needs recovery…"
+ ├─ handler returns ApiError → its status + stable code (GAME_NOT_FOUND, MEDIA_NOT_FOUND, …)
+ └─ unhandled exception → 500 INTERNAL_ERROR "Unexpected server error. Copy the diagnostic log…"
 ```
 
 Most structured error responses carry a stable `code` and a `request_id`. The request id is a short per-request token that also appears in the diagnostic log, so a screenshot of an error banner can be correlated with the log line.
 
 Since 2.0, every error response is an `application/problem+json` (RFC 9457) document carrying `type`, `title`, `status`, `detail`, `code`, `retryable`, `request_id`, and `instance`; the `error` field is kept as a duplicate of `detail` for one compatibility cycle. The payload examples in the table below show the fields older integrations read; the full document adds the problem-details members on top.
 
-POST handlers re-raise `ApiError` unchanged and convert `ValueError`, `OSError`, `TypeError`, `AttributeError`, `KeyError`, `IndexError`, `json.JSONDecodeError`, `GameyfinError`, `FileNotFoundError`, `RuntimeError`, and `subprocess.SubprocessError` into `400 BAD_REQUEST` with the message in `error`. State-corruption errors become `503` before handler dispatch. Everything else is logged and returned as `500`.
+Handlers return a typed `ApiError`; validation failures are `400` with a readable `detail`, and state errors are mapped before the handler runs (`409` for schema-too-old, future, or frozen; `503` for corrupt state). An unhandled failure is logged and returned as `500` with a `request_id`.
 
 This is why almost every operation failure you hit through the API is a `400` with a readable, specific message, and why a `500` is genuinely "something the developers need to see," not a normal error path.
 
 ## Bodies
 
-- POST bodies must be JSON. `Content-Length` must be a valid non-negative number; bodies over 65,536 bytes are rejected with `"Request is too large."`; truncated bodies with `"Request body was truncated."`.
-- The body must decode to a JSON object; `[]`, `null`, `"text"`, and malformed JSON return `400 {"error": ...}`.
-- GET requests take parameters from the query string (`parse_qs`); lists and repeated keys behave per `parse_qs` (values are lists).
+- POST bodies must be JSON. Bodies over 65,536 bytes are rejected with `"Request is too large."`; truncated bodies with `"Request body was truncated."`.
+- The body must decode to a JSON object; `[]`, `null`, `"text"`, and malformed JSON return `400`.
+- GET requests take parameters from the query string; repeated keys are parsed as lists.
 
 ## Response headers
 
-JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and a restrictive Content-Security-Policy (`default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.bunny.net; font-src …; script-src 'self'; object-src 'none'; base-uri 'none'`). Rate-limited auth returns `429` with `Retry-After`. The socket times out after 30 seconds (`Handler.REQUEST_TIMEOUT`), SSE events are capped at 64 KiB (`SSE_MAX_EVENT_BYTES`), at most 16 SSE subscribers (`SSE_MAX_SUBSCRIBERS`), and the webhook envelope at 64 KiB (`MAX_ENVELOPE_BYTES`). Media files are served with immutable cache headers, ETag, Last-Modified, `Accept-Ranges`, and byte-range (206/416) support; `theme.css` revalidates with `public, max-age=0, must-revalidate` and ETag. Gzip is applied when `Accept-Encoding: gzip` and the JSON is at least 1 KiB (`GZIP_THRESHOLD=1024`).
+JSON responses are served with `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and a restrictive Content-Security-Policy. Rate-limited auth returns `429` with `Retry-After`. The request timeout is 30 seconds, SSE events are capped at 64 KiB and 16 subscribers, and the webhook envelope at 64 KiB. Media files are served with immutable cache headers, ETag, Last-Modified, `Accept-Ranges`, and byte-range (206/416) support; `theme.css` revalidates with `public, max-age=0, must-revalidate` and ETag.
 
 ## Common errors
 
 | Status | Envelope | When |
 | --- | --- | --- |
-| 403 | `{"error":"Unauthorized"}` | Missing or wrong token on any known protected route, including `/api/native/*` |
+| 403 | `{"error":"Unauthorized"}` | Missing or wrong token on any protected route, including `/api/v2/native/*` |
 | 403 | `{"error":"Request host is not allowed.","code":"BAD_HOST","request_id":"…"}` | Host header mismatch or foreign network host rejected |
 | 429 | `{"error":"Too many authentication failures. Try again later.","code":"RATE_LIMITED","retry_after":n}` | Rate limited after repeated auth failures (`Retry-After` header sent) |
 | 400 | `{"error": "<message>", "code": "BAD_REQUEST", "request_id": "…"}` | Validation failures, missing prerequisites surfaced by handlers, provider errors, unknown queue/notification actions, malformed payloads |
-| 404 | `{"error":"Not found","code":"ROUTE_NOT_FOUND","request_id":"…"}` | Unknown route. GET checks this before authentication; POST checks it after the body is accepted. |
+| 404 | `{"error":"Not found","code":"ROUTE_NOT_FOUND","request_id":"…"}` | Unknown route after authentication. An unauthenticated unknown route returns `403`. |
 | 404 | `GAME_NOT_FOUND` / `MEDIA_NOT_FOUND` / `DOCUMENT_NOT_FOUND` / `PLATFORM_DOCUMENT_NOT_FOUND` / `BADGE_NOT_FOUND` | Lookups that miss |
-| 409 | `{"error":"Download the LaunchBox metadata database first.","code":"CONFLICT","request_id":"…"}` | Metadata routes that need the LaunchBox database (for example `GET /api/metadata/search`) before it is downloaded |
+| 409 | `{"error":"Download the LaunchBox metadata database first.","code":"CONFLICT","request_id":"…"}` | Metadata routes that need the LaunchBox database (for example `GET /api/v2/metadata/search`) before it is downloaded |
 | 503 | `{"error":"OpenBox library data needs recovery before this operation can continue.","code":"STATE_UNAVAILABLE"}` | Corrupt state file |
-| 503 | `{"error":"Server is busy. Close an unused tab and try again.","code":"SSE_BUSY","retry_after":5}`, with `Retry-After: 5` | `GET /api/events` already has its 16 subscribers |
+| 503 | `{"error":"Server is busy. Close an unused tab and try again.","code":"SSE_BUSY","retry_after":5}`, with `Retry-After: 5` | `GET /api/v2/events` already has its 16 subscribers |
 | 500 | `{"error":"Unexpected server error. Copy the diagnostic log from Settings and include it in your report.","code":"INTERNAL_ERROR"}` | Unhandled exception |
 
 ## Versioned surface
 
-- **Public v2 contract (`/api/v2/*`)**: Since 2.0 this is the stable public API. Every `/api/v2/*` route below is part of the ratcheted contract; the newest additions (migration, library move/integrity, compatibility report, version) are collected on [API 2.0 changes](/reference/api/two-zero/).
+- **Public v2 contract (`/api/v2/*`)**: The stable public API. Every `/api/v2/*` route is part of the ratcheted contract; 3.0 adds Save Vault, Achievement Trail, Deal Radar, Time Capsules, Milestones, and Backlog Itinerary on [API 3.0 changes](/reference/api/three-zero/). The 2.0 and 2.1 transitions are recorded on [API 2.0 changes](/reference/api/two-zero/) and [API 2.1 changes](/reference/api/two-one/).
 - **Native host channel (`/api/host/*`)**: The authenticated channel the bundled native windows use (`launch`, `resume`, `shutdown`, `capabilities`). Host requests carry `X-OpenBox-API-Version: 2`; a mismatched major version is refused `409 HOST_API_UNSUPPORTED` before any route runs.
-- **Retired v1 bridge (`/api/v1/*`)**: Off by default in 2.0 — every route answers `410 V1_API_DISABLED`. `OPENBOX_ENABLE_V1_API=1` restores the bridge through 2.0.x with `Deprecation` and `Sunset` headers; it is removed in 2.1.0.
-- **Base routes (`/api/*` without a version prefix)**: Local-workflow routes such as `GET /api/emulators/recommend`, `POST /api/webhooks/test`, `/api/wine/*`, and `/api/faugus/*` stay routable as the internal layer through 2.0.x. Documented on the group pages; treat them as local operations, not the stable remote contract.
-<Callout type="note" title="2.0.0 (unreleased) is the newest build">
-OpenBox 2.0 promotes `/api/v2` to the public contract, retires the `/api/v1` bridge (off by default), adds the `/api/host/*` native channel, and switches every error to an RFC 9457 problem document. The new routes — migration gate, portable-library move, integrity check, compatibility report, version — are on [API 2.0 changes](/reference/api/two-zero/). The previous release's changes remain on [API 1.19 changes](/reference/api/one-nineteen/).
+- **Removed surfaces**: `/api/v1/*` returns `410 V1_API_REMOVED`; the legacy host names `/api/launch`, `/api/shutdown`, and `/api/native/capabilities` return `410 HOST_CHANNEL_RETIRED`; any other unversioned `/api/*` path with a v2 twin returns `410 API_VERSION_REQUIRED`. `OPENBOX_ENABLE_V1_API` is ignored.
+<Callout type="note" title="3.0.0 is the newest build">
+OpenBox 3.0 serves `/api/v2` and `/api/host` from the Rust `openbox-server`. The 3.0 additions — Save Vault, Achievement Trail, Deal Radar, Player's Log, Milestones, and Backlog Itinerary — are on [API 3.0 changes](/reference/api/three-zero/). The 2.1 transition to v2-only dispatch is on [API 2.1 changes](/reference/api/two-one/), and the 2.0 contract changes remain on [API 2.0 changes](/reference/api/two-zero/).
 </Callout>
 
 - **v2 surface added before 2.0**: Modern workflows introduced in v1.7.0 through 1.19.1, now part of the public contract:
@@ -131,9 +126,9 @@ OpenBox 2.0 promotes `/api/v2` to the public contract, retires the `/api/v1` bri
   - **Per-game RetroArch core** (v1.16.1): `GET /api/v2/launch/cores` (installed cores) and `POST /api/v2/launch/core` (bind one to a game; an empty core restores the definition default).
   - **Game Night decks** (v1.17.0): `GET`/`POST /api/v2/party/decks` list and upsert a named deck (players, minutes, filter query, capped at 20), and `POST /api/v2/party/decks/delete` removes one by name. The existing party queue route accepts an eight-character seed so the same seed and library reproduce the same draw.
   - **Native Windows storefront imports** (v1.17.0): `POST /api/v2/import/gog`, `POST /api/v2/import/ea`, and `POST /api/v2/import/ubisoft` discover installed games from the launchers' registry entries and manifests. Discovery is offline and read-only; merging is by stable provider id. On hosts other than Windows the routes return `400` since 1.19.1.
-  - **Platform, media, saves, and plugin services** (v1.18.0): `POST /api/v2/platform/rename` and `POST /api/v2/platform/delete`; `GET /api/media/queue` with `POST /api/media/queue/pause|resume|cancel|retry` and `POST /api/media/cache/cleanup`; `GET /api/saves/manifest` and `POST /api/saves/restore/preview`; `POST /api/v2/resume/slot`; `POST /api/v2/achievements/refresh` and `POST /api/v2/achievements/override`; `GET /api/v2/highscores/table`; `POST /api/v2/bulk/find-replace`; `GET`/`POST /api/v2/plugins/credentials`, `GET`/`POST /api/v2/plugins/data`, `GET /api/v2/plugin-stats`, `POST /api/v2/plugin-stats/refresh`, and `POST /api/v2/plugins/repair`.
-  - **Storefronts, credentials, imports, and native surfaces** (v1.18.0): `GET /api/v2/storefronts`, `GET /api/v2/storefront/status`, `POST /api/v2/storefront/scan`, `POST /api/v2/storefronts/plugin/catalog`, and `POST /api/v2/storefronts/plugin/import`; `GET`/`POST /api/v2/integration-tokens`, `POST /api/v2/integration-tokens/remove`, `GET`/`POST /api/v2/integrations/steam`, `POST /api/v2/integrations/steam/test`, and `POST /api/v2/integrations/steam/refresh`; `POST /api/v2/import/pico8`, `POST /api/v2/import/msu1`, and `POST /api/v2/import/whdload`; `GET`/`POST /api/v2/emulators/settings`; `GET /api/v2/netplay/lobby`; `GET /api/native/battery`; `POST /api/v2/steam/action` and `POST /api/game/store-action`; and `POST /api/v2/metadata/candidates/apply`.
-  - **Presentation assets** (v1.18.0): `GET /api/bigbox/startup-video`, `GET`/`POST /api/platform/videos`, `GET /api/platform/video`, `GET /api/theme-sounds`, and `GET /api/theme-asset`.
+  - **Platform, media, saves, and plugin services** (v1.18.0): `POST /api/v2/platform/rename` and `POST /api/v2/platform/delete`; `GET /api/v2/media/queue` with `POST /api/v2/media/queue/pause|resume|cancel|retry` and `POST /api/v2/media/cache/cleanup`; `GET /api/v2/saves/manifest` and `POST /api/v2/saves/restore/preview`; `POST /api/v2/resume/slot`; `POST /api/v2/achievements/refresh` and `POST /api/v2/achievements/override`; `GET /api/v2/highscores/table`; `POST /api/v2/bulk/find-replace`; `GET`/`POST /api/v2/plugins/credentials`, `GET`/`POST /api/v2/plugins/data`, `GET /api/v2/plugin-stats`, `POST /api/v2/plugin-stats/refresh`, and `POST /api/v2/plugins/repair`.
+  - **Storefronts, credentials, imports, and native surfaces** (v1.18.0): `GET /api/v2/storefronts`, `GET /api/v2/storefront/status`, `POST /api/v2/storefront/scan`, `POST /api/v2/storefronts/plugin/catalog`, and `POST /api/v2/storefronts/plugin/import`; `GET`/`POST /api/v2/integration-tokens`, `POST /api/v2/integration-tokens/remove`, `GET`/`POST /api/v2/integrations/steam`, `POST /api/v2/integrations/steam/test`, and `POST /api/v2/integrations/steam/refresh`; `POST /api/v2/import/pico8`, `POST /api/v2/import/msu1`, and `POST /api/v2/import/whdload`; `GET`/`POST /api/v2/emulators/settings`; `GET /api/v2/netplay/lobby`; `GET /api/v2/native/battery`; `POST /api/v2/steam/action` and `POST /api/v2/game/store-action`; and `POST /api/v2/metadata/candidates/apply`.
+  - **Presentation assets** (v1.18.0): `GET /api/v2/bigbox/startup-video`, `GET`/`POST /api/v2/platform/videos`, `GET /api/v2/platform/video`, `GET /api/v2/theme-sounds`, and `GET /api/v2/theme-asset`.
 
 See [API 1.11 additions](/reference/api/one-eleven/), [API 1.12 additions](/reference/api/one-twelve/), [API 1.14 additions](/reference/api/one-fourteen/), [API 1.16 additions](/reference/api/one-sixteen/), [API 1.17 additions](/reference/api/one-seventeen/), [API 1.18 additions](/reference/api/one-eighteen/), and [API 1.19 changes](/reference/api/one-nineteen/) for request bodies, response examples, optional-tool caveats, and stale-plan handling.
 - **Locale files** (public, no auth): `GET /locales/{en,es,de,fr,pt}.json` — serves JSON locale files for the i18n system (v1.7.2)
@@ -159,13 +154,13 @@ See [API 1.11 additions](/reference/api/one-eleven/), [API 1.12 additions](/refe
 | Request body | 65,536 bytes |
 | Socket timeout | 30 seconds |
 | Playlist members | 100,000 per playlist |
-| History returned by `/api/history` | `limit` clamped to 1..500, default 100 |
+| History returned by `/api/v2/history` | `limit` clamped to 1..500, default 100 |
 | Webhook configs | 32 |
 | Watch folders | 50 |
 
 ## The shared read endpoint
 
-<ApiEndpoint method="GET" path="/api/library" auth="X-OpenBox-Token: TOKEN" summary="The full public library projection, cached until the library file, media epoch, or plugin epoch changes.">
+<ApiEndpoint method="GET" path="/api/v2/library" auth="X-OpenBox-Token: TOKEN" summary="The full public library projection, cached until the library file, media epoch, or plugin epoch changes.">
 
 Returns `games`, `playlists`, `filter_presets`, `ra_configured`, `settings`, `discovery`, and `media_epoch`. Each game includes every editable field (with `""` defaults) plus computed flags: `id` (numeric index), `game_id` (stable), `favorite`, `hidden`, `last_played`, `play_count`, `playtime_seconds`, `path_exists`, `has_cover`/`has_background`/…, `has_saves`, `has_documents`, `has_achievements`, `tags`, `custom_fields`, `store_catalog`, `store_installed`, `owned`, and more.
 

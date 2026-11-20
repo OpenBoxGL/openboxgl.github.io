@@ -10,16 +10,16 @@ OpenBoxGL ships one UI over two hosts that share one local library. This page ex
 | Host | Entry point | What you see | Best for |
 | --- | --- | --- | --- |
 | Native window | `openbox` or `openbox-native` | A native WebKitGTK window rendering the same three-column workspace: filter sidebar, cover grid or list, detail pane | Default desktop use |
-| Web UI | `openbox --web` or `python3 web_app.py` | The same UI in a chrome-less app window (falls back to your browser) | Development, debugging, REST API, Big Box mode |
+| Web UI | `openbox --web` (Rust server) | The same UI in a browser tab | Development, debugging, REST API, Big Box mode |
 
-Both hosts render the identical `index.html`, `app.js`, and `app.css` served by the loopback server, so there is no second presentation stack to drift. The native host is a small C shim that owns the window chrome and spawns the Python server as a child; it never contains application logic.
+Both hosts render the identical `index.html`, `app.js`, and `app.css` served by the loopback server, so there is no second presentation stack to drift. The native host is a small C/Objective-C shim that owns the window chrome and spawns `openbox-server` as a child; it never contains application logic. The Python `web_app.py` path is the `OPENBOX_BACKEND=python` fallback.
 
 ### Native host
 
 Starting `openbox` (or `openbox-native`) does three things in order:
 
 1. Acquires a single-instance lock; a second launch focuses the existing window and exits.
-2. Spawns `web_app.py --no-browser` as a child and waits for it to write `server.port` and `server.token`.
+2. Spawns `openbox-server --no-browser` (or `python3 web_app.py --no-browser` when `OPENBOX_BACKEND=python`) as a child and waits for it to write `server.port` and `server.token`.
 3. Opens a WebKitGTK window at `http://127.0.0.1:PORT/?token=...`, restores the last window geometry, and registers a `window.openboxNative` bridge for native dialogs, external opens, reveal, and window chrome.
 
 On window close the host shuts the server down cleanly. When WebKitGTK is missing, the launcher prints an install hint and falls back to the system-browser app window, so no install bricks.
@@ -36,7 +36,7 @@ The bridge surface is `window.openboxNative`, injected by `native_host.c` on Lin
 
 ### Web UI
 
-Running `python3 web_app.py` starts the loopback server directly and opens the same UI in a chrome-less app window (falling back to the default browser). Pass `--no-browser` to drive the API yourself.
+Running `openbox --web` starts the Rust loopback server and prints a tokenless URL; open it with `?token=<server.token>` or drive the API with `X-OpenBox-Token`. `python3 web_app.py` is the Python fallback and requires `OPENBOX_BACKEND=python` (or no Rust binary).
 
 The server is loopback-only, so nothing is reachable from the network. The URL carries the per-launch token in the query string; the API also accepts the same value as an `X-OpenBox-Token` header. When the server stops, both files are deleted. The keyboard launcher (`scripts/openbox-launcher.sh`) and `openbox://` deep links read these two files to find and authenticate against the running server. See [Command line and deep links](/reference/cli/) for the full flag and URI reference.
 
@@ -50,9 +50,10 @@ The default data directory is `~/.local/share/openbox-game-launcher` on Linux, `
 | `library.json.bak` | Last-known-good copy, rewritten before every commit |
 | `.library.json.lock` | Cross-process lock file coordinating concurrent writes |
 | `sessions.json` | Active sessions mirrored out of the library for crash recovery (2.0); reconciled at startup and removed when none remain |
-| `library.v6.backup.json` | Pre-migration v6 library copy kept by the 2.0 upgrade; `openbox --rollback-library` restores it |
-| `migration-report.json`, `migration-in-progress.json` | The v6→v7 migration record and its in-flight crash marker (2.0) |
-| `rollback-report.json`, `library.v7.kept-<stamp>.json` | A rollback's discarded-edit record and the replaced v7 file it kept (2.0) |
+| `library.v6.backup.json` | Pre-migration v6 library copy written by `openbox --migrate-library` (or a 2.0/2.1 first start). 3.0 does not restore it; use OpenBox 2.1.0. |
+| `migration-report.json`, `migration-in-progress.json`, `migration-acknowledged.json` | The v6→v7 migration record, its in-flight crash marker, and the readiness acknowledgment. |
+| `save-vault/` | Save Vault snapshots and `index.json`; excluded from library backups. |
+| `rollback-report.json`, `library.v7.kept-<stamp>.json` | Legacy 2.0 rollback artifacts. 3.0 never writes them. |
 | `media/manifest.json` | Per-file SHA-256, size, and mtime for media downloads and captures; feeds the integrity check (2.0) |
 | `sqlite_readmodel.db`, `dna_index.json` | The search read-model projection and Game DNA index — rebuildable caches |
 | `operations.json` | Durable background operations and task lifecycle states |
@@ -68,7 +69,7 @@ The default data directory is `~/.local/share/openbox-game-launcher` on Linux, `
 | `themes/` | Stock themes plus locally imported CSS themes |
 | `plugins/` | Installed local plugin packages |
 | `metadata/` | The synced LaunchBox Games Database file |
-| `cache/` | Rebuildable working files: archive extraction, RetroAchievements lookups, the Launch Audit report (`launch_audit.json`), its rolling history (`launch_audit.jsonl`, rotated at 5 MiB), generated media, and the Steam cache. Safe to delete — OpenBoxGL rebuilds it, though deleting the audit discards the grid readiness badges until the next check. `POST /api/media/cache/cleanup` removes generated media cache files older than a requested number of days (1-3650, default 30) without touching user media |
+| `cache/` | Rebuildable working files: archive extraction, RetroAchievements lookups, the Launch Audit report (`launch_audit.json`), its rolling history (`launch_audit.jsonl`, rotated at 5 MiB), generated media, and the Steam cache. Safe to delete — OpenBoxGL rebuilds it, though deleting the audit discards the grid readiness badges until the next check. `POST /api/v2/media/cache/cleanup` removes generated media cache files older than a requested number of days (1-3650, default 30) without touching user media |
 | `media-queue.json` | Durable media download queue: owner-only JSON with at most 5,000 items, written atomically under `.media-queue.json.lock` |
 | `highscores/`, `bezels/` | MAME high-score exports and bezel downloads |
 
@@ -116,7 +117,7 @@ Supported variables are documented in `.env.example` and [Configuration](/refere
 
 The state store writes atomically: it writes the backup copy from the temp file first, then swaps the primary into place, so a crash cannot pair a fresh primary with a stale backup. If the primary file ever fails to decode, OpenBoxGL preserves the original, raises a clear error, and recovery must be explicit. Restore paths and archive members are validated, symlink parents are rejected, and a pre-restore safety copy is created automatically.
 
-Make a backup before major changes: Settings has a backup manager, and `python3 web_app.py --backup` creates an archive from the command line. See [Data and recovery](/reference/data-and-recovery/) and [Library backups](/reference/library-backups/).
+Make a backup before major changes: Settings has a backup manager, and `openbox --backup [--items ...]` creates an archive from the command line. See [Data and recovery](/reference/data-and-recovery/) and [Library backups](/reference/library-backups/).
 
 ## Troubleshooting orientation
 

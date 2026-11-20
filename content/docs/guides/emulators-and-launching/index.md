@@ -30,7 +30,7 @@ The **Emulators & controllers** entry in the Tools menu opens the Emulator profi
 | `{heroic_app_id}` | Heroic application ID |
 | `{lutris_id}` | Lutris game identifier |
 | `{retroarch_core}` | The core file name the game uses, already expanded from the definition or your per-game/per-platform choice |
-| `{state_path}` / `{state_dir}` / `{state_config}` / `{state_name}` | Quick Resume state values from the adapter `state:` block (`pkg/parity/launch_tokens.py`); empty for ordinary launch commands |
+| `{state_path}` / `{state_dir}` / `{state_config}` / `{state_name}` | Quick Resume state values from the adapter `state:` block (`crates/openbox-emulators/src/tokens.rs`); empty for ordinary launch commands |
 
 <CommandBuilder />
 
@@ -120,7 +120,7 @@ Selecting a platform in the library opens a platform panel whose **Emulator sett
 | RetroArch core | `retroarch_core` | The game has no per-game `retroarch_core` |
 | Extra launch arguments | `extra_args` (split with shell rules; longer input is cut at 2,000 characters) | Always appended to the resolved command |
 
-Entries live in `settings.emulator_platform_settings`, keyed by platform name, and are saved through `POST /api/settings`. Leaving the adapter id blank keeps adapter detection. A core value must be a valid libretro core file name; an invalid one is rejected on save. Extra arguments are appended after plugin emulator arguments and before the resume-state injection, so `-fullscreen` or a `-rompath` addition reaches the emulator as typed.
+Entries live in `settings.emulator_platform_settings`, keyed by platform name, and are saved through `POST /api/v2/settings`. Leaving the adapter id blank keeps adapter detection. A core value must be a valid libretro core file name; an invalid one is rejected on save. Extra arguments are appended after plugin emulator arguments and before the resume-state injection, so `-fullscreen` or a `-rompath` addition reaches the emulator as typed.
 
 These overrides are per platform, not per emulator: they choose which adapter runs a platform and what extra argv it receives. The [Edit Emulator](#edit-emulator) overrides are per emulator and drive the settings OpenBox writes into the command.
 
@@ -142,7 +142,7 @@ How it behaves:
 - **Retractions are honored.** If a newer pack stops shipping a definition the previous one installed, the old file is removed rather than left shadowing the bundled set.
 - **No restart needed.** A definition update refreshes the emulator list, the platform map, and the folder-import extension list in place, so a newly added definition is recognized on the next scan.
 
-The API equivalents are `GET /api/v2/emulators/defs/status` (what is installed, what is local, whether anything is available), `GET`/`POST /api/v2/emulators/defs/update` (check, then install), and `POST /api/v2/emulators/defs/rollback`. They are public `/api/v2` routes; the v1 surface is frozen and off by default in 2.0 — `/api/v1` answers `410 V1_API_DISABLED` unless `OPENBOX_ENABLE_V1_API=1` is set.
+The API equivalents are `GET /api/v2/emulators/defs/status` (what is installed, what is local, whether anything is available), `GET`/`POST /api/v2/emulators/defs/update` (check, then install), and `POST /api/v2/emulators/defs/rollback`. They are public `/api/v2` routes. `/api/v1` and unversioned `/api/*` paths were retired in 2.1; they return `410 V1_API_REMOVED` / `410 API_VERSION_REQUIRED`, and `OPENBOX_ENABLE_V1_API` is ignored.
 
 ### Emulator-def schema
 
@@ -201,7 +201,7 @@ The arcade importer reads a MAME or FinalBurn Neo catalog and adds the sets it f
 
 Each imported game records its `rom_name`, `clone_of`, `set_type` (`parent`, `merged`, `split`, or `non-merged`), `players`, `vertical`, and `requires_chd`, so the generated playlists and the filter builder can use them afterwards. Duplicate sets already in the library (same source and `rom_name`) are skipped.
 
-The route is `POST /api/import/arcade` with `folder`, `source`, `dat`, `command`, `players`, `skip_chd`, `skip_inputs`, and `make_playlists`; it answers with `added`, `found`, a `sets` breakdown by set type, and the playlist names when playlist creation was requested. The `vertical` and `requires_chd` fields are also filter rules, so you can build your own playlists over them. See [Filter playlists](/guides/library/organizing/) for rule syntax.
+The route is `POST /api/v2/import/arcade` with `folder`, `source`, `dat`, `command`, `players`, `skip_chd`, `skip_inputs`, and `make_playlists`; it answers with `added`, `found`, a `sets` breakdown by set type, and the playlist names when playlist creation was requested. The `vertical` and `requires_chd` fields are also filter rules, so you can build your own playlists over them. See [Filter playlists](/guides/library/organizing/) for rule syntax.
 
 ## Launch check & Preflight Checks
 
@@ -226,7 +226,7 @@ Open **Library checkup** in the Tools menu and press **Check every game**. OpenB
 - **One click for a missing emulator.** When the cause is an emulator that isn't installed, the group has an **Install** button that installs it once for every game waiting on it.
 - **A summary at the top** shows how many games are ready, how many have warnings (no cover art, no save folder set), and how many are blocked and will not start.
 - **The games behind each cause.** Open a group to page through its games, then click one to jump straight to it; its details panel shows the full launch check result for that game.
-- **Fast, even on huge libraries.** Each emulator is looked up once rather than once per game, so a 20,000-game library is checked in seconds rather than an hour. The audit also runs on the scheduled library check (daily or weekly), so a report is usually already there.
+- **Fast, even on huge libraries.** Each emulator is looked up once rather than once per game, so a 50,000-game library is checked in seconds rather than an hour. The audit also runs on the scheduled library check (daily or weekly), so a report is usually already there.
 - **It tells you when it is out of date.** If you add or remove games after a check, OpenBox says the results describe an older version of your library and suggests running it again.
 - **Optional deep mode.** Deep mode also looks inside zipped ROMs and checks BIOS files against their expected versions. It is off by default because it reads every file and takes longer.
 

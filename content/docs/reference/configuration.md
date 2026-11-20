@@ -15,7 +15,7 @@ OpenBoxGL reads configuration from three places: the process environment, discov
 
 A `.env` file sets an environment variable only when that variable is not already set, so the process environment always wins. Unreadable or non-UTF-8 `.env` files are skipped silently; an optional `.env` must never abort startup.
 
-A `.env` file is a credential and HTTP-allowlist file only. `env_config.py` loads just the names in `ENV_KEYS`: the provider credentials, the GitHub token aliases, `OPENBOX_ALLOW_HTTP_WEBHOOKS`, and `OPENBOX_ALLOW_HTTP_GAMEYFIN`. Every other key in the file is dropped silently, so `.env` cannot carry general settings.
+A `.env` file is a credential and HTTP-allowlist file only. `openbox-io/src/env_config.rs` loads just the names in `ENV_KEYS`: the provider credentials, the GitHub token aliases, `OPENBOX_ALLOW_HTTP_WEBHOOKS`, and `OPENBOX_ALLOW_HTTP_GAMEYFIN`. Every other key in the file is dropped silently, so `.env` cannot carry general settings.
 
 ### Credential precedence
 
@@ -31,7 +31,7 @@ Precedence is per provider, not one global order:
 
 ## `.env` discovery order
 
-`env_config.discover_env_files` checks these roots in order and loads every `.env` found:
+`openbox-io` checks these roots in order and loads every `.env` found:
 
 1. An explicit `OPENBOX_ENV_FILE` path, if set (read before the extra roots).
 2. The data directory (the extra root passed to `bootstrap_env`).
@@ -50,9 +50,13 @@ Values already in the environment are never overridden by `.env`. The template l
 
 | Variable | Meaning |
 | --- | --- |
-| `OPENBOX_DATA_DIR` | Data directory. Read at import time, before `.env` bootstrap; must be exported in the shell, desktop entry, or systemd unit before launch. Defaults to `~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, and `~/Library/Application Support/openbox-game-launcher` on macOS. When no home directory can be determined, it falls back to `openbox-game-launcher` inside the current working directory. |
+| `OPENBOX_DATA_DIR` | Data directory. Read at startup, before `.env` bootstrap; must be exported in the shell, desktop entry, or systemd unit before launch. Defaults to `~/.local/share/openbox-game-launcher` on Linux, `%LOCALAPPDATA%\openbox-game-launcher` on Windows, and `~/Library/Application Support/openbox-game-launcher` on macOS. When no home directory can be determined, it falls back to `openbox-game-launcher` inside the current working directory. |
+| `OPENBOX_SERVER_BIN` | Explicit path to the `openbox-server` / `openbox-server.exe` binary. The launchers and native hosts check this first, then the bundle/share location, then `target/release`, then `PATH`. |
+| `OPENBOX_BACKEND` | Set to `python` to run the legacy `web_app.py` backend instead of Rust. The default is `rust`. |
+| `OPENBOX_ROOT` | Application asset/share root (`index.html`, `static/`, `locales/`, `themes/`, `emulator_defs/`, `plugin_runner_v2.py`). |
+| `OPENBOX_PORT` | Bind a specific `127.0.0.1` port instead of an ephemeral one (`0`, default). |
 | `OPENBOX_SAFE_MODE` | Any non-empty value (conventionally `1`) disables plugin execution and the webhook dispatcher for the whole process. Exposed as `settings.safe_mode`. Process environment only (not `.env`). |
-| `APPIMAGE` | Set automatically when running from an AppImage; the Linux updater refuses to install without it. Exposed as `settings.appimage`. Windows updates use the verified `OpenBox-<arch>-windows.zip` path instead, and macOS updates use the verified `OpenBox-macos.zip` bundle. |
+| `APPIMAGE` | Set automatically when running from an AppImage; the Linux updater refuses to install without it. Exposed as `settings.appimage`. The 3.0 Rust server implements the verified install step for the AppImage only; Windows and macOS use their release installers. |
 | `OPENBOX_ENV_FILE` | Explicit path to a single `.env` file, checked first before the data-directory roots. Read directly from the process environment; must point at an owner-only regular file (not a symlink) or it is skipped. |
 | `OPENBOX_ALLOW_HTTP_WEBHOOKS` | Set to `1` to allow plain-HTTP webhook URLs. Required only for trusted local test targets; HTTPS is the default and safer. |
 | `OPENBOX_ALLOW_HTTP_GAMEYFIN` | Set to `1` to allow plain-HTTP Gameyfin URLs. HTTPS is the default; loopback (localhost) addresses are always allowed. |
@@ -61,18 +65,18 @@ Values already in the environment are never overridden by `.env`. The template l
 | `OPENBOX_EXECUTABLE` | Optional explicit path to the emulator/launcher executable recorded when importing Steam titles for Steam Bridge. Read from the process environment at scan time; when unset, the importer uses the Steam-reported executable. Process environment only (not `.env`). |
 | `OPENBOX_ENABLE_DMABUF` | Set to `1` to enable WebKitGTK DMA-BUF rendering in the Linux native window. Disabled by default to prevent silent blank windows on AMD GPUs (including Steam Deck). Windows uses WebView2 instead and ignores this. Process environment only (not `.env`). |
 | `OPENBOX_WEBKIT_HARDWARE_ACCELERATION` | WebKitGTK hardware acceleration policy in the Linux native window (`always` or `on-demand`; default is `on-demand`). Process environment only (not `.env`). |
-| `OPENBOX_SNAPSHOT_DEBOUNCE` | Debounce delay in seconds (float) for background library state snapshot writes (defaults to `0.0`). Process environment only (not `.env`). |
+| `OPENBOX_SNAPSHOT_DEBOUNCE` | Python fallback only: debounce delay in seconds (float) for background library state snapshot writes (defaults to `0.0`). The Rust `openbox-server` constructs its store with a zero debounce, so this variable has no effect there. Process environment only (not `.env`). |
 | `OPENBOX_INSTALL_DIR` | Custom installation directory used by `install.sh` (defaults to `~/.local/bin`). On Windows the same variable, or `install.ps1 -InstallDir`, defaults to `%LOCALAPPDATA%\OpenBox`; the runtime lands in `<InstallDir>\share\openbox` and the previous tree is kept at `<InstallDir>\share\openbox.previous`. |
-| `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v1.13.0`) during `install.sh` execution. |
-| `OPENBOX_PYTHON` | Path to the Python interpreter invoked by the native host (defaults to `python3`; on Windows the launchers locate `python.exe` or `py.exe` on `PATH` unless this is set). |
-| `OPENBOX_WEB_APP` | Path to `web_app.py` invoked by the native host. |
+| `OPENBOX_RELEASE_TAG` | Pins a specific GitHub release tag (e.g. `v3.0.0`) during `install.sh` execution. |
+| `OPENBOX_PYTHON` | Python fallback/plugin override: path to the interpreter used by `web_app.py` and `.py` v2 plugins (defaults to `python3`; on Windows the launchers locate `python.exe` or `py.exe` on `PATH` unless this is set). The Rust server does not use it. |
+| `OPENBOX_WEB_APP` | Python fallback only: path to `web_app.py` used when `OPENBOX_BACKEND=python` or no `openbox-server` binary is found. |
 | `OPENBOX_NATIVE_HOST` | Path override for the native host binary used by `openbox-native.sh` (defaults to `native_host` beside the app). On Windows it overrides the `native_host.exe` binary that `openbox-native.ps1` runs. |
 | `OPENBOX_SHARE` | Runtime directory override used by the Windows launchers (`openbox.ps1`, `openbox-native.ps1`) to point at the extracted runtime tree. |
 | `OPENBOX_BUNDLED_LIB_PATH` | `LD_LIBRARY_PATH` value used by the AppImage wrapper for bundled libraries. |
 | `OPENBOX_ARCH` | Overrides `uname -m` architecture detection in `install.sh` and `build_appimage.sh` (`x86_64` or `aarch64`). |
 | `OPENBOX_UPDATE_INFORMATION` | zsync update-metadata line embedded by `build_appimage.sh` for the verified updater (packaging-time, not user-facing). |
 | `OPENBOX_RELEASE_BASE` | Base URL the release assets are served from, read by `scripts/install.ps1` (or pass `-ReleaseBase`). Overrides the default GitHub release download host. |
-| `OPENBOX_ENABLE_SQLITE_READ` | Set to `1` to enable the SQLite read model (`pkg/state/sqlite_readmodel.py`) for accelerated search and facets on large libraries. It uses stdlib `sqlite3` with FTS5 full-text search (LIKE fallback if FTS5 is unavailable). JSON remains the source of truth; SQLite is a read-only projection. Release evidence covers 10k and 20k libraries; larger collections are exploratory. Since v1.12.0 the read model also self-enables at 5,000+ games (`should_auto_enable()`, latched per process); an explicit `0`/`false`/`no` opt-out is never overridden. (v1.7.2+) Process environment only (not `.env`). |
+| `OPENBOX_ENABLE_SQLITE_READ` | Set to `1` to enable the SQLite read model (`crates/openbox-store/src/sqlite_readmodel.rs`) for accelerated search and facets. The Rust build uses bundled `rusqlite` with FTS5. JSON remains the source of truth; SQLite is a read-only projection. Release evidence covers up to 50,000 games on the Rust backend. The read model self-enables at 5,000+ games; an explicit `0`/`false`/`no` opt-out is never overridden. Process environment only (not `.env`). |
 
 ### Windows launchers
 
@@ -84,7 +88,7 @@ The Windows runtime tree ships three entry points:
 | `openbox.ps1` | Runs the ladder: the native WebView2 window first, the browser app window second. `--web` forces the browser app window. |
 | `openbox-native.ps1` | Runs `native_host.exe`, or falls back when it is absent |
 
-Python is located as `python.exe` or `py.exe` on `PATH`, or through `OPENBOX_PYTHON`; `OPENBOX_SHARE` points the launchers at the runtime directory. `native_host.exe` ships compiled in the released portable install; rebuilding it from a source checkout is `powershell -File scripts/build_native_host_windows.ps1` (MSVC toolchain; WebView2 SDK from the NuGet cache or nuget.org), and without `native_host.exe` the launchers open the same UI in a browser app window. See [Windows](/windows/) for the install layout.
+The launchers resolve `openbox-server.exe` first (`OPENBOX_SERVER_BIN`, the install tree, then `PATH`) and fall back to Python only when `OPENBOX_BACKEND=python` is set or no server binary exists. Python, when needed, is located as `python.exe` or `py.exe` on `PATH`, or through `OPENBOX_PYTHON`; `OPENBOX_SHARE` points the launchers at the runtime directory. `native_host.exe` ships compiled in the released portable install; rebuilding it from a source checkout is `powershell -File scripts/build_native_host_windows.ps1` (MSVC toolchain; WebView2 SDK from the NuGet cache or nuget.org), and without `native_host.exe` the launchers open the same UI in a browser app window. See [Windows](/windows/) for the install layout.
 
 ### Credentials (all optional)
 
@@ -105,7 +109,7 @@ Python is located as `python.exe` or `py.exe` on `PATH`, or through `OPENBOX_PYT
 | `STEAM_API_KEY` | Steam Web API key for achievement and playtime import. Process environment only (not `.env`). | |
 | `STEAM_ID` | Steam ID (64-bit account id) for achievement and playtime import. Process environment only (not `.env`). | |
 
-Most credential lookups check the aliases in order using `env_value()` from `env_config.py`: it iterates through the listed names and uses the first non-empty value found. Steam's two values work the other way round: `<data>/steam.json` (mode `0o600`) wins per field, and `STEAM_API_KEY` / `STEAM_ID` only fill the values the file does not have. Neither name is in `ENV_KEYS` or in `.env.example`, so a value placed in `.env` is silently dropped — export it in the process environment instead. If an empty string is returned for any required variable, the route returns a specific `400` error naming exactly which variable is missing. For example, IGDB requires both `IGDB_CLIENT_ID` **and** `IGDB_CLIENT_SECRET`; without either the IGDB routes return `400 {"error":"Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET in ~/.env to use IGDB."}`. Without RetroAchievements credentials, the `/api/ra/*` routes return `400 {"error":"Configure RetroAchievements first."}`.
+Most credential lookups check the aliases in order using the Rust `env_config` resolver: it iterates through the listed names and uses the first non-empty value found. Steam's two values work the other way round: `<data>/steam.json` (mode `0o600`) wins per field, and `STEAM_API_KEY` / `STEAM_ID` only fill the values the file does not have. Neither name is in `ENV_KEYS` or in `.env.example`, so a value placed in `.env` is silently dropped — export it in the process environment instead. If an empty string is returned for any required variable, the route returns a specific `400` error naming exactly which variable is missing. For example, IGDB requires both `IGDB_CLIENT_ID` **and** `IGDB_CLIENT_SECRET`; without either the IGDB routes return `400 {"error":"Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET in ~/.env to use IGDB."}`. Without RetroAchievements credentials, the `/api/v2/ra/*` routes return `400 {"error":"Configure RetroAchievements first."}`.
 
 <Callout type="tip" title="Why aliases exist">
 
@@ -113,11 +117,11 @@ The alias pattern lets users choose whichever name suits their setup. A RetroAch
 
 </Callout>
 
-Credentials supplied through the Settings dialog are persisted in the data directory with owner-only permissions (`0o600` via `secure_text_write`). RetroAchievements and EmuMovies keep their own files (`retroachievements.json`, `emumovies.json`); the Gameyfin password is stored in the library settings inside `library.json`, which is written with mode `0o600`. A `settings.json` file only ever appears as an archive member inside a backup. The API and diagnostic log redact the values, but the files themselves are plaintext. Windows has no POSIX mode bits, so there these files rely on the per-user profile ACL instead.
+Credentials supplied through the Settings dialog are persisted in the data directory with owner-only permissions (`0o600`). RetroAchievements and EmuMovies keep their own files (`retroachievements.json`, `emumovies.json`); the Gameyfin password is stored in the library settings inside `library.json`, which is written with mode `0o600`. A `settings.json` file only ever appears as an archive member inside a backup. The API and diagnostic log redact the values, but the files themselves are plaintext. Windows has no POSIX mode bits, so there these files rely on the per-user profile ACL instead.
 
 ## Persisted settings
 
-The Settings dialog saves into `library.json` under `settings`. The save handler (`SettingsHandlers._save_settings_locked` in `handlers/settings.py`) validates each field it normalizes before committing; a value that fails validation aborts the whole save with a `400` error. Many fields are normalized rather than rejected, though: `spinner_sensitivity` and `obs_websocket_timeout` are clamped to their range, `locale` and `list_sort_dir` are truncated, `attract_mode_seconds` is only coerced to an integer, and the webhook attempt count and timeout are cast to an integer at save time and clamped only at delivery. Keys must exist in the `settings_schema.py` registry: unknown keys are dropped with a diagnostic log warning rather than persisted. `GET /api/settings` returns the projection built by `public_settings()` in `pkg/state/cache.py`, not every registry key. Twenty-six keys are left out, including `webhooks`, `party_queue`, `health_rescan`, `list_sort`, and the `scrape_*` keys. Most of them are read straight from the stored state by their features, but `health_rescan`, `list_sort`, and `list_sort_dir` are not part of the public projection at all, so they do not round-trip through `GET /api/settings`; `gameyfin_password` and `obs_websocket_password` are never returned. Notable validated limits:
+The Settings dialog saves into `library.json` under `settings`. The save handler (`crates/openbox-http/src/handlers/settings.rs`) validates each field it normalizes before committing; a value that fails validation aborts the whole save with a `400` error. Many fields are normalized rather than rejected, though: `spinner_sensitivity` and `obs_websocket_timeout` are clamped to their range, `locale` and `list_sort_dir` are truncated, `attract_mode_seconds` is only coerced to an integer, and the webhook attempt count and timeout are cast to an integer at save time and clamped only at delivery. Keys must exist in the `KNOWN_SETTINGS` registry (`crates/openbox-core/src/settings.rs`, mirrored by `settings_schema.py` for the Python fallback): unknown keys are dropped with a diagnostic log warning rather than persisted. `GET /api/v2/settings` returns the projection built by `public_settings` in `crates/openbox-http/src/handlers/projection.rs`, not every registry key. The projection omits internal keys such as `webhooks`, `party_queue`, `health_rescan`, `list_sort`, and the `scrape_*` keys; `gameyfin_password` and `obs_websocket_password` are never returned. Notable validated limits:
 
 | Setting | Default | Validation |
 | --- | --- | --- |
@@ -142,9 +146,9 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `show_launch_badges` | `true` | Boolean; shows the "Won't launch" and "Needs attention" readiness badges on the grid from the last Launch Audit. Settings → Appearance. Badges disappear on their own when the library has changed since the audit ran. (v1.16.1+) |
 | `cloud_folder` | "" | Absolute, existing path for mounted-folder statistics sync and optional catalog sync |
 | `library_sync_enabled` | `false` | Explicit opt-in for causal catalog synchronization; it does not enable the separate statistics sync automatically |
-| `library_root` | "" | Normalized absolute path to the portable library folder; must exist when set. Written by the Move library flow — setting it or `path_mode` directly outside a move preview/apply is refused. (v2.0.0+) |
-| `path_mode` | `"absolute"` | One of `absolute`, `portable`. In `portable` mode, game paths under `library_root` are stored as `@library/...` tokens so the library survives a folder move. Changes only through the Move library flow. (v2.0.0+) |
-| `media_manifest_enabled` | `true` | Boolean; reserved opt-out for the media manifest (`media/manifest.json`). In 2.0 the manifest is recorded unconditionally and the persisted flag has no consumer yet. (v2.0.0+) |
+| `library_root` | "" | Normalized absolute path to the portable library folder; must exist when set. Written by the Move library flow — setting it or `path_mode` directly outside a move preview/apply is refused. (v3.0.0+) |
+| `path_mode` | `"absolute"` | One of `absolute`, `portable`. In `portable` mode, game paths under `library_root` are stored as `@library/...` tokens so the library survives a folder move. Changes only through the Move library flow. (v3.0.0+) |
+| `media_manifest_enabled` | `true` | Boolean; controls whether downloads and captures are recorded in `media/manifest.json` and whether the integrity report verifies and repairs it. Turning it off skips manifest writes and hashing; the integrity report says the manifest is disabled. Effective since 2.1. |
 | `storefront_auto_import` | All off | Object keyed by store (`steam`, `heroic`, `lutris`, `gameyfin`, `gog`, `ea`, `ubisoft`, or `plugin:<id>`) whose values are `{enabled, platform, include_uninstalled}` objects. At most 20 entries; `platform` is at most 80 characters. Legacy boolean values are still read and are migrated to this shape on the next settings save. |
 | `auto_import_media_types` | ["background", "cover", "screenshots"] | Subset of the 23 media types in `MEDIA_TYPES_ALL` (cover, background, screenshots, clear_logo, fanart, banner, icon, box_back, box_spine, box_3d, title_screen, cart_front, cart_back, disc, advertisement, manual, poster, square, video, video_snap, video_theme, video_trailer, music) |
 | `media_download_limit` | 0 (unlimited) | 0 to 10,000 |
@@ -162,7 +166,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `track_session_history` | `true` | Boolean, when false, sessions still track but history isn't recorded |
 | `backup_on_close` | `false` | Boolean, creates save backups when session ends |
 | `save_backup_limit` | 10 | 0 to 500, oldest archives trimmed after each backup |
-| `backup_auto_enabled` | `false` | Boolean; opt-in weekly automatic library backup, checked on an hourly tick (`auto_backup_due()`) (v1.12.0+) |
+| `backup_auto_enabled` | `false` | Boolean; opt-in weekly automatic library backup. **3.0 note:** the Rust server's hourly tick currently unlocks time capsules and refreshes tray recents; it does not call `auto_backup_due`, so scheduled automatic backups do not fire under `openbox-server`. Use manual or CLI backups until the scheduler is wired. (v1.12.0+) |
 | `backup_auto_keep` | 4 | 1 to 52 automatic backup archives retained (v1.12.0+) |
 | `last_auto_backup` | `""` | Internal timestamp of the last automatic backup; missing or unparsable counts as due — do not edit (v1.12.0+) |
 | `quick_resume_enabled` | `true` | Boolean; enables Quick Resume state capture and restore on state-capable adapters (v1.11.0+) |
@@ -176,13 +180,13 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `scrape_screenscraper_enabled` | `false` | ScreenScraper opt-in for the post-import scrape. Requires all four ScreenScraper values: user, password, developer ID, and developer password |
 | `scrape_igdb_enabled` | `false` | IGDB opt-in for the post-import scrape. Requires `IGDB_CLIENT_ID`/`IGDB_CLIENT_SECRET` |
 | `scrape_steamgrid_enabled` | `false` | SteamGridDB opt-in for the post-import scrape. Requires `STEAMGRIDDB_API_KEY` |
-| `steamgrid_key_configured` | `(derived)` | Read-only projection in `public_settings` (`pkg/state/cache.py`): true when a SteamGridDB API key is configured; not writable via Settings |
+| `steamgrid_key_configured` | `(derived)` | Read-only projection in `public_settings` (`crates/openbox-http/src/handlers/projection.rs`): true when a SteamGridDB API key is configured; not writable via Settings |
 | `obs_replay_enabled` | `false` | Boolean; enables Record That clip capture via the OBS replay buffer (v1.11.0+) |
 | `obs_websocket_url` | `""` | OBS WebSocket endpoint for replay-buffer capture (v1.11.0+) |
 | `obs_websocket_timeout` | 5.0 | 0.1 to 30 seconds for OBS WebSocket calls (v1.11.0+) |
 | `obs_websocket_password` | `""` | OBS WebSocket password; empty leaves the stored value unchanged (v1.11.0+) |
 | `museum_kiosk_enabled` | `false` | Boolean; Museum/kiosk mode with reduced interaction (v1.11.0+) |
-| `health_rescan` | `"weekly"` | Library health rescan cadence: `daily`, `weekly`, `on_startup`, or `off`. `on_startup` runs once at boot when no game session is active; `off` disables the hourly tick. (v1.14.0+) |
+| `health_rescan` | `"weekly"` | Library health rescan cadence: `daily`, `weekly`, `on_startup`, or `off`. `on_startup` runs once at boot when no game session is active; `off` disables the scheduled tick. **3.0 note:** the Rust server does not currently call `rescan_due`, so only the manual scan runs under `openbox-server`. (v1.14.0+) |
 | `museum_kiosk_pin_hash` | `""` | Salted PIN hash for the kiosk convenience boundary — not API authentication (v1.11.0+) |
 | `mood_match_enabled` | `false` | Boolean; enables adaptive cover theming (Mood Match) from the selected artwork. (v1.9.0+) |
 | `mood_match_bigbox` | `false` | Boolean; extends Mood Match to the Big Box background and cover ring. Only effective while `mood_match_enabled` is true. (v1.9.0+) |
@@ -208,7 +212,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `show_playlist_actions` | `true` | Boolean, show add/remove playlist buttons |
 | `gameyfin_url` | "" | Prepends `http://` when no scheme is given. Not checked for reachability at save time. |
 | `gameyfin_username` | "" | Stored as plain text alongside url and password |
-| `gameyfin_password` | "" | Empty value leaves the stored password unchanged. Stored in `library.json`, which is written with mode `0o600`. `GET /api/settings` returns only `gameyfin_password_set`. |
+| `gameyfin_password` | "" | Empty value leaves the stored password unchanged. Stored in `library.json`, which is written with mode `0o600`. `GET /api/v2/settings` returns only `gameyfin_password_set`. |
 | `gameyfin_install_dir` | "" | Absolute directory, created if missing (parent folders included). Gameyfin refuses install paths that contain symlinks. Empty by default. |
 | `gameyfin_provider` | "" | Provider label; falls back to first available |
 | `ludusavi_backup_path` | "" | Optional path for Ludusavi JSON output; created if missing |
@@ -232,7 +236,7 @@ The Settings dialog saves into `library.json` under `settings`. The save handler
 | `active_media_packs` | `[]` | List of strings; media pack ids, appended when a pack is applied |
 | `last_cloud_sync` | `""` | Internal, auto-managed timestamp; do not edit |
 | `last_update_check` | `""` | Internal, auto-managed timestamp; do not edit |
-| `gameyfin_password_set` | `false` | Read-only in `GET /api/settings`; true when a Gameyfin password is stored |
+| `gameyfin_password_set` | `false` | Read-only in `GET /api/v2/settings`; true when a Gameyfin password is stored |
 | `gamescope_guest` | `false` | Read-only; derived from the Gamescope environment and `--game-mode` |
 
 ### Display, input, and integration settings
@@ -280,6 +284,14 @@ The Settings dialog also persists the following keys. Every key in this table ex
 | `reader_theme` | `"light"` | One of `light` or `dark`; the document reader colour scheme. |
 | `retroachievements_enabled` | `false` (effective) | Read-only effective flag read by Play Insights; when true and a RetroAchievements cache exists, mastery totals include it. The current Settings save path does not write this key. |
 | `save_management_enabled` | `true` | Boolean; when false, save backup, restore, and manifest routes refuse writes and report the feature as disabled. |
+| `save_vault_enabled` | `true` | Boolean; enables Save Vault. `session_close` and `auto` snapshots require it; a manual snapshot still works when the vault is enabled. (3.0) |
+| `save_vault_keep` | 5 | 1 to 50 snapshots kept per game; older snapshots are pruned. `pre-restore` safety snapshots are exempt. (3.0) |
+| `save_vault_on_close` | `false` | Boolean; takes a `session_close` Save Vault snapshot when a game session ends. (3.0) |
+| `save_vault_auto_days` | 0 | 0 to 365 days between automatic `auto` snapshots; `0` disables the schedule. **3.0 note:** the Rust server does not currently call `auto_vault_due`; use manual or on-close snapshots until the scheduler is wired. (3.0) |
+| `deals_enabled` | `false` | Boolean; opt-in Deal Radar. All requests and redirects are restricted to `https://store.steampowered.com`. (3.0) |
+| `deals_poll_hours` | 168 | 24 to 720 hours between Deal Radar polls. **3.0 note:** the Rust server does not currently call `deals_due`; use `POST /api/v2/deals/refresh` for an immediate poll. (3.0) |
+| `deals_min_drop_pct` | 10 | 1 to 90 percent minimum drop for a Deal Radar alert. (3.0) |
+| `deals_store_cc` | `"us"` | Two-letter Steam store country code used for price queries; empty or invalid values fall back to `us`. (3.0) |
 | `spinner_sensitivity` | 6 | 1 to 20; spinner input sensitivity in Big Box. |
 
 One naming detail worth knowing:
@@ -316,4 +328,4 @@ These are read once during process startup and require a restart to change:
 - Keep `server.token`, provider credentials, and webhook secrets private. The diagnostic log redacts values matching token/password/secret/API-key/authorization patterns, but a `.env` file is plaintext.
 - Restart OpenBoxGL after changing values consumed at process startup.
 
-The authoritative sources are `.env.example`, `env_config.py`, `handlers/settings.py`, `settings_schema.py`, and the Settings dialog.
+The authoritative sources are `.env.example`, `crates/openbox-io/src/env_config.rs`, `crates/openbox-http/src/handlers/settings.rs`, `crates/openbox-core/src/settings.rs`, and the Settings dialog. The Python `env_config.py`, `handlers/settings.py`, and `settings_schema.py` remain as the `OPENBOX_BACKEND=python` fallback.

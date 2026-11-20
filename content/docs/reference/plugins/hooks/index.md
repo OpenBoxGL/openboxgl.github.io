@@ -3,7 +3,11 @@ title: Plugin hooks reference
 description: The base hook payloads, capability hooks, service requests, and response rules.
 ---
 
-A plugin's entry module exports one function per declared hook: `def library(payload)`, `def before_launch(payload)`, `def after_session(payload)`, `def command(payload)`, `def library_source(payload)`, `def events(payload)`, and the capability hooks `def storefront(payload)`, `def metadata(payload)`, `def media(payload)`, `def stats(payload)`, `def emulator(payload)`, and `def discovery(payload)`. The runner loads the module by path, calls the matching function with the decoded JSON payload, and writes the returned dict back to stdout as JSON. If the module does not export the hook function, the payload passes through unchanged.
+Plugin API v2 is required in 3.0. A `.py` entry exports one function per declared hook: `def library(payload)`, `def before_launch(payload)`, `def after_session(payload)`, `def command(payload)`, `def library_source(payload)`, `def events(payload)`, and the capability hooks `def storefront(payload)`, `def metadata(payload)`, `def media(payload)`, `def stats(payload)`, `def emulator(payload)`, and `def discovery(payload)`. A native executable entry receives the same JSON Lines request. The runner calls the matching function with the decoded payload and writes the returned dict as JSON. If the module does not export the hook function, the payload passes through unchanged.
+
+<Callout type="note" title="3.0 hook wiring">
+The Rust 3.0 server invokes `command`, `events`, and the six capability hooks. The `library`, `before_launch`, `after_session`, and `library_source` hooks are currently invoked only by the Python fallback (`OPENBOX_BACKEND=python`). The Rust server emits `app_startup` and `app_shutdown`; the other lifecycle events are Python-fallback-only.
+</Callout>
 
 ## Payloads common to every hook
 
@@ -13,7 +17,7 @@ A plugin's entry module exports one function per declared hook: `def library(pay
 
 ## `library`
 
-Payload: `{"games": [<public game objects>]}`. The games are the full public projection (every field from `GET /api/library`, including computed flags like `path_exists`, `has_saves`, `game_id`, and the numeric `id`).
+Payload: `{"games": [<public game objects>]}`. The games are the full public projection (every field from `GET /api/v2/library`, including computed flags like `path_exists`, `has_saves`, `game_id`, and the numeric `id`).
 
 Contract:
 
@@ -186,7 +190,7 @@ Return `{"lists": [{"id": "...", "name": "...", "game_ids": ["..."]}]}`:
 
 - At most 10 lists; a list id is slugged to `[a-z0-9._-]`, and `name` is required.
 - At most 50 ids per list. Unknown ids and duplicates are dropped rather than inventing games.
-- Keys become `plugin:<plugin_id>:<list_id>`. The merged `/api/discovery` response gains one top-level list per key (the same index rows built-in lists use) plus a `discovery_names` entry for its label, so the Discovery Center renders them as shelves with no second payload shape.
+- Keys become `plugin:<plugin_id>:<list_id>`. The merged `/api/v2/discovery` response gains one top-level list per key (the same index rows built-in lists use) plus a `discovery_names` entry for its label, so the Discovery Center renders them as shelves with no second payload shape.
 - `truncated` is true when the list count or an id list exceeded the cap. A failing optional plugin is skipped instead of breaking the Discovery Center.
 
 ## Service requests

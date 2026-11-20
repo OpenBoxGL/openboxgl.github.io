@@ -9,7 +9,7 @@ The **Time Machine** makes catalog history visible without replacing the canonic
 
 Choose **Tools → Library history**, then use **Timeline** to browse retained events. Filter by days, event kind, or game. Events can include catalog edits, imports, deletes/restores, sessions, and Moments. The journal is local and may be enabled even when catalog synchronization is off.
 
-History is bounded by the journal's retained snapshots and events. The journal keeps at most **25,000 events** (`JOURNAL_MAX_EVENTS`) over a **400-day retention window** (`JOURNAL_RETENTION_DAYS` in `pkg/parity/parity_time_machine.py:55-60`), compacting to a horizon when over budget. If compaction created a horizon, a gap, or a corruption marker, the UI reports that boundary; it does not invent the missing state. Use [Library backups](/reference/library-backups/) when you need a complete archive of files and settings.
+History is bounded by the journal's retained snapshots and events. The journal keeps at most **25,000 events** (`JOURNAL_MAX_EVENTS`) over a **400-day retention window** (`JOURNAL_RETENTION_DAYS` in `crates/openbox-sync/src/time_machine.rs`), compacting to a horizon when over budget. If compaction created a horizon, a gap, or a corruption marker, the UI reports that boundary; it does not invent the missing state. Use [Library backups](/reference/library-backups/) when you need a complete archive of files and settings.
 
 ## Browse as of a date
 
@@ -36,7 +36,7 @@ curl -s -H "X-OpenBox-Token: $TOKEN" \
 
 ## Preview a revert
 
-From an event, choose the revert action and review the affected game and fields. The request accepts an `undo` flag to reverse an event's effect rather than re-apply named fields (`handlers/timemachine.py:60-108`). The API equivalent is a read-only request with `apply: false`:
+From an event, choose the revert action and review the affected game and fields. The request accepts an `undo` flag to reverse an event's effect rather than re-apply named fields (`crates/openbox-http/src/handlers/timemachine.rs`). The API equivalent is a read-only request with `apply: false`:
 
 ```bash
 curl -s -X POST \

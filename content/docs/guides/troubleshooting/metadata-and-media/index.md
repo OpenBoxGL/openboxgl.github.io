@@ -7,7 +7,7 @@ Metadata and media work against local files and optional external providers. Sta
 
 ## Metadata database
 
-- `/api/metadata/search` and bulk media return `409` with `"Download the LaunchBox metadata database first."` until the database is downloaded (Artwork & details dialog, **Download database**).
+- `/api/v2/metadata/search` and bulk media return `409` with `"Download the LaunchBox metadata database first."` until the database is downloaded (Artwork & details dialog, **Download database**).
 - The first download can be large (up to 2 GiB allowed) and runs as a background job; poll the status endpoint until it reaches `done`.
 - An unreachable database fails the sync job with `"Could not reach the metadata database (<reason>). Check the connection and try again."` (`URLError`/`TimeoutError` during LBDB sync no longer leak raw socket messages into the job panel).
 - A missing database returns `409` from readiness-dependent routes.
@@ -25,14 +25,14 @@ Metadata and media work against local files and optional external providers. Sta
 
 Automatic imports and bulk actions feed one durable queue, saved to `media-queue.json` in the data directory, so closing OpenBox does not lose pending downloads.
 
-- `GET /api/media/queue` returns `items` (also as `queue`), `running`, `paused`, `completed`, `failed`, `cancelled`, and `counts` (`total`, `queued`, `failed`, `completed`, `cancelled`).
-- Each failed item keeps `last_error` (up to 500 characters) and its attempt count. `POST /api/media/queue/retry` with `{"id": "<item id>"}` resets the item and starts the worker if it is idle; an unknown id returns `"Queue item not found."`.
+- `GET /api/v2/media/queue` returns `items` (also as `queue`), `running`, `paused`, `completed`, `failed`, `cancelled`, and `counts` (`total`, `queued`, `failed`, `completed`, `cancelled`).
+- Each failed item keeps `last_error` (up to 500 characters) and its attempt count. `POST /api/v2/media/queue/retry` with `{"id": "<item id>"}` resets the item and starts the worker if it is idle; an unknown id returns `"Queue item not found."`.
 - Pause, resume, and cancel are separate routes; a cancelled run leaves the queued items in place for a later retry.
 - Global and per-platform limits (`media_download_limit`, `media_download_limit_per_group`) apply per run; a limit hit ends the run cleanly and leaves the rest queued.
 
 ## Cache cleanup
 
-`POST /api/media/cache/cleanup` with `{"days": N}` (1..3650, default 30) deletes generated cache files older than N days under `<data-dir>/cache/media`. It returns `{root, deleted, bytes, skipped}`. Only regular files inside that cache root are removed; symlinks are skipped, user media directories are never touched, and a file that cannot be unlinked counts in `skipped` rather than failing the request. An invalid `days` value returns `"days must be a whole number."`.
+`POST /api/v2/media/cache/cleanup` with `{"days": N}` (1..3650, default 30) deletes generated cache files older than N days under `<data-dir>/cache/media`. It returns `{root, deleted, bytes, skipped}`. Only regular files inside that cache root are removed; symlinks are skipped, user media directories are never touched, and a file that cannot be unlinked counts in `skipped` rather than failing the request. An invalid `days` value returns `"days must be a whole number."`.
 
 ## Provider priority
 

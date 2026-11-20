@@ -34,7 +34,7 @@ The **Explorer** panel in the sidebar breaks your library down by metadata facet
 - **Dimensions**: Genre, Developer, Publisher, Platform, Progress state, and ESRB rating.
 - **Dynamic Counts**: Shows how many games match each value (e.g. `Platformer (24)`, `Capcom (12)`).
 - **Compound Filters**: Clicking a facet immediately applies a scoped search query to your library view.
-- **REST API**: Backed by `GET /api/explorer/facets?field=<field>`, returning the top 40 sorted facets.
+- **REST API**: Backed by `GET /api/v2/explorer/facets?field=<field>`, returning the top 40 sorted facets.
 
 ## Related games and recommendations
 
@@ -42,13 +42,13 @@ When viewing any game's detail modal or pane, OpenBox dynamically computes the m
 
 - **Scoring Engine**: Evaluates similarity weights across shared `series` (+5), `developer` (+3), `publisher` (+2), `genre` (+2), `collection` (+2), and `platform` (+1).
 - **Reason Badges**: Badges explain why each game was recommended (e.g. *Same Series*, *Same Developer*, *Shared Genre*).
-- **API Endpoint**: Accessible via `GET /api/related/rich?id=<index>` or `?game_id=<stable_id>`.
+- **API Endpoint**: Accessible via `GET /api/v2/related/rich?id=<index>` or `?game_id=<stable_id>`.
 
 ## See also
 
 - [Library overview](/guides/library/), browsing and filtering the full library
-- [API content and imports](/reference/api/content-and-imports/), `GET /api/discovery`
-- [API local administrator](/reference/api/local-admin/), `GET /api/explorer/facets`
+- [API content and imports](/reference/api/content-and-imports/), `GET /api/v2/discovery`
+- [API local administrator](/reference/api/local-admin/), `GET /api/v2/explorer/facets`
 - [Sessions, saves, and backups](/guides/sessions-saves-and-backups/), where play history comes from
 
 ## What should I play? (Picker)
@@ -60,7 +60,7 @@ The **"What should I play?"** picker (replacing the old random "Surprise me" but
 - **Familiarity** — something new, or a favorite worth revisiting.
 - **Players** — solo or couch-multiplayer options.
 
-The top pick renders with an explanatory reason plus quick **Launch**, **Details**, and **Again** actions, and a "Just surprise me" fallback. Backed by `POST /api/v2/library/pick` (`pkg/parity/parity_picker.py`).
+The top pick renders with an explanatory reason plus quick **Launch**, **Details**, and **Again** actions, and a "Just surprise me" fallback. Backed by `POST /api/v2/library/pick` (`crates/openbox-discovery/src/picker.rs`).
 
 ## Constellation
 

@@ -3,7 +3,7 @@ title: Save archives
 description: ZIP structure, per-file manifests, preview, selective restore, retention, and validation.
 ---
 
-Per-game save backups are ZIP archives stored in `save-backups/` inside the data directory. This page documents the archive format, where backups live, the preview and selective-restore contract, retention, and the restore safety rules. The implementation is `saves.py` with contract coverage in `test_saves.py` and `test_parity_features.py`.
+Per-game save backups are ZIP archives stored in `save-backups/` inside the data directory. This page documents the archive format, where backups live, the preview and selective-restore contract, retention, and the restore safety rules. The implementation is `crates/openbox-sync/src/saves.rs` (Python `saves.py` is the fallback), with contract coverage in `tests/test_saves.py` and `tests/test_parity_features.py`.
 
 ## Location and naming
 
@@ -77,7 +77,7 @@ After a backup, `enforce_backup_limit` trims the oldest archives beyond `setting
 
 ## Preview a restore
 
-`POST /api/saves/restore/preview` with `{id | game_id, backup, selected?}` describes what a restore would change without writing anything:
+`POST /api/v2/saves/restore/preview` with `{id | game_id, backup, selected?}` describes what a restore would change without writing anything:
 
 | Key | Meaning |
 | --- | --- |
@@ -96,7 +96,7 @@ The preview and the restore validate the same selection rules: the list must be 
 
 ## Selective restore and dry run
 
-`POST /api/saves/restore` accepts `{id | game_id, backup, selected?, dry_run?, confirm_conflict?}` and queues the work as a durable job (`202` with `job_id`).
+`POST /api/v2/saves/restore` accepts `{id | game_id, backup, selected?, dry_run?, confirm_conflict?}` and queues the work as a durable job (`202` with `job_id`).
 
 - **Dry run.** `dry_run: true` makes the queued job return `{archive, dry_run: true, files: [{archive, path}]}` without writing or creating a safety backup.
 - **Selective restore.** `selected` restores only the listed archive members; omitted, it restores every member.
@@ -119,12 +119,12 @@ Restores write files, so they are destructive: the automatic `before-restore` ar
 
 ## Listing and inspection
 
-- `GET /api/saves?id=<id>` returns `{backups: [...]}` newest first, capped at 200 entries. Each row carries `name`, `size`, `mtime`, `label`, `emulator_id`, `core`, and `slot`. The manifest is read best-effort: a corrupt or pre-1.18 archive still returns its file name, size, and a label parsed from the archive name.
-- `GET /api/saves/manifest?id=<id>&backup=<name>` returns `{archive, game, files, manifest}` where `files` lists each archive member with its destination `path` and `size`. The restore dialog uses this listing to let you check individual files.
-- `GET /api/saves/discover` lists candidate save locations; `POST /api/saves/scan/apply` applies them library-wide.
+- `GET /api/v2/saves?id=<id>` returns `{backups: [...]}` newest first, capped at 200 entries. Each row carries `name`, `size`, `mtime`, `label`, `emulator_id`, `core`, and `slot`. The manifest is read best-effort: a corrupt or pre-1.18 archive still returns its file name, size, and a label parsed from the archive name.
+- `GET /api/v2/saves/manifest?id=<id>&backup=<name>` returns `{archive, game, files, manifest}` where `files` lists each archive member with its destination `path` and `size`. The restore dialog uses this listing to let you check individual files.
+- `GET /api/v2/saves/discover` lists candidate save locations; `POST /api/v2/saves/scan/apply` applies them library-wide.
 
 ## Related
 
-- [API saves and operations](/reference/api/saves-and-operations/) for the routes (`/api/saves/backup`, `/api/saves/restore`, retention)
+- [API saves and operations](/reference/api/saves-and-operations/) for the routes (`/api/v2/saves/backup`, `/api/v2/saves/restore`, retention)
 - [Library backups](/reference/library-backups/) for whole-library archives
 - [Data and recovery](/reference/data-and-recovery/) for the state store

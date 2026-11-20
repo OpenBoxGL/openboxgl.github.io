@@ -35,11 +35,11 @@ The query bar's **Save as collection** chip pins a Backlog Radio query as a name
 
 ## Game Story timelines (v1.12.0)
 
-The detail pane **Story** tab narrates one game's deterministic timeline via `GET /api/v2/story` — a pure read projection over the game record, the session journal, and captured Moments, so it can never go stale. Event kinds are `added`, `first_played`, `session` (longest only), `milestone`, `progress`, and `moment` (`parity_story.py:17`). Playtime milestones fire at **1h, 5h, 10h, 25h, 50h, and 100h** (`MILESTONE_SECONDS`). See [Library overview](/guides/library/) for where the tab lives.
+The detail pane **Story** tab narrates one game's deterministic timeline via `GET /api/v2/story` — a pure read projection over the game record, the session journal, and captured Moments, so it can never go stale. Event kinds are `added`, `first_played`, `session` (longest only), `milestone`, `progress`, and `moment` (`crates/openbox-discovery`). Playtime milestones fire at **1h, 5h, 10h, 25h, 50h, and 100h** (`MILESTONE_SECONDS`). See [Library overview](/guides/library/) for where the tab lives.
 
 ## Large libraries and automatic backups (v1.12.0)
 
-Collections and search run through the same read path documented in [API 1.12 additions](/reference/api/one-twelve/): the SQLite FTS read model **self-enables at 5,000+ games** (`SQLITE_AUTO_THRESHOLD` in `pkg/state/sqlite_readmodel.py:30-34`); set `OPENBOX_ENABLE_SQLITE_READ=0` to opt out — the opt-out is never overridden. In 2.0 the projection rebuilds on a background thread after writes, and a query that lands before the rebuild falls back to the canonical library with `source: "json"` — JSON remains the source of truth either way. Whole-library protection is the opt-in **weekly automatic backup** (`AUTO_BACKUP_DAYS = 7`, `AUTO_BACKUP_KEEP = 4` in `pkg/parity/parity_backup.py:27-28`, `last_auto_backup` stamp; missing or unparsable counts as due). See [Library backups](/guides/sessions-saves-and-backups/library-backups/) for the manual engine the schedule reuses.
+Collections and search run through the same read path documented in [API 1.12 additions](/reference/api/one-twelve/): the SQLite FTS read model **self-enables at 5,000+ games** (`SQLITE_AUTO_THRESHOLD` in `crates/openbox-store/src/sqlite_readmodel.rs`); set `OPENBOX_ENABLE_SQLITE_READ=0` to opt out — the opt-out is never overridden. In 2.0 the projection rebuilds on a background thread after writes, and a query that lands before the rebuild falls back to the canonical library with `source: "json"` — JSON remains the source of truth either way. Whole-library protection is the opt-in **weekly automatic backup** (`AUTO_BACKUP_DAYS = 7`, `AUTO_BACKUP_KEEP = 4` in `crates/openbox-sync/src/backup.rs`, `last_auto_backup` stamp; missing or unparsable counts as due). See [Library backups](/guides/sessions-saves-and-backups/library-backups/) for the manual engine the schedule reuses.
 
 ## Fields, badges, and bulk edits
 
@@ -59,7 +59,7 @@ Progress automation (Settings) can mark a game **Playing** after N minutes of pl
 
 **Settings → Controller** records the keyboard shortcuts for play, back, menu, pause, paging, search, settings, and the reader, and maps gamepad buttons to the same actions. A mapped button can be cleared by emptying its field, and a duplicate assignment is never applied silently: OpenBox asks **Swap controller buttons** first and swaps the two assignments only after you confirm.
 
-The same Settings category defines the **controller types** — Gamepad, Arcade stick, Racing wheel, Light gun, Paddle, Trackball, Spinner, Keyboard, Mouse, and VR. A type shows as a chip in the game editor and as one badge per type on a library card, so a shelf that mixes input devices is visible at a glance (`handlers/settings.py:184-217`, `static/settings.js:132-175`). See [Keyboard & Controller Shortcuts](/reference/shortcuts/) for the full table of defaults and rules.
+The same Settings category defines the **controller types** — Gamepad, Arcade stick, Racing wheel, Light gun, Paddle, Trackball, Spinner, Keyboard, Mouse, and VR. A type shows as a chip in the game editor and as one badge per type on a library card, so a shelf that mixes input devices is visible at a glance (`crates/openbox-http/src/handlers/settings.rs`, `static/settings.js:132-175`). See [Keyboard & Controller Shortcuts](/reference/shortcuts/) for the full table of defaults and rules.
 
 ## Health audit and duplicates
 

@@ -8,7 +8,7 @@ These routes manage the local installation and process. They are not a stable re
 
 ## Updates
 
-<ApiEndpoint method="GET" path="/api/update">
+<ApiEndpoint method="GET" path="/api/v2/update">
 
 
 Check for a new release. Queries the GitHub releases API for `vindeckyy/OpenBoxGL` (30-second timeout) and returns:
@@ -38,34 +38,34 @@ Rules:
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/update/install">
+<ApiEndpoint method="POST" path="/api/v2/update/install">
 
 
 Download and atomically install the verified update into the running AppImage. Prerequisites:
 
 - `APPIMAGE` must be set (the process must run from an AppImage), else `400` `"Automatic updates require the OpenBox AppImage."`
 - The update must be `available` and its URLs trusted.
-- The download streams with a 2 GiB cap and the SHA-256 is verified before the swap.
+- The download streams with a 512 MiB cap and the SHA-256 is verified before the swap.
 - The current AppImage is renamed to `<name>.previous<ext>`; a failed swap restores it.
 
 Returns `{"installed": "<version>", "backup": "<path>"}`. Restart to use the update.
 
-On Windows there is no AppImage: the updater checks the same pinned key, SHA-256, and Ed25519 signature in pure Python (no OpenSSL), downloads `OpenBox-<arch>-windows.zip`, and swaps the installed tree, leaving the previous tree at `<InstallDir>\share\openbox.previous` for rollback. Windows installs land under `%LOCALAPPDATA%\OpenBox` by default.
+The 3.0 Rust server implements the verified install step for the AppImage only. On Windows it returns `"Automatic updates require an installed OpenBox copy."`; on macOS it returns `"Automatic updates require the OpenBox.app bundle."`. Install a new release with the new release's `install.ps1` or `install-macos.sh --replace`.
 
 </ApiEndpoint>
 
 ## Shutdown
 
-<ApiEndpoint method="POST" path="/api/shutdown">
+<ApiEndpoint method="POST" path="/api/v2/shutdown">
 
 
-`{"force": bool}` stops every running game (SIGTERM, or SIGKILL with `force: true`) and returns `{"stopped": <count>, "forced": bool}`. Games that already exited are skipped.
+Requests shutdown and returns `{"ok": true, "shutting_down": true}`. The 3.0 handler does not accept a `force` field or report a stopped-game count; the server tears down its sessions as part of shutdown. The same handler is mounted at `POST /api/host/shutdown` for the native windows.
 
 </ApiEndpoint>
 
 ## State recovery
 
-<ApiEndpoint method="POST" path="/api/state/recover">
+<ApiEndpoint method="POST" path="/api/v2/state/recover">
 
 
 Restore the library from `library.json.bak` or rolling snapshots (see [Data and recovery](/reference/data-and-recovery/)).
@@ -78,7 +78,7 @@ An unusable backup or unknown snapshot raises an error message.
 
 ## Desktop integration
 
-<ApiEndpoint method="POST" path="/api/desktop/install">
+<ApiEndpoint method="POST" path="/api/v2/desktop/install">
 
 
 Write the desktop entry and icon for the running AppImage: `~/.local/share/applications/io.openbox.GameLauncher.desktop` and `~/.local/share/icons/hicolor/scalable/apps/io.openbox.GameLauncher.svg`. Requires `APPIMAGE` (else `400`). Returns `{"desktop": "<path>"}`.
@@ -87,31 +87,31 @@ Write the desktop entry and icon for the running AppImage: `~/.local/share/appli
 
 ## Native status and display video
 
-<ApiEndpoint method="GET" path="/api/native/battery">
+<ApiEndpoint method="GET" path="/api/v2/native/battery">
 
 Reports battery state for the native window: `{"present": bool, "percent": 0-100, "charging": bool}`. On Linux the first `BAT*` device under `/sys/class/power_supply` is read; on macOS `pmset -g batt` is read; on Windows `GetSystemPowerStatus` is read. The response never exposes the device path. A host with no battery, such as a desktop, returns `{"present": false, "percent": 0, "charging": false}`. See [API 1.19 changes](/reference/api/one-nineteen/).
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/bigbox/startup-video">
+<ApiEndpoint method="GET" path="/api/v2/bigbox/startup-video">
 
 Streams the configured `bigbox_startup_video` when it is an existing `.mp4`, `.webm`, `.ogv`, `.ogg`, or `.mkv` file. An empty setting, a missing file, or an unsupported suffix returns `404 {"error": "Startup video not found"}`. The video path itself is not echoed in the response.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/platform/videos">
+<ApiEndpoint method="GET" path="/api/v2/platform/videos">
 
 Returns the configured per-platform video map: `{"videos": {"SNES": "/absolute/path.mp4", ...}}`. A malformed stored value is treated as an empty map.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/platform/video">
+<ApiEndpoint method="GET" path="/api/v2/platform/video">
 
 Streams one platform video: `?platform=<name>`. The stored path must still be an existing supported video file; a missing platform, path, or file returns `404 {"error": "Platform video not found"}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/platform/videos">
+<ApiEndpoint method="POST" path="/api/v2/platform/videos">
 
 Sets or clears one platform video: `{"platform": "SNES", "path": "/absolute/video.mp4"}` or `{"platform": "SNES", "clear": true}`. The platform is required and capped at 80 characters; the path must be absolute, existing, and end in `.mp4`, `.webm`, `.ogv`, `.ogg`, or `.mkv`. Returns `{"platform", "path"}` with an empty path after a clear.
 
@@ -119,28 +119,28 @@ Sets or clears one platform video: `{"platform": "SNES", "path": "/absolute/vide
 
 ## Themes
 
-<ApiEndpoint method="GET" path="/api/themes">
+<ApiEndpoint method="GET" path="/api/v2/themes">
 
 
 `?platform=<name>` returns `{"themes": [...], "selected": "...", "global": "...", "mappings": {...}}`. Stock themes are installed on demand (Midnight Circuit, Phosphor Terminal, Harbor Light, Cinema Marquee, Nordic Mist). `selected` is the per-platform mapping when `platform` is given, else the global theme.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/themes/select">
+<ApiEndpoint method="POST" path="/api/v2/themes/select">
 
 
 `{"name": "theme-name"|"", "platform": ""}` sets the global theme (or clears it with `""`); with `platform`, sets/clears a per-platform mapping. Unknown theme file: `400`. Returns `{"selected", "platform"}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/themes/import">
+<ApiEndpoint method="POST" path="/api/v2/themes/import">
 
 
 `{"path": "/path/to/theme.css"}` copies a CSS file into `themes/` (`.css` suffix required, max 256 KiB, must be valid UTF-8, symlinked sources/destinations rejected, remote `@import` with `http` rejected to respect `style-src` CSP). Returns `{"theme": "<stem>"}`. Errors: `400` with the exact reason when the file is missing, too large, a symlink, or contains a remote import.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/themes/open-folder">
+<ApiEndpoint method="POST" path="/api/v2/themes/open-folder">
 
 
 Open the themes folder in the file manager via `xdg-open` (missing `xdg-open`: `400`). Returns `{"path"}`.
@@ -149,13 +149,13 @@ Open the themes folder in the file manager via `xdg-open` (missing `xdg-open`: `
 
 **Added in 1.18.0.**
 
-<ApiEndpoint method="GET" path="/api/theme-sounds">
+<ApiEndpoint method="GET" path="/api/v2/theme-sounds">
 
 `?name=<theme stem>` reads the theme's optional `<theme>.json` sidecar and returns `{"music": "<relative path>", "sounds": {"move": "...", "select": "...", "back": "..."}}`. Only relative `.ogg`, `.mp3`, and `.wav` paths inside the theme folder are accepted; a missing theme, missing sidecar, malformed JSON, or oversized sidecar returns empty values rather than an error.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/theme-asset">
+<ApiEndpoint method="GET" path="/api/v2/theme-asset">
 
 Streams one theme audio asset: `?name=<theme stem>&path=<relative audio path>`. The path is contained to the theme folder, must be an existing `.ogg`, `.mp3`, or `.wav` file no larger than 20 MiB, and is served with a private one-hour cache. A missing theme, non-audio suffix, escape attempt, or oversized file returns `404 {"error": "Theme sound asset not found."}`.
 
@@ -163,42 +163,42 @@ Streams one theme audio asset: `?name=<theme stem>&path=<relative audio path>`. 
 
 ## Plugins
 
-<ApiEndpoint method="GET" path="/api/plugins">
+<ApiEndpoint method="GET" path="/api/v2/plugins">
 
 
 `{"plugins": [{"id", "name", "version", "entry", "hooks", "enabled", "valid", "sandbox", ...}, ...]}` sorted by id. Invalid packages are **not** hidden: they are reported with `valid: false` and a sandbox status so the manager can explain why they cannot run.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/plugins/install">
+<ApiEndpoint method="POST" path="/api/v2/plugins/install">
 
 
 `{"path": "/path/to/plugin-dir-or.zip"}` installs or updates a plugin package (safe extraction, staging, rollback on failure). Returns `{"plugin": {...manifest..., "updated": bool}}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/plugins/toggle">
+<ApiEndpoint method="POST" path="/api/v2/plugins/toggle">
 
 
 `{"id", "enabled": bool}` enables/disables a plugin (persisted in `plugins-state.json`). Returns `{"enabled": bool}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/plugins/remove">
+<ApiEndpoint method="POST" path="/api/v2/plugins/remove">
 
 
 `{"id"}` moves the plugin directory to `plugins/.removed/<id>-<timestamp>` (reversible by moving it back) and clears its disabled state, trust grant, and permission grants. Returns `{"removed": "<id>"}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/plugins/catalog">
+<ApiEndpoint method="GET" path="/api/v2/plugins/catalog">
 
 
 `{"catalog": [...]}` from the commit-pinned remote catalog (20-second timeout, 4 MiB cap, and a pinned SHA-256 check on the response), falling back to the bundled local catalog.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/plugins/catalog/install">
+<ApiEndpoint method="POST" path="/api/v2/plugins/catalog/install">
 
 
 `{"id"}` downloads the catalog entry's package (128 MiB cap, SHA-256 verified when the entry provides one, 120-second timeout) and installs it. Unknown id or `local_only` entries raise `400` (`"This catalog entry is documentation-only. Install local plugin packages manually."`). Returns `{"plugin": {...}}`.
@@ -311,28 +311,28 @@ Reinstalls one plugin from its catalog entry without touching its data, credenti
 
 ## Premium read models
 
-<ApiEndpoint method="GET" path="/api/premium/strings">
+<ApiEndpoint method="GET" path="/api/v2/premium/strings">
 
 
 `?locale=en|es|de|fr|pt` returns `{"locale", "strings": {...}}`; unknown locales fall back to English.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/premium/media-packs">
+<ApiEndpoint method="GET" path="/api/v2/premium/media-packs">
 
 
 `{"packs": [{"id", "name", "description", "kinds", "active"}, ...]}`. Bundled packs: `clear-logos-default`, `controller-xbox`, `controller-playstation`, `badges-core`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/premium/platform-categories">
+<ApiEndpoint method="GET" path="/api/v2/premium/platform-categories">
 
 
 `{"categories": {...}}` platform-to-category mapping (Nintendo, Sony, Microsoft, Computer, Arcade, Adventure, ...) with user overrides merged.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/premium/media-packs/apply">
+<ApiEndpoint method="POST" path="/api/v2/premium/media-packs/apply">
 
 
 `{"id": "<pack id>"}` activates a pack (and sets the controller prompt pack/hint for controller packs). Unknown pack: `400`. Returns `{"pack": {...}, "settings": {...}}`.
@@ -341,68 +341,63 @@ Reinstalls one plugin from its catalog entry without touching its data, credenti
 
 ## Local reads
 
-<ApiEndpoint method="GET" path="/api/log">
+<ApiEndpoint method="GET" path="/api/v2/log">
 
 
 `{"log": "<last 250 KB of openbox.log>"}`. The log redacts tokens, passwords, API keys, and authorization headers, but can contain game names and local file paths.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/theme.css">
+<ApiEndpoint method="GET" path="/api/v2/theme.css">
 
 
 `?name=<theme>` serves the theme CSS with revalidation headers; unknown themes return an empty stylesheet.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/diagnostic">
+<ApiEndpoint method="GET" path="/api/v2/diagnostic">
 
-`GET /api/diagnostic` (also served on the v2 prefix; the retired `/api/v1` alias answers 410 unless the bridge is enabled) returns sanitized system diagnostic details generated by `crash_report.py`: host OS, Python runtime version, data directory, memory and process statistics, active settings summary, running session count, and library size. All secrets, tokens, passwords, and API keys are automatically redacted.
+`GET /api/v2/diagnostic` returns a sanitized diagnostic preview built by the Rust crash-report builder. It includes the app version, install channel, architecture, distro, desktop session, native-host and renderer flags, library count, schema version, disk space, package integrity, recent job and request IDs, and a `system` object with `python: "rust-native"`, platform, machine, data directory, and library size. All secrets, tokens, passwords, and API keys are redacted.
 
 `report` is a JSON-encoded **string** (clients must `JSON.parse` it):
 
 ```json
 {
-  "report": "{\"version\": \"1.19.1\", \"python\": \"3.12.3\", \"platform\": \"Linux-...\", \"data_dir\": \"~/.local/share/openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
+  "report": "{\"report\": \"openbox-diagnostic\", \"version\": \"3.0.0\", \"install_channel\": \"appimage\", \"architecture\": \"x86_64\", \"library_count\": 42, \"schema_version\": 7, \"system\": {\"python\": \"rust-native\", \"platform\": \"linux\", \"data_dir\": \"~/.local/share/openbox-game-launcher\", \"library_bytes\": 1234567}}"
 }
 ```
 
-The same report on Windows carries the Windows host and data directory:
-
-```json
-{
-  "report": "{\"version\": \"1.18.0\", \"python\": \"3.12.3\", \"platform\": \"Windows-...\", \"data_dir\": \"C:\\\\Users\\\\<you>\\\\AppData\\\\Local\\\\openbox-game-launcher\", \"games_count\": 42, \"running_count\": 0, \"settings_summary\": { ... }}"
-}
-```
+`GET /api/v2/log` returns the last 64 KiB of `openbox.log` as `{"log": "..."}`.
 
 </ApiEndpoint>
 
 <ApiEndpoint method="GET" path="/api/v2/jobs">
 
-`GET /api/v2/jobs` (also at `GET /api/jobs`; the retired `/api/v1` alias answers 410 unless the bridge is enabled) returns snapshots of all currently background jobs (`auto-import`, `metadata-match`, `media-bulk`, `emulator-install`, etc.) and the 50 most recent completed or failed jobs with durations, attempt numbers, and error messages.
-
-`jobs` is an object keyed by job name; `history` is an array:
+`GET /api/v2/jobs` returns a cursor-paginated list of durable operations (`auto-import`, `metadata-sync`, `media-bulk`, `emulator-install`, `trail-refresh`, and others). Query parameters: `limit` (default 50, max 100), `cursor`, `type` or `type_filter`, `state` or `state_filter`, `root_job_id`, and `group_by=root_job_id`.
 
 ```json
 {
-  "jobs": {
-    "metadata-match": {
-      "name": "metadata-match",
+  "cursor": "",
+  "next_cursor": "…",
+  "jobs": [
+    {
       "job_id": "job-abc123",
+      "type": "metadata-sync",
       "state": "running",
       "started_at": "2026-08-17T12:00:00Z",
       "attempt": 1
     }
-  },
-  "history": [ ... ]
+  ]
 }
 ```
 
+Per-operation rows are at `GET /api/v2/jobs/items?job_id=…`. `POST /api/v2/jobs/cancel`, `/retry`, and `/resume` return `202` with the updated row. The legacy job-name map and `GET /api/jobs` are gone.
+
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/native/capabilities">
+<ApiEndpoint method="GET" path="/api/v2/native/capabilities">
 
-Returns native host capabilities detected by the backend when running inside the native wrapper (WebKitGTK on Linux, WebView2 on Windows, WKWebView on macOS), plus the identity fields **Settings → About** displays. Detection is the `OPENBOX_NATIVE_HOST` variable the host sets before spawning this server, so the payload shape is the same on every platform; `gamepad` stays `"webkit"` either way, because the host's gamepad hook is a stub and the Web Gamepad API keeps serving. Since 1.19.1 the response also carries a `features` object that says which platform-specific controls this host supports; a missing object means every feature is unavailable. See [API 1.19 changes](/reference/api/one-nineteen/) for the feature table.
+Returns native host capabilities detected by the backend when running inside the native wrapper (WebKitGTK on Linux, WebView2 on Windows, WKWebView on macOS), plus the identity fields **Settings → About** displays. The native windows use `GET /api/host/capabilities`; the browser-safe mirror is `GET /api/v2/native/capabilities`. The payload shape is the same on every platform; `gamepad` stays `"webkit"` because the host's gamepad hook is a stub and the Web Gamepad API keeps serving. The response also carries a `features` object that says which platform-specific controls this host supports; a missing object means every feature is unavailable.
 
 ```json
 {
@@ -413,74 +408,75 @@ Returns native host capabilities detected by the backend when running inside the
   "gamepad": "webkit",
   "fullscreen": true,
   "clipboard": true,
-  "version": "1.18.0",
+  "version": "3.0.0",
   "platform": "win32",
-  "data_dir": "C:\\Users\\<you>\\AppData\\Local\\openbox-game-launcher"
+  "data_dir": "C:\\Users\\<you>\\AppData\\Local\\openbox-game-launcher",
+  "features": { "gamescope": false, "mangohud": false, "wine": false, "faugus": false, "lutris": false, "heroic": true, "native_storefronts": true, "desktop_entry": false }
 }
 ```
 
-`version`, `platform`, and `data_dir` were added in v1.15.0. `webview` is what **Settings → About** reads to say whether you are in the native window or a browser tab — a browser tab is a supported configuration, not a failure state.
+`webview` is what **Settings → About** reads to say whether you are in the native window or a browser tab — a browser tab is a supported configuration, not a failure state.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/native/dialog">
+<ApiEndpoint method="POST" path="/api/v2/native/dialog">
 
 Opens a native file or folder picker dialog on the host system. Body: `{"kind": "folder" | "file" | "save"}` (defaults to `"folder"`). Returns `{"path": "/selected/path"}` or `{"path": null, "cancelled": true}`. Unauthorized requests return `403 {"error": "Unauthorized"}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/native/reveal">
+<ApiEndpoint method="POST" path="/api/v2/native/reveal">
 
 Reveals a file or folder in the default desktop file manager (e.g. Nautilus, Dolphin). Body: `{"path": "/path/to/game.rom"}`. Returns `{"ok": bool, "error": str | null}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/native/open-external">
+<ApiEndpoint method="POST" path="/api/v2/native/open-external">
 
 Opens an external HTTP/HTTPS URL or file path in the host's default web browser or application. Body: `{"url": "https://..."}` or `{"path": "/path/to/file"}`. Returns `{"ok": bool, "error": str | null}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/native/window">
+<ApiEndpoint method="POST" path="/api/v2/native/window">
 
 Controls the native application window. Body: `{"action": "minimize" | "toggle-maximize" | "close" | "set-fullscreen" | "unset-fullscreen"}`. Returns `{"ok": bool}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/platform/documents">
+<ApiEndpoint method="GET" path="/api/v2/platform/documents">
 
 Retrieves the document metadata list for a platform (`?platform=<name>`) or mapping of all platforms when omitted. Returns `{"documents": [{"name", "path"}, ...]}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/platform/document">
+<ApiEndpoint method="GET" path="/api/v2/platform/document">
 
 Serves a platform document file for inline viewing (`?platform=<name>&index=<doc_index>`). Symlinks are rejected. Missing document returns `404 {"error": "Platform document not found"}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/platform/documents">
+<ApiEndpoint method="POST" path="/api/v2/platform/documents">
 
 
 `{"platform", "documents": [{"name", "path"}, ...]}` replaces the platform's document list (capped at 100 entries). Returns `{"saved", "count"}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/document">
+<ApiEndpoint method="GET" path="/api/v2/document">
 
 Serves a game's document file for inline viewing (`?id=<index>&index=<doc_index>` or `?game_id=<id>&index=<doc_index>`). The file is validated to be a regular file (symlinks rejected), served with its guessed MIME type and a sanitized `Content-Disposition` name. Missing game, index, or file returns `404` `{"error": "Document not found"}`.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="GET" path="/api/explorer/facets">
+<ApiEndpoint method="GET" path="/api/v2/explorer/facets">
 
 Facet counts for the Explorer rail (`?field=genre|developer|publisher|platform|progress|esrb`). Hidden games are skipped; missing values fall back to `Unspecified` / `Unplayed` / `Unrated`; results are sorted by count descending then name, capped at 40. Returns `{"field", "facets": [{"value", "count"}, ...]}`. Unknown fields return an empty list.
 
 </ApiEndpoint>
 
-<ApiEndpoint method="POST" path="/api/bigbox/mode">
+<ApiEndpoint method="POST" path="/api/v2/bigbox/mode">
 
-Signals Big Box mode entry or exit. Body `{"entering": true}` runs the configured `bigbox_shutdown_commands` in new session groups (failures are logged, never block). Body `{"entering": false}` acknowledges mode exit. Returns `{"ok": true, "entering": bool}`.
+Signals Big Box mode entry or exit. Body `{"entering": true}` runs the configured `bigbox_shutdown_commands` in new session groups (failures are logged, never block). Body `{"entering": false}` acknowledges mode exit. Returns `{"ok": true, "entering": bool, "commands": <count>}`; `commands` is the number of exit commands run.
 
 </ApiEndpoint>
 
