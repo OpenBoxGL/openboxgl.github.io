@@ -134,7 +134,7 @@ These are verified but not fixed in this sweep:
 - **`reference/hardware-matrix`.** The 50k scale statement and battery route are fixed; Windows/macOS hardware rows and minimum-spec guidance are still absent.
 - **`reference/save-archives`, `reference/plugins/hooks`, and some troubleshooting pages.** Python module citations remain; they are behaviorally correct but point at fallback files.
 - **`reference/configuration`** still has some Python-era wording in the credential/`.env` sections and a `STRIPE_SECRET_KEY` allowlist entry with no documented consumer.
-- **Screenshots.** `public/*.png` are pre-3.0 captures; the 3.0 UI redesign needs a fresh capture pass.
+- **Screenshots — fixed.** `public/openbox-*.png` were replaced with the current 3.0 captures from the application repo's `assets/`, and the site's `library-view.png` / `bigbox-mode.png` aliases were refreshed from the same source. The showcase and home captions now match the 3.0 captures.
 - **`content/docs/404.md`** is now redundant with `app/not-found.tsx`; keep it as authored copy or delete it.
 - **`package.json`** does not list `@mdx-js/mdx` directly; `check-mdx.mjs` resolves it transitively through `next-mdx-remote-client`.
 

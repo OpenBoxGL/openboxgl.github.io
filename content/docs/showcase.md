@@ -7,15 +7,15 @@ description: Real OpenBoxGL setups, library views, and Big Box on Linux.
 
 Real screenshots from the repository, not renders. Regenerate them with `python3 scripts/capture_readme_screenshots.py` after `cd scripts && npm ci` when you need fresh captures. All images are user supplied captures of user supplied games and cover art belongs to its publisher. Cover art and game files are not vendored in the repository or the site. Contributions that add an image must state the source and that you have the right to submit it under the [Developer Certificate of Origin](/project/contributing/#developer-certificate-of-origin).
 
-<ProductShot src="/openbox-screenshot.png" alt="OpenBox library grid with platform filters, grouped covers, and detail pane" caption="Library, grid and list views, platform filters, and the detail pane in one workspace." />
+<ProductShot src="/openbox-screenshot.png" alt="OpenBox 3.0 library view with the compact single-row header, Display popover, top-bar Settings, collapsed More filters sidebar, and auto-collapsed Details pane" caption="Library: the 94 px single-row header, Display popover, top-bar Settings, collapsed More filters, and auto-collapsed empty Details pane." />
 
-<ProductShot src="/openbox-game-detail.png" alt="OpenBox game detail panel with cover art, metadata, and launch controls" caption="Game detail, metadata, ratings, history, hero art, and one click launch." />
+<ProductShot src="/openbox-game-detail.png" alt="OpenBox 3.0 game detail panel for Elden Ring with hero art, one-click Play, close button, and collapsible More actions, Save management, and Launch check cards" caption="Game detail: hero art, one-click Play, streamlined primary actions, collapsible More actions / Save management / Launch check, and a quick close button." />
 
-<ProductShot src="/openbox-bigbox.png" alt="OpenBox Big Box Stage layout with cover art and controller hints" caption="Big Box Stage layout, fullscreen and controller first." />
+<ProductShot src="/openbox-bigbox.png" alt="OpenBox 3.0 Big Box in Stage layout with portrait cover art, Play button, top-bar Exit button, and controller hints" caption="Big Box: fullscreen controller navigation in Stage layout with clean portrait framing and a top-bar Exit button." />
 
 <ProductShot src="/openbox-picker.png" alt="The What should I play? picker with time, mood, familiarity, and player filters" caption="The smart picker narrows the library by time, mood, familiarity, and players — or just surprise me." />
 
-<ProductShot src="/openbox-constellation.png" alt="Library Constellation relationship graph connecting games by platform, series, and source" caption="Library Constellation draws the relationships between your games as a pan and zoom graph." />
+<ProductShot src="/openbox-constellation.png" alt="OpenBox 3.0 Library Constellation graph showing connected game nodes with series, developer, and genre edges" caption="Constellation: an interactive library relationship graph with series, developer, and genre edges." />
 
 <ProductShot src="/openbox-wrapped.png" alt="Your Year in Games report with playtime, sessions, streaks, and top games" caption="Your Year in Games: a printable annual report of playtime, sessions, streaks, and top picks." />
 
